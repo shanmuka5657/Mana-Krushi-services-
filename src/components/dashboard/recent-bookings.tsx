@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -10,49 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Booking } from "@/lib/types";
-
-const bookings: Booking[] = [
-  {
-    id: "#BK001",
-    client: "John Smith",
-    destination: "Paris, France",
-    date: "15 Aug 2023",
-    amount: 2450,
-    status: "Confirmed",
-  },
-  {
-    id: "#BK002",
-    client: "Emma Wilson",
-    destination: "Bali, Indonesia",
-    date: "22 Aug 2023",
-    amount: 1890,
-    status: "Pending",
-  },
-  {
-    id: "#BK003",
-    client: "Michael Brown",
-    destination: "Tokyo, Japan",
-    date: "05 Sep 2023",
-    amount: 3250,
-    status: "Confirmed",
-  },
-  {
-    id: "#BK004",
-    client: "Sophia Davis",
-    destination: "Rome, Italy",
-    date: "12 Sep 2023",
-    amount: 2150,
-    status: "Cancelled",
-  },
-  {
-    id: "#BK005",
-    client: "Robert Johnson",
-    destination: "New York, USA",
-    date: "18 Sep 2023",
-    amount: 1750,
-    status: "Confirmed",
-  },
-];
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
   switch (status) {
@@ -67,7 +25,11 @@ const getStatusBadgeClass = (status: Booking["status"]) => {
   }
 };
 
-const RecentBookings = () => {
+interface RecentBookingsProps {
+  bookings: Booking[];
+}
+
+const RecentBookings = ({ bookings }: RecentBookingsProps) => {
   return (
     <Card className="shadow-sm">
       <CardHeader>
@@ -87,27 +49,35 @@ const RecentBookings = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {bookings.map((booking) => (
-              <TableRow key={booking.id}>
-                <TableCell className="font-medium">{booking.id}</TableCell>
-                <TableCell>{booking.client}</TableCell>
-                <TableCell>{booking.destination}</TableCell>
-                <TableCell>{booking.date}</TableCell>
-                <TableCell className="text-right">
-                  ${booking.amount.toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={getStatusBadgeClass(booking.status)}>
-                    {booking.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button variant="outline" size="sm">
-                    View
-                  </Button>
+            {bookings.length > 0 ? (
+              bookings.map((booking) => (
+                <TableRow key={booking.id}>
+                  <TableCell className="font-medium">{booking.id}</TableCell>
+                  <TableCell>{booking.client}</TableCell>
+                  <TableCell>{booking.destination}</TableCell>
+                  <TableCell>{booking.date}</TableCell>
+                  <TableCell className="text-right">
+                    ${booking.amount.toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={getStatusBadgeClass(booking.status)}>
+                      {booking.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm">
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  No recent bookings.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </CardContent>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,7 +57,11 @@ const bookingFormSchema = z.object({
 
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
-export default function BookingForm() {
+interface BookingFormProps {
+  onBookingCreated: (data: BookingFormValues) => void;
+}
+
+export default function BookingForm({ onBookingCreated }: BookingFormProps) {
   const [isFindingDestinations, setIsFindingDestinations] = useState(false);
   const { toast } = useToast();
 
@@ -125,6 +130,7 @@ export default function BookingForm() {
   };
 
   function onSubmit(data: BookingFormValues) {
+    onBookingCreated(data);
     toast({
       title: "Booking Created!",
       description: `Booking for ${data.clientName} to ${data.destination} has been created successfully.`,
