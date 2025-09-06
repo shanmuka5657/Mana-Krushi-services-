@@ -8,6 +8,7 @@ import BookingForm from "@/components/dashboard/booking-form";
 import { useState } from "react";
 import type { Booking } from "@/lib/types";
 import { format } from "date-fns";
+import type { BookingFormValues } from "@/components/dashboard/booking-form";
 
 const initialBookings: Booking[] = [
   {
@@ -17,6 +18,8 @@ const initialBookings: Booking[] = [
     date: "15 Aug 2023",
     amount: 2450,
     status: "Confirmed",
+    mobile: "1234567890",
+    travelers: "2",
   },
   {
     id: "#BK002",
@@ -25,6 +28,8 @@ const initialBookings: Booking[] = [
     date: "22 Aug 2023",
     amount: 1890,
     status: "Pending",
+    mobile: "1234567890",
+    travelers: "1",
   },
   {
     id: "#BK003",
@@ -33,6 +38,8 @@ const initialBookings: Booking[] = [
     date: "05 Sep 2023",
     amount: 3250,
     status: "Confirmed",
+    mobile: "1234567890",
+    travelers: "3",
   },
   {
     id: "#BK004",
@@ -41,6 +48,8 @@ const initialBookings: Booking[] = [
     date: "12 Sep 2023",
     amount: 2150,
     status: "Cancelled",
+    mobile: "1234567890",
+    travelers: "2",
   },
   {
     id: "#BK005",
@@ -49,19 +58,23 @@ const initialBookings: Booking[] = [
     date: "18 Sep 2023",
     amount: 1750,
     status: "Confirmed",
+    mobile: "1234567890",
+    travelers: "4",
   },
 ];
 
 export default function Home() {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
 
-  const addBooking = (newBookingData: Omit<Booking, 'id' | 'status' | 'date'> & { departureDate: Date }) => {
+  const addBooking = (newBookingData: BookingFormValues) => {
     const newBooking: Booking = {
       id: `#BK${(bookings.length + 1).toString().padStart(3, '0')}`,
       client: newBookingData.clientName,
       destination: newBookingData.destination,
       date: format(newBookingData.departureDate, "dd MMM yyyy"),
       amount: newBookingData.budget,
+      mobile: newBookingData.mobile,
+      travelers: newBookingData.travelers,
       status: "Pending",
     };
     setBookings((prevBookings) => [newBooking, ...prevBookings]);

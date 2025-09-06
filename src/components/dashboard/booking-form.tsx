@@ -41,6 +41,10 @@ const bookingFormSchema = z.object({
   clientName: z.string().min(2, {
     message: "Client name must be at least 2 characters.",
   }),
+  mobile: z
+    .string()
+    .min(10, { message: "Mobile number must be at least 10 digits." })
+    .regex(/^\d+$/, { message: "Mobile number must contain only digits." }),
   destination: z.string().min(3, {
     message: "Destination must be at least 3 characters.",
   }),
@@ -55,7 +59,7 @@ const bookingFormSchema = z.object({
   specialRequests: z.string().optional(),
 });
 
-type BookingFormValues = z.infer<typeof bookingFormSchema>;
+export type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
 interface BookingFormProps {
   onBookingCreated: (data: BookingFormValues) => void;
@@ -72,6 +76,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
       destination: "",
       travelers: "1",
       budget: 0,
+      mobile: "",
       specialRequests: "",
     },
   });
@@ -162,12 +167,44 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
               />
               <FormField
                 control={form.control}
+                name="mobile"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client Mobile</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        placeholder="Enter mobile number"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
                 name="destination"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Destination</FormLabel>
                     <FormControl>
                       <Input placeholder="Or use AI suggestion" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="budget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Budget ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 2000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -282,19 +319,6 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                         <SelectItem value="5+">5+ Travelers</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="budget"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Budget ($)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 2000" {...field} />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

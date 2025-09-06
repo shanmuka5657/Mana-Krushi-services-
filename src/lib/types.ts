@@ -5,4 +5,6 @@ export type Booking = {
   date: string;
   amount: number;
   status: "Confirmed" | "Pending" | "Cancelled";
+  travelers: string;
+  mobile: string;
 };
