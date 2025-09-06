@@ -4,8 +4,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Loader2, Sparkles } from "lucide-react";
+import { format, setHours, setMinutes } from "date-fns";
+import { Calendar as CalendarIcon, Loader2, Sparkles, Clock } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -51,9 +51,11 @@ const bookingFormSchema = z.object({
   departureDate: z.date({
     required_error: "A departure date is required.",
   }),
+  departureTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   returnDate: z.date({
     required_error: "A return date is required.",
   }),
+  returnTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   travelers: z.string().nonempty("Number of travelers is required."),
   budget: z.coerce.number().positive({ message: "Please enter a valid budget." }),
   specialRequests: z.string().optional(),
@@ -78,6 +80,8 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
       budget: 0,
       mobile: "",
       specialRequests: "",
+      departureTime: "09:00",
+      returnTime: "17:00",
     },
   });
 
@@ -135,7 +139,17 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
   };
 
   function onSubmit(data: BookingFormValues) {
-    onBookingCreated(data);
+    const [depHours, depMinutes] = data.departureTime.split(':').map(Number);
+    const departureDateTime = setMinutes(setHours(data.departureDate, depHours), depMinutes);
+
+    const [retHours, retMinutes] = data.returnTime.split(':').map(Number);
+    const returnDateTime = setMinutes(setHours(data.returnDate, retHours), retMinutes);
+
+    onBookingCreated({
+        ...data,
+        departureDate: departureDateTime,
+        returnDate: returnDateTime,
+    });
     toast({
       title: "Booking Created!",
       description: `Booking for ${data.clientName} to ${data.destination} has been created successfully.`,
@@ -253,6 +267,24 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="departureTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Departure Time</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input type="time" className="pl-10" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="returnDate"
@@ -290,6 +322,22 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                         />
                       </PopoverContent>
                     </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="returnTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Return Time</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input type="time" className="pl-10" {...field} />
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

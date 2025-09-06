@@ -22,7 +22,8 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Phone, Users } from "lucide-react";
+import { User, Phone, Users, Calendar, Clock } from "lucide-react";
+import { format } from "date-fns";
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
   switch (status) {
@@ -57,7 +58,7 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                 <TableHead className="rounded-l-lg">Booking ID</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Destination</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Departure</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="rounded-r-lg">Actions</TableHead>
@@ -70,7 +71,7 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                     <TableCell className="font-medium">{booking.id}</TableCell>
                     <TableCell>{booking.client}</TableCell>
                     <TableCell>{booking.destination}</TableCell>
-                    <TableCell>{booking.date}</TableCell>
+                    <TableCell>{format(booking.departureDate, "dd MMM yyyy")}</TableCell>
                     <TableCell className="text-right">
                       ${booking.amount.toLocaleString()}
                     </TableCell>
@@ -145,6 +146,54 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                       {selectedBooking.travelers}
                     </span>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-4">
+                        <Calendar className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex flex-col">
+                            <span className="text-sm text-muted-foreground">
+                            Departure
+                            </span>
+                            <span className="font-medium">
+                            {format(selectedBooking.departureDate, "dd MMM yyyy")}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <Clock className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex flex-col">
+                            <span className="text-sm text-muted-foreground">
+                            Time
+                            </span>
+                            <span className="font-medium">
+                            {format(selectedBooking.departureDate, "HH:mm")}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-4">
+                        <Calendar className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex flex-col">
+                            <span className="text-sm text-muted-foreground">
+                            Return
+                            </span>
+                            <span className="font-medium">
+                            {format(selectedBooking.returnDate, "dd MMM yyyy")}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <Clock className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex flex-col">
+                            <span className="text-sm text-muted-foreground">
+                            Time
+                            </span>
+                            <span className="font-medium">
+                            {format(selectedBooking.returnDate, "HH:mm")}
+                            </span>
+                        </div>
+                    </div>
                 </div>
               </div>
             </DialogContent>
