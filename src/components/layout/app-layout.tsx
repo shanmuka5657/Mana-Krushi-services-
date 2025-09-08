@@ -47,7 +47,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <Briefcase className="size-8 text-accent" />
             <h1 className="text-xl font-bold">
-              Globetrotter<span className="text-accent">HQ</span>
+              MK<span className="text-accent">travels</span>
             </h1>
           </div>
         </SidebarHeader>
