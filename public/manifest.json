@@ -1,112 +1,95 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "Krushi Travel",
-  "description": "Your friendly travel agent for booking rides and managing routes.",
-  "theme_color": "#16a34a",
-  "background_color": "#ffffff",
+  "short_name": "ManaKrushi",
+  "description": "The ultimate travel agent management system for Mana Krushi Services.",
+  "start_url": "/dashboard",
   "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/",
-  "start_url": "/login",
-  "lang": "en-US",
-  "dir": "ltr",
+  "background_color": "#F2F4F4",
+  "theme_color": "#16a34a",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
+      "src": "/images/icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-96x96.png",
+      "src": "/images/icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-128x128.png",
+      "src": "/images/icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-144x144.png",
+      "src": "/images/icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-152x152.png",
+      "src": "/images/icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/images/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-384x384.png",
+      "src": "/images/icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/images/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screen1.png",
+      "src": "/images/screenshots/screenshot-my-routes.png",
       "type": "image/png",
-      "sizes": "1080x1920",
-      "form_factor": "narrow"
+      "sizes": "1080x2340",
+      "form_factor": "narrow",
+      "label": "My Routes View"
     },
     {
-      "src": "/screenshots/screen2.png",
+      "src": "/images/screenshots/screenshot1.png",
       "type": "image/png",
       "sizes": "1080x1920",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Dashboard"
     },
     {
-      "src": "/screenshots/screen_wide.png",
+      "src": "/images/screenshots/screenshot2.png",
       "type": "image/png",
       "sizes": "1920x1080",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "Desktop Dashboard"
     }
   ],
   "shortcuts": [
     {
+      "name": "Add New Route",
+      "short_name": "New Route",
+      "description": "Quickly add a new travel route",
+      "url": "/dashboard?role=owner&tab=add-route",
+      "icons": [{ "src": "/images/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
       "name": "Find a Ride",
       "short_name": "Find Ride",
-      "description": "Search for available rides to your destination.",
-      "url": "/dashboard?role=passenger",
-      "icons": [{ "src": "/icons/shortcut-search.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings.",
-      "url": "/bookings?role=passenger",
-      "icons": [{ "src": "/icons/shortcut-bookings.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Add a New Route",
-      "short_name": "New Route",
-      "description": "Create a new route for passengers to book.",
-      "url": "/dashboard?role=owner",
-      "icons": [{ "src": "/icons/shortcut-add-route.png", "sizes": "96x96" }]
+      "description": "Find an available ride",
+      "url": "/dashboard?role=passenger&tab=find-ride",
+      "icons": [{ "src": "/images/icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ],
-  "categories": [
-    "travel",
-    "navigation",
-    "business",
-    "lifestyle"
-  ],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "categories": ["business", "travel", "navigation"],
   "related_applications": [],
-  "prefer_related_applications": false,
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "edge_side_panel": {}
+  "prefer_related_applications": false
 }
