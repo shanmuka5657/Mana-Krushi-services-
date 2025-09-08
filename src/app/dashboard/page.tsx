@@ -12,6 +12,8 @@ import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from 'react';
 import { getBookings, saveBookings, getRoutes, saveRoutes } from "@/lib/storage";
+import MyRoutes from "@/components/dashboard/my-routes";
+import ProfileForm from "@/components/dashboard/profile-form";
 
 function DashboardPage() {
   const searchParams = useSearchParams();
@@ -69,9 +71,17 @@ function DashboardPage() {
          <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch}>
           <TabsList>
             <TabsTrigger value="add-route">Add Route</TabsTrigger>
+            <TabsTrigger value="my-routes">My Routes</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="add-route">
              <OwnerDashboard onRouteAdded={addRoute} onSwitchTab={handleTabSwitch} />
+          </TabsContent>
+          <TabsContent value="my-routes">
+            <MyRoutes routes={routes} />
+          </TabsContent>
+           <TabsContent value="profile">
+            <ProfileForm />
           </TabsContent>
         </Tabs>
       ) : (
@@ -79,12 +89,16 @@ function DashboardPage() {
           <TabsList>
             <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
             <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="find-ride">
             <PassengerDashboard routes={routes} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-bookings">
             <RecentBookings bookings={bookings} onUpdateBooking={handleUpdateBooking} />
+          </TabsContent>
+           <TabsContent value="profile">
+            <ProfileForm />
           </TabsContent>
         </Tabs>
       )}
