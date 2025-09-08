@@ -21,9 +21,13 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
+  DialogFooter,
+  DialogClose
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar, Clock } from "lucide-react";
-import { getBookings } from "@/lib/storage";
+import { User, Phone, Users, Calendar, Clock, DollarSign, Sparkles } from "lucide-react";
+import { getBookings, saveBookings } from "@/lib/storage";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 interface MyRoutesProps {
   routes: Route[];
@@ -32,6 +36,7 @@ interface MyRoutesProps {
 const MyRoutes = ({ routes }: MyRoutesProps) => {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
+  const { toast } = useToast();
 
   const handleViewClick = (route: Route) => {
     const allBookings = getBookings();
@@ -43,6 +48,31 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
     setSelectedRoute(route);
     setBookingsForRoute(routeBookings);
   };
+  
+  const handlePayment = (bookingId: string, method: 'Cash' | 'UPI') => {
+    const allBookings = getBookings();
+    const updatedBookings = allBookings.map(b => {
+      if (b.id === bookingId) {
+        return {
+          ...b,
+          paymentMethod: method,
+          paymentStatus: "Paid" as const,
+          status: "Completed" as const,
+        }
+      }
+      return b;
+    });
+    saveBookings(updatedBookings);
+    setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, paymentMethod: method, paymentStatus: 'Paid', status: 'Completed'} : b))
+    toast({
+      title: "Payment Recorded",
+      description: `Payment for booking ${bookingId} has been recorded as ${method}.`,
+    });
+  }
+  
+  const isRideComplete = (route: Route) => {
+      return new Date(route.travelDate) < new Date();
+  }
 
   return (
     <Card className="shadow-sm mt-6">
@@ -78,7 +108,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                           size="sm"
                           onClick={() => handleViewClick(route)}
                         >
-                          View
+                          View Bookings
                         </Button>
                       </DialogTrigger>
                     </TableCell>
@@ -94,7 +124,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
             </TableBody>
           </Table>
           {selectedRoute && (
-            <DialogContent>
+            <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Bookings for {selectedRoute.fromLocation} to {selectedRoute.toLocation}</DialogTitle>
                 <DialogDescription>
@@ -108,36 +138,44 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                         <div className="flex items-center gap-4">
                             <User className="h-5 w-5 text-muted-foreground" />
                             <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">
-                                Client Name
-                                </span>
-                                <span className="font-medium">
-                                {booking.client}
-                                </span>
+                                <span className="text-sm text-muted-foreground">Client Name</span>
+                                <span className="font-medium">{booking.client}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-4 mt-2">
                             <Phone className="h-5 w-5 text-muted-foreground" />
                             <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">
-                                Mobile Number
-                                </span>
-                                <span className="font-medium">
-                                {booking.mobile}
-                               </span>
+                                <span className="text-sm text-muted-foreground">Mobile Number</span>
+                                <span className="font-medium">{booking.mobile}</span>
                             </div>
                         </div>
                          <div className="flex items-center gap-4 mt-2">
                             <Clock className="h-5 w-5 text-muted-foreground" />
                             <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">
-                                Departure Time
-                                </span>
-                                <span className="font-medium">
-                                {format(booking.departureDate, "HH:mm")}
-                               </span>
+                                <span className="text-sm text-muted-foreground">Departure Time</span>
+                                <span className="font-medium">{format(booking.departureDate, "HH:mm")}</span>
                             </div>
                         </div>
+                        {isRideComplete(selectedRoute) && (
+                            <div className="mt-4 pt-4 border-t">
+                               <p className="text-sm text-muted-foreground mb-2">Payment</p>
+                               {booking.paymentStatus === 'Paid' ? (
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="h-5 w-5 text-green-500" />
+                                        <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
+                                    </div>
+                               ) : (
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'Cash')}>
+                                        <DollarSign className="mr-2 h-4 w-4" /> Cash
+                                    </Button>
+                                    <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'UPI')}>
+                                       <Sparkles className="mr-2 h-4 w-4" /> UPI
+                                    </Button>
+                                </div>
+                               )}
+                            </div>
+                        )}
                     </div>
                   ))
                 ) : (

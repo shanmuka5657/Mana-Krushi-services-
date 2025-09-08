@@ -16,7 +16,7 @@ import {
   LogOut,
 } from "lucide-react";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -43,9 +43,11 @@ import { clearCurrentUser, getCurrentUserName, getCurrentUser } from "@/lib/stor
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [userName, setUserName] = React.useState("User");
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
+  const [role, setRole] = React.useState('passenger');
 
   React.useEffect(() => {
     const name = getCurrentUserName();
@@ -58,26 +60,30 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       setUserName(fallbackName);
       setUserInitial(fallbackName.charAt(0).toUpperCase());
     }
-    // A simple way to show role, in a real app this would come from session
-    const role = new URLSearchParams(window.location.search).get('role') || 'passenger';
-    setUserRole(role === 'owner' ? 'Owner' : 'Passenger');
+    const roleFromUrl = new URLSearchParams(window.location.search).get('role') || 'passenger';
+    setRole(roleFromUrl);
+    setUserRole(roleFromUrl === 'owner' ? 'Owner' : 'Passenger');
   }, []);
 
   const navItems = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
-    { href: "/profile", icon: User, label: "Profile" },
-    { href: "#", icon: Users, label: "Clients" },
-    { href: "#", icon: Plane, label: "Bookings" },
-    { href: "#", icon: Map, label: "Itineraries" },
-    { href: "#", icon: DollarSign, label: "Payments" },
-    { href: "#", icon: BarChart, label: "Reports" },
-    { href: "#", icon: Settings, label: "Settings" },
-    { href: "#", icon: HelpCircle, label: "Help" },
-  ];
+    { href: `/dashboard?role=${role}`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/profile?role=${role}`, icon: User, label: "Profile" },
+    { href: `/bookings?role=${role}`, icon: Plane, label: "Bookings" },
+    { href: `/clients?role=${role}`, icon: Users, label: "Clients", ownerOnly: true },
+    { href: `/itineraries?role=${role}`, icon: Map, label: "Itineraries", ownerOnly: true },
+    { href: `/payments?role=${role}`, icon: DollarSign, label: "Payments", ownerOnly: true },
+    { href: `/reports?role=${role}`, icon: BarChart, label: "Reports" },
+    { href: `/settings?role=${role}`, icon: Settings, label: "Settings" },
+    { href: `/help?role=${role}`, icon: HelpCircle, label: "Help" },
+  ].filter(item => !(item.ownerOnly && role !== 'owner'));
 
   const handleLogout = () => {
     clearCurrentUser();
     router.push('/login');
+  };
+  
+  const handleNavClick = (href: string) => {
+    router.push(href);
   };
 
   return (
@@ -96,8 +102,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {navItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
-                  href={item.href}
-                  isActive={item.label === 'Dashboard'}
+                  onClick={() => handleNavClick(item.href)}
+                  isActive={pathname.startsWith(item.href.split('?')[0])}
                   className="justify-start"
                   tooltip={item.label}
                 >
@@ -145,11 +151,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                <DropdownMenuItem onClick={() => router.push(`/profile?role=${role}`)}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>

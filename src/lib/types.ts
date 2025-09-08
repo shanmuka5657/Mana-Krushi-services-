@@ -6,12 +6,15 @@ export type Booking = {
   departureDate: Date;
   returnDate: Date;
   amount: number;
-  status: "Confirmed" | "Pending" | "Cancelled";
+  status: "Confirmed" | "Pending" | "Cancelled" | "Completed";
   travelers: string;
   mobile: string;
   driverName?: string;
   driverMobile?: string;
   vehicleType?: string;
+  paymentMethod?: "Cash" | "UPI" | "Pending";
+  paymentStatus?: "Paid" | "Unpaid";
+  report?: string;
 };
 
 export type Route = {
