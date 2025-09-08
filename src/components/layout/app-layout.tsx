@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -11,6 +12,7 @@ import {
   Search,
   Settings,
   Users,
+  User,
 } from "lucide-react";
 import * as React from "react";
 
@@ -30,10 +32,11 @@ import {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
-    { href: "#", icon: LayoutDashboard, label: "Dashboard", active: true },
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
     { href: "#", icon: Users, label: "Clients" },
     { href: "#", icon: Plane, label: "Bookings" },
     { href: "#", icon: Map, label: "Itineraries" },
+    { href: "/profile", icon: User, label: "Profile" },
     { href: "#", icon: DollarSign, label: "Payments" },
     { href: "#", icon: BarChart, label: "Reports" },
     { href: "#", icon: Settings, label: "Settings" },
@@ -57,7 +60,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
                   href={item.href}
-                  isActive={item.active}
+                  isActive={item.label === 'Dashboard'}
                   className="justify-start"
                   tooltip={item.label}
                 >
