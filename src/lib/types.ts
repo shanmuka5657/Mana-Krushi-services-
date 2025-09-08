@@ -1,3 +1,4 @@
+
 export type Booking = {
   id: string;
   client: string;
@@ -8,6 +9,9 @@ export type Booking = {
   status: "Confirmed" | "Pending" | "Cancelled";
   travelers: string;
   mobile: string;
+  driverName?: string;
+  driverMobile?: string;
+  vehicleType?: string;
 };
 
 export type Route = {

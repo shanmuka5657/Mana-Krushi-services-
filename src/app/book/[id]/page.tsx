@@ -48,6 +48,9 @@ export default function BookRidePage() {
         status: "Confirmed",
         travelers: "1",
         mobile: passengerProfile.mobile,
+        driverName: route.driverName,
+        driverMobile: route.driverMobile,
+        vehicleType: route.vehicleType,
     };
     
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);

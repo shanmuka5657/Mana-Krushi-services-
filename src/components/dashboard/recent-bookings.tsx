@@ -22,7 +22,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar, Clock } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
@@ -46,9 +46,9 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm mt-6">
       <CardHeader>
-        <CardTitle>Recent Bookings</CardTitle>
+        <CardTitle>My Bookings</CardTitle>
       </CardHeader>
       <CardContent>
         <Dialog>
@@ -56,7 +56,6 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
             <TableHeader>
               <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
                 <TableHead className="rounded-l-lg">Booking ID</TableHead>
-                <TableHead>Client</TableHead>
                 <TableHead>Destination</TableHead>
                 <TableHead>Departure</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
@@ -69,11 +68,10 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                 bookings.map((booking) => (
                   <TableRow key={booking.id}>
                     <TableCell className="font-medium">{booking.id}</TableCell>
-                    <TableCell>{booking.client}</TableCell>
                     <TableCell>{booking.destination}</TableCell>
-                    <TableCell>{format(booking.departureDate, "dd MMM yyyy")}</TableCell>
+                    <TableCell>{format(booking.departureDate, "dd MMM yyyy, HH:mm")}</TableCell>
                     <TableCell className="text-right">
-                      ${(booking.amount || 0).toLocaleString()}
+                      ₹{(booking.amount || 0).toFixed(2)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -98,8 +96,8 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    No recent bookings.
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    You have no bookings.
                   </TableCell>
                 </TableRow>
               )}
@@ -108,9 +106,9 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
           {selectedBooking && (
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Booking Details for {selectedBooking.id}</DialogTitle>
+                <DialogTitle>Details for booking {selectedBooking.id}</DialogTitle>
                 <DialogDescription>
-                  Client and travel information for this booking.
+                  Driver and vehicle information for your trip.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -118,10 +116,10 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                   <User className="h-5 w-5 text-muted-foreground" />
                   <div className="flex flex-col">
                     <span className="text-sm text-muted-foreground">
-                      Client Name
+                      Driver Name
                     </span>
                     <span className="font-medium">
-                      {selectedBooking.client}
+                      {selectedBooking.driverName || 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -129,21 +127,21 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                   <Phone className="h-5 w-5 text-muted-foreground" />
                   <div className="flex flex-col">
                     <span className="text-sm text-muted-foreground">
-                      Mobile Number
+                      Driver Mobile
                     </span>
                     <span className="font-medium">
-                      {selectedBooking.mobile}
+                      {selectedBooking.driverMobile || 'N/A'}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <Car className="h-5 w-5 text-muted-foreground" />
                   <div className="flex flex-col">
                     <span className="text-sm text-muted-foreground">
-                      Travelers
+                      Vehicle Type
                     </span>
                     <span className="font-medium">
-                      {selectedBooking.travelers}
+                      {selectedBooking.vehicleType || 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -167,30 +165,6 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                             </span>
                             <span className="font-medium">
                             {format(selectedBooking.departureDate, "HH:mm")}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-4">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                        <div className="flex flex-col">
-                            <span className="text-sm text-muted-foreground">
-                            Return
-                            </span>
-                            <span className="font-medium">
-                            {format(selectedBooking.returnDate, "dd MMM yyyy")}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <Clock className="h-5 w-5 text-muted-foreground" />
-                        <div className="flex flex-col">
-                            <span className="text-sm text-muted-foreground">
-                            Time
-                            </span>
-                            <span className="font-medium">
-                            {format(selectedBooking.returnDate, "HH:mm")}
                             </span>
                         </div>
                     </div>
