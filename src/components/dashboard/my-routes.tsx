@@ -43,7 +43,8 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
     const routeBookings = allBookings.filter(
       (booking) =>
         booking.destination === `${route.fromLocation} to ${route.toLocation}` &&
-        format(new Date(booking.departureDate), "yyyy-MM-dd") === format(new Date(route.travelDate), "yyyy-MM-dd")
+        format(new Date(booking.departureDate), "yyyy-MM-dd") === format(new Date(route.travelDate), "yyyy-MM-dd") &&
+        format(new Date(booking.departureDate), "HH:mm") === route.departureTime
     );
     setSelectedRoute(route);
     setBookingsForRoute(routeBookings);
@@ -71,7 +72,10 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   }
   
   const isRideComplete = (route: Route) => {
-      return new Date(route.travelDate) < new Date();
+      const routeDateTime = new Date(route.travelDate);
+      const [hours, minutes] = route.arrivalTime.split(':').map(Number);
+      routeDateTime.setHours(hours, minutes);
+      return routeDateTime < new Date();
   }
 
   return (
@@ -80,7 +84,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
         <CardTitle>My Routes</CardTitle>
       </CardHeader>
       <CardContent>
-        <Dialog>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedRoute(null)}>
           <Table>
             <TableHeader>
               <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
@@ -128,7 +132,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
               <DialogHeader>
                 <DialogTitle>Bookings for {selectedRoute.fromLocation} to {selectedRoute.toLocation}</DialogTitle>
                 <DialogDescription>
-                  {format(new Date(selectedRoute.travelDate), "PPP")}
+                  {format(new Date(selectedRoute.travelDate), "PPP")} at {selectedRoute.departureTime}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">

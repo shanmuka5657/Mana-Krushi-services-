@@ -28,7 +28,7 @@ import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle } from "l
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { saveBookings } from "@/lib/storage";
+import { getBookings, saveBookings } from "@/lib/storage";
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
   switch (status) {
@@ -54,9 +54,11 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [reportText, setReportText] = useState("");
   const { toast } = useToast();
+  const [dialogAction, setDialogAction] = useState<'view' | 'report' | null>(null);
   
   const isRideComplete = (booking: Booking) => {
-      return new Date(booking.departureDate) < new Date();
+    const rideEndTime = new Date(booking.departureDate); // This should ideally be arrival time if available
+    return rideEndTime < new Date();
   }
   
   const handleReportSubmit = () => {
@@ -69,19 +71,37 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       return;
     }
     const updatedBooking = { ...selectedBooking, report: reportText };
-    onUpdateBooking(updatedBooking);
     
     // Also persist this change
-    const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    const allBookings = getBookings();
     const updatedBookings = allBookings.map((b: Booking) => b.id === updatedBooking.id ? updatedBooking : b);
     saveBookings(updatedBookings);
+    
+    onUpdateBooking(updatedBooking);
 
     toast({
       title: "Report Submitted",
       description: "Thank you for your feedback. The owner has been notified.",
     });
     setReportText("");
+    setDialogAction(null);
+    setSelectedBooking(null);
   };
+  
+  const handleOpenDialog = (booking: Booking, action: 'view' | 'report') => {
+      setSelectedBooking(booking);
+      setDialogAction(action);
+  }
+
+  const getBookingStatus = (booking: Booking): Booking['status'] => {
+    if (booking.status === 'Cancelled' || booking.status === 'Completed') {
+        return booking.status;
+    }
+    if (isRideComplete(booking) && booking.status === 'Confirmed') {
+        return 'Completed';
+    }
+    return booking.status;
+  }
 
   return (
     <Card className="shadow-sm mt-6">
@@ -89,7 +109,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
         <CardTitle>My Bookings</CardTitle>
       </CardHeader>
       <CardContent>
-        <Dialog>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedBooking(null)}>
           <Table>
             <TableHeader>
               <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
@@ -103,7 +123,9 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
             </TableHeader>
             <TableBody>
               {bookings.length > 0 ? (
-                bookings.map((booking) => (
+                bookings.map((booking) => {
+                  const status = getBookingStatus(booking);
+                  return (
                   <TableRow key={booking.id}>
                     <TableCell className="font-medium">{booking.id}</TableCell>
                     <TableCell>{booking.destination}</TableCell>
@@ -114,15 +136,9 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={getStatusBadgeClass(
-                          isRideComplete(booking) && booking.status === "Confirmed"
-                            ? "Completed"
-                            : booking.status
-                        )}
+                        className={getStatusBadgeClass(status)}
                       >
-                        {isRideComplete(booking) && booking.status === "Confirmed"
-                          ? "Completed"
-                          : booking.status}
+                       {status}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -131,14 +147,14 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedBooking(booking)}
+                            onClick={() => handleOpenDialog(booking, 'view')}
                           >
                             View
                           </Button>
                         </DialogTrigger>
-                        {isRideComplete(booking) && !booking.report && (
+                        {status === 'Completed' && !booking.report && (
                             <DialogTrigger asChild>
-                                <Button variant="destructive" size="sm" onClick={() => setSelectedBooking(booking)}>
+                                <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'report')}>
                                     <AlertCircle className="h-4 w-4 mr-2" /> Report
                                 </Button>
                             </DialogTrigger>
@@ -146,7 +162,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                )})
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
@@ -159,8 +175,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 
           {selectedBooking && (
             <DialogContent>
-                {/* Conditional rendering based on whether it's a 'view' or 'report' action */}
-                {!isRideComplete(selectedBooking) || (isRideComplete(selectedBooking) && !reportText && !selectedBooking.report) ? (
+                {dialogAction === 'view' ? (
                     <>
                         <DialogHeader>
                             <DialogTitle>Details for booking {selectedBooking.id}</DialogTitle>
@@ -227,6 +242,11 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 </div>
                             </div>
                         </div>
+                         <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline">Close</Button>
+                            </DialogClose>
+                        </DialogFooter>
                     </>
                 ) : (
                     <>
@@ -246,11 +266,9 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="ghost">Cancel</Button>
+                                <Button variant="ghost" onClick={() => setReportText('')}>Cancel</Button>
                             </DialogClose>
-                            <DialogClose asChild>
-                                <Button onClick={handleReportSubmit}>Submit Report</Button>
-                            </DialogClose>
+                            <Button onClick={handleReportSubmit}>Submit Report</Button>
                         </DialogFooter>
                     </>
                 )}
