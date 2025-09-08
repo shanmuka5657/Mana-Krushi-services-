@@ -74,12 +74,16 @@ function DashboardPage() {
           <TabsList>
             <TabsTrigger value="add-route">Add Route</TabsTrigger>
             <TabsTrigger value="my-routes">My Routes</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="add-route">
-             <OwnerDashboard onRouteAdded={addRoute} />
+             <OwnerDashboard onRouteAdded={addRoute} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-routes">
             <MyRoutes routes={routes} />
+          </TabsContent>
+          <TabsContent value="profile">
+            <ProfilePage />
           </TabsContent>
         </Tabs>
       ) : (
