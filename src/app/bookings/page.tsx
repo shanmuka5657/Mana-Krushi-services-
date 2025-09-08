@@ -17,29 +17,30 @@ function BookingsPageContent() {
     const currentUserName = getCurrentUserName();
 
     useEffect(() => {
-        const allBookings = getBookings();
-        let userBookings: Booking[] = [];
+        const fetchBookings = async () => {
+            const allBookings = await getBookings();
+            let userBookings: Booking[] = [];
 
-        if (role === 'passenger') {
-            const passengerName = getCurrentUserName();
-            if (passengerName) {
-                userBookings = allBookings.filter(b => b.client === passengerName);
+            if (role === 'passenger') {
+                const passengerName = getCurrentUserName();
+                if (passengerName) {
+                    userBookings = allBookings.filter(b => b.client === passengerName);
+                }
+            } else if (role === 'owner') {
+                const ownerName = getCurrentUserName();
+                userBookings = allBookings.filter(b => b.driverName === ownerName);
             }
-        } else if (role === 'owner') {
-             // This page is mainly for passengers, but if an owner lands here,
-             // maybe show bookings related to them.
-            const ownerName = getCurrentUserName();
-            userBookings = allBookings.filter(b => b.driverName === ownerName);
-        }
-        
-        setBookings(userBookings);
-        setIsLoaded(true);
+            
+            setBookings(userBookings);
+            setIsLoaded(true);
+        };
+        fetchBookings();
     }, [role]);
     
-    const handleUpdateBooking = (updatedBooking: Booking) => {
-        const allBookings = getBookings();
+    const handleUpdateBooking = async (updatedBooking: Booking) => {
+        const allBookings = await getBookings();
         const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
-        saveBookings(updatedAllBookings);
+        await saveBookings(updatedAllBookings);
         
         let userBookings: Booking[] = [];
         if (role === 'passenger') {

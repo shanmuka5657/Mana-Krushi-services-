@@ -81,11 +81,14 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
   const router = useRouter();
 
   useEffect(() => {
-    const profile = getProfile();
-    // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
-    if (!profile || !profile.mobile || profile.mobile === '0000000000') {
-      setShowProfilePrompt(true);
-    }
+    const checkProfile = async () => {
+        const profile = await getProfile();
+        // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
+        if (!profile || !profile.mobile || profile.mobile === '0000000000') {
+          setShowProfilePrompt(true);
+        }
+    };
+    checkProfile();
   }, []);
   
   const form = useForm<SearchFormValues>({

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { getBookings, getCurrentUserName, getCurrentUser } from '@/lib/storage';
+import { getBookings, getCurrentUserName } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { format } from 'date-fns';
 import { AlertCircle, Calendar } from 'lucide-react';
@@ -18,19 +18,21 @@ function ReportsPageContent() {
     const role = searchParams.get('role') || 'passenger';
 
     useEffect(() => {
-        const allBookings = getBookings();
-        let userReports: Booking[] = [];
-        if(role === 'owner') {
-            const ownerName = getCurrentUserName();
-            userReports = allBookings.filter(b => b.driverName === ownerName && b.report);
-        } else {
-            const clientName = getCurrentUserName();
-            userReports = allBookings.filter(b => b.client === clientName && b.report);
-        }
-        
-        setReports(userReports.sort((a,b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime()));
-        setIsLoaded(true);
-
+        const fetchReports = async () => {
+            const allBookings = await getBookings();
+            let userReports: Booking[] = [];
+            if(role === 'owner') {
+                const ownerName = getCurrentUserName();
+                userReports = allBookings.filter(b => b.driverName === ownerName && b.report);
+            } else {
+                const clientName = getCurrentUserName();
+                userReports = allBookings.filter(b => b.client === clientName && b.report);
+            }
+            
+            setReports(userReports.sort((a,b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime()));
+            setIsLoaded(true);
+        };
+        fetchReports();
     }, [role]);
 
     if (!isLoaded) {

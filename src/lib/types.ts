@@ -32,3 +32,9 @@ export type Route = {
   price: number;
   rating: number;
 };
+
+export type Profile = {
+    name: string;
+    mobile: string;
+    email: string;
+}

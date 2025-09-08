@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -41,6 +41,14 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   const [toFilter, setToFilter] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+        setAllBookings(await getBookings());
+    }
+    fetchBookings();
+  }, []);
 
   const filteredRoutes = useMemo(() => {
     return routes.filter(route => {
@@ -52,7 +60,6 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   }, [routes, fromFilter, toFilter, dateFilter]);
 
   const handleViewClick = (route: Route) => {
-    const allBookings = getBookings();
     const routeBookings = allBookings.filter(
       (booking) => {
         const routeDate = new Date(route.travelDate);
@@ -69,8 +76,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
     setBookingsForRoute(routeBookings);
   };
   
-  const handlePayment = (bookingId: string, method: 'Cash' | 'UPI') => {
-    const allBookings = getBookings();
+  const handlePayment = async (bookingId: string, method: 'Cash' | 'UPI') => {
     const updatedBookings = allBookings.map(b => {
       if (b.id === bookingId) {
         return {
@@ -82,7 +88,8 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
       }
       return b;
     });
-    saveBookings(updatedBookings);
+    await saveBookings(updatedBookings);
+    setAllBookings(updatedBookings);
     setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, paymentMethod: method, paymentStatus: 'Paid', status: 'Completed'} : b))
     toast({
       title: "Payment Recorded",

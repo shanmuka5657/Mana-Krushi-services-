@@ -23,35 +23,38 @@ function PassengersPageContent() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const ownerName = getCurrentUserName();
-        const allBookings = getBookings();
-        
-        // Filter bookings where the owner is the driver
-        const ownerBookings = allBookings.filter(b => b.driverName === ownerName);
+        const fetchPassengers = async () => {
+            const ownerName = getCurrentUserName();
+            const allBookings = await getBookings();
+            
+            // Filter bookings where the owner is the driver
+            const ownerBookings = allBookings.filter(b => b.driverName === ownerName);
 
-        const passengerMap: { [mobile: string]: Passenger } = {};
+            const passengerMap: { [mobile: string]: Passenger } = {};
 
-        ownerBookings.forEach(booking => {
-            if (!booking.mobile) return; // Skip if no mobile number
+            ownerBookings.forEach(booking => {
+                if (!booking.mobile) return; // Skip if no mobile number
 
-            if (!passengerMap[booking.mobile]) {
-                passengerMap[booking.mobile] = {
-                    name: booking.client,
-                    mobile: booking.mobile,
-                    lastBookingDate: new Date(booking.departureDate),
-                    totalBookings: 0,
-                };
-            }
-            passengerMap[booking.mobile].totalBookings += 1;
-            if (new Date(booking.departureDate) > passengerMap[booking.mobile].lastBookingDate) {
-                passengerMap[booking.mobile].lastBookingDate = new Date(booking.departureDate);
-            }
-        });
+                if (!passengerMap[booking.mobile]) {
+                    passengerMap[booking.mobile] = {
+                        name: booking.client,
+                        mobile: booking.mobile,
+                        lastBookingDate: new Date(booking.departureDate),
+                        totalBookings: 0,
+                    };
+                }
+                passengerMap[booking.mobile].totalBookings += 1;
+                if (new Date(booking.departureDate) > passengerMap[booking.mobile].lastBookingDate) {
+                    passengerMap[booking.mobile].lastBookingDate = new Date(booking.departureDate);
+                }
+            });
 
-        const passengerList = Object.values(passengerMap).sort((a, b) => b.lastBookingDate.getTime() - a.lastBookingDate.getTime());
+            const passengerList = Object.values(passengerMap).sort((a, b) => b.lastBookingDate.getTime() - a.lastBookingDate.getTime());
 
-        setPassengers(passengerList);
-        setIsLoaded(true);
+            setPassengers(passengerList);
+            setIsLoaded(true);
+        };
+        fetchPassengers();
     }, []);
 
     if (!isLoaded) {

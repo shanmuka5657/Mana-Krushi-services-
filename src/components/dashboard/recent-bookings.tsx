@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -61,7 +61,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
     return rideEndTime < new Date();
   }
   
-  const handleReportSubmit = () => {
+  const handleReportSubmit = async () => {
     if (!selectedBooking || reportText.trim().length < 10) {
       toast({
         title: "Report too short",
@@ -72,10 +72,9 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
     }
     const updatedBooking = { ...selectedBooking, report: reportText };
     
-    // Also persist this change
-    const allBookings = getBookings();
+    const allBookings = await getBookings();
     const updatedBookings = allBookings.map((b: Booking) => b.id === updatedBooking.id ? updatedBooking : b);
-    saveBookings(updatedBookings);
+    await saveBookings(updatedBookings);
     
     onUpdateBooking(updatedBooking);
 
@@ -266,8 +265,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="ghost" onClick={() => setReportText('')}>Cancel</Button>
-                            </DialogClose>
+                                <Button variant="ghost" onClick={() => setReportText('')}>Cancel</Button>                            </DialogClose>
                             <Button onClick={handleReportSubmit}>Submit Report</Button>
                         </DialogFooter>
                     </>

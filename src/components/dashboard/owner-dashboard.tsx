@@ -20,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import type { Route } from "@/lib/types";
 import {
   Popover,
   PopoverContent,
@@ -69,11 +68,14 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
   useEffect(() => {
-    const profile = getProfile();
-    // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
-    if (!profile || !profile.mobile || profile.mobile === '0000000000') {
-      setShowProfilePrompt(true);
+    const checkProfile = async () => {
+        const profile = await getProfile();
+        // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
+        if (!profile || !profile.mobile || profile.mobile === '0000000000') {
+          setShowProfilePrompt(true);
+        }
     }
+    checkProfile();
   }, []);
 
   const form = useForm<OwnerFormValues>({

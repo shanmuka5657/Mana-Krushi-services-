@@ -6,12 +6,14 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
 import { format } from "date-fns";
 
-import { getRoutes, getBookings, saveBookings, getProfile } from "@/lib/storage";
+import { getRoutes, getBookings, saveBookings, getProfile, addRoute } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { getApp } from "firebase/app";
 
 export default function BookRidePage() {
   const router = useRouter();
@@ -22,20 +24,23 @@ export default function BookRidePage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const routes = getRoutes();
-    const routeId = typeof params.id === 'string' ? params.id : '';
-    const foundRoute = routes.find((r) => r.id === routeId);
-    if (foundRoute) {
-      setRoute(foundRoute);
-      setMessage(`Hello, I've just booked your ride! I'd be glad to travel with you. Can I get more information?`);
+    const fetchRoute = async () => {
+        const routes = await getRoutes();
+        const routeId = typeof params.id === 'string' ? params.id : '';
+        const foundRoute = routes.find((r) => r.id === routeId);
+        if (foundRoute) {
+            setRoute(foundRoute);
+            setMessage(`Hello, I've just booked your ride! I'd be glad to travel with you. Can I get more information?`);
+        }
+        setIsLoaded(true);
     }
-    setIsLoaded(true);
+    fetchRoute();
   }, [params.id]);
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!route) return;
 
-    const passengerProfile = getProfile();
+    const passengerProfile = await getProfile();
     if (!passengerProfile) {
         toast({
             title: "Profile Incomplete",
@@ -46,10 +51,13 @@ export default function BookRidePage() {
         return;
     }
 
+    const bookings = await getBookings();
+    
+    const db = getFirestore(getApp());
+    const newBookingRef = await addDoc(collection(db, 'bookings'), {});
 
-    const bookings = getBookings();
     const newBooking: Booking = {
-        id: `#BK${(bookings.length + 1).toString().padStart(3, '0')}`,
+        id: newBookingRef.id,
         client: passengerProfile.name,
         destination: `${route.fromLocation} to ${route.toLocation}`,
         departureDate: route.travelDate,
@@ -67,7 +75,7 @@ export default function BookRidePage() {
     newBooking.departureDate.setHours(depHours, depMinutes);
 
     const updatedBookings = [newBooking, ...bookings];
-    saveBookings(updatedBookings);
+    await saveBookings(updatedBookings);
 
     toast({
         title: "Booking Confirmed!",

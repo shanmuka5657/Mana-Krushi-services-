@@ -1,6 +1,8 @@
 
+
 import type { Booking, Route } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore } from './firebase';
 
 
 const isBrowser = typeof window !== "undefined";
@@ -79,106 +81,52 @@ const initialRoutes: Route[] = [
 ];
 
 // Functions for bookings
-export const getBookings = (): Booking[] => {
-    if (!isBrowser) return initialBookings;
-    try {
-        const storedBookings = window.localStorage.getItem('bookings');
-        if (storedBookings) {
-            const parsed = JSON.parse(storedBookings);
-            // Dates need to be converted back to Date objects
-            return parsed.map((b: any) => ({
-                ...b,
-                departureDate: new Date(b.departureDate),
-                returnDate: new Date(b.returnDate),
-            }));
-        }
-    } catch (error) {
-        console.error("Failed to parse bookings from localStorage", error);
+export const getBookings = async (): Promise<Booking[]> => {
+    const bookings = await getBookingsFromFirestore();
+    if (bookings.length === 0) {
+        await saveBookingsToFirestore(initialBookings);
+        return initialBookings;
     }
-    // Set initial data if nothing is stored
-    saveBookings(initialBookings);
-    return initialBookings;
+    return bookings;
 };
 
-export const saveBookings = (bookings: Booking[]) => {
-    if (!isBrowser) return;
-    try {
-        window.localStorage.setItem('bookings', JSON.stringify(bookings));
-    } catch (error) {
-        console.error("Failed to save bookings to localStorage", error);
-    }
+export const saveBookings = async (bookings: Booking[]) => {
+    await saveBookingsToFirestore(bookings);
 };
 
 // Functions for routes
-export const getRoutes = (): Route[] => {
-    if (!isBrowser) return initialRoutes;
-    try {
-        const storedRoutes = window.localStorage.getItem('routes');
-        if (storedRoutes) {
-            const parsed = JSON.parse(storedRoutes);
-             // Dates need to be converted back to Date objects
-            return parsed.map((r: any) => ({
-                ...r,
-                travelDate: new Date(r.travelDate),
-            }));
-        }
-    } catch (error) {
-        console.error("Failed to parse routes from localStorage", error);
+export const getRoutes = async (): Promise<Route[]> => {
+    const routes = await getRoutesFromFirestore();
+    if (routes.length === 0) {
+        await saveRoutesToFirestore(initialRoutes);
+        return initialRoutes;
     }
-    // Set initial data if nothing is stored
-    saveRoutes(initialRoutes);
-    return initialRoutes;
+    return routes;
 };
 
-export const saveRoutes = (routes: Route[]) => {
-    if (!isBrowser) return;
-    try {
-        window.localStorage.setItem('routes', JSON.stringify(routes));
-    } catch (error) {
-        console.error("Failed to save routes to localStorage", error);
-    }
+export const saveRoutes = async (routes: Route[]) => {
+    await saveRoutesToFirestore(routes);
 };
+
+export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
+    return await addRouteToFirestore(route);
+}
 
 // Functions for profile
-export const saveProfile = (profile: ProfileFormValues) => {
-    if (!isBrowser) return;
-    try {
-        const userEmail = getCurrentUser();
-        if (userEmail) {
-            const profiles = getAllProfiles();
-            profiles[userEmail] = profile;
-            window.localStorage.setItem('userProfiles', JSON.stringify(profiles));
-        }
-    } catch (error) {
-        console.error("Failed to save profile to localStorage", error);
+export const saveProfile = async (profile: ProfileFormValues) => {
+    const userEmail = getCurrentUser();
+    if (userEmail) {
+        await saveProfileToFirestore({ ...profile, email: userEmail });
     }
 };
 
-export const getProfile = (): ProfileFormValues | null => {
-    if (!isBrowser) return null;
-    try {
-        const userEmail = getCurrentUser();
-        if (userEmail) {
-            const profiles = getAllProfiles();
-            return profiles[userEmail] || null;
-        }
-        return null;
-    } catch (error) {
-        console.error("Failed to parse profile from localStorage", error);
-        return null;
+export const getProfile = async (): Promise<ProfileFormValues | null> => {
+    const userEmail = getCurrentUser();
+    if (userEmail) {
+        return await getProfileFromFirestore(userEmail);
     }
+    return null;
 };
-
-const getAllProfiles = (): { [email: string]: ProfileFormValues } => {
-    if (!isBrowser) return {};
-    try {
-        const storedProfiles = window.localStorage.getItem('userProfiles');
-        return storedProfiles ? JSON.parse(storedProfiles) : {};
-    } catch (error) {
-        console.error("Failed to parse profiles from localStorage", error);
-        return {};
-    }
-}
 
 
 // Functions for user session

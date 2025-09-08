@@ -11,7 +11,7 @@ import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from 'react';
-import { getBookings, saveBookings, getRoutes, saveRoutes, getCurrentUserName } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, addRoute, getCurrentUserName } from "@/lib/storage";
 import MyRoutes from "@/components/dashboard/my-routes";
 import ProfileForm from "@/components/dashboard/profile-form";
 
@@ -27,39 +27,29 @@ function DashboardPage() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Ensure this runs only on the client
-    const bookingsFromStorage = getBookings();
-    setAllBookings(bookingsFromStorage);
-    setRoutes(getRoutes());
+    const fetchData = async () => {
+      const bookingsFromStorage = await getBookings();
+      setAllBookings(bookingsFromStorage);
+      setRoutes(await getRoutes());
 
-    if (role === 'passenger') {
-      const currentUserName = getCurrentUserName();
-      const filteredBookings = bookingsFromStorage.filter(b => b.client === currentUserName);
-      setUserBookings(filteredBookings);
-    } else {
-      setUserBookings(bookingsFromStorage); // Owner sees all bookings for now, can be refined.
-    }
+      if (role === 'passenger') {
+        const currentUserName = getCurrentUserName();
+        const filteredBookings = bookingsFromStorage.filter(b => b.client === currentUserName);
+        setUserBookings(filteredBookings);
+      } else {
+        const ownerName = getCurrentUserName();
+        const ownerRoutes = (await getRoutes()).filter(r => r.ownerName === ownerName);
+        setRoutes(ownerRoutes);
+        setUserBookings(bookingsFromStorage); // Owner sees all bookings for now, can be refined.
+      }
 
-    setIsLoaded(true);
+      setIsLoaded(true);
+    };
+    fetchData();
   }, [role]);
 
-  useEffect(() => {
-    if (isLoaded) {
-      saveBookings(allBookings);
-    }
-  }, [allBookings, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      saveRoutes(routes);
-    }
-  }, [routes, isLoaded]);
-
-  const addRoute = (newRouteData: OwnerFormValues) => {
-    const newRoute: Route = {
-      id: `ROUTE-${(routes.length + 1).toString().padStart(3, '0')}`,
-      ...newRouteData
-    };
+  const handleAddRoute = async (newRouteData: OwnerFormValues) => {
+    const newRoute = await addRoute(newRouteData);
     setRoutes((prevRoutes) => [newRoute, ...prevRoutes]);
   };
   
@@ -67,8 +57,9 @@ function DashboardPage() {
     setActiveTab(tabValue);
   };
   
-  const handleUpdateBooking = (updatedBooking: Booking) => {
+  const handleUpdateBooking = async (updatedBooking: Booking) => {
     const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
+    await saveBookings(updatedAllBookings);
     setAllBookings(updatedAllBookings);
     if (role === 'passenger') {
       const currentUserName = getCurrentUserName();
@@ -93,7 +84,7 @@ function DashboardPage() {
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="add-route">
-             <OwnerDashboard onRouteAdded={addRoute} onSwitchTab={handleTabSwitch} />
+             <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-routes">
             <MyRoutes routes={routes} />

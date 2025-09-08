@@ -42,23 +42,25 @@ export default function ProfileForm() {
   });
 
   useEffect(() => {
-    const userEmail = getCurrentUser();
-    const profile = getProfile();
-    
-    if (profile) {
-      form.reset(profile);
-    } else if (userEmail) {
-      // If no profile, use email from session and set default name
-      form.reset({
-        email: userEmail,
-        name: userEmail.split('@')[0],
-        mobile: '',
-      })
-    }
+    const loadProfile = async () => {
+        const userEmail = getCurrentUser();
+        const profile = await getProfile();
+        
+        if (profile) {
+          form.reset(profile);
+        } else if (userEmail) {
+          form.reset({
+            email: userEmail,
+            name: userEmail.split('@')[0],
+            mobile: '',
+          })
+        }
+    };
+    loadProfile();
   }, [form]);
 
-  function onSubmit(data: ProfileFormValues) {
-    saveProfile(data);
+  async function onSubmit(data: ProfileFormValues) {
+    await saveProfile(data);
     toast({
       title: "Profile Updated!",
       description: "Your profile has been successfully updated.",

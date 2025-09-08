@@ -13,16 +13,17 @@ function MyRoutesPageContent() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const ownerName = getCurrentUserName();
-        const allRoutes = getRoutes();
-        // In a real app, you'd fetch this from a server based on owner ID
-        const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName || r.driverName === ownerName);
-        
-        // Sort routes by date, newest first
-        ownerRoutes.sort((a, b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime());
+        const fetchRoutes = async () => {
+            const ownerName = getCurrentUserName();
+            const allRoutes = await getRoutes();
+            const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName || r.driverName === ownerName);
+            
+            ownerRoutes.sort((a, b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime());
 
-        setRoutes(ownerRoutes);
-        setIsLoaded(true);
+            setRoutes(ownerRoutes);
+            setIsLoaded(true);
+        };
+        fetchRoutes();
     }, []);
 
 

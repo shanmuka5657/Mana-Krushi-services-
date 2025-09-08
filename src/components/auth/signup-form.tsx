@@ -58,12 +58,12 @@ export function SignupForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Save the user session
     saveCurrentUser(values.email, values.name);
 
     // Save the initial profile. We'll add a dummy mobile number.
-    saveProfile({
+    await saveProfile({
       name: values.name,
       email: values.email,
       mobile: '0000000000',

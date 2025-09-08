@@ -17,15 +17,17 @@ function PaymentsPageContent() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const ownerName = getCurrentUserName();
-        const allBookings = getBookings();
-        // Filter for completed and paid bookings for the current owner
-        const ownerPayments = allBookings.filter(b => 
-            b.driverName === ownerName && b.paymentStatus === 'Paid'
-        ).sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-        
-        setPayments(ownerPayments);
-        setIsLoaded(true);
+        const fetchPayments = async () => {
+            const ownerName = getCurrentUserName();
+            const allBookings = await getBookings();
+            const ownerPayments = allBookings.filter(b => 
+                b.driverName === ownerName && b.paymentStatus === 'Paid'
+            ).sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+            
+            setPayments(ownerPayments);
+            setIsLoaded(true);
+        }
+        fetchPayments();
     }, []);
 
     if (!isLoaded) {
