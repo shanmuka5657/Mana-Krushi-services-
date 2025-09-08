@@ -44,27 +44,36 @@ const profilesCollection = db ? collection(db, "profiles") : null;
 // --- Bookings ---
 export const getBookingsFromFirestore = async (): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
-    const snapshot = await getDocs(bookingsCollection);
-    return snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            ...data,
-            id: doc.id,
-            // Firestore timestamps need to be converted to JS Dates
-            departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
-            returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
-        } as Booking;
-    });
+    try {
+        const snapshot = await getDocs(bookingsCollection);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                // Firestore timestamps need to be converted to JS Dates
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        });
+    } catch(e) {
+        console.error("Error getting bookings from Firestore", e);
+        return [];
+    }
 };
 
 export const saveBookingsToFirestore = async (bookings: Booking[]) => {
-    if (!bookingsCollection) return;
+    if (!bookingsCollection || !db) return;
     const batch = writeBatch(db);
     bookings.forEach((booking) => {
-        // Create a new doc ref if id is not a valid firestore id, otherwise use existing.
-        const docRef = booking.id.startsWith('#') ? doc(bookingsCollection) : doc(db, "bookings", booking.id);
-        const bookingToSave = { ...booking, id: docRef.id };
-        batch.set(docRef, bookingToSave);
+        // A valid Firestore ID is a 20-character string. Anything else is a new doc.
+        const isNew = !booking.id || booking.id.length !== 20;
+        const docRef = isNew ? doc(bookingsCollection) : doc(db, "bookings", booking.id);
+        
+        // Firestore cannot store undefined values.
+        const bookingToSave = Object.fromEntries(Object.entries(booking).filter(([_, v]) => v !== undefined));
+
+        batch.set(docRef, bookingToSave, { merge: true });
     });
     await batch.commit();
 };
@@ -73,19 +82,24 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
 // --- Routes ---
 export const getRoutesFromFirestore = async (): Promise<Route[]> => {
     if (!routesCollection) return [];
-    const snapshot = await getDocs(routesCollection);
-    return snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            ...data,
-            id: doc.id,
-            travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
-        } as Route;
-    });
+     try {
+        const snapshot = await getDocs(routesCollection);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
+            } as Route;
+        });
+    } catch(e) {
+        console.error("Error getting routes from Firestore", e);
+        return [];
+    }
 };
 
 export const saveRoutesToFirestore = async (routes: Route[]) => {
-    if (!routesCollection) return;
+    if (!routesCollection || !db) return;
     const batch = writeBatch(db);
     routes.forEach((route) => {
         const docRef = doc(db, "routes", route.id);
@@ -122,7 +136,7 @@ export const getProfileFromFirestore = async (email: string): Promise<Profile | 
 }
 
 export const saveProfileToFirestore = async (profile: Profile) => {
-    if (!profilesCollection) return;
+    if (!profilesCollection || !db) return;
     const docRef = doc(db, "profiles", profile.email);
     await setDoc(docRef, profile, { merge: true });
 }

@@ -47,6 +47,7 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(null);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,20 +58,27 @@ export function SignupForm() {
       password: '',
     },
   });
+  
+  function handleFormSubmit(values: z.infer<typeof formSchema>) {
+    setFormData(values);
+    setShowConfirmation(true);
+  }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    saveCurrentUser(values.email, values.name);
+  async function handleConfirmation() {
+    if (!formData) return;
+
+    saveCurrentUser(formData.email, formData.name);
 
     // Save the initial profile. We'll add a dummy mobile number.
     await saveProfile({
-      name: values.name,
-      email: values.email,
-      mobile: '0000000000',
+      name: formData.name,
+      email: formData.email,
+      mobile: '0000000000', // Dummy number to be updated in profile settings
     });
     
     setShowConfirmation(false);
     // Redirect to the dashboard after signup and "login"
-    router.push(`/dashboard?role=${values.role}`);
+    router.push(`/dashboard?role=${formData.role}`);
   }
 
   return (
@@ -82,7 +90,7 @@ export function SignupForm() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(() => setShowConfirmation(true))} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
@@ -169,7 +177,7 @@ export function SignupForm() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={form.handleSubmit(onSubmit)}>Continue</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmation}>Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

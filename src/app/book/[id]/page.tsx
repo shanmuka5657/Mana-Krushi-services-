@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
 import { format } from "date-fns";
-import { getFirestore, addDoc, collection } from "firebase/firestore";
+import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
 
 
@@ -55,10 +55,11 @@ export default function BookRidePage() {
     const bookings = await getBookings();
     
     const db = getFirestore(getApp());
-    const newBookingRef = await addDoc(collection(db, 'bookings'), {});
+    // Create a new document reference first to get the ID
+    const newBookingRef = doc(collection(db, 'bookings'));
 
     const newBooking: Booking = {
-        id: newBookingRef.id,
+        id: newBookingRef.id, // Use the real Firestore ID
         client: passengerProfile.name,
         destination: `${route.fromLocation} to ${route.toLocation}`,
         departureDate: route.travelDate,
@@ -75,8 +76,8 @@ export default function BookRidePage() {
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
     newBooking.departureDate.setHours(depHours, depMinutes);
 
-    const updatedBookings = [newBooking, ...bookings];
-    await saveBookings(updatedBookings);
+    // Now save the booking with the correct ID
+    await setDoc(newBookingRef, newBooking);
 
     toast({
         title: "Booking Confirmed!",
