@@ -75,14 +75,14 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
   });
 
   function onSubmit(data: SearchFormValues) {
-    const searchDate = startOfDay(data.travelDate);
+    const searchDateStr = format(data.travelDate, "yyyy-MM-dd");
+    
+    const results = routes.filter(route => {
+        const routeDateStr = format(new Date(route.travelDate), "yyyy-MM-dd");
 
-    const results = routes.filter(owner => {
-        const ownerTravelDate = startOfDay(new Date(owner.travelDate));
-        
-        const fromMatch = owner.fromLocation.trim().toLowerCase() === data.fromLocation.trim().toLowerCase();
-        const toMatch = owner.toLocation.trim().toLowerCase() === data.toLocation.trim().toLowerCase();
-        const dateMatch = searchDate.getTime() === ownerTravelDate.getTime();
+        const fromMatch = route.fromLocation.trim().toLowerCase() === data.fromLocation.trim().toLowerCase();
+        const toMatch = route.toLocation.trim().toLowerCase() === data.toLocation.trim().toLowerCase();
+        const dateMatch = searchDateStr === routeDateStr;
         
         return fromMatch && toMatch && dateMatch;
     });
@@ -243,4 +243,3 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
     </div>
   );
 }
-
