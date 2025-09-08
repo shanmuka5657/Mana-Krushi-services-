@@ -1,5 +1,7 @@
 
 import type { Booking, Route } from "./types";
+import type { ProfileFormValues } from "@/components/dashboard/profile-form";
+
 
 const isBrowser = typeof window !== "undefined";
 
@@ -134,5 +136,26 @@ export const saveRoutes = (routes: Route[]) => {
         window.localStorage.setItem('routes', JSON.stringify(routes));
     } catch (error) {
         console.error("Failed to save routes to localStorage", error);
+    }
+};
+
+// Functions for profile
+export const saveProfile = (profile: ProfileFormValues) => {
+    if (!isBrowser) return;
+    try {
+        window.localStorage.setItem('passengerProfile', JSON.stringify(profile));
+    } catch (error) {
+        console.error("Failed to save profile to localStorage", error);
+    }
+};
+
+export const getProfile = (): ProfileFormValues | null => {
+    if (!isBrowser) return null;
+    try {
+        const storedProfile = window.localStorage.getItem('passengerProfile');
+        return storedProfile ? JSON.parse(storedProfile) : null;
+    } catch (error) {
+        console.error("Failed to parse profile from localStorage", error);
+        return null;
     }
 };

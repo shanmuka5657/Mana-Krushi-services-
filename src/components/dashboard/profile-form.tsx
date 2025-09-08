@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { User, Phone, Mail } from "lucide-react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { saveProfile, getProfile } from "@/lib/storage";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -39,9 +41,15 @@ export default function ProfileForm() {
     },
   });
 
+  useEffect(() => {
+    const profile = getProfile();
+    if (profile) {
+      form.reset(profile);
+    }
+  }, [form]);
+
   function onSubmit(data: ProfileFormValues) {
-    // Here you would typically save the user's profile data
-    console.log(data);
+    saveProfile(data);
     toast({
       title: "Profile Updated!",
       description: "Your profile has been successfully updated.",

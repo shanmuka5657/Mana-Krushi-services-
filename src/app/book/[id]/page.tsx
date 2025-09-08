@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
 import { format } from "date-fns";
 
-import { getRoutes, getBookings, saveBookings } from "@/lib/storage";
+import { getRoutes, getBookings, saveBookings, getProfile } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,23 +35,23 @@ export default function BookRidePage() {
   const handleBooking = () => {
     if (!route) return;
 
+    const passengerProfile = getProfile() || { name: 'Passenger User', mobile: '0000000000' };
+
     const bookings = getBookings();
     const newBooking: Booking = {
         id: `#BK${(bookings.length + 1).toString().padStart(3, '0')}`,
-        client: 'Passenger User', // Placeholder name
+        client: passengerProfile.name,
         destination: `${route.fromLocation} to ${route.toLocation}`,
-        departureDate: route.travelDate, // This should combine date and time
+        departureDate: route.travelDate,
         returnDate: route.travelDate, // Not applicable for one-way, but schema requires it
         amount: route.price,
         status: "Confirmed",
         travelers: "1",
-        mobile: '1234567890', // Placeholder
+        mobile: passengerProfile.mobile,
     };
     
-    // A bit of a hack to combine date and time for storage
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
     newBooking.departureDate.setHours(depHours, depMinutes);
-
 
     const updatedBookings = [newBooking, ...bookings];
     saveBookings(updatedBookings);
