@@ -73,7 +73,7 @@ const RecentBookings = ({ bookings }: RecentBookingsProps) => {
                     <TableCell>{booking.destination}</TableCell>
                     <TableCell>{format(booking.departureDate, "dd MMM yyyy")}</TableCell>
                     <TableCell className="text-right">
-                      ${booking.amount.toLocaleString()}
+                      ${(booking.amount || 0).toLocaleString()}
                     </TableCell>
                     <TableCell>
                       <Badge
