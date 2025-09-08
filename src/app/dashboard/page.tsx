@@ -55,7 +55,7 @@ function DashboardPage() {
   };
   
   const handleTabSwitch = (tab: string) => {
-    setActiveTab(tabValue);
+    setActiveTab(tab);
   };
   
   const handleUpdateBooking = async (updatedBooking: Booking) => {
