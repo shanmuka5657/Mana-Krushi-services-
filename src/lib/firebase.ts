@@ -5,12 +5,13 @@ import type { Booking, Route, Profile } from "./types";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  "projectId": "globetrotterhq-xx8l8",
+  "appId": "1:691006742493:web:f1f5f88fda35370e8de034",
+  "storageBucket": "globetrotterhq-xx8l8.firebasestorage.app",
+  "apiKey": "AIzaSyDaVPZmSQXIhH-8fMtw5iEQ2ylngPS6KqU",
+  "authDomain": "globetrotterhq-xx8l8.firebaseapp.com",
+  "measurementId": "",
+  "messagingSenderId": "691006742493"
 };
 
 // Initialize Firebase
