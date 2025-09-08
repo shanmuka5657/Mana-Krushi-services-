@@ -1,23 +1,112 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
-  "description": "Travel Agent Management System",
-  "icons": [
-    {
-      "src": "/icons/icon-192x192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "/icons/icon-512x512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
-    }
-  ],
-  "start_url": "/login",
+  "short_name": "Krushi Travel",
+  "description": "Your friendly travel agent for booking rides and managing routes.",
+  "theme_color": "#16a34a",
+  "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#27ae60",
-  "background_color": "#f0f4f8",
-  "id": "/"
+  "scope": "/",
+  "start_url": "/login",
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screen1.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screen2.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screen_wide.png",
+      "type": "image/png",
+      "sizes": "1920x1080",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find Ride",
+      "description": "Search for available rides to your destination.",
+      "url": "/dashboard?role=passenger",
+      "icons": [{ "src": "/icons/shortcut-search.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your upcoming and past bookings.",
+      "url": "/bookings?role=passenger",
+      "icons": [{ "src": "/icons/shortcut-bookings.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Add a New Route",
+      "short_name": "New Route",
+      "description": "Create a new route for passengers to book.",
+      "url": "/dashboard?role=owner",
+      "icons": [{ "src": "/icons/shortcut-add-route.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": [
+    "travel",
+    "navigation",
+    "business",
+    "lifestyle"
+  ],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {}
 }
