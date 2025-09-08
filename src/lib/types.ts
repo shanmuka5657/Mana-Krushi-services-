@@ -22,4 +22,6 @@ export type Route = {
   arrivalTime: string;
   availableSeats: number;
   vehicleType: string;
+  price: number;
+  rating: number;
 };

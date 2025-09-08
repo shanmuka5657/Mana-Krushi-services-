@@ -40,7 +40,9 @@ const initialRoutes: Route[] = [
         availableSeats: 3, 
         vehicleType: 'Sedan',
         driverName: "Alice",
-        driverMobile: "1234567890" 
+        driverMobile: "1234567890",
+        price: 550,
+        rating: 4.8
     },
     { 
         id: "2", 
@@ -53,7 +55,9 @@ const initialRoutes: Route[] = [
         availableSeats: 2, 
         vehicleType: 'SUV',
         driverName: "Bob",
-        driverMobile: "1234567890" 
+        driverMobile: "1234567890",
+        price: 750,
+        rating: 4.9
     },
     { 
         id: "3", 
@@ -66,7 +70,9 @@ const initialRoutes: Route[] = [
         availableSeats: 4, 
         vehicleType: 'Minivan',
         driverName: "Charlie",
-        driverMobile: "1234567890" 
+        driverMobile: "1234567890",
+        price: 500,
+        rating: 4.5
     },
 ];
 

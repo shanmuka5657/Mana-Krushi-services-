@@ -4,8 +4,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, isSameDay } from "date-fns";
-import { Calendar as CalendarIcon, MapPin } from "lucide-react";
+import { format, isSameDay, parse } from "date-fns";
+import { Calendar as CalendarIcon, MapPin, Car, Star, Zap } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,6 +28,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { Route } from "@/lib/types";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 
 const searchFormSchema = z.object({
@@ -42,6 +43,23 @@ type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 interface PassengerDashboardProps {
   routes: Route[];
+}
+
+const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
+    try {
+        const departure = parse(departureTime, 'HH:mm', new Date());
+        const arrival = parse(arrivalTime, 'HH:mm', new Date());
+        const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
+        if (diffMinutes < 0) return "";
+
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        
+        return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+
+    } catch (e) {
+        return "";
+    }
 }
 
 export default function PassengerDashboard({ routes }: PassengerDashboardProps) {
@@ -164,21 +182,53 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
         </Card>
 
         {availableOwners.length > 0 && (
-            <div className="space-y-4">
-                <h3 className="text-xl font-bold">Available Owners</h3>
-                {availableOwners.map(owner => (
-                    <Card key={owner.id}>
-                        <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
-                            <div className="font-semibold">{owner.ownerName}'s {owner.vehicleType}</div>
-                            <div>{owner.fromLocation} &rarr; {owner.toLocation}</div>
-                            <div>{owner.departureTime} - {owner.arrivalTime}</div>
-                            <div className="flex justify-end">
-                                <Button>Book ({owner.availableSeats} seats left)</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+          <div className="space-y-4">
+              <h2 className="text-xl font-bold">Today</h2>
+              {availableOwners.map((route) => (
+                  <Card key={route.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                              <div className="flex gap-4">
+                                  <div>
+                                      <div className="font-semibold">{route.departureTime}</div>
+                                      <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
+                                      <div className="font-semibold mt-2">{route.arrivalTime}</div>
+                                  </div>
+                                  <div className="flex flex-col items-center">
+                                    <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                    <div className="w-px h-10 bg-border my-1"></div>
+                                    <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                  </div>
+                                  <div>
+                                      <div className="font-semibold">{route.fromLocation}</div>
+                                      <div className="font-semibold mt-8">{route.toLocation}</div>
+                                  </div>
+                              </div>
+                              <div className="text-lg font-bold text-right">
+                                ₹{route.price.toFixed(2)}
+                              </div>
+                          </div>
+                      </CardContent>
+                      <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                              <Car className="text-muted-foreground" />
+                              <Avatar className="h-8 w-8">
+                                  <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                  <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                  <div className="font-semibold text-sm">{route.driverName}</div>
+                                  <div className="flex items-center gap-1">
+                                      <Star className="w-4 h-4 text-yellow-400" />
+                                      <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
+                                  </div>
+                              </div>
+                          </div>
+                          <Zap className="text-muted-foreground" />
+                      </CardFooter>
+                  </Card>
+              ))}
+          </div>
         )}
     </div>
   );
