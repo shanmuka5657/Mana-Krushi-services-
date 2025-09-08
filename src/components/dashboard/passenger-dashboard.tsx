@@ -227,7 +227,7 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
                                   <div className="font-semibold text-sm">{route.driverName}</div>
                                   <div className="flex items-center gap-1">
                                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                      <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
+                                      <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
                                   </div>
                               </div>
                           </div>
