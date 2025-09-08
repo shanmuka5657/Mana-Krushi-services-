@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone } from "lucide-react";
+import { User, Phone, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +49,7 @@ export default function ProfileForm() {
   }
 
   return (
-    <Card className="shadow-sm mt-6 max-w-2xl mx-auto">
+    <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Profile</CardTitle>
         <CardDescription>Update your personal information.</CardDescription>
@@ -99,7 +99,7 @@ export default function ProfileForm() {
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input type="email" placeholder="Enter your email" {...field} className="pl-10" disabled />
                     </div>
                   </FormControl>

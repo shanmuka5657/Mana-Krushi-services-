@@ -15,6 +15,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from 'react';
 import MyRoutes from "@/components/dashboard/my-routes";
 import { getBookings, saveBookings, getRoutes, saveRoutes } from "@/lib/storage";
+import ProfilePage from "./profile-page";
 
 function DashboardPage() {
   const searchParams = useSearchParams();
@@ -81,12 +82,16 @@ function DashboardPage() {
           <TabsList>
             <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
             <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="find-ride">
             <PassengerDashboard routes={routes} />
           </TabsContent>
           <TabsContent value="my-bookings">
             <RecentBookings bookings={bookings} />
+          </TabsContent>
+           <TabsContent value="profile">
+            <ProfilePage />
           </TabsContent>
         </Tabs>
       )}

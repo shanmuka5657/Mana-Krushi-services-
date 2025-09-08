@@ -33,10 +33,10 @@ import {
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
+    { href: "/profile", icon: User, label: "Profile" },
     { href: "#", icon: Users, label: "Clients" },
     { href: "#", icon: Plane, label: "Bookings" },
     { href: "#", icon: Map, label: "Itineraries" },
-    { href: "/profile", icon: User, label: "Profile" },
     { href: "#", icon: DollarSign, label: "Payments" },
     { href: "#", icon: BarChart, label: "Reports" },
     { href: "#", icon: Settings, label: "Settings" },
