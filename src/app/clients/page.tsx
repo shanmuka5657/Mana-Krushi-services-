@@ -26,13 +26,14 @@ function ClientsPageContent() {
         const ownerName = getCurrentUserName();
         const allBookings = getBookings();
         
-        // Assuming owner's bookings are those where driver name matches owner name.
-        // In a real app, you'd have a better way to associate routes/bookings with owners.
+        // Filter bookings where the owner is the driver
         const ownerBookings = allBookings.filter(b => b.driverName === ownerName);
 
         const clientMap: { [mobile: string]: Client } = {};
 
         ownerBookings.forEach(booking => {
+            if (!booking.mobile) return; // Skip if no mobile number
+
             if (!clientMap[booking.mobile]) {
                 clientMap[booking.mobile] = {
                     name: booking.client,

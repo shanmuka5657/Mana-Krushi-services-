@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import RecentBookings from '@/components/dashboard/recent-bookings';
-import { getBookings, saveBookings, getCurrentUser, getCurrentUserName } from '@/lib/storage';
+import { getBookings, saveBookings, getCurrentUserName } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -14,20 +14,20 @@ function BookingsPageContent() {
     const [isLoaded, setIsLoaded] = useState(false);
     const searchParams = useSearchParams();
     const role = searchParams.get('role') || 'passenger';
-    const currentUser = role === 'passenger' ? getCurrentUserName() : getCurrentUser();
+    const currentUserName = getCurrentUserName();
 
     useEffect(() => {
         const allBookings = getBookings();
         const userBookings = allBookings.filter(b => {
             if (role === 'passenger') {
-                return b.client === currentUser;
+                return b.client === currentUserName;
             }
-            // A simple way to filter for owner. In a real app this link would be more robust.
-            return b.driverName === getCurrentUserName();
+            // For an owner, show bookings where they are the driver.
+            return b.driverName === currentUserName;
         });
         setBookings(userBookings);
         setIsLoaded(true);
-    }, [currentUser, role]);
+    }, [currentUserName, role]);
     
     const handleUpdateBooking = (updatedBooking: Booking) => {
         const allBookings = getBookings();
