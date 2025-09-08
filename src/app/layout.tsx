@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export const metadata: Metadata = {
-  title: "MK travels",
+  title: "Mana Krushi Services",
   description: "Travel Agent Management System",
 };
 
