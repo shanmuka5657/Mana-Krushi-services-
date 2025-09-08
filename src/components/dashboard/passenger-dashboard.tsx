@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, Car, Star, Zap } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,16 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { Route } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { getProfile } from "@/lib/storage";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 const searchFormSchema = z.object({
@@ -44,6 +54,7 @@ type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 interface PassengerDashboardProps {
   routes: Route[];
+  onSwitchTab: (tab: string) => void;
 }
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
@@ -63,10 +74,19 @@ const getTravelDuration = (departureTime: string, arrivalTime: string): string =
     }
 }
 
-export default function PassengerDashboard({ routes }: PassengerDashboardProps) {
+export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDashboardProps) {
   const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    const profile = getProfile();
+    // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
+    if (!profile || !profile.mobile || profile.mobile === '0000000000') {
+      setShowProfilePrompt(true);
+    }
+  }, []);
   
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
@@ -102,6 +122,21 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
 
   return (
     <div className="space-y-6">
+        <AlertDialog open={showProfilePrompt}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Complete Your Profile</AlertDialogTitle>
+              <AlertDialogDescription>
+                Please complete your profile details before searching for a ride. It helps owners know who they are traveling with.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => onSwitchTab('profile')}>
+                Go to Profile
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Card className="shadow-sm mt-6">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>

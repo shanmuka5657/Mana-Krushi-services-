@@ -21,7 +21,8 @@ function DashboardPage() {
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "passenger"; 
   const defaultTab = role === 'owner' ? 'add-route' : 'find-ride';
-  
+
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -57,6 +58,10 @@ function DashboardPage() {
     };
     setRoutes((prevRoutes) => [newRoute, ...prevRoutes]);
   };
+  
+  const handleTabSwitch = (tabValue: string) => {
+    setActiveTab(tabValue);
+  };
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -65,7 +70,7 @@ function DashboardPage() {
   return (
     <AppLayout>
       {role === 'owner' ? (
-         <Tabs defaultValue={defaultTab}>
+         <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch}>
           <TabsList>
             <TabsTrigger value="add-route">Add Route</TabsTrigger>
             <TabsTrigger value="my-routes">My Routes</TabsTrigger>
@@ -78,14 +83,14 @@ function DashboardPage() {
           </TabsContent>
         </Tabs>
       ) : (
-        <Tabs defaultValue={defaultTab}>
+        <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch}>
           <TabsList>
             <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
             <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="find-ride">
-            <PassengerDashboard routes={routes} />
+            <PassengerDashboard routes={routes} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-bookings">
             <RecentBookings bookings={bookings} />
