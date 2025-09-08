@@ -44,6 +44,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { clearCurrentUser, getCurrentUserName, getCurrentUser } from "@/lib/storage";
 
+// Define the interface for the event, as it's not standard in all TS lib versions.
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed',
+    platform: string,
+  }>;
+  prompt(): Promise<void>;
+}
+
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -51,6 +62,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
   const [role, setRole] = React.useState('passenger');
+  const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
 
   React.useEffect(() => {
     const name = getCurrentUserName();
@@ -99,6 +124,21 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const handleNavClick = (href: string) => {
     router.push(href);
   };
+  
+  const handleInstallClick = () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      installPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setInstallPrompt(null);
+      });
+    }
+  };
+
 
   return (
     <SidebarProvider>
@@ -131,7 +171,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton className="justify-start" tooltip="Install App">
+                    <SidebarMenuButton className="justify-start" tooltip="Install App" onClick={handleInstallClick} disabled={!installPrompt}>
                         <Download />
                         <span>Install App</span>
                     </SidebarMenuButton>
