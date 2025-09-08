@@ -35,6 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -45,7 +46,7 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [formValues, setFormValues] = useState<z.infer<typeof formSchema> | null>(null);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,17 +57,12 @@ export function SignupForm() {
     },
   });
 
-  function handleFinalSubmit() {
-    if (formValues) {
-      console.log('Final submission:', formValues);
-      // Here you would typically handle the signup logic
-      setShowConfirmation(false);
-    }
-  }
-
-  function onAttemptSubmit(values: z.infer<typeof formSchema>) {
-    setFormValues(values);
-    setShowConfirmation(true);
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log('Final submission:', values);
+    // Here you would typically handle the signup logic
+    setShowConfirmation(false);
+    // For now, let's redirect to the login page after "signup"
+    router.push('/login');
   }
 
   return (
@@ -78,7 +74,7 @@ export function SignupForm() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onAttemptSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(() => setShowConfirmation(true))} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -162,7 +158,7 @@ export function SignupForm() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleFinalSubmit}>Continue</AlertDialogAction>
+            <AlertDialogAction onClick={form.handleSubmit(onSubmit)}>Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
