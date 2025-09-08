@@ -9,7 +9,6 @@ import { useState } from "react";
 import type { Booking } from "@/lib/types";
 import { format } from "date-fns";
 import type { BookingFormValues } from "@/components/dashboard/booking-form";
-import { useRouter } from "next/navigation";
 
 const initialBookings: Booking[] = [
   {
@@ -71,7 +70,6 @@ const initialBookings: Booking[] = [
 
 export default function Home() {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
-  const router = useRouter();
 
   const addBooking = (newBookingData: BookingFormValues) => {
     const newBooking: Booking = {
@@ -89,33 +87,15 @@ export default function Home() {
   };
   
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold">Welcome to GlobetrotterHQ</h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Your travel agent management system.
-        </p>
-        <div className="mt-8 flex justify-center gap-4">
-          <button
-            onClick={() => router.push('/login')}
-            className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
-          >
-            Login
-          </button>
-          <button
-            onClick={() => router.push('/signup')}
-            className="rounded-md bg-secondary px-4 py-2 text-secondary-foreground"
-          >
-            Sign Up
-          </button>
-           <button
-            onClick={() => router.push('/dashboard')}
-            className="rounded-md bg-secondary px-4 py-2 text-secondary-foreground"
-          >
-            Dashboard
-          </button>
-        </div>
+    <AppLayout>
+      <div className="flex flex-col gap-8">
+        <h2 className="text-3xl font-bold tracking-tight md:hidden">
+          Dashboard
+        </h2>
+        <StatCards />
+        <RecentBookings bookings={bookings} />
+        <BookingForm onBookingCreated={addBooking} />
       </div>
-    </main>
+    </AppLayout>
   );
 }
