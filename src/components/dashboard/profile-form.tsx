@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { saveProfile, getProfile, getCurrentUser } from "@/lib/storage";
+import { saveProfile, getProfile, getCurrentUser, getCurrentUserName } from "@/lib/storage";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -43,17 +43,20 @@ export default function ProfileForm() {
 
   useEffect(() => {
     const loadProfile = async () => {
-        const userEmail = getCurrentUser();
         const profile = await getProfile();
         
         if (profile) {
           form.reset(profile);
-        } else if (userEmail) {
-          form.reset({
-            email: userEmail,
-            name: userEmail.split('@')[0],
-            mobile: '',
-          })
+        } else {
+          const userEmail = getCurrentUser();
+          const userName = getCurrentUserName();
+           if (userEmail) {
+            form.reset({
+              email: userEmail,
+              name: userName || userEmail.split('@')[0],
+              mobile: '',
+            })
+          }
         }
     };
     loadProfile();

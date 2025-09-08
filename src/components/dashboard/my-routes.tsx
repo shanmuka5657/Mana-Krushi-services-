@@ -178,7 +178,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                   <TableRow key={route.id}>
                     <TableCell className="font-medium">{route.fromLocation}</TableCell>
                     <TableCell>{route.toLocation}</TableCell>
-                    <TableCell>{format(route.travelDate, "dd MMM yyyy")}</TableCell>
+                    <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
                     <TableCell>{route.departureTime}</TableCell>
                     <TableCell>{route.availableSeats}</TableCell>
                     <TableCell>

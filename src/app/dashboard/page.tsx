@@ -28,17 +28,18 @@ function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const bookingsFromStorage = await getBookings();
+      const [bookingsFromStorage, allRoutes] = await Promise.all([getBookings(), getRoutes()]);
+      
       setAllBookings(bookingsFromStorage);
-      setRoutes(await getRoutes());
+      const currentUserName = getCurrentUserName();
 
       if (role === 'passenger') {
-        const currentUserName = getCurrentUserName();
         const filteredBookings = bookingsFromStorage.filter(b => b.client === currentUserName);
         setUserBookings(filteredBookings);
+        setRoutes(allRoutes);
       } else {
         const ownerName = getCurrentUserName();
-        const ownerRoutes = (await getRoutes()).filter(r => r.ownerName === ownerName);
+        const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName);
         setRoutes(ownerRoutes);
         setUserBookings(bookingsFromStorage); // Owner sees all bookings for now, can be refined.
       }
@@ -71,7 +72,7 @@ function DashboardPage() {
 
 
   if (!isLoaded) {
-    return <div>Loading...</div>;
+    return <AppLayout><div>Loading...</div></AppLayout>;
   }
 
   return (
@@ -118,7 +119,7 @@ function DashboardPage() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<AppLayout><div>Loading...</div></AppLayout>}>
       <DashboardPage />
     </Suspense>
   )

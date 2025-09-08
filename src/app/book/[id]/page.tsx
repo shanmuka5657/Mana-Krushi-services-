@@ -5,15 +5,16 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
 import { format } from "date-fns";
+import { getFirestore, addDoc, collection } from "firebase/firestore";
+import { getApp } from "firebase/app";
 
-import { getRoutes, getBookings, saveBookings, getProfile, addRoute } from "@/lib/storage";
+
+import { getRoutes, getBookings, saveBookings, getProfile } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
-import { getApp } from "firebase/app";
 
 export default function BookRidePage() {
   const router = useRouter();

@@ -95,7 +95,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     },
   });
 
-  function onSubmit(data: OwnerFormValues) {
+  async function onSubmit(data: OwnerFormValues) {
     onRouteAdded(data);
     toast({
       title: "Route Added!",
@@ -330,7 +330,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price per Seat ($)</FormLabel>
+                    <FormLabel>Price per Seat (₹)</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

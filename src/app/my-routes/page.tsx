@@ -40,7 +40,7 @@ function MyRoutesPageContent() {
 
 export default function MyRoutesPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<AppLayout><div>Loading...</div></AppLayout>}>
             <MyRoutesPageContent />
         </Suspense>
     );

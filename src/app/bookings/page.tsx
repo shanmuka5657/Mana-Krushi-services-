@@ -68,7 +68,7 @@ function BookingsPageContent() {
 
 export default function BookingsPage() {
     return (
-        <Suspense>
+        <Suspense fallback={<AppLayout><div>Loading bookings...</div></AppLayout>}>
             <BookingsPageContent />
         </Suspense>
     )

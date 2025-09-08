@@ -103,7 +103,7 @@ function PassengersPageContent() {
 
 export default function ClientsPage() {
     return (
-        <Suspense>
+        <Suspense fallback={<AppLayout><div>Loading...</div></AppLayout>}>
             <PassengersPageContent />
         </Suspense>
     )

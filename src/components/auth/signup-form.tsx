@@ -59,7 +59,6 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Save the user session
     saveCurrentUser(values.email, values.name);
 
     // Save the initial profile. We'll add a dummy mobile number.
@@ -70,8 +69,8 @@ export function SignupForm() {
     });
     
     setShowConfirmation(false);
-    // Redirect to the login page after "signup"
-    router.push('/login');
+    // Redirect to the dashboard after signup and "login"
+    router.push(`/dashboard?role=${values.role}`);
   }
 
   return (

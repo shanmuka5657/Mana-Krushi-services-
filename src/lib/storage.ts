@@ -82,38 +82,54 @@ const initialRoutes: Route[] = [
 
 // Functions for bookings
 export const getBookings = async (): Promise<Booking[]> => {
-    const bookings = await getBookingsFromFirestore();
-    if (bookings.length === 0) {
-        await saveBookingsToFirestore(initialBookings);
-        return initialBookings;
+    if (!isBrowser) return [];
+    try {
+        const bookings = await getBookingsFromFirestore();
+        if (bookings.length === 0) {
+            await saveBookingsToFirestore(initialBookings);
+            return initialBookings;
+        }
+        return bookings;
+    } catch (error) {
+        console.error("Error getting bookings:", error);
+        return [];
     }
-    return bookings;
 };
 
 export const saveBookings = async (bookings: Booking[]) => {
+     if (!isBrowser) return;
     await saveBookingsToFirestore(bookings);
 };
 
 // Functions for routes
 export const getRoutes = async (): Promise<Route[]> => {
-    const routes = await getRoutesFromFirestore();
-    if (routes.length === 0) {
-        await saveRoutesToFirestore(initialRoutes);
-        return initialRoutes;
+    if (!isBrowser) return [];
+    try {
+        const routes = await getRoutesFromFirestore();
+        if (routes.length === 0) {
+            await saveRoutesToFirestore(initialRoutes);
+            return initialRoutes;
+        }
+        return routes;
+    } catch(e) {
+        console.error("Error getting routes:", e);
+        return [];
     }
-    return routes;
 };
 
 export const saveRoutes = async (routes: Route[]) => {
+    if (!isBrowser) return;
     await saveRoutesToFirestore(routes);
 };
 
 export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
+    if (!isBrowser) throw new Error("This function can only be called from the browser.");
     return await addRouteToFirestore(route);
 }
 
 // Functions for profile
 export const saveProfile = async (profile: ProfileFormValues) => {
+    if (!isBrowser) return;
     const userEmail = getCurrentUser();
     if (userEmail) {
         await saveProfileToFirestore({ ...profile, email: userEmail });
@@ -121,6 +137,7 @@ export const saveProfile = async (profile: ProfileFormValues) => {
 };
 
 export const getProfile = async (): Promise<ProfileFormValues | null> => {
+    if (!isBrowser) return null;
     const userEmail = getCurrentUser();
     if (userEmail) {
         return await getProfileFromFirestore(userEmail);
