@@ -11,31 +11,31 @@
       "src": "https://placehold.co/72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "https://placehold.co/96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "https://placehold.co/128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "https://placehold.co/144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "https://placehold.co/152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "https://placehold.co/192x192.png",
@@ -47,7 +47,7 @@
       "src": "https://placehold.co/384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "https://placehold.co/512x512.png",
@@ -58,13 +58,13 @@
   ],
   "screenshots": [
     {
-      "src": "/images/screenshots/screenshot-dashboard.png",
+      "src": "https://picsum.photos/1080/1920",
       "type": "image/png",
       "sizes": "1080x1920",
       "form_factor": "narrow"
     },
     {
-      "src": "/images/screenshots/screenshot-my-routes.png",
+      "src": "https://picsum.photos/1080/1920",
       "type": "image/png",
       "sizes": "1080x1920",
       "form_factor": "narrow"
