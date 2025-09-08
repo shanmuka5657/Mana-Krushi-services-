@@ -18,27 +18,40 @@ function BookingsPageContent() {
 
     useEffect(() => {
         const allBookings = getBookings();
-        const userBookings = allBookings.filter(b => {
-            if (role === 'passenger') {
-                // For a passenger, show bookings they created.
-                // We assume client name is unique for simplicity.
-                return b.client === currentUserName;
+        let userBookings: Booking[] = [];
+
+        if (role === 'passenger') {
+            const passengerName = getCurrentUserName();
+            if (passengerName) {
+                userBookings = allBookings.filter(b => b.client === passengerName);
             }
-             // This page is now only for passengers, but keeping the logic just in case.
-            if (role === 'owner') {
-                 return b.driverName === currentUserName;
-            }
-            return false;
-        });
+        } else if (role === 'owner') {
+             // This page is mainly for passengers, but if an owner lands here,
+             // maybe show bookings related to them.
+            const ownerName = getCurrentUserName();
+            userBookings = allBookings.filter(b => b.driverName === ownerName);
+        }
+        
         setBookings(userBookings);
         setIsLoaded(true);
-    }, [currentUserName, role]);
+    }, [role]);
     
     const handleUpdateBooking = (updatedBooking: Booking) => {
         const allBookings = getBookings();
         const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
         saveBookings(updatedAllBookings);
-        setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+        
+        let userBookings: Booking[] = [];
+        if (role === 'passenger') {
+            const passengerName = getCurrentUserName();
+             if (passengerName) {
+                userBookings = updatedAllBookings.filter(b => b.client === passengerName);
+            }
+        } else if (role === 'owner') {
+            const ownerName = getCurrentUserName();
+            userBookings = updatedAllBookings.filter(b => b.driverName === ownerName);
+        }
+        setBookings(userBookings);
     };
 
     if (!isLoaded) {

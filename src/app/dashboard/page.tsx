@@ -11,7 +11,7 @@ import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from 'react';
-import { getBookings, saveBookings, getRoutes, saveRoutes } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, saveRoutes, getCurrentUserName } from "@/lib/storage";
 import MyRoutes from "@/components/dashboard/my-routes";
 import ProfileForm from "@/components/dashboard/profile-form";
 
@@ -21,22 +21,33 @@ function DashboardPage() {
   const defaultTab = role === 'owner' ? 'add-route' : 'find-ride';
 
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Ensure this runs only on the client
-    setBookings(getBookings());
+    const bookingsFromStorage = getBookings();
+    setAllBookings(bookingsFromStorage);
     setRoutes(getRoutes());
+
+    if (role === 'passenger') {
+      const currentUserName = getCurrentUserName();
+      const filteredBookings = bookingsFromStorage.filter(b => b.client === currentUserName);
+      setUserBookings(filteredBookings);
+    } else {
+      setUserBookings(bookingsFromStorage); // Owner sees all bookings for now, can be refined.
+    }
+
     setIsLoaded(true);
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     if (isLoaded) {
-      saveBookings(bookings);
+      saveBookings(allBookings);
     }
-  }, [bookings, isLoaded]);
+  }, [allBookings, isLoaded]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -57,7 +68,14 @@ function DashboardPage() {
   };
   
   const handleUpdateBooking = (updatedBooking: Booking) => {
-    setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+    const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
+    setAllBookings(updatedAllBookings);
+    if (role === 'passenger') {
+      const currentUserName = getCurrentUserName();
+      setUserBookings(updatedAllBookings.filter(b => b.client === currentUserName));
+    } else {
+      setUserBookings(updatedAllBookings);
+    }
   };
 
 
@@ -95,7 +113,7 @@ function DashboardPage() {
             <PassengerDashboard routes={routes} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-bookings">
-            <RecentBookings bookings={bookings} onUpdateBooking={handleUpdateBooking} />
+            <RecentBookings bookings={userBookings} onUpdateBooking={handleUpdateBooking} />
           </TabsContent>
            <TabsContent value="profile">
             <ProfileForm />
