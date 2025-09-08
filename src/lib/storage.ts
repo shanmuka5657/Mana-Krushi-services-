@@ -1,95 +1,18 @@
 
 
-import type { Booking, Route } from "./types";
+import type { Booking, Route, Profile } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore } from './firebase';
 
 
 const isBrowser = typeof window !== "undefined";
 
-const initialBookings: Booking[] = [
-  {
-    id: "#BK001",
-    client: "John Smith",
-    destination: "Paris, France",
-    departureDate: new Date("2023-08-15T09:00:00"),
-    returnDate: new Date("2023-08-22T17:00:00"),
-    amount: 2450,
-    status: "Confirmed",
-    mobile: "1234567890",
-    travelers: "2",
-  },
-  {
-    id: "#BK002",
-    client: "Emma Wilson",
-    destination: "Bali, Indonesia",
-    departureDate: new Date("2023-08-22T10:00:00"),
-    returnDate: new Date("2023-08-29T18:00:00"),
-    amount: 1890,
-    status: "Pending",
-    mobile: "1234567890",
-    travelers: "1",
-  },
-];
-
-const initialRoutes: Route[] = [
-    {
-        id: "1",
-        ownerName: 'Srinivas',
-        fromLocation: 'Kurnool',
-        toLocation: 'Hyderabad',
-        travelDate: new Date("2024-08-15T00:00:00"),
-        departureTime: '09:00',
-        arrivalTime: '18:00',
-        availableSeats: 3,
-        vehicleType: 'Sedan',
-        driverName: "Srinivas",
-        driverMobile: "1234567890",
-        price: 500,
-        rating: 4.5
-    },
-    {
-        id: "2",
-        ownerName: 'Srinivas',
-        fromLocation: 'Kurnool',
-        toLocation: 'Hyderabad',
-        travelDate: new Date("2024-08-16T00:00:00"),
-        departureTime: '09:00',
-        arrivalTime: '18:00',
-        availableSeats: 2,
-        vehicleType: 'SUV',
-        driverName: "Srinivas",
-        driverMobile: "1234567890",
-        price: 500,
-        rating: 4.5
-    },
-    {
-        id: "3",
-        ownerName: 'Srinivas',
-        fromLocation: 'Kurnool',
-        toLocation: 'Hyderabad',
-        travelDate: new Date("2024-08-15T00:00:00"),
-        departureTime: '09:00',
-        arrivalTime: '18:00',
-        availableSeats: 4,
-        vehicleType: 'Minivan',
-        driverName: "Srinivas",
-        driverMobile: "1234567890",
-        price: 550,
-        rating: 4.5
-    },
-];
-
-// Functions for bookings
+// --- Bookings ---
 export const getBookings = async (): Promise<Booking[]> => {
     if (!isBrowser) return [];
     try {
-        const bookings = await getBookingsFromFirestore();
-        if (bookings.length === 0) {
-            await saveBookingsToFirestore(initialBookings);
-            return initialBookings;
-        }
-        return bookings;
+        // Always fetch directly from Firestore.
+        return await getBookingsFromFirestore();
     } catch (error) {
         console.error("Error getting bookings:", error);
         return [];
@@ -97,20 +20,17 @@ export const getBookings = async (): Promise<Booking[]> => {
 };
 
 export const saveBookings = async (bookings: Booking[]) => {
-     if (!isBrowser) return;
+    if (!isBrowser) return;
+    // This function now correctly points to the Firestore save function.
     await saveBookingsToFirestore(bookings);
 };
 
-// Functions for routes
+// --- Routes ---
 export const getRoutes = async (): Promise<Route[]> => {
     if (!isBrowser) return [];
     try {
-        const routes = await getRoutesFromFirestore();
-        if (routes.length === 0) {
-            await saveRoutesToFirestore(initialRoutes);
-            return initialRoutes;
-        }
-        return routes;
+        // Always fetch directly from Firestore.
+        return await getRoutesFromFirestore();
     } catch(e) {
         console.error("Error getting routes:", e);
         return [];
@@ -124,19 +44,23 @@ export const saveRoutes = async (routes: Route[]) => {
 
 export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
     if (!isBrowser) throw new Error("This function can only be called from the browser.");
+    // This function now correctly points to the Firestore add function.
     return await addRouteToFirestore(route);
 }
 
-// Functions for profile
-export const saveProfile = async (profile: ProfileFormValues) => {
+
+// --- Profile ---
+export const saveProfile = async (profile: Profile) => {
     if (!isBrowser) return;
     const userEmail = getCurrentUser();
     if (userEmail) {
-        await saveProfileToFirestore({ ...profile, email: userEmail });
+        await saveProfileToFirestore({ ...profile });
+    } else {
+        console.error("Cannot save profile, no user is logged in.");
     }
 };
 
-export const getProfile = async (): Promise<ProfileFormValues | null> => {
+export const getProfile = async (): Promise<Profile | null> => {
     if (!isBrowser) return null;
     const userEmail = getCurrentUser();
     if (userEmail) {
@@ -146,7 +70,7 @@ export const getProfile = async (): Promise<ProfileFormValues | null> => {
 };
 
 
-// Functions for user session
+// --- User Session (remains in sessionStorage) ---
 export const saveCurrentUser = (email: string, name: string) => {
     if (!isBrowser) return;
     try {
