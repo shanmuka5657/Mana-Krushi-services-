@@ -41,10 +41,16 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   const handleViewClick = (route: Route) => {
     const allBookings = getBookings();
     const routeBookings = allBookings.filter(
-      (booking) =>
-        booking.destination === `${route.fromLocation} to ${route.toLocation}` &&
-        format(new Date(booking.departureDate), "yyyy-MM-dd") === format(new Date(route.travelDate), "yyyy-MM-dd") &&
-        format(new Date(booking.departureDate), "HH:mm") === route.departureTime
+      (booking) => {
+        const routeDate = new Date(route.travelDate);
+        const bookingDate = new Date(booking.departureDate);
+        
+        return booking.destination === `${route.fromLocation} to ${route.toLocation}` &&
+        routeDate.getFullYear() === bookingDate.getFullYear() &&
+        routeDate.getMonth() === bookingDate.getMonth() &&
+        routeDate.getDate() === bookingDate.getDate() &&
+        format(booking.departureDate, "HH:mm") === route.departureTime
+      }
     );
     setSelectedRoute(route);
     setBookingsForRoute(routeBookings);
@@ -139,22 +145,22 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                 {bookingsForRoute.length > 0 ? (
                   bookingsForRoute.map(booking => (
                     <div key={booking.id} className="border p-4 rounded-md">
-                        <div className="flex items-center gap-4">
-                            <User className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex items-start gap-4">
+                            <User className="h-5 w-5 text-muted-foreground mt-1" />
                             <div className="flex flex-col">
                                 <span className="text-sm text-muted-foreground">Client Name</span>
                                 <span className="font-medium">{booking.client}</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 mt-2">
-                            <Phone className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex items-start gap-4 mt-4">
+                            <Phone className="h-5 w-5 text-muted-foreground mt-1" />
                             <div className="flex flex-col">
                                 <span className="text-sm text-muted-foreground">Mobile Number</span>
                                 <span className="font-medium">{booking.mobile}</span>
                             </div>
                         </div>
-                         <div className="flex items-center gap-4 mt-2">
-                            <Clock className="h-5 w-5 text-muted-foreground" />
+                         <div className="flex items-start gap-4 mt-4">
+                            <Clock className="h-5 w-5 text-muted-foreground mt-1" />
                             <div className="flex flex-col">
                                 <span className="text-sm text-muted-foreground">Departure Time</span>
                                 <span className="font-medium">{format(booking.departureDate, "HH:mm")}</span>
