@@ -29,49 +29,49 @@ const initialBookings: Booking[] = [
 ];
 
 const initialRoutes: Route[] = [
-    { 
-        id: "1", 
-        ownerName: 'Alice', 
-        fromLocation: 'New York', 
-        toLocation: 'Boston', 
+    {
+        id: "1",
+        ownerName: 'Srinivas',
+        fromLocation: 'Kurnool',
+        toLocation: 'Hyderabad',
         travelDate: new Date("2024-08-15T00:00:00"),
-        departureTime: '08:00', 
-        arrivalTime: '12:00', 
-        availableSeats: 3, 
+        departureTime: '09:00',
+        arrivalTime: '18:00',
+        availableSeats: 3,
         vehicleType: 'Sedan',
-        driverName: "Alice",
-        driverMobile: "1234567890",
-        price: 550,
-        rating: 4.8
-    },
-    { 
-        id: "2", 
-        ownerName: 'Bob', 
-        fromLocation: 'San Francisco', 
-        toLocation: 'Los Angeles', 
-        travelDate: new Date("2024-08-16T00:00:00"),
-        departureTime: '10:00', 
-        arrivalTime: '16:00', 
-        availableSeats: 2, 
-        vehicleType: 'SUV',
-        driverName: "Bob",
-        driverMobile: "1234567890",
-        price: 750,
-        rating: 4.9
-    },
-    { 
-        id: "3", 
-        ownerName: 'Charlie', 
-        fromLocation: 'New York', 
-        toLocation: 'Boston', 
-        travelDate: new Date("2024-08-15T00:00:00"),
-        departureTime: '14:00', 
-        arrivalTime: '18:00', 
-        availableSeats: 4, 
-        vehicleType: 'Minivan',
-        driverName: "Charlie",
+        driverName: "Srinivas",
         driverMobile: "1234567890",
         price: 500,
+        rating: 4.5
+    },
+    {
+        id: "2",
+        ownerName: 'Srinivas',
+        fromLocation: 'Kurnool',
+        toLocation: 'Hyderabad',
+        travelDate: new Date("2024-08-16T00:00:00"),
+        departureTime: '09:00',
+        arrivalTime: '18:00',
+        availableSeats: 2,
+        vehicleType: 'SUV',
+        driverName: "Srinivas",
+        driverMobile: "1234567890",
+        price: 500,
+        rating: 4.5
+    },
+    {
+        id: "3",
+        ownerName: 'Srinivas',
+        fromLocation: 'Kurnool',
+        toLocation: 'Hyderabad',
+        travelDate: new Date("2024-08-15T00:00:00"),
+        departureTime: '09:00',
+        arrivalTime: '18:00',
+        availableSeats: 4,
+        vehicleType: 'Minivan',
+        driverName: "Srinivas",
+        driverMobile: "1234567890",
+        price: 550,
         rating: 4.5
     },
 ];
@@ -93,6 +93,8 @@ export const getBookings = (): Booking[] => {
     } catch (error) {
         console.error("Failed to parse bookings from localStorage", error);
     }
+    // Set initial data if nothing is stored
+    saveBookings(initialBookings);
     return initialBookings;
 };
 
@@ -121,6 +123,8 @@ export const getRoutes = (): Route[] => {
     } catch (error) {
         console.error("Failed to parse routes from localStorage", error);
     }
+    // Set initial data if nothing is stored
+    saveRoutes(initialRoutes);
     return initialRoutes;
 };
 

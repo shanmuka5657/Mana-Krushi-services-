@@ -212,7 +212,7 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
                                   </div>
                               </div>
                               <div className="text-lg font-bold text-right">
-                                ₹{(route.price || 0).toFixed(2)}
+                                P{(route.price || 0).toFixed(2)}
                               </div>
                           </div>
                       </CardContent>
