@@ -50,7 +50,20 @@ function DashboardPage() {
   }, [role]);
 
   const handleAddRoute = async (newRouteData: OwnerFormValues) => {
-    const newRoute = await addRoute(newRouteData);
+    const ownerName = getCurrentUserName();
+    if (!ownerName) {
+        // Handle case where owner name is not available, maybe show an error
+        console.error("Owner name not found, cannot add route.");
+        return;
+    }
+    
+    // Ensure the ownerName from the session is used, overriding anything from the form
+    const routeWithOwner = {
+        ...newRouteData,
+        ownerName: ownerName,
+    };
+
+    const newRoute = await addRoute(routeWithOwner);
     setRoutes((prevRoutes) => [newRoute, ...prevRoutes]);
   };
   
