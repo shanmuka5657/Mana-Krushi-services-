@@ -45,19 +45,19 @@ export default function ProfileForm() {
   useEffect(() => {
     const loadProfile = async () => {
         const profile = await getProfile();
-        
+        const userEmail = getCurrentUser();
+        const userName = getCurrentUserName();
+
+        const defaultValues = {
+            name: userName || (userEmail ? userEmail.split('@')[0] : ''),
+            email: userEmail || '',
+            mobile: '',
+        };
+
         if (profile) {
-          form.reset(profile);
-        } else {
-          const userEmail = getCurrentUser();
-          const userName = getCurrentUserName();
-           if (userEmail) {
-            form.reset({
-              email: userEmail,
-              name: userName || userEmail.split('@')[0],
-              mobile: '',
-            })
-          }
+            form.reset({ ...defaultValues, ...profile });
+        } else if (userEmail) {
+            form.reset(defaultValues);
         }
     };
     loadProfile();

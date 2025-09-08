@@ -16,7 +16,7 @@ function MyRoutesPageContent() {
         const fetchRoutes = async () => {
             const ownerName = getCurrentUserName();
             const allRoutes = await getRoutes();
-            const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName || r.driverName === ownerName);
+            const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
             
             ownerRoutes.sort((a, b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime());
 

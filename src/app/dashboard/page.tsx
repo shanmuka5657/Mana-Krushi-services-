@@ -34,12 +34,12 @@ function DashboardPage() {
       const currentUserName = getCurrentUserName();
 
       if (role === 'passenger') {
-        const filteredBookings = bookingsFromStorage.filter(b => b.client === currentUserName);
+        const filteredBookings = currentUserName ? bookingsFromStorage.filter(b => b.client === currentUserName) : [];
         setUserBookings(filteredBookings);
         setRoutes(allRoutes);
       } else {
         const ownerName = getCurrentUserName();
-        const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName);
+        const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
         setRoutes(ownerRoutes);
         setUserBookings(bookingsFromStorage); // Owner sees all bookings for now, can be refined.
       }
@@ -54,7 +54,7 @@ function DashboardPage() {
     setRoutes((prevRoutes) => [newRoute, ...prevRoutes]);
   };
   
-  const handleTabSwitch = (tabValue: string) => {
+  const handleTabSwitch = (tab: string) => {
     setActiveTab(tabValue);
   };
   
@@ -62,9 +62,9 @@ function DashboardPage() {
     const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
     await saveBookings(updatedAllBookings);
     setAllBookings(updatedAllBookings);
+    const currentUserName = getCurrentUserName();
     if (role === 'passenger') {
-      const currentUserName = getCurrentUserName();
-      setUserBookings(updatedAllBookings.filter(b => b.client === currentUserName));
+      setUserBookings(currentUserName ? updatedAllBookings.filter(b => b.client === currentUserName) : []);
     } else {
       setUserBookings(updatedAllBookings);
     }
