@@ -4,9 +4,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, parse, startOfDay } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, Car, Star, Zap } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,8 +48,8 @@ interface PassengerDashboardProps {
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
     try {
-        const departure = parse(departureTime, 'HH:mm', new Date());
-        const arrival = parse(arrivalTime, 'HH:mm', new Date());
+        const departure = new Date(`1970-01-01T${departureTime}:00`);
+        const arrival = new Date(`1970-01-01T${arrivalTime}:00`);
         const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
         if (diffMinutes < 0) return "";
 
@@ -65,6 +66,7 @@ const getTravelDuration = (departureTime: string, arrivalTime: string): string =
 export default function PassengerDashboard({ routes }: PassengerDashboardProps) {
   const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
   const { toast } = useToast();
+  const router = useRouter();
   
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
@@ -212,7 +214,7 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
                                   </div>
                               </div>
                               <div className="text-lg font-bold text-right">
-                                P{(route.price || 0).toFixed(2)}
+                                ₹{(route.price || 0).toFixed(2)}
                               </div>
                           </div>
                       </CardContent>
@@ -231,7 +233,7 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
                                   </div>
                               </div>
                           </div>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
                             <Zap className="mr-2 h-4 w-4" />
                             Book Now
                           </Button>

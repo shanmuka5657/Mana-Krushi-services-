@@ -19,6 +19,7 @@ import { getBookings, saveBookings, getRoutes, saveRoutes } from "@/lib/storage"
 function DashboardPage() {
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "passenger"; 
+  const defaultTab = role === 'owner' ? 'add-route' : 'find-ride';
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -44,19 +45,8 @@ function DashboardPage() {
   }, [routes, isLoaded]);
 
 
-  const addBooking = (newBookingData: BookingFormValues) => {
-    const newBooking: Booking = {
-      id: `#BK${(bookings.length + 1).toString().padStart(3, '0')}`,
-      client: newBookingData.clientName,
-      destination: newBookingData.destination,
-      departureDate: newBookingData.departureDate,
-      returnDate: newBookingData.returnDate,
-      amount: newBookingData.budget,
-      mobile: newBookingData.mobile,
-      travelers: newBookingData.travelers,
-      status: "Pending",
-    };
-    setBookings((prevBookings) => [newBooking, ...prevBookings]);
+  const addBooking = (newBookingData: Booking) => {
+    setBookings((prevBookings) => [newBookingData, ...prevBookings]);
   };
   
   const addRoute = (newRouteData: OwnerFormValues) => {
@@ -74,33 +64,29 @@ function DashboardPage() {
   return (
     <AppLayout>
       {role === 'owner' ? (
-         <Tabs defaultValue="dashboard">
+         <Tabs defaultValue={defaultTab}>
           <TabsList>
-            <TabsTrigger value="dashboard">Add Route</TabsTrigger>
-            <TabsTrigger value="routes">My Routes</TabsTrigger>
+            <TabsTrigger value="add-route">Add Route</TabsTrigger>
+            <TabsTrigger value="my-routes">My Routes</TabsTrigger>
           </TabsList>
-          <TabsContent value="dashboard">
+          <TabsContent value="add-route">
              <OwnerDashboard onRouteAdded={addRoute} />
           </TabsContent>
-          <TabsContent value="routes">
+          <TabsContent value="my-routes">
             <MyRoutes routes={routes} />
           </TabsContent>
         </Tabs>
       ) : (
-        <Tabs defaultValue="dashboard">
+        <Tabs defaultValue={defaultTab}>
           <TabsList>
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
-            <TabsTrigger value="new-booking">Book a Ride</TabsTrigger>
+            <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
+            <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
           </TabsList>
-          <TabsContent value="dashboard">
+          <TabsContent value="find-ride">
             <PassengerDashboard routes={routes} />
           </TabsContent>
-          <TabsContent value="bookings">
+          <TabsContent value="my-bookings">
             <RecentBookings bookings={bookings} />
-          </TabsContent>
-          <TabsContent value="new-booking">
-            <BookingForm onBookingCreated={addBooking} />
           </TabsContent>
         </Tabs>
       )}
