@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Briefcase, Users, Plane, ListTodo } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -41,7 +42,7 @@ const stats: Stat[] = [
 
 const StatCards = () => {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-6">
       {stats.map((stat, index) => (
         <Card key={index} className="shadow-sm transition-all hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-6">

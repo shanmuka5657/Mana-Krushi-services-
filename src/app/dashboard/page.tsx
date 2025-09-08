@@ -1,22 +1,25 @@
 
 "use client";
 
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
-import StatCards from "@/components/dashboard/stat-cards";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RecentBookings from "@/components/dashboard/recent-bookings";
 import BookingForm from "@/components/dashboard/booking-form";
-import { useState } from "react";
 import type { Booking } from "@/lib/types";
-import { format } from "date-fns";
 import type { BookingFormValues } from "@/components/dashboard/booking-form";
+import OwnerDashboard from "@/components/dashboard/owner-dashboard";
+import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from 'react';
 
 const initialBookings: Booking[] = [
   {
     id: "#BK001",
     client: "John Smith",
     destination: "Paris, France",
-    departureDate: new Date("2023-08-15"),
-    returnDate: new Date("2023-08-22"),
+    departureDate: new Date("2023-08-15T09:00:00"),
+    returnDate: new Date("2023-08-22T17:00:00"),
     amount: 2450,
     status: "Confirmed",
     mobile: "1234567890",
@@ -26,49 +29,21 @@ const initialBookings: Booking[] = [
     id: "#BK002",
     client: "Emma Wilson",
     destination: "Bali, Indonesia",
-    departureDate: new Date("2023-08-22"),
-    returnDate: new Date("2023-08-29"),
+    departureDate: new Date("2023-08-22T10:00:00"),
+    returnDate: new Date("2023-08-29T18:00:00"),
     amount: 1890,
     status: "Pending",
     mobile: "1234567890",
     travelers: "1",
   },
-  {
-    id: "#BK003",
-    client: "Michael Brown",
-    destination: "Tokyo, Japan",
-    departureDate: new Date("2023-09-05"),
-    returnDate: new Date("2023-09-12"),
-    amount: 3250,
-    status: "Confirmed",
-    mobile: "1234567890",
-    travelers: "3",
-  },
-  {
-    id: "#BK004",
-    client: "Sophia Davis",
-    destination: "Rome, Italy",
-    departureDate: new Date("2023-09-12"),
-    returnDate: new Date("2023-09-19"),
-    amount: 2150,
-    status: "Cancelled",
-    mobile: "1234567890",
-    travelers: "2",
-  },
-  {
-    id: "#BK005",
-    client: "Robert Johnson",
-    destination: "New York, USA",
-    departureDate: new Date("2023-09-18"),
-    returnDate: new Date("2023-09-25"),
-    amount: 1750,
-    status: "Confirmed",
-    mobile: "1234567890",
-    travelers: "4",
-  },
 ];
 
-export default function Home() {
+
+function DashboardPage() {
+  const searchParams = useSearchParams();
+  // Default to 'passenger' if no role is specified
+  const role = searchParams.get("role") || "passenger"; 
+  
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
 
   const addBooking = (newBookingData: BookingFormValues) => {
@@ -88,14 +63,46 @@ export default function Home() {
   
   return (
     <AppLayout>
-      <div className="flex flex-col gap-8">
-        <h2 className="text-3xl font-bold tracking-tight md:hidden">
-          Dashboard
-        </h2>
-        <StatCards />
-        <RecentBookings bookings={bookings} />
-        <BookingForm onBookingCreated={addBooking} />
-      </div>
+      {role === 'owner' ? (
+         <Tabs defaultValue="dashboard">
+          <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="routes">My Routes</TabsTrigger>
+          </TabsList>
+          <TabsContent value="dashboard">
+             <OwnerDashboard />
+          </TabsContent>
+          <TabsContent value="routes">
+            <p>A list of routes added by the owner will be displayed here.</p>
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <Tabs defaultValue="dashboard">
+          <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+            <TabsTrigger value="new-booking">Book a Ride</TabsTrigger>
+          </TabsList>
+          <TabsContent value="dashboard">
+            <PassengerDashboard />
+          </TabsContent>
+          <TabsContent value="bookings">
+            <RecentBookings bookings={bookings} />
+          </TabsContent>
+          <TabsContent value="new-booking">
+            <BookingForm onBookingCreated={addBooking} />
+          </TabsContent>
+        </Tabs>
+      )}
     </AppLayout>
   );
+}
+
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardPage />
+    </Suspense>
+  )
 }

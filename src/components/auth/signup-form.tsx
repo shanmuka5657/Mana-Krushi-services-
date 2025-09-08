@@ -57,8 +57,6 @@ export function SignupForm() {
     },
   });
 
-  const role = form.watch('role');
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Final submission:', values);
     // Here you would typically handle the signup logic
@@ -77,7 +75,7 @@ export function SignupForm() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(() => setShowConfirmation(true))} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
                   name="name"

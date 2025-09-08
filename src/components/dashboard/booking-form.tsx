@@ -158,7 +158,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
   }
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>Add New Booking</CardTitle>
       </CardHeader>
@@ -171,9 +171,9 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                 name="clientName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Name</FormLabel>
+                    <FormLabel>Your Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter client name" {...field} />
+                      <Input placeholder="Enter your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -184,7 +184,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                 name="mobile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client Mobile</FormLabel>
+                    <FormLabel>Your Mobile</FormLabel>
                     <FormControl>
                       <Input
                         type="tel"
@@ -377,7 +377,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
               name="specialRequests"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Special Requests for AI</FormLabel>
+                  <FormLabel>Preferences for AI</FormLabel>
                   <FormControl>
                     <Textarea
                       rows={3}

@@ -13,6 +13,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
@@ -21,6 +28,7 @@ import { useRouter } from 'next/navigation';
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  role: z.enum(['owner', 'passenger'], { required_error: 'Please select a role.' }),
 });
 
 export function LoginForm() {
@@ -30,13 +38,14 @@ export function LoginForm() {
     defaultValues: {
       email: '',
       password: '',
+      role: 'passenger',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    // Here you would typically handle the login logic
-    router.push('/dashboard');
+    // Simulate login and redirect with role
+    router.push(`/dashboard?role=${values.role}`);
   }
 
   return (
@@ -70,6 +79,27 @@ export function LoginForm() {
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Login as</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="passenger">Passenger</SelectItem>
+                      </SelectContent>
+                    </Select>
                   <FormMessage />
                 </FormItem>
               )}
