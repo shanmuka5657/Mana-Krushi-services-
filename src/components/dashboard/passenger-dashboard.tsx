@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, isSameDay, parse } from "date-fns";
+import { format, parse, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, Car, Star, Zap } from "lucide-react";
 import { useState } from "react";
 
@@ -75,11 +75,18 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
   });
 
   function onSubmit(data: SearchFormValues) {
-    const results = routes.filter(owner => 
-      owner.fromLocation.trim().toLowerCase() === data.fromLocation.trim().toLowerCase() &&
-      owner.toLocation.trim().toLowerCase() === data.toLocation.trim().toLowerCase() &&
-      isSameDay(owner.travelDate, data.travelDate)
-    );
+    const searchDate = startOfDay(data.travelDate);
+
+    const results = routes.filter(owner => {
+        const ownerTravelDate = startOfDay(new Date(owner.travelDate));
+        
+        const fromMatch = owner.fromLocation.trim().toLowerCase() === data.fromLocation.trim().toLowerCase();
+        const toMatch = owner.toLocation.trim().toLowerCase() === data.toLocation.trim().toLowerCase();
+        const dateMatch = searchDate.getTime() === ownerTravelDate.getTime();
+        
+        return fromMatch && toMatch && dateMatch;
+    });
+
     setAvailableOwners(results);
 
     if (results.length === 0) {
@@ -183,7 +190,7 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
 
         {availableOwners.length > 0 && (
           <div className="space-y-4">
-              <h2 className="text-xl font-bold">Today</h2>
+              <h2 className="text-xl font-bold">Available Rides</h2>
               {availableOwners.map((route) => (
                   <Card key={route.id} className="overflow-hidden">
                       <CardContent className="p-4">
@@ -219,12 +226,15 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
                               <div>
                                   <div className="font-semibold text-sm">{route.driverName}</div>
                                   <div className="flex items-center gap-1">
-                                      <Star className="w-4 h-4 text-yellow-400" />
+                                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                       <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
                                   </div>
                               </div>
                           </div>
-                          <Zap className="text-muted-foreground" />
+                          <Button size="sm">
+                            <Zap className="mr-2 h-4 w-4" />
+                            Book Now
+                          </Button>
                       </CardFooter>
                   </Card>
               ))}
@@ -233,3 +243,4 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
     </div>
   );
 }
+
