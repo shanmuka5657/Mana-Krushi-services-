@@ -113,7 +113,7 @@ export default function BookRidePage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <div className="flex justify-between">
-                        <span>1 seat: ₹{route.price.toFixed(2)}</span>
+                        <span>1 seat: ₹{(route.price || 0).toFixed(2)}</span>
                         <span className="font-semibold">Cash</span>
                     </div>
                     <p className="text-sm text-muted-foreground">Pay in the car</p>
