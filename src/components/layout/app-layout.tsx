@@ -69,7 +69,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=${role}`, icon: LayoutDashboard, label: "Dashboard" },
     { href: `/profile?role=${role}`, icon: User, label: "Profile" },
     { href: `/bookings?role=${role}`, icon: Plane, label: "Bookings" },
-    { href: `/clients?role=${role}`, icon: Users, label: "Clients", ownerOnly: true },
+    { href: `/clients?role=${role}`, icon: Users, label: "Passengers", ownerOnly: true },
     { href: `/itineraries?role=${role}`, icon: Map, label: "Itineraries", ownerOnly: true },
     { href: `/payments?role=${role}`, icon: DollarSign, label: "Payments", ownerOnly: true },
     { href: `/reports?role=${role}`, icon: BarChart, label: "Reports" },

@@ -11,15 +11,15 @@ import { format } from 'date-fns';
 import { User, Phone, Calendar } from 'lucide-react';
 import { Suspense } from 'react';
 
-type Client = {
+type Passenger = {
     name: string;
     mobile: string;
     lastBookingDate: Date;
     totalBookings: number;
 }
 
-function ClientsPageContent() {
-    const [clients, setClients] = useState<Client[]>([]);
+function PassengersPageContent() {
+    const [passengers, setPassengers] = useState<Passenger[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
@@ -29,40 +29,40 @@ function ClientsPageContent() {
         // Filter bookings where the owner is the driver
         const ownerBookings = allBookings.filter(b => b.driverName === ownerName);
 
-        const clientMap: { [mobile: string]: Client } = {};
+        const passengerMap: { [mobile: string]: Passenger } = {};
 
         ownerBookings.forEach(booking => {
             if (!booking.mobile) return; // Skip if no mobile number
 
-            if (!clientMap[booking.mobile]) {
-                clientMap[booking.mobile] = {
+            if (!passengerMap[booking.mobile]) {
+                passengerMap[booking.mobile] = {
                     name: booking.client,
                     mobile: booking.mobile,
                     lastBookingDate: new Date(booking.departureDate),
                     totalBookings: 0,
                 };
             }
-            clientMap[booking.mobile].totalBookings += 1;
-            if (new Date(booking.departureDate) > clientMap[booking.mobile].lastBookingDate) {
-                clientMap[booking.mobile].lastBookingDate = new Date(booking.departureDate);
+            passengerMap[booking.mobile].totalBookings += 1;
+            if (new Date(booking.departureDate) > passengerMap[booking.mobile].lastBookingDate) {
+                passengerMap[booking.mobile].lastBookingDate = new Date(booking.departureDate);
             }
         });
 
-        const clientList = Object.values(clientMap).sort((a, b) => b.lastBookingDate.getTime() - a.lastBookingDate.getTime());
+        const passengerList = Object.values(passengerMap).sort((a, b) => b.lastBookingDate.getTime() - a.lastBookingDate.getTime());
 
-        setClients(clientList);
+        setPassengers(passengerList);
         setIsLoaded(true);
     }, []);
 
     if (!isLoaded) {
-        return <AppLayout><div>Loading clients...</div></AppLayout>;
+        return <AppLayout><div>Loading passengers...</div></AppLayout>;
     }
 
     return (
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>My Clients</CardTitle>
+                    <CardTitle>My Passengers</CardTitle>
                     <CardDescription>A list of all passengers who have booked with you.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -76,16 +76,17 @@ function ClientsPageContent() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {clients.length > 0 ? clients.map(client => (
-                                <TableRow key={client.mobile}>
-                                    <TableCell className="font-medium flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {client.name}</TableCell>
-                                    <TableCell><Phone className="h-4 w-4 mr-2 inline text-muted-foreground" />{client.mobile}</TableCell>
-                                    <TableCell>{client.totalBookings}</TableCell>
-                                    <TableCell><Calendar className="h-4 w-4 mr-2 inline text-muted-foreground" />{format(client.lastBookingDate, 'PPP')}</TableCell>
+                            {passengers.length > 0 ? passengers.map(passenger => (
+                                <TableRow key={passenger.mobile}>
+                                    <TableCell className="font-medium flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {passenger.name}</TableCell>
+                                    <TableCell><Phone className="h-4 w-4 mr-2 inline text-muted-foreground" />{passenger.mobile}</TableCell>
+                                    <TableCell>{passenger.totalBookings}</TableCell>
+                                    <TableCell><Calendar className="h-4 w-4 mr-2 inline text-muted-foreground" />{format(passenger.lastBookingDate, 'PPP')}</TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center">No clients found.</TableCell>
+                                    <TableCell colSpan={4} className="h-24 text-center">No passengers found.</TableCell>
+
                                 </TableRow>
                             )}
                         </TableBody>
@@ -100,7 +101,7 @@ function ClientsPageContent() {
 export default function ClientsPage() {
     return (
         <Suspense>
-            <ClientsPageContent />
+            <PassengersPageContent />
         </Suspense>
     )
 }
