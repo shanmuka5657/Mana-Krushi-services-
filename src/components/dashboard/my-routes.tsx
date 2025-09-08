@@ -21,13 +21,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
-  DialogFooter,
-  DialogClose
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar, Clock, DollarSign, Sparkles } from "lucide-react";
+import { User, Phone, Users, Clock, DollarSign, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { getBookings, saveBookings } from "@/lib/storage";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "../ui/badge";
 
 interface MyRoutesProps {
   routes: Route[];
@@ -82,6 +80,17 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
       const [hours, minutes] = route.arrivalTime.split(':').map(Number);
       routeDateTime.setHours(hours, minutes);
       return routeDateTime < new Date();
+  }
+
+  const getStatusInfo = (status: Booking['status']) => {
+    switch(status) {
+      case 'Confirmed':
+        return { icon: CheckCircle, color: 'text-green-500', label: 'Confirmed' };
+      case 'Pending':
+         return { icon: AlertCircle, color: 'text-yellow-500', label: 'Pending' };
+      default:
+        return { icon: AlertCircle, color: 'text-muted-foreground', label: status };
+    }
   }
 
   return (
@@ -143,29 +152,40 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 {bookingsForRoute.length > 0 ? (
-                  bookingsForRoute.map(booking => (
-                    <div key={booking.id} className="border p-4 rounded-md">
-                        <div className="flex items-start gap-4">
-                            <User className="h-5 w-5 text-muted-foreground mt-1" />
-                            <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">Client Name</span>
-                                <span className="font-medium">{booking.client}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-4 mt-4">
-                            <Phone className="h-5 w-5 text-muted-foreground mt-1" />
-                            <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">Mobile Number</span>
-                                <span className="font-medium">{booking.mobile}</span>
-                            </div>
-                        </div>
-                         <div className="flex items-start gap-4 mt-4">
-                            <Clock className="h-5 w-5 text-muted-foreground mt-1" />
-                            <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">Departure Time</span>
-                                <span className="font-medium">{format(booking.departureDate, "HH:mm")}</span>
-                            </div>
-                        </div>
+                  bookingsForRoute.map(booking => {
+                    const StatusIcon = getStatusInfo(booking.status).icon;
+                    const statusColor = getStatusInfo(booking.status).color;
+                    return (
+                    <div key={booking.id} className="border p-4 rounded-md space-y-4">
+                       <div className="flex items-start gap-4">
+                          <User className="h-5 w-5 text-muted-foreground mt-1" />
+                          <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">Passenger Name</span>
+                              <span className="font-medium">{booking.client}</span>
+                          </div>
+                      </div>
+                       <div className="flex items-start gap-4">
+                          <Phone className="h-5 w-5 text-muted-foreground mt-1" />
+                          <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">Mobile Number</span>
+                              <span className="font-medium">{booking.mobile}</span>
+                          </div>
+                      </div>
+                       <div className="flex items-start gap-4">
+                          <Users className="h-5 w-5 text-muted-foreground mt-1" />
+                          <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">Travelers</span>
+                              <span className="font-medium">{booking.travelers}</span>
+                          </div>
+                      </div>
+                       <div className="flex items-start gap-4">
+                          <StatusIcon className={`h-5 w-5 ${statusColor} mt-1`} />
+                          <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">Status</span>
+                              <span className={`font-medium ${statusColor}`}>{booking.status}</span>
+                          </div>
+                      </div>
+
                         {isRideComplete(selectedRoute) && (
                             <div className="mt-4 pt-4 border-t">
                                <p className="text-sm text-muted-foreground mb-2">Payment</p>
@@ -187,7 +207,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                             </div>
                         )}
                     </div>
-                  ))
+                  )})
                 ) : (
                   <p>No bookings for this route yet.</p>
                 )}
