@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export const metadata: Metadata = {
   title: "Mana Krushi Services",
   description: "Travel Agent Management System",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
