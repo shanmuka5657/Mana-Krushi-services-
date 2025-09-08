@@ -68,6 +68,7 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
         toast({
             title: "No Routes Found",
             description: "No owners are currently serving this route on the selected date.",
+            variant: "destructive",
         });
     }
   }
