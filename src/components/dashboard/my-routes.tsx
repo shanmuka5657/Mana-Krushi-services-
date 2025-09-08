@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -22,10 +22,13 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Clock, DollarSign, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { getBookings, saveBookings } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "../ui/badge";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 interface MyRoutesProps {
   routes: Route[];
@@ -34,7 +37,19 @@ interface MyRoutesProps {
 const MyRoutes = ({ routes }: MyRoutesProps) => {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
+  const [fromFilter, setFromFilter] = useState("");
+  const [toFilter, setToFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
+
+  const filteredRoutes = useMemo(() => {
+    return routes.filter(route => {
+      const fromMatch = fromFilter ? route.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()) : true;
+      const toMatch = toFilter ? route.toLocation.toLowerCase().includes(toFilter.toLowerCase()) : true;
+      const dateMatch = dateFilter ? format(new Date(route.travelDate), 'yyyy-MM-dd') === format(dateFilter, 'yyyy-MM-dd') : true;
+      return fromMatch && toMatch && dateMatch;
+    });
+  }, [routes, fromFilter, toFilter, dateFilter]);
 
   const handleViewClick = (route: Route) => {
     const allBookings = getBookings();
@@ -99,6 +114,45 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
         <CardTitle>My Routes</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <Input 
+                placeholder="Filter by From location..."
+                value={fromFilter}
+                onChange={(e) => setFromFilter(e.target.value)}
+                className="max-w-sm"
+            />
+            <Input 
+                placeholder="Filter by To location..."
+                value={toFilter}
+                onChange={(e) => setToFilter(e.target.value)}
+                className="max-w-sm"
+            />
+             <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[280px] justify-start text-left font-normal",
+                    !dateFilter && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateFilter ? format(dateFilter, "PPP") : <span>Filter by date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={dateFilter}
+                  onSelect={setDateFilter}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            {(fromFilter || toFilter || dateFilter) && (
+                 <Button variant="ghost" onClick={() => { setFromFilter(''); setToFilter(''); setDateFilter(undefined); }}>Clear</Button>
+            )}
+        </div>
         <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedRoute(null)}>
           <Table>
             <TableHeader>
@@ -112,8 +166,8 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {routes.length > 0 ? (
-                routes.map((route) => (
+              {filteredRoutes.length > 0 ? (
+                filteredRoutes.map((route) => (
                   <TableRow key={route.id}>
                     <TableCell className="font-medium">{route.fromLocation}</TableCell>
                     <TableCell>{route.toLocation}</TableCell>
@@ -136,7 +190,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    No routes added yet.
+                    No routes found.
                   </TableCell>
                 </TableRow>
               )}
