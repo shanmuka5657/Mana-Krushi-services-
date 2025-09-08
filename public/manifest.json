@@ -67,7 +67,7 @@
       "name": "Add New Route",
       "short_name": "New Route",
       "description": "Quickly add a new route to your list.",
-      "url": "/dashboard?role=owner&action=add-route",
+      "url": "/dashboard?role=owner&amp;action=add-route",
       "icons": [
         {
           "src": "/images/icons/icon-96x96.svg",
@@ -79,7 +79,7 @@
       "name": "Find a Ride",
       "short_name": "Find Ride",
       "description": "Search for available rides.",
-      "url": "/dashboard?role=passenger&action=find-ride",
+      "url": "/dashboard?role=passenger&amp;action=find-ride",
       "icons": [
         {
           "src": "/images/icons/icon-96x96.svg",
@@ -92,6 +92,5 @@
     "travel",
     "business",
     "management"
-  ],
-  "related_applications": []
+  ]
 }
