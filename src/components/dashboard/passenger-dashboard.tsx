@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, MapPin } from "lucide-react";
 import { useState } from "react";
 
@@ -27,6 +27,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import type { Route } from "@/lib/types";
+
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -38,15 +40,12 @@ const searchFormSchema = z.object({
 
 type SearchFormValues = z.infer<typeof searchFormSchema>;
 
-const ownerList = [
-    { id: 1, ownerName: 'Alice', from: 'New York', to: 'Boston', departure: '08:00', arrival: '12:00', seats: 3, vehicle: 'Sedan' },
-    { id: 2, ownerName: 'Bob', from: 'San Francisco', to: 'Los Angeles', departure: '10:00', arrival: '16:00', seats: 2, vehicle: 'SUV' },
-    { id: 3, ownerName: 'Charlie', from: 'New York', to: 'Boston', departure: '14:00', arrival: '18:00', seats: 4, vehicle: 'Minivan' },
-];
+interface PassengerDashboardProps {
+  routes: Route[];
+}
 
-
-export default function PassengerDashboard() {
-  const [availableOwners, setAvailableOwners] = useState<typeof ownerList>([]);
+export default function PassengerDashboard({ routes }: PassengerDashboardProps) {
+  const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
   const { toast } = useToast();
   
   const form = useForm<SearchFormValues>({
@@ -58,10 +57,10 @@ export default function PassengerDashboard() {
   });
 
   function onSubmit(data: SearchFormValues) {
-    console.log(data);
-    const results = ownerList.filter(owner => 
-      owner.from.toLowerCase() === data.fromLocation.toLowerCase() &&
-      owner.to.toLowerCase() === data.toLocation.toLowerCase()
+    const results = routes.filter(owner => 
+      owner.fromLocation.toLowerCase() === data.fromLocation.toLowerCase() &&
+      owner.toLocation.toLowerCase() === data.toLocation.toLowerCase() &&
+      isSameDay(owner.travelDate, data.travelDate)
     );
     setAvailableOwners(results);
 
@@ -169,11 +168,11 @@ export default function PassengerDashboard() {
                 {availableOwners.map(owner => (
                     <Card key={owner.id}>
                         <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
-                            <div className="font-semibold">{owner.ownerName}'s {owner.vehicle}</div>
-                            <div>{owner.from} &rarr; {owner.to}</div>
-                            <div>{owner.departure} - {owner.arrival}</div>
+                            <div className="font-semibold">{owner.ownerName}'s {owner.vehicleType}</div>
+                            <div>{owner.fromLocation} &rarr; {owner.toLocation}</div>
+                            <div>{owner.departureTime} - {owner.arrivalTime}</div>
                             <div className="flex justify-end">
-                                <Button>Book ({owner.seats} seats left)</Button>
+                                <Button>Book ({owner.availableSeats} seats left)</Button>
                             </div>
                         </CardContent>
                     </Card>

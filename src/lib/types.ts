@@ -9,3 +9,17 @@ export type Booking = {
   travelers: string;
   mobile: string;
 };
+
+export type Route = {
+  id: string;
+  ownerName: string;
+  driverName: string;
+  driverMobile: string;
+  fromLocation: string;
+  toLocation: string;
+  travelDate: Date;
+  departureTime: string;
+  arrivalTime: string;
+  availableSeats: number;
+  vehicleType: string;
+};
