@@ -35,7 +35,17 @@ export default function BookRidePage() {
   const handleBooking = () => {
     if (!route) return;
 
-    const passengerProfile = getProfile() || { name: 'Passenger User', mobile: '0000000000' };
+    const passengerProfile = getProfile();
+    if (!passengerProfile) {
+        toast({
+            title: "Profile Incomplete",
+            description: "Please complete your profile before booking.",
+            variant: "destructive",
+        });
+        router.push('/profile?role=passenger');
+        return;
+    }
+
 
     const bookings = getBookings();
     const newBooking: Booking = {
