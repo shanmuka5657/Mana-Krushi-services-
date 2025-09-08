@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -23,6 +24,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,6 +36,7 @@ export function LoginForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     // Here you would typically handle the login logic
+    router.push('/dashboard');
   }
 
   return (
