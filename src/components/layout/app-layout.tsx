@@ -8,12 +8,13 @@ import {
   HelpCircle,
   LayoutDashboard,
   Map,
-  Plane,
+  Route as RouteIcon,
   Search,
   Settings,
   Users,
   User,
   LogOut,
+  Plane,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -65,17 +66,27 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     setUserRole(roleFromUrl === 'owner' ? 'Owner' : 'Passenger');
   }, []);
 
-  const navItems = [
-    { href: `/dashboard?role=${role}`, icon: LayoutDashboard, label: "Dashboard" },
-    { href: `/profile?role=${role}`, icon: User, label: "Profile" },
-    { href: `/bookings?role=${role}`, icon: Plane, label: "Bookings" },
-    { href: `/clients?role=${role}`, icon: Users, label: "Passengers", ownerOnly: true },
-    { href: `/itineraries?role=${role}`, icon: Map, label: "Itineraries", ownerOnly: true },
-    { href: `/payments?role=${role}`, icon: DollarSign, label: "Payments", ownerOnly: true },
-    { href: `/reports?role=${role}`, icon: BarChart, label: "Reports" },
-    { href: `/settings?role=${role}`, icon: Settings, label: "Settings" },
-    { href: `/help?role=${role}`, icon: HelpCircle, label: "Help" },
-  ].filter(item => !(item.ownerOnly && role !== 'owner'));
+  const ownerNavItems = [
+    { href: `/dashboard?role=owner`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/profile?role=owner`, icon: User, label: "Profile" },
+    { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
+    { href: `/payments?role=owner`, icon: DollarSign, label: "Payments" },
+    { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
+    { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
+    { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
+  ];
+
+  const passengerNavItems = [
+    { href: `/dashboard?role=passenger`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/profile?role=passenger`, icon: User, label: "Profile" },
+    { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
+    { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
+    { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
+    { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
+  ];
+  
+  const navItems = role === 'owner' ? ownerNavItems : passengerNavItems;
+
 
   const handleLogout = () => {
     clearCurrentUser();

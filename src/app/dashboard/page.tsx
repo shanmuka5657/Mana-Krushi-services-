@@ -11,7 +11,6 @@ import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from 'react';
-import MyRoutes from "@/components/dashboard/my-routes";
 import { getBookings, saveBookings, getRoutes, saveRoutes } from "@/lib/storage";
 
 function DashboardPage() {
@@ -70,13 +69,9 @@ function DashboardPage() {
          <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch}>
           <TabsList>
             <TabsTrigger value="add-route">Add Route</TabsTrigger>
-            <TabsTrigger value="my-routes">My Routes</TabsTrigger>
           </TabsList>
           <TabsContent value="add-route">
              <OwnerDashboard onRouteAdded={addRoute} onSwitchTab={handleTabSwitch} />
-          </TabsContent>
-          <TabsContent value="my-routes">
-            <MyRoutes routes={routes} />
           </TabsContent>
         </Tabs>
       ) : (

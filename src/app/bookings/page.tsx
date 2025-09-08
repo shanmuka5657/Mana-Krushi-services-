@@ -20,10 +20,15 @@ function BookingsPageContent() {
         const allBookings = getBookings();
         const userBookings = allBookings.filter(b => {
             if (role === 'passenger') {
+                // For a passenger, show bookings they created.
+                // We assume client name is unique for simplicity.
                 return b.client === currentUserName;
             }
-            // For an owner, show bookings where they are the driver.
-            return b.driverName === currentUserName;
+             // This page is now only for passengers, but keeping the logic just in case.
+            if (role === 'owner') {
+                 return b.driverName === currentUserName;
+            }
+            return false;
         });
         setBookings(userBookings);
         setIsLoaded(true);
