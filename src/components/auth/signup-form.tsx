@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { saveCurrentUser, saveProfile } from '@/lib/storage';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -58,10 +59,18 @@ export function SignupForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('Final submission:', values);
-    // Here you would typically handle the signup logic
+    // Save the user session
+    saveCurrentUser(values.email, values.name);
+
+    // Save the initial profile. We'll add a dummy mobile number.
+    saveProfile({
+      name: values.name,
+      email: values.email,
+      mobile: '0000000000',
+    });
+    
     setShowConfirmation(false);
-    // For now, let's redirect to the login page after "signup"
+    // Redirect to the login page after "signup"
     router.push('/login');
   }
 

@@ -39,9 +39,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { clearCurrentUser, getCurrentUserName, getCurrentUser } from "@/lib/storage";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [userName, setUserName] = React.useState("User");
+  const [userRole, setUserRole] = React.useState("Passenger");
+  const [userInitial, setUserInitial] = React.useState("U");
+
+  React.useEffect(() => {
+    const name = getCurrentUserName();
+    const email = getCurrentUser();
+    if (name) {
+      setUserName(name);
+      setUserInitial(name.charAt(0).toUpperCase());
+    } else if (email) {
+      const fallbackName = email.split('@')[0];
+      setUserName(fallbackName);
+      setUserInitial(fallbackName.charAt(0).toUpperCase());
+    }
+    // A simple way to show role, in a real app this would come from session
+    const role = new URLSearchParams(window.location.search).get('role') || 'passenger';
+    setUserRole(role === 'owner' ? 'Owner' : 'Passenger');
+  }, []);
+
   const navItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
     { href: "/profile", icon: User, label: "Profile" },
@@ -55,7 +76,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   ];
 
   const handleLogout = () => {
-    // For now, logout will just redirect to the login page.
+    clearCurrentUser();
     router.push('/login');
   };
 
@@ -110,14 +131,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center gap-3 cursor-pointer">
                   <Avatar className="h-10 w-10 border">
                     <AvatarImage
-                      src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=f39c12&color=fff"
-                      alt="Sarah Johnson"
+                      src={`https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
+                      alt={userName}
                     />
-                    <AvatarFallback>SJ</AvatarFallback>
+                    <AvatarFallback>{userInitial}</AvatarFallback>
                   </Avatar>
                   <div className="hidden text-sm md:block">
-                    <div className="font-semibold">Sarah Johnson</div>
-                    <div className="text-muted-foreground">Travel Agent</div>
+                    <div className="font-semibold">{userName}</div>
+                    <div className="text-muted-foreground">{userRole}</div>
                   </div>
                 </div>
               </DropdownMenuTrigger>

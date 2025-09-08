@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { saveCurrentUser, getProfile } from '@/lib/storage';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -43,8 +44,10 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Simulate login and redirect with role
+    // In a real app, you'd validate credentials. Here we just save the session.
+    const userProfile = getProfile(); // We don't have separate user objects, so we get the name from a profile if it exists
+    const name = userProfile?.name || values.email.split('@')[0];
+    saveCurrentUser(values.email, name);
     router.push(`/dashboard?role=${values.role}`);
   }
 

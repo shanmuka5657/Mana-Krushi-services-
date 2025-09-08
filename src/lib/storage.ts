@@ -143,7 +143,12 @@ export const saveRoutes = (routes: Route[]) => {
 export const saveProfile = (profile: ProfileFormValues) => {
     if (!isBrowser) return;
     try {
-        window.localStorage.setItem('passengerProfile', JSON.stringify(profile));
+        const userEmail = getCurrentUser();
+        if (userEmail) {
+            const profiles = getAllProfiles();
+            profiles[userEmail] = profile;
+            window.localStorage.setItem('userProfiles', JSON.stringify(profiles));
+        }
     } catch (error) {
         console.error("Failed to save profile to localStorage", error);
     }
@@ -152,10 +157,53 @@ export const saveProfile = (profile: ProfileFormValues) => {
 export const getProfile = (): ProfileFormValues | null => {
     if (!isBrowser) return null;
     try {
-        const storedProfile = window.localStorage.getItem('passengerProfile');
-        return storedProfile ? JSON.parse(storedProfile) : null;
+        const userEmail = getCurrentUser();
+        if (userEmail) {
+            const profiles = getAllProfiles();
+            return profiles[userEmail] || null;
+        }
+        return null;
     } catch (error) {
         console.error("Failed to parse profile from localStorage", error);
         return null;
     }
 };
+
+const getAllProfiles = (): { [email: string]: ProfileFormValues } => {
+    if (!isBrowser) return {};
+    try {
+        const storedProfiles = window.localStorage.getItem('userProfiles');
+        return storedProfiles ? JSON.parse(storedProfiles) : {};
+    } catch (error) {
+        console.error("Failed to parse profiles from localStorage", error);
+        return {};
+    }
+}
+
+
+// Functions for user session
+export const saveCurrentUser = (email: string, name: string) => {
+    if (!isBrowser) return;
+    try {
+        window.sessionStorage.setItem('currentUserEmail', email);
+        window.sessionStorage.setItem('currentUserName', name);
+    } catch (error) {
+        console.error("Failed to save current user to sessionStorage", error);
+    }
+}
+
+export const getCurrentUser = (): string | null => {
+    if (!isBrowser) return null;
+    return window.sessionStorage.getItem('currentUserEmail');
+}
+
+export const getCurrentUserName = (): string | null => {
+    if (!isBrowser) return null;
+    return window.sessionStorage.getItem('currentUserName');
+}
+
+export const clearCurrentUser = () => {
+    if (!isBrowser) return;
+    window.sessionStorage.removeItem('currentUserEmail');
+    window.sessionStorage.removeItem('currentUserName');
+}

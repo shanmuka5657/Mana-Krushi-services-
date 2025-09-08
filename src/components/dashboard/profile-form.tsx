@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { saveProfile, getProfile } from "@/lib/storage";
+import { saveProfile, getProfile, getCurrentUser } from "@/lib/storage";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -35,16 +35,25 @@ export default function ProfileForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: "Passenger User",
-      mobile: "1234567890",
-      email: "passenger@example.com",
+      name: "",
+      mobile: "",
+      email: "",
     },
   });
 
   useEffect(() => {
+    const userEmail = getCurrentUser();
     const profile = getProfile();
+    
     if (profile) {
       form.reset(profile);
+    } else if (userEmail) {
+      // If no profile, use email from session and set default name
+      form.reset({
+        email: userEmail,
+        name: userEmail.split('@')[0],
+        mobile: '',
+      })
     }
   }, [form]);
 
