@@ -13,8 +13,10 @@ import {
   Settings,
   Users,
   User,
+  LogOut,
 } from "lucide-react";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -29,8 +31,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const navItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", active: true },
     { href: "/profile", icon: User, label: "Profile" },
@@ -42,6 +53,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: "#", icon: Settings, label: "Settings" },
     { href: "#", icon: HelpCircle, label: "Help" },
   ];
+
+  const handleLogout = () => {
+    // For now, logout will just redirect to the login page.
+    router.push('/login');
+  };
 
   return (
     <SidebarProvider>
@@ -89,19 +105,40 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 className="pl-10"
               />
             </div>
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border">
-                <AvatarImage
-                  src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=f39c12&color=fff"
-                  alt="Sarah Johnson"
-                />
-                <AvatarFallback>SJ</AvatarFallback>
-              </Avatar>
-              <div className="hidden text-sm md:block">
-                <div className="font-semibold">Sarah Johnson</div>
-                <div className="text-muted-foreground">Travel Agent</div>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <Avatar className="h-10 w-10 border">
+                    <AvatarImage
+                      src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=f39c12&color=fff"
+                      alt="Sarah Johnson"
+                    />
+                    <AvatarFallback>SJ</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden text-sm md:block">
+                    <div className="font-semibold">Sarah Johnson</div>
+                    <div className="text-muted-foreground">Travel Agent</div>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <main className="flex-1 p-4 md:p-8">{children}</main>
