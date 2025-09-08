@@ -58,8 +58,8 @@ export default function PassengerDashboard({ routes }: PassengerDashboardProps) 
 
   function onSubmit(data: SearchFormValues) {
     const results = routes.filter(owner => 
-      owner.fromLocation.toLowerCase() === data.fromLocation.toLowerCase() &&
-      owner.toLocation.toLowerCase() === data.toLocation.toLowerCase() &&
+      owner.fromLocation.toLowerCase() === data.fromLocation.toLowerCase().trim() &&
+      owner.toLocation.toLowerCase() === data.toLocation.toLowerCase().trim() &&
       isSameDay(owner.travelDate, data.travelDate)
     );
     setAvailableOwners(results);

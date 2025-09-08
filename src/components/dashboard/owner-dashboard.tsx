@@ -32,8 +32,8 @@ const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
   driverName: z.string().min(2, "Driver name is required."),
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
-  fromLocation: z.string().min(2, "Starting location is required."),
-  toLocation: z.string().min(2, "Destination is required."),
+  fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
+  toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
   travelDate: z.date({
     required_error: "A travel date is required.",
   }),
