@@ -4,18 +4,10 @@
   "description": "Travel Agent Management System",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F2F4F4",
-  "theme_color": "#76D7C4",
+  "background_color": "#ffffff",
+  "theme_color": "#2c3e50",
   "orientation": "any",
-  "id": "/?source=pwa",
-  "scope": "/",
-  "lang": "en-US",
-  "dir": "ltr",
-  "categories": ["business", "travel", "productivity"],
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
+  "id": "/?utm_source=pwa",
   "icons": [
     {
       "src": "/images/icon-192x192.png",
@@ -30,87 +22,128 @@
       "purpose": "any maskable"
     }
   ],
+  "categories": [
+    "business",
+    "travel",
+    "management"
+  ],
+  "lang": "en-US",
+  "dir": "ltr",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "fullscreen",
+    "window-controls-overlay"
+  ],
   "screenshots": [
     {
       "src": "/images/screenshot-desktop.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Desktop View"
+      "label": "Desktop Screenshot"
     },
     {
       "src": "/images/screenshot-mobile.png",
-      "sizes": "540x720",
+      "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile View"
+      "label": "Mobile Screenshot"
     }
   ],
   "shortcuts": [
     {
-      "name": "Add New Route",
-      "short_name": "New Route",
-      "description": "Create a new travel route",
-      "url": "/dashboard?role=owner&action=add-route",
-      "icons": [{ "src": "/images/shortcut-icon.png", "sizes": "96x96" }]
+      "name": "New Booking",
+      "short_name": "New",
+      "description": "Create a new booking",
+      "url": "/dashboard?action=new-booking",
+      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Search for available rides",
-      "url": "/dashboard?role=passenger&action=find-ride",
-       "icons": [{ "src": "/images/shortcut-icon.png", "sizes": "96x96" }]
+      "name": "View Bookings",
+      "short_name": "Bookings",
+      "description": "View your existing bookings",
+      "url": "/bookings",
+      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
     }
   ],
   "share_target": {
     "action": "/share-handler",
-    "method": "GET",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url"
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*"]
+        }
+      ]
     }
   },
   "file_handlers": [
     {
-      "action": "/file-handler",
+      "action": "/open-file",
       "accept": {
-        "text/plain": [".txt", ".csv"]
+        "text/plain": [".txt", ".text"],
+        "application/json": [".json"]
       }
     }
   ],
   "protocol_handlers": [
     {
       "protocol": "web+manakrushi",
-      "url": "/protocol-handler?url=%s"
+      "url": "/protocol-handler?q=%s"
     }
   ],
- "related_applications": [
+  "related_applications": [
     {
       "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.example.app",
-      "id": "com.example.app"
-    },
-    {
-      "platform": "itunes",
-      "url": "https://itunes.apple.com/app/example-app/id123456789"
-    }
-  ],
-  "widgets": [
-    {
-      "name": "My Bookings",
-      "description": "View your upcoming bookings",
-      "tag": "bookings",
-      "template": "booking-widget",
-      "ms_ac_template": "booking-widget",
-      "data": "/widgets/bookings.json"
+      "url": "https://play.google.com/store/apps/details?id=com.example.manakrushi",
+      "id": "com.example.manakrushi"
     }
   ],
   "edge_side_panel": {
     "preferred_width": 480
   },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "prefer_related_applications": false,
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "widgets": [
+    {
+      "name": "Recent Bookings",
+      "description": "View recent bookings right from your home screen.",
+      "tag": "recent-bookings",
+      "template": "booking-template",
+      "ms_ac_template": "widgets/booking-template.json",
+      "data": "widgets/booking-data.json",
+      "type": "application/json",
+      "screenshots": [
+        {
+          "src": "/images/widget-screenshot.png",
+          "sizes": "600x400",
+          "label": "Recent Bookings Widget"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/images/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ],
+      "auth": false,
+      "update": 86400
+    }
+  ],
+  "note_taking": {
+    "new_note_url": "/new-note",
+    "needs_account": true
+  },
   "scope_extensions": [
-    {"origin": "*.example.com"},
-    {"origin": "example.com"}
+    { "origin": "*.example.com" }
   ]
 }
