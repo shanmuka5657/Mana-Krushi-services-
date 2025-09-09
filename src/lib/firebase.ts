@@ -161,5 +161,7 @@ export const getAllProfilesFromFirestore = async (): Promise<Profile[]> => {
 export const saveProfileToFirestore = async (profile: Profile) => {
     if (!profilesCollection || !db) return;
     const docRef = doc(db, "profiles", profile.email);
-    await setDoc(docRef, profile, { merge: true });
+    // Remove undefined values before saving to Firestore
+    const profileToSave = Object.fromEntries(Object.entries(profile).filter(([_, v]) => v !== undefined));
+    await setDoc(docRef, profileToSave, { merge: true });
 }
