@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { getProfile } from "@/lib/storage";
+import PaymentDialog from "./payment-dialog";
 
 
 const ownerFormSchema = z.object({
@@ -66,11 +67,12 @@ interface OwnerDashboardProps {
 export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashboardProps) {
   const { toast } = useToast();
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [routeDataToSubmit, setRouteDataToSubmit] = useState<OwnerFormValues | null>(null);
 
   useEffect(() => {
     const checkProfile = async () => {
         const profile = await getProfile();
-        // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
@@ -94,14 +96,52 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         rating: 4.5,
     },
   });
+  
+  useEffect(() => {
+    const loadProfile = async () => {
+        const profile = await getProfile();
+        if(profile?.name) {
+            form.setValue('ownerName', profile.name);
+            form.setValue('driverName', profile.name);
+        }
+         if(profile?.mobile && profile.mobile !== '0000000000') {
+            form.setValue('driverMobile', profile.mobile);
+        }
+    }
+    loadProfile();
+  }, [form]);
 
-  async function onSubmit(data: OwnerFormValues) {
-    onRouteAdded(data);
-    toast({
-      title: "Route Added!",
-      description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
-    });
-    form.reset();
+  function onSubmit(data: OwnerFormValues) {
+    setRouteDataToSubmit(data);
+    setIsPaymentDialogOpen(true);
+  }
+  
+  const handlePaymentSuccess = () => {
+    if (routeDataToSubmit) {
+      onRouteAdded(routeDataToSubmit);
+      toast({
+        title: "Route Added!",
+        description: `Your route from ${routeDataToSubmit.fromLocation} to ${routeDataToSubmit.toLocation} has been added.`,
+      });
+      form.reset();
+       // Reset form fields to their defaults after submission
+       const profileName = form.getValues('ownerName');
+       const profileMobile = form.getValues('driverMobile');
+       form.reset({
+        ownerName: profileName,
+        driverName: profileName,
+        driverMobile: profileMobile,
+        fromLocation: "",
+        toLocation: "",
+        departureTime: "09:00",
+        arrivalTime: "18:00",
+        availableSeats: 1,
+        vehicleType: "",
+        price: 500,
+        rating: 4.5
+      });
+      setRouteDataToSubmit(null);
+    }
   }
 
   return (
@@ -121,6 +161,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <PaymentDialog 
+        isOpen={isPaymentDialogOpen}
+        onOpenChange={setIsPaymentDialogOpen}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+      
       <Card className="shadow-sm mt-6">
         <CardHeader>
           <CardTitle>Add a New Route</CardTitle>
@@ -138,7 +185,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Enter owner's name" {...field} className="pl-10" />
+                          <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
                         </div>
                       </FormControl>
                       <FormMessage />
