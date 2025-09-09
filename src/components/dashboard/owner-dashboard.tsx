@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -181,11 +180,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         title: "Route Added!",
         description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
       });
-      form.reset();
-       // Reset form fields to their defaults after submission
-       const profileName = form.getValues('ownerName');
-       const profileMobile = form.getValues('driverMobile');
-       form.reset({
+      
+      const profileName = form.getValues('ownerName');
+      const profileMobile = form.getValues('driverMobile');
+      form.reset({
         ownerName: profileName,
         driverName: profileName,
         driverMobile: profileMobile,
