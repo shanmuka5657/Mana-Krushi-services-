@@ -4,8 +4,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail } from "lucide-react";
-import { useEffect } from "react";
+import { User, Phone, Mail, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfileForm() {
   const { toast } = useToast();
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -44,7 +46,9 @@ export default function ProfileForm() {
 
   useEffect(() => {
     const loadProfile = async () => {
-        const profile = await getProfile();
+        const userProfile = await getProfile();
+        setProfile(userProfile);
+        
         const userEmail = getCurrentUser();
         const userName = getCurrentUserName();
 
@@ -54,8 +58,8 @@ export default function ProfileForm() {
             mobile: '',
         };
 
-        if (profile) {
-            form.reset({ ...defaultValues, ...profile });
+        if (userProfile) {
+            form.reset({ ...defaultValues, ...userProfile });
         } else if (userEmail) {
             form.reset(defaultValues);
         }
@@ -64,7 +68,9 @@ export default function ProfileForm() {
   }, [form]);
 
   async function onSubmit(data: ProfileFormValues) {
-    await saveProfile(data);
+    const currentProfile = await getProfile();
+    const profileToSave = { ...currentProfile, ...data };
+    await saveProfile(profileToSave as Profile);
     toast({
       title: "Profile Updated!",
       description: "Your profile has been successfully updated.",
@@ -72,71 +78,90 @@ export default function ProfileForm() {
   }
 
   return (
-    <Card className="shadow-sm mt-6">
-      <CardHeader>
-        <CardTitle>My Profile</CardTitle>
-        <CardDescription>Update your personal information.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input placeholder="Enter your full name" {...field} className="pl-10" />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <div className="space-y-6">
+      {profile?.planExpiryDate && (
+        <Card className="shadow-sm bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+           <CardHeader>
+             <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="text-green-600 dark:text-green-500" />
+                <span>Active Plan</span>
+             </CardTitle>
+             <CardDescription>Your plan is active and you can add routes.</CardDescription>
+           </CardHeader>
+           <CardContent>
+                <div className="text-sm">
+                    <span className="text-muted-foreground">Expires on:</span>{' '}
+                    <span className="font-semibold">{format(new Date(profile.planExpiryDate), 'PPP')}</span>
+                </div>
+           </CardContent>
+        </Card>
+      )}
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>My Profile</CardTitle>
+          <CardDescription>Update your personal information.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input placeholder="Enter your full name" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="mobile"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mobile Number</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input type="tel" placeholder="Enter your mobile number" {...field} className="pl-10" />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="mobile"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mobile Number</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input type="tel" placeholder="Enter your mobile number" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input type="email" placeholder="Enter your email" {...field} className="pl-10" disabled />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input type="email" placeholder="Enter your email" {...field} className="pl-10" disabled />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Button type="submit" className="w-full">
-              Save Changes
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              <Button type="submit" className="w-full">
+                Save Changes
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
