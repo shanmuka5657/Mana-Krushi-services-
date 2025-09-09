@@ -23,11 +23,15 @@ interface PaymentDialogProps {
 }
 
 const paymentMethods = [
-    { id: "gpay", name: "Google Pay", url: "gpay://upi/pay" },
-    { id: "phonepe", name: "PhonePe", url: "phonepe://pay" },
-    { id: "paytm", name: "Paytm", url: "paytmmp://pay" },
-    { id: "upi", name: "UPI", url: "upi://pay" },
-]
+    { id: "gpay", name: "Google Pay", scheme: "gpay" },
+    { id: "phonepe", name: "PhonePe", scheme: "phonepe" },
+    { id: "paytm", name: "Paytm", scheme: "paytmmp" },
+    { id: "upi", name: "Other UPI Apps", scheme: "upi" },
+];
+
+const UPI_ID = "7569114679@ybl";
+const PAYEE_NAME = "Mana Krushi Services";
+const AMOUNT = "50.00";
 
 export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }: PaymentDialogProps) {
   const [selectedMethod, setSelectedMethod] = useState("gpay");
@@ -37,9 +41,20 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
   const handlePayment = () => {
     const method = paymentMethods.find(m => m.id === selectedMethod);
     if (!method) return;
+    
+    // Construct the UPI URL
+    const upiParams = new URLSearchParams({
+        pa: UPI_ID,
+        pn: PAYEE_NAME,
+        am: AMOUNT,
+        cu: "INR",
+        tn: `Fee for ${PAYEE_NAME}`
+    });
+
+    const paymentUrl = `${method.scheme}://pay?${upiParams.toString()}`;
 
     // Open the payment app URL
-    window.open(method.url, '_blank');
+    window.open(paymentUrl, '_blank');
     
     setIsProcessing(true);
     onOpenChange(false); // Close the dialog immediately
