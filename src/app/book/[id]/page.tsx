@@ -9,7 +9,7 @@ import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestor
 import { getApp } from "firebase/app";
 
 
-import { getRoutes, getBookings, saveBookings, getProfile, getCurrentUser } from "@/lib/storage";
+import { getRoutes, getProfile, getCurrentUser } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,8 +53,6 @@ export default function BookRidePage() {
         router.push('/profile?role=passenger');
         return;
     }
-
-    const bookings = await getBookings();
     
     const db = getFirestore(getApp());
     // Create a new document reference first to get the ID
