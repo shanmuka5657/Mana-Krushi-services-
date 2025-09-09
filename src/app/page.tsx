@@ -10,6 +10,7 @@ import type { Booking } from "@/lib/types";
 import { format } from "date-fns";
 import type { BookingFormValues } from "@/components/dashboard/booking-form";
 import { useRouter } from "next/navigation";
+import InstallPrompt from "@/components/common/install-prompt";
 
 const initialBookings: Booking[] = [
   {
@@ -90,6 +91,7 @@ export default function Home() {
   
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <InstallPrompt />
       <div className="text-center">
         <h1 className="text-4xl font-bold">Welcome to Mana Krushi Services</h1>
         <p className="mt-4 text-lg text-muted-foreground">
