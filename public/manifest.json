@@ -1,33 +1,32 @@
 {
-  "theme_color": "#f39c12",
-  "background_color": "#2d3748",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/login",
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
   "description": "Travel Agent Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "https://i.ibb.co/6y4jK2T/logo.png",
+      "src": "https://i.ibb.co/7jHzB9d/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/6y4jK2T/logo.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://i.ibb.co/6y4jK2T/logo.png",
+      "src": "https://i.ibb.co/7jHzB9d/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/6y4jK2T/logo.png",
+      "src": "https://i.ibb.co/7jHzB9d/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.ibb.co/7jHzB9d/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
