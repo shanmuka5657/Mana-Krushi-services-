@@ -1,13 +1,22 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "Mana Krushi",
+  "short_name": "ManaKrushi",
   "description": "Travel Agent Management System",
   "start_url": "/",
-  "id": "/",
   "display": "standalone",
-  "background_color": "#f0f4f8",
-  "theme_color": "#38a169",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
   "orientation": "any",
+  "lang": "en-US",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "/?source=pwa",
+  "categories": [
+    "business",
+    "productivity",
+    "travel"
+  ],
   "icons": [
     {
       "src": "/images/icon-192x192.png",
@@ -19,5 +28,9 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "prefer_related_applications": false
 }
