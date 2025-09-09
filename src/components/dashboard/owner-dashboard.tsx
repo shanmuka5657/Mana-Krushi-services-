@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign } from "lucide-react";
-import { format } from "date-fns";
+import { format, addMonths } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -36,8 +36,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getProfile } from "@/lib/storage";
+import { getProfile, saveProfile } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
+import type { Profile } from "@/lib/types";
 
 
 const ownerFormSchema = z.object({
@@ -69,11 +70,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<OwnerFormValues | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     const checkProfile = async () => {
-        const profile = await getProfile();
-        if (!profile || !profile.mobile || profile.mobile === '0000000000') {
+        const userProfile = await getProfile();
+        setProfile(userProfile);
+        if (!userProfile || !userProfile.mobile || userProfile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
     }
@@ -99,29 +102,38 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   
   useEffect(() => {
     const loadProfile = async () => {
-        const profile = await getProfile();
-        if(profile?.name) {
-            form.setValue('ownerName', profile.name);
-            form.setValue('driverName', profile.name);
+        const userProfile = await getProfile();
+        if(userProfile?.name) {
+            form.setValue('ownerName', userProfile.name);
+            form.setValue('driverName', userProfile.name);
         }
-         if(profile?.mobile && profile.mobile !== '0000000000') {
-            form.setValue('driverMobile', profile.mobile);
+         if(userProfile?.mobile && userProfile.mobile !== '0000000000') {
+            form.setValue('driverMobile', userProfile.mobile);
         }
     }
     loadProfile();
   }, [form]);
 
-  function onSubmit(data: OwnerFormValues) {
+  async function onSubmit(data: OwnerFormValues) {
     setRouteDataToSubmit(data);
-    setIsPaymentDialogOpen(true);
+
+    // Check if the user has an active plan
+    const hasActivePlan = profile?.planExpiryDate && new Date(profile.planExpiryDate) > new Date();
+
+    if (hasActivePlan) {
+      // If they have a plan, add the route directly
+      handleRouteSubmission(data);
+    } else {
+      // Otherwise, open the payment dialog
+      setIsPaymentDialogOpen(true);
+    }
   }
-  
-  const handlePaymentSuccess = () => {
-    if (routeDataToSubmit) {
-      onRouteAdded(routeDataToSubmit);
+
+  const handleRouteSubmission = (data: OwnerFormValues) => {
+     onRouteAdded(data);
       toast({
         title: "Route Added!",
-        description: `Your route from ${routeDataToSubmit.fromLocation} to ${routeDataToSubmit.toLocation} has been added.`,
+        description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
       });
       form.reset();
        // Reset form fields to their defaults after submission
@@ -141,6 +153,18 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         rating: 4.5
       });
       setRouteDataToSubmit(null);
+  }
+  
+  const handlePaymentSuccess = async () => {
+    if (routeDataToSubmit && profile) {
+      // Update profile with new expiry date
+      const newExpiryDate = addMonths(new Date(), 3);
+      const updatedProfile: Profile = { ...profile, planExpiryDate: newExpiryDate };
+      await saveProfile(updatedProfile);
+      setProfile(updatedProfile); // Update local profile state
+      
+      // Now submit the route
+      handleRouteSubmission(routeDataToSubmit);
     }
   }
 

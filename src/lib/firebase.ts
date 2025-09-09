@@ -127,7 +127,12 @@ export const getProfileFromFirestore = async (email: string): Promise<Profile | 
 
         if (!docSnap.empty) {
             const doc = docSnap.docs[0];
-            return { ...doc.data(), email: doc.id } as Profile;
+            const data = doc.data();
+            return { 
+                ...data, 
+                email: doc.id,
+                planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
+            } as Profile;
         }
     } catch(e) {
         console.error("Error getting profile", e);

@@ -37,4 +37,5 @@ export type Profile = {
     name: string;
     mobile: string;
     email: string;
+    planExpiryDate?: Date;
 }
