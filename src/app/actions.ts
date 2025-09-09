@@ -1,8 +1,11 @@
+
 "use server";
 
 import { findDestinations } from "@/ai/flows/smart-destination-finder";
-import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-calculator";
+import { calculateDistance as calculateDistanceFlow, CalculateDistanceInputSchema, CalculateDistanceOutputSchema } from "@/ai/flows/distance-calculator";
 import { z } from "zod";
+import type { CalculateDistanceInput, CalculateDistanceOutput } from "@/ai/flows/distance-calculator";
+
 
 const SuggestDestinationsInput = z.object({
   preferences: z
@@ -35,19 +38,6 @@ export async function suggestDestinations(input: {
     return { error: "An unexpected error occurred. Please try again later." };
   }
 }
-
-export const CalculateDistanceInputSchema = z.object({
-  from: z.string().min(2, '"From" location is required.'),
-  to: z.string().min(2, '"To" location is required.'),
-});
-export type CalculateDistanceInput = z.infer<typeof CalculateDistanceInputSchema>;
-
-
-export const CalculateDistanceOutputSchema = z.object({
-    distance: z.number().describe('The approximate driving distance in kilometers.'),
-});
-export type CalculateDistanceOutput = z.infer<typeof CalculateDistanceOutputSchema>;
-
 
 export async function calculateDistance(input: { from: string, to: string }) {
     const validatedInput = CalculateDistanceInputSchema.safeParse(input);

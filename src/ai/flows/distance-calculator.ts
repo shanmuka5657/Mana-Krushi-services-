@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,8 +10,20 @@
  */
 
 import {ai} from '@/ai/genkit';
-import type {CalculateDistanceInput, CalculateDistanceOutput} from '@/app/actions';
-import {CalculateDistanceInputSchema, CalculateDistanceOutputSchema} from '@/app/actions';
+import {z} from 'zod';
+
+export const CalculateDistanceInputSchema = z.object({
+  from: z.string().min(2, '"From" location is required.'),
+  to: z.string().min(2, '"To" location is required.'),
+});
+export type CalculateDistanceInput = z.infer<typeof CalculateDistanceInputSchema>;
+
+
+export const CalculateDistanceOutputSchema = z.object({
+    distance: z.number().describe('The approximate driving distance in kilometers.'),
+});
+export type CalculateDistanceOutput = z.infer<typeof CalculateDistanceOutputSchema>;
+
 
 export async function calculateDistance(input: CalculateDistanceInput): Promise<CalculateDistanceOutput> {
     return calculateDistanceFlow(input);
