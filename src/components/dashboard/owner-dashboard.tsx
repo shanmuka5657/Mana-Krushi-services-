@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -47,6 +48,8 @@ const ownerFormSchema = z.object({
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
+  pickupPoints: z.string().optional().transform(val => val?.split('\n').map(p => p.trim()).filter(p => p)),
+  dropOffPoints: z.string().optional().transform(val => val?.split('\n').map(p => p.trim()).filter(p => p)),
   travelDate: z.date({
     required_error: "A travel date is required.",
   }),
@@ -91,6 +94,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: "",
         fromLocation: "",
         toLocation: "",
+        pickupPoints: [],
+        dropOffPoints: [],
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -145,6 +150,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: profileMobile,
         fromLocation: "",
         toLocation: "",
+        pickupPoints: [],
+        dropOffPoints: [],
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -261,7 +268,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Starting point" {...field} className="pl-10" />
+                          <Input placeholder="Starting city" {...field} className="pl-10" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -277,7 +284,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Destination" {...field} className="pl-10" />
+                          <Input placeholder="Destination city" {...field} className="pl-10" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -285,6 +292,45 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                 />
               </div>
+
+               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                 <FormField
+                    control={form.control}
+                    name="pickupPoints"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pickup Points</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter each pickup point on a new line" 
+                            className="h-24"
+                            {...field}
+                            value={Array.isArray(field.value) ? field.value.join('\n') : field.value || ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dropOffPoints"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Drop-off Points</FormLabel>
+                        <FormControl>
+                           <Textarea 
+                              placeholder="Enter each drop-off point on a new line" 
+                              className="h-24"
+                              {...field}
+                              value={Array.isArray(field.value) ? field.value.join('\n') : field.value || ''}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+               </div>
 
               <FormField
                   control={form.control}
