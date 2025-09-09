@@ -19,6 +19,7 @@ import {
   Download,
   Shield,
   Book,
+  Loader2,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -69,6 +70,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = React.useState('passenger');
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
+  const [isInstallReady, setIsInstallReady] = React.useState(false);
+
 
   React.useEffect(() => {
     // This will only run on the client
@@ -77,6 +80,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
+      setIsInstallReady(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -171,18 +175,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           console.log('User dismissed the install prompt');
         }
       });
-    } else {
-       if (isStandalone) {
-             toast({
-                title: "App is already installed",
-                description: "You are running this as a standalone application.",
-             });
-        } else {
-            toast({
-                title: "Installation not ready",
-                description: "The installation prompt is not available yet. Please refresh the page or try again in a moment.",
-            });
-        }
     }
   };
 
@@ -219,9 +211,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {!isStandalone && (
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton className="justify-start" tooltip="Install App" onClick={handleInstallClick}>
-                            <Download />
-                            <span>Install App</span>
+                        <SidebarMenuButton 
+                            className="justify-start" 
+                            tooltip="Install App" 
+                            onClick={handleInstallClick}
+                            disabled={!isInstallReady}
+                        >
+                            {isInstallReady ? <Download /> : <Loader2 className="animate-spin" /> }
+                            <span>{isInstallReady ? 'Install App' : 'Checking...'}</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

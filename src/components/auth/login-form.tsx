@@ -20,7 +20,7 @@ import { useRouter } from 'next/navigation';
 import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
-import { Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -42,6 +42,8 @@ export function LoginForm() {
   const { toast } = useToast();
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
+  const [isInstallReady, setIsInstallReady] = React.useState(false);
+
 
   React.useEffect(() => {
     // This will only run on the client
@@ -50,6 +52,7 @@ export function LoginForm() {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
+      setIsInstallReady(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -68,21 +71,7 @@ export function LoginForm() {
         } else {
           console.log('User dismissed the install prompt');
         }
-        // We don't set the prompt to null on dismissal, so the user can try again.
-        // setInstallPrompt(null);
       });
-    } else {
-        if (isStandalone) {
-             toast({
-                title: "App is already installed",
-                description: "You are running this as a standalone application.",
-             });
-        } else {
-            toast({
-                title: "Installation not ready",
-                description: "The installation prompt is not available yet. Please refresh the page or try again in a moment.",
-            });
-        }
     }
   };
 
@@ -179,9 +168,18 @@ export function LoginForm() {
         {!isStandalone && (
             <CardFooter className="flex-col gap-2">
                 <div className="w-full h-px bg-border" />
-                <Button variant="outline" className="w-full" onClick={handleInstallClick}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Install App
+                <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={handleInstallClick}
+                    disabled={!isInstallReady}
+                >
+                    {isInstallReady ? (
+                        <Download className="mr-2 h-4 w-4" />
+                    ) : (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {isInstallReady ? 'Install App' : 'Checking for App...'}
                 </Button>
             </CardFooter>
         )}
