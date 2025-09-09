@@ -45,10 +45,28 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
 
   useEffect(() => {
     const fetchBookings = async () => {
-        setAllBookings(await getBookings());
+        setAllBookings(await getBookings(true)); // Admin/Owner can see all
     }
     fetchBookings();
   }, []);
+
+  const getBookedSeats = (route: Route) => {
+     return allBookings.filter(b => {
+        const routeDate = new Date(route.travelDate);
+        const bookingDate = new Date(b.departureDate);
+        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                          routeDate.getMonth() === bookingDate.getMonth() &&
+                          routeDate.getDate() === bookingDate.getDate();
+        const bookingTime = format(bookingDate, 'HH:mm');
+
+        return (
+            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+            isSameDay &&
+            bookingTime === route.departureTime &&
+            b.status !== "Cancelled"
+        );
+    }).length;
+  }
 
   const filteredRoutes = useMemo(() => {
     return routes.filter(route => {
@@ -69,7 +87,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
         routeDate.getFullYear() === bookingDate.getFullYear() &&
         routeDate.getMonth() === bookingDate.getMonth() &&
         routeDate.getDate() === bookingDate.getDate() &&
-        format(booking.departureDate, "HH:mm") === route.departureTime
+        format(bookingDate, "HH:mm") === route.departureTime
       }
     );
     setSelectedRoute(route);
@@ -77,7 +95,8 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   };
   
   const handlePayment = async (bookingId: string, method: 'Cash' | 'UPI') => {
-    const updatedBookings = allBookings.map(b => {
+    const bookingsToUpdate = await getBookings(true);
+    const updatedBookings = bookingsToUpdate.map(b => {
       if (b.id === bookingId) {
         return {
           ...b,
@@ -168,32 +187,36 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                 <TableHead>To</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Departure</TableHead>
-                <TableHead>Seats</TableHead>
+                <TableHead>Seats Left</TableHead>
                 <TableHead className="rounded-r-lg">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredRoutes.length > 0 ? (
-                filteredRoutes.map((route) => (
-                  <TableRow key={route.id}>
-                    <TableCell className="font-medium">{route.fromLocation}</TableCell>
-                    <TableCell>{route.toLocation}</TableCell>
-                    <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
-                    <TableCell>{route.departureTime}</TableCell>
-                    <TableCell>{route.availableSeats}</TableCell>
-                    <TableCell>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewClick(route)}
-                        >
-                          View Bookings
-                        </Button>
-                      </DialogTrigger>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredRoutes.map((route) => {
+                    const bookedSeats = getBookedSeats(route);
+                    const availableSeats = route.availableSeats - bookedSeats;
+                    return (
+                      <TableRow key={route.id}>
+                        <TableCell className="font-medium">{route.fromLocation}</TableCell>
+                        <TableCell>{route.toLocation}</TableCell>
+                        <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
+                        <TableCell>{route.departureTime}</TableCell>
+                        <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
+                        <TableCell>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewClick(route)}
+                            >
+                              View Bookings
+                            </Button>
+                          </DialogTrigger>
+                        </TableCell>
+                      </TableRow>
+                    )
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">

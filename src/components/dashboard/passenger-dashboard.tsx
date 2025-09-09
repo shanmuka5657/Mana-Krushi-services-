@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Car, Star, Zap } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Car, Star, Zap, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -28,9 +28,9 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import type { Route } from "@/lib/types";
+import type { Route, Booking } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { getProfile } from "@/lib/storage";
+import { getProfile, getBookings } from "@/lib/storage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,18 +77,21 @@ const getTravelDuration = (departureTime: string, arrivalTime: string): string =
 export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDashboardProps) {
   const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
-    const checkProfile = async () => {
+    const checkProfileAndFetchBookings = async () => {
         const profile = await getProfile();
         // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
+        const bookings = await getBookings(true); // Fetch all bookings
+        setAllBookings(bookings);
     };
-    checkProfile();
+    checkProfileAndFetchBookings();
   }, []);
   
   const form = useForm<SearchFormValues>({
@@ -98,6 +101,24 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
       toLocation: "",
     },
   });
+  
+  const getBookedSeats = (route: Route) => {
+     return allBookings.filter(b => {
+        const routeDate = new Date(route.travelDate);
+        const bookingDate = new Date(b.departureDate);
+        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                          routeDate.getMonth() === bookingDate.getMonth() &&
+                          routeDate.getDate() === bookingDate.getDate();
+        const bookingTime = format(bookingDate, 'HH:mm');
+
+        return (
+            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+            isSameDay &&
+            bookingTime === route.departureTime &&
+            b.status !== "Cancelled"
+        );
+    }).length;
+  }
 
   function onSubmit(data: SearchFormValues) {
     const searchDateStr = format(data.travelDate, "yyyy-MM-dd");
@@ -231,7 +252,11 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
         {availableOwners.length > 0 && (
           <div className="space-y-4">
               <h2 className="text-xl font-bold">Available Rides</h2>
-              {availableOwners.map((route) => (
+              {availableOwners.map((route) => {
+                  const bookedSeats = getBookedSeats(route);
+                  const availableSeats = route.availableSeats - bookedSeats;
+
+                  return (
                   <Card key={route.id} className="overflow-hidden">
                       <CardContent className="p-4">
                           <div className="flex justify-between items-start">
@@ -251,8 +276,14 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
                                       <div className="font-semibold mt-8">{route.toLocation}</div>
                                   </div>
                               </div>
-                              <div className="text-lg font-bold text-right">
-                                ₹{(route.price || 0).toFixed(2)}
+                              <div className="text-right">
+                                <div className="text-lg font-bold">
+                                    ₹{(route.price || 0).toFixed(2)}
+                                </div>
+                                <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                    <Users className="h-4 w-4" />
+                                    <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
+                                </div>
                               </div>
                           </div>
                       </CardContent>
@@ -271,13 +302,16 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
                                   </div>
                               </div>
                           </div>
-                          <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
-                            <Zap className="mr-2 h-4 w-4" />
-                            Book Now
-                          </Button>
+                          {availableSeats > 0 && (
+                            <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
+                                <Zap className="mr-2 h-4 w-4" />
+                                Book Now
+                            </Button>
+                          )}
                       </CardFooter>
                   </Card>
-              ))}
+                  )
+              })}
           </div>
         )}
     </div>
