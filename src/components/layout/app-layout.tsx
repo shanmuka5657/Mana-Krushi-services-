@@ -201,7 +201,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton className="justify-start" tooltip="Install App" onClick={handleInstallClick} disabled={!installPrompt}>
+                    <SidebarMenuButton className="justify-start" tooltip="Install App" onClick={handleInstallClick}>
                         <Download />
                         <span>Install App</span>
                     </SidebarMenuButton>
