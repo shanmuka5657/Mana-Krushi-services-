@@ -7,7 +7,7 @@ import Script from "next/script";
 export const metadata: Metadata = {
   title: "Mana Krushi Services",
   description: "Travel Agent Management System",
-  manifest: "/manifest.json",
+  manifest: "/manifest.json?v=2",
 };
 
 export default function RootLayout({
