@@ -208,17 +208,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-            {!isStandalone && (
+            {!isStandalone && isInstallReady && (
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton 
                             className="justify-start" 
                             tooltip="Install App" 
                             onClick={handleInstallClick}
-                            disabled={!isInstallReady}
                         >
-                            {isInstallReady ? <Download /> : <Loader2 className="animate-spin" /> }
-                            <span>{isInstallReady ? 'Install App' : 'Checking...'}</span>
+                            <Download />
+                            <span>Install App</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
