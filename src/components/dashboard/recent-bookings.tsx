@@ -204,10 +204,25 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                         <DialogHeader>
                             <DialogTitle>Details for booking {selectedBooking.id}</DialogTitle>
                             <DialogDescription>
-                            Driver and vehicle information for your trip.
+                            Passenger, driver and vehicle information for your trip.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
+                            <div className="flex items-center gap-4">
+                                <User className="h-5 w-5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                    <span className="text-sm text-muted-foreground">Passenger Name</span>
+                                    <span className="font-medium">{selectedBooking.client}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <Phone className="h-5 w-5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                    <span className="text-sm text-muted-foreground">Passenger Mobile</span>
+                                    <span className="font-medium">{selectedBooking.mobile}</span>
+                                </div>
+                            </div>
+                            <hr />
                              <div className="flex items-center gap-4">
                                 <MapPin className="h-5 w-5 text-muted-foreground" />
                                 <div className="flex flex-col">
