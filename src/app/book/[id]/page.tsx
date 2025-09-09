@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Zap, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
@@ -24,6 +24,7 @@ export default function BookRidePage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [isBooking, setIsBooking] = useState(false);
+  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
     const fetchRoute = async () => {
@@ -159,6 +160,27 @@ export default function BookRidePage() {
                             <div className="h-10"></div>
                             <div className="text-muted-foreground">{route.toLocation}</div>
                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        <span>Route Map</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="aspect-video w-full rounded-md overflow-hidden border">
+                         <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            src={`https://www.google.com/maps/embed/v1/directions?key=${mapsApiKey}&origin=${encodeURIComponent(route.fromLocation)}&destination=${encodeURIComponent(route.toLocation)}`}>
+                        </iframe>
                     </div>
                 </CardContent>
             </Card>
