@@ -1,6 +1,7 @@
 "use server";
 
 import { findDestinations } from "@/ai/flows/smart-destination-finder";
+import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-calculator";
 import { z } from "zod";
 
 const SuggestDestinationsInput = z.object({
@@ -33,4 +34,28 @@ export async function suggestDestinations(input: {
     console.error(e);
     return { error: "An unexpected error occurred. Please try again later." };
   }
+}
+
+const CalculateDistanceInput = z.object({
+  from: z.string().min(2, '"From" location is required.'),
+  to: z.string().min(2, '"To" location is required.'),
+});
+
+
+export async function calculateDistance(input: { from: string, to: string }) {
+    const validatedInput = CalculateDistanceInput.safeParse(input);
+    if(!validatedInput.success) {
+        return { error: "Invalid input. " + validatedInput.error.flatten().fieldErrors };
+    }
+
+    try {
+        const result = await calculateDistanceFlow(validatedInput.data);
+        if(!result || !result.distance) {
+             return { error: "Could not calculate distance." };
+        }
+        return { distance: result.distance };
+    } catch (e) {
+        console.error(e);
+        return { error: "An unexpected error occurred while calculating the distance." };
+    }
 }

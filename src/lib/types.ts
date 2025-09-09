@@ -25,6 +25,7 @@ export type Route = {
   driverMobile: string;
   fromLocation: string;
   toLocation: string;
+  distance?: number;
   pickupPoints?: string[];
   dropOffPoints?: string[];
   travelDate: Date;

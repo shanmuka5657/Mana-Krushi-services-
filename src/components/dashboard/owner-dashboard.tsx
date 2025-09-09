@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2 } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { useEffect, useState } from "react";
 
@@ -40,6 +40,7 @@ import {
 import { getProfile, saveProfile } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
+import { calculateDistance } from "@/app/actions";
 
 
 const ownerFormSchema = z.object({
@@ -48,6 +49,7 @@ const ownerFormSchema = z.object({
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
+  distance: z.coerce.number().optional(),
   pickupPoints: z.string().optional(),
   dropOffPoints: z.string().optional(),
   travelDate: z.date({
@@ -72,6 +74,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const { toast } = useToast();
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<OwnerFormValues | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -94,6 +97,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: "",
         fromLocation: "",
         toLocation: "",
+        distance: undefined,
         pickupPoints: "",
         dropOffPoints: "",
         departureTime: "09:00",
@@ -133,6 +137,37 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       setIsPaymentDialogOpen(true);
     }
   }
+  
+  const handleCalculateDistance = async () => {
+      const from = form.getValues('fromLocation');
+      const to = form.getValues('toLocation');
+
+      if(!from || !to) {
+          toast({
+              title: "Locations required",
+              description: "Please enter 'From' and 'To' locations to calculate distance.",
+              variant: "destructive"
+          });
+          return;
+      }
+      setIsCalculating(true);
+      const result = await calculateDistance({from, to});
+      setIsCalculating(false);
+
+      if (result.error) {
+          toast({
+              title: "Error Calculating Distance",
+              description: result.error,
+              variant: "destructive"
+          });
+      } else if (result.distance) {
+          form.setValue('distance', result.distance);
+           toast({
+              title: "Distance Calculated",
+              description: `The distance is approximately ${result.distance} km.`,
+          });
+      }
+  }
 
   const handleRouteSubmission = (data: OwnerFormValues) => {
     const finalData = {
@@ -156,6 +191,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: profileMobile,
         fromLocation: "",
         toLocation: "",
+        distance: undefined,
         pickupPoints: "",
         dropOffPoints: "",
         departureTime: "09:00",
@@ -264,7 +300,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                 )}
               />
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
                 <FormField
                   control={form.control}
                   name="fromLocation"
@@ -298,6 +334,32 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                 />
               </div>
+
+               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                   <FormField
+                      control={form.control}
+                      name="distance"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Distance (km)</FormLabel>
+                          <div className="flex gap-2">
+                             <FormControl>
+                                <div className="relative flex-grow">
+                                  <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                  <Input type="number" placeholder="AI Calculated Distance" {...field} className="pl-10" readOnly />
+                                </div>
+                              </FormControl>
+                             <Button type="button" variant="outline" onClick={handleCalculateDistance} disabled={isCalculating}>
+                                {isCalculating ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                                <span className="ml-2">Calculate</span>
+                             </Button>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+               </div>
+
 
                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                  <FormField
