@@ -173,7 +173,7 @@ export default function BookRidePage() {
                        {route.pickupPoints.map((point, index) => (
                            <a 
                                 key={index} 
-                                href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(point)}`}
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(point)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 text-muted-foreground hover:text-primary hover:underline"
@@ -195,7 +195,7 @@ export default function BookRidePage() {
                        {route.dropOffPoints.map((point, index) => (
                            <a 
                                 key={index} 
-                                href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(point)}`}
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(point)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 text-muted-foreground hover:text-primary hover:underline"
