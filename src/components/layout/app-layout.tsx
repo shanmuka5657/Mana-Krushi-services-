@@ -68,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [userInitial, setUserInitial] = React.useState("U");
   const [role, setRole] = React.useState('passenger');
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = React.useState(true); // Default to true to hide button SSR
+  const [isStandalone, setIsStandalone] = React.useState(false);
 
   React.useEffect(() => {
     // This will only run on the client
@@ -170,13 +170,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         } else {
           console.log('User dismissed the install prompt');
         }
-        setInstallPrompt(null);
       });
     } else {
-       toast({
-        title: "App is not installable",
-        description: "The app might already be installed or your browser doesn't support installation.",
-       });
+       if (isStandalone) {
+             toast({
+                title: "App is already installed",
+                description: "You are running this as a standalone application.",
+             });
+        } else {
+            toast({
+                title: "Installation not ready",
+                description: "The installation prompt is not available yet. Please refresh the page or try again in a moment.",
+            });
+        }
     }
   };
 
