@@ -105,7 +105,7 @@ export default function BookRidePage() {
     const db = getFirestore(getApp());
     const newBookingRef = doc(collection(db, 'bookings'));
 
-    const newBooking: Booking = {
+    const bookingData: Booking = {
         id: newBookingRef.id,
         client: passengerProfile.name,
         clientEmail: passengerEmail,
@@ -124,7 +124,11 @@ export default function BookRidePage() {
     };
     
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
-    newBooking.departureDate.setHours(depHours, depMinutes, 0, 0);
+    bookingData.departureDate.setHours(depHours, depMinutes, 0, 0);
+
+    const newBooking = Object.fromEntries(
+      Object.entries(bookingData).filter(([, value]) => value !== undefined)
+    );
 
     await setDoc(newBookingRef, newBooking);
 
@@ -292,5 +296,3 @@ export default function BookRidePage() {
     </div>
   );
 }
-
-    

@@ -103,7 +103,8 @@ export const saveRoutesToFirestore = async (routes: Route[]) => {
     const batch = writeBatch(db);
     routes.forEach((route) => {
         const docRef = doc(db, "routes", route.id);
-        batch.set(docRef, route);
+        const routeToSave = Object.fromEntries(Object.entries(route).filter(([_, v]) => v !== undefined));
+        batch.set(docRef, routeToSave);
     });
     await batch.commit();
 };
@@ -111,7 +112,8 @@ export const saveRoutesToFirestore = async (routes: Route[]) => {
 export const addRouteToFirestore = async (route: Omit<Route, 'id'>): Promise<Route> => {
     if (!routesCollection) throw new Error("Firestore not initialized");
     const newDocRef = doc(routesCollection);
-    const newRoute = { ...route, id: newDocRef.id };
+    const routeToSave = Object.fromEntries(Object.entries(route).filter(([_, v]) => v !== undefined));
+    const newRoute = { ...routeToSave, id: newDocRef.id } as Route;
     await setDoc(newDocRef, newRoute);
     return newRoute;
 }

@@ -78,13 +78,18 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       });
       return;
     }
-    const updatedBooking = { ...selectedBooking, report: reportText };
+    const updatedBookingData = { ...selectedBooking, report: reportText };
+
+    // Remove undefined values before saving to Firestore
+    const updatedBooking = Object.fromEntries(
+      Object.entries(updatedBookingData).filter(([, value]) => value !== undefined)
+    );
     
     const allBookings = await getBookings();
-    const updatedBookings = allBookings.map((b: Booking) => b.id === updatedBooking.id ? updatedBooking : b);
+    const updatedBookings = allBookings.map((b: Booking) => b.id === updatedBooking.id ? (updatedBooking as Booking) : b);
     await saveBookings(updatedBookings);
     
-    onUpdateBooking(updatedBooking);
+    onUpdateBooking(updatedBooking as Booking);
 
     toast({
       title: "Report Submitted",
