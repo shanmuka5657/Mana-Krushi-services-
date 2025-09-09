@@ -66,16 +66,8 @@
       "url": "url"
     }
   },
-  "file_handlers": [],
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
-  "protocol_handlers": [],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "",
-  "widgets": [],
-  "edge_side_panel": {},
-  "note_taking": {},
-  "scope_extensions": []
+  "prefer_related_applications": false
 }
