@@ -2,18 +2,11 @@
   "name": "Mana Krushi Services",
   "short_name": "ManaKrushi",
   "description": "Travel Agent Management System",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2c3e50",
-  "orientation": "any",
-  "id": "/?utm_source=pwa",
   "icons": [
     {
       "src": "/images/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/images/icon-512x512.png",
@@ -22,106 +15,113 @@
       "purpose": "any maskable"
     }
   ],
+  "theme_color": "#10b981",
+  "background_color": "#ffffff",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "id": "/?source=pwa",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
   "categories": [
     "business",
     "travel",
     "management"
   ],
-  "lang": "en-US",
-  "dir": "ltr",
   "display_override": [
     "standalone",
-    "minimal-ui",
-    "fullscreen",
-    "window-controls-overlay"
+    "minimal-ui"
   ],
-  "screenshots": [
-    {
-      "src": "/images/screenshot-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Desktop Screenshot"
-    },
-    {
-      "src": "/images/screenshot-mobile.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mobile Screenshot"
-    }
-  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
   "shortcuts": [
     {
       "name": "New Booking",
       "short_name": "New",
       "description": "Create a new booking",
       "url": "/dashboard?action=new-booking",
-      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/images/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "View Bookings",
       "short_name": "Bookings",
-      "description": "View your existing bookings",
+      "description": "View all your bookings",
       "url": "/bookings",
-      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/images/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-desktop.png",
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/images/screenshot-mobile.png",
+      "type": "image/png",
+      "sizes": "640x1136",
+      "form_factor": "narrow"
     }
   ],
   "share_target": {
-    "action": "/share-handler",
-    "method": "POST",
-    "enctype": "multipart/form-data",
+    "action": "/share-target",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url",
-      "files": [
-        {
-          "name": "files",
-          "accept": ["image/*"]
-        }
-      ]
+      "url": "url"
     }
   },
   "file_handlers": [
     {
       "action": "/open-file",
       "accept": {
-        "text/plain": [".txt", ".text"],
-        "application/json": [".json"]
+        "text/plain": [
+          ".txt"
+        ]
       }
     }
   ],
   "protocol_handlers": [
     {
-      "protocol": "web+manakrushi",
-      "url": "/protocol-handler?q=%s"
+      "protocol": "web+mana",
+      "url": "/protocol-handler?path=%s"
     }
   ],
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.example.manakrushi",
-      "id": "com.example.manakrushi"
-    }
-  ],
-  "edge_side_panel": {
-    "preferred_width": 480
-  },
   "launch_handler": {
-    "client_mode": "navigate-existing"
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
   },
-  "prefer_related_applications": false,
+  "edge_side_panel": {},
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "scope_extensions": [
+    {
+      "origin": "*.manakrushi.com"
+    }
+  ],
   "widgets": [
     {
       "name": "Recent Bookings",
-      "description": "View recent bookings right from your home screen.",
+      "description": "View your recent bookings.",
       "tag": "recent-bookings",
-      "template": "booking-template",
-      "ms_ac_template": "widgets/booking-template.json",
-      "data": "widgets/booking-data.json",
-      "type": "application/json",
+      "template": "booking-list",
+      "ms_ac_template": "booking-list",
+      "data": "{ 'bookings': [] }",
       "screenshots": [
         {
           "src": "/images/widget-screenshot.png",
@@ -138,12 +138,5 @@
       "auth": false,
       "update": 86400
     }
-  ],
-  "note_taking": {
-    "new_note_url": "/new-note",
-    "needs_account": true
-  },
-  "scope_extensions": [
-    { "origin": "*.example.com" }
   ]
 }
