@@ -62,6 +62,7 @@ export default function BookRidePage() {
     const bookingsForThisRoute = allBookings.filter(b => {
         const routeDate = new Date(route.travelDate);
         const bookingDate = new Date(b.departureDate);
+
         // Compare year, month, and day
         const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
                           routeDate.getMonth() === bookingDate.getMonth() &&
@@ -162,6 +163,38 @@ export default function BookRidePage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {route.pickupPoints && route.pickupPoints.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Pickup Points</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                       {route.pickupPoints.map((point, index) => (
+                           <div key={index} className="flex items-center gap-2 text-muted-foreground">
+                               <MapPin className="h-4 w-4" />
+                               <span>{point}</span>
+                           </div>
+                       ))}
+                    </CardContent>
+                </Card>
+            )}
+
+            {route.dropOffPoints && route.dropOffPoints.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Drop-off Points</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                       {route.dropOffPoints.map((point, index) => (
+                           <div key={index} className="flex items-center gap-2 text-muted-foreground">
+                               <MapPin className="h-4 w-4" />
+                               <span>{point}</span>
+                           </div>
+                       ))}
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader>
