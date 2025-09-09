@@ -1,0 +1,135 @@
+{
+  "name": "Mana Krushi Services",
+  "short_name": "ManaKrushi",
+  "description": "Travel Agent Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2F4F4",
+  "theme_color": "#76D7C4",
+  "orientation": "any",
+  "id": "/?user_id=globetrotter",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "business",
+    "travel",
+    "productivity"
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop Dashboard View"
+    },
+    {
+      "src": "/images/screenshot-mobile.png",
+      "sizes": "640x1136",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Bookings View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Booking",
+      "short_name": "New",
+      "description": "Create a new client booking",
+      "url": "/dashboard?action=new-booking",
+      "icons": [{ "src": "/images/shortcut-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "share_target": {
+    "action": "/share-handler",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "shared_files",
+          "accept": ["image/jpeg", "image/png", ".pdf"]
+        }
+      ]
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/open-file",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "image/png": [".png"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+travel",
+      "url": "/handle-protocol?url=%s"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.krushiservices.app",
+      "id": "com.krushiservices.app"
+    }
+  ],
+  "iarc_rating_id": "e1234567890",
+  "widgets": [
+    {
+      "name": "Quick Booking",
+      "description": "Create a new booking fast",
+      "tag": "booking",
+      "template": "booking-widget",
+      "ms_ac_template": "booking-widget",
+      "data": "{ \"id\": \"123\" }",
+      "screenshots": [{
+        "src": "/images/widget-preview.png",
+        "sizes": "256x256",
+        "label": "A preview of the booking widget"
+      }],
+      "icons": [{
+        "src": "/images/widget-icon.png",
+        "sizes": "48x48"
+      }]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "note_taking": {
+    "enabled": true,
+    "default_note_title": "New Travel Note",
+    "new_note_url": "/notes/new"
+  },
+  "scope_extensions": [
+    { "origin": "https://*.example.com" }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "prefer_related_applications": false
+}
