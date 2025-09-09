@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getBookings, getCurrentUserName } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Calendar } from 'lucide-react';
+import { User, Phone, Calendar, Download } from 'lucide-react';
 import { Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { exportToCsv } from '@/lib/utils';
 
 type Passenger = {
     name: string;
@@ -57,6 +59,16 @@ function PassengersPageContent() {
         fetchPassengers();
     }, []);
 
+    const handleExport = () => {
+        const dataToExport = passengers.map(p => ({
+            'Name': p.name,
+            'Mobile': p.mobile,
+            'Total Bookings': p.totalBookings,
+            'Last Booking': format(p.lastBookingDate, 'PPP'),
+        }));
+        exportToCsv('my-passengers.csv', dataToExport);
+    }
+
     if (!isLoaded) {
         return <AppLayout><div>Loading passengers...</div></AppLayout>;
     }
@@ -64,9 +76,15 @@ function PassengersPageContent() {
     return (
         <AppLayout>
             <Card>
-                <CardHeader>
-                    <CardTitle>My Passengers</CardTitle>
-                    <CardDescription>A list of all passengers who have booked with you.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>My Passengers</CardTitle>
+                        <CardDescription>A list of all passengers who have booked with you.</CardDescription>
+                    </div>
+                     <Button onClick={handleExport} variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <Table>

@@ -8,6 +8,10 @@ import { getRoutes } from '@/lib/storage';
 import type { Route } from '@/lib/types';
 import { Suspense } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import { exportToCsv } from '@/lib/utils';
+import { format } from 'date-fns';
 
 function AdminAllRoutesPage() {
     const [routes, setRoutes] = useState<Route[]>([]);
@@ -23,6 +27,21 @@ function AdminAllRoutesPage() {
         fetchRoutes();
     }, []);
 
+    const handleExport = () => {
+        const dataToExport = routes.map(r => ({
+            'Owner': r.ownerName,
+            'Driver': r.driverName,
+            'From': r.fromLocation,
+            'To': r.toLocation,
+            'Date': format(new Date(r.travelDate), 'yyyy-MM-dd'),
+            'Departure': r.departureTime,
+            'Arrival': r.arrivalTime,
+            'Seats': r.availableSeats,
+            'Price': r.price,
+            'Vehicle': r.vehicleType
+        }));
+        exportToCsv('all-routes.csv', dataToExport);
+    }
 
     if (!isLoaded) {
         return <AppLayout><div>Loading all routes...</div></AppLayout>;
@@ -31,9 +50,15 @@ function AdminAllRoutesPage() {
     return (
         <AppLayout>
            <Card>
-                <CardHeader>
-                    <CardTitle>All Routes</CardTitle>
-                    <CardDescription>A list of all routes created by all owners.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>All Routes</CardTitle>
+                        <CardDescription>A list of all routes created by all owners.</CardDescription>
+                    </div>
+                     <Button onClick={handleExport} variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                    </Button>
                 </CardHeader>
            </Card>
            <MyRoutes routes={routes} />

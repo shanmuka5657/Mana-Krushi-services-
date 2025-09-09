@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAllProfiles } from '@/lib/storage';
 import type { Profile } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Mail, Shield, Badge } from 'lucide-react';
+import { User, Phone, Mail, Shield, Download } from 'lucide-react';
 import { Badge as UiBadge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { exportToCsv } from '@/lib/utils';
 
 function AdminUsersPage() {
     const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -24,6 +26,17 @@ function AdminUsersPage() {
         fetchProfiles();
     }, []);
 
+    const handleExport = () => {
+        const dataToExport = profiles.map(p => ({
+            Name: p.name,
+            Email: p.email,
+            Mobile: p.mobile,
+            Role: p.role,
+            'Plan Expiry': p.planExpiryDate ? format(new Date(p.planExpiryDate), 'PPP') : 'N/A'
+        }));
+        exportToCsv('users.csv', dataToExport);
+    }
+
     if (!isLoaded) {
         return <AppLayout><div>Loading users...</div></AppLayout>;
     }
@@ -31,9 +44,15 @@ function AdminUsersPage() {
     return (
         <AppLayout>
             <Card>
-                <CardHeader>
-                    <CardTitle>All Users</CardTitle>
-                    <CardDescription>A list of all registered users in the system.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>All Users</CardTitle>
+                        <CardDescription>A list of all registered users in the system.</CardDescription>
+                    </div>
+                    <Button onClick={handleExport} variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <Table>

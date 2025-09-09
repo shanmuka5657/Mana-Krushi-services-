@@ -8,9 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getBookings } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { format } from 'date-fns';
-import { DollarSign, User, Car } from 'lucide-react';
+import { DollarSign, User, Car, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { exportToCsv } from '@/lib/utils';
 
 function AdminPaymentsPage() {
     const [payments, setPayments] = useState<Booking[]>([]);
@@ -29,6 +31,18 @@ function AdminPaymentsPage() {
         fetchPayments();
     }, []);
 
+    const handleExport = () => {
+        const dataToExport = payments.map(p => ({
+            'Booking ID': p.id,
+            'Client': p.client,
+            'Owner': p.driverName,
+            'Date': format(new Date(p.departureDate), 'PPP'),
+            'Amount': p.amount.toFixed(2),
+            'Method': p.paymentMethod,
+        }));
+        exportToCsv('payments-history.csv', dataToExport);
+    }
+
     if (!isLoaded) {
         return <AppLayout><div>Loading payments...</div></AppLayout>;
     }
@@ -36,9 +50,15 @@ function AdminPaymentsPage() {
     return (
         <AppLayout>
             <Card>
-                <CardHeader>
-                    <CardTitle>All Payments</CardTitle>
-                    <CardDescription>A record of all completed payments from all users.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>All Payments</CardTitle>
+                        <CardDescription>A record of all completed payments from all users.</CardDescription>
+                    </div>
+                     <Button onClick={handleExport} variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <Table>
