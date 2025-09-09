@@ -21,17 +21,6 @@ import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 import { Download } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -52,17 +41,11 @@ export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallDialogOpen, setIsInstallDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
-      // Only show the dialog automatically once per session, if not already seen.
-      if (!sessionStorage.getItem('installPromptSeen')) {
-        setIsInstallDialogOpen(true); 
-        sessionStorage.setItem('installPromptSeen', 'true');
-      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -82,7 +65,6 @@ export function LoginForm() {
           console.log('User dismissed the install prompt');
         }
         setInstallPrompt(null);
-        setIsInstallDialogOpen(false);
       });
     }
   };
@@ -131,24 +113,6 @@ export function LoginForm() {
 
   return (
     <>
-      <AlertDialog open={isInstallDialogOpen} onOpenChange={setIsInstallDialogOpen}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Install Mana Krushi Services App</AlertDialogTitle>
-                <AlertDialogDescription>
-                    For a better experience, install our app on your device. It's fast, works offline, and is just one click away from your home screen.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setIsInstallDialogOpen(false)}>Later</AlertDialogCancel>
-                <AlertDialogAction onClick={handleInstallClick}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Install
-                </AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Login</CardTitle>
