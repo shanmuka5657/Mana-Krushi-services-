@@ -6,6 +6,7 @@ import {
   Briefcase,
   DollarSign,
   HelpCircle,
+  Home,
   LayoutDashboard,
   Map,
   Route as RouteIcon,
@@ -103,7 +104,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const adminNavItems = [
-    { href: `/admin/dashboard`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/admin/dashboard`, icon: Home, label: "Home" },
     { href: `/admin/users`, icon: Users, label: "Users" },
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
@@ -112,7 +113,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   ];
 
   const ownerNavItems = [
-    { href: `/dashboard?role=owner`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/dashboard?role=owner`, icon: Home, label: "Home" },
     { href: `/profile?role=owner`, icon: User, label: "Profile" },
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
@@ -123,7 +124,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   ];
 
   const passengerNavItems = [
-    { href: `/dashboard?role=passenger`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
@@ -214,7 +215,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             <SidebarTrigger className="md:hidden" />
             <h2 className="hidden text-2xl font-semibold md:block">
-              {role === 'admin' ? 'Admin Panel' : 'Travel Agent Dashboard'}
+              {role === 'admin' ? 'Admin Panel' : (role === 'owner' ? 'Owner Dashboard' : 'Passenger Dashboard')}
             </h2>
           </div>
           <div className="flex flex-1 items-center justify-end gap-4">

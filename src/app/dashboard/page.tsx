@@ -41,7 +41,8 @@ function DashboardPage() {
         const ownerName = getCurrentUserName();
         const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
         setRoutes(ownerRoutes);
-        setUserBookings(bookingsFromStorage); // Owner sees all bookings for now, can be refined.
+        const ownerBookings = ownerName ? bookingsFromStorage.filter(b => b.driverName === ownerName) : [];
+        setUserBookings(ownerBookings);
       }
 
       setIsLoaded(true);
@@ -52,12 +53,10 @@ function DashboardPage() {
   const handleAddRoute = async (newRouteData: OwnerFormValues) => {
     const ownerName = getCurrentUserName();
     if (!ownerName) {
-        // Handle case where owner name is not available, maybe show an error
         console.error("Owner name not found, cannot add route.");
         return;
     }
     
-    // Ensure the ownerName from the session is used, overriding anything from the form
     const routeWithOwner = {
         ...newRouteData,
         ownerName: ownerName,
@@ -79,7 +78,9 @@ function DashboardPage() {
     if (role === 'passenger') {
       setUserBookings(currentUserName ? updatedAllBookings.filter(b => b.client === currentUserName) : []);
     } else {
-      setUserBookings(updatedAllBookings);
+      const ownerName = getCurrentUserName();
+      const ownerBookings = ownerName ? updatedAllBookings.filter(b => b.driverName === ownerName) : [];
+      setUserBookings(ownerBookings);
     }
   };
 
