@@ -2,9 +2,9 @@
 "use server";
 
 import { findDestinations } from "@/ai/flows/smart-destination-finder";
-import { calculateDistance as calculateDistanceFlow, CalculateDistanceInputSchema, CalculateDistanceOutputSchema } from "@/ai/flows/distance-calculator";
+import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-calculator";
 import { z } from "zod";
-import type { CalculateDistanceInput, CalculateDistanceOutput } from "@/ai/flows/distance-calculator";
+import { CalculateDistanceInputSchema } from "@/lib/types";
 
 
 const SuggestDestinationsInput = z.object({
