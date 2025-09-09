@@ -31,6 +31,7 @@ function AdminAllRoutesPage() {
         const dataToExport = routes.map(r => ({
             'Owner': r.ownerName,
             'Driver': r.driverName,
+            'Driver Mobile': r.driverMobile,
             'From': r.fromLocation,
             'To': r.toLocation,
             'Date': format(new Date(r.travelDate), 'yyyy-MM-dd'),
