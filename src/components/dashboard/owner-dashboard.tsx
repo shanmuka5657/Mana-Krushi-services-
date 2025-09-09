@@ -48,8 +48,8 @@ const ownerFormSchema = z.object({
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
-  pickupPoints: z.string().optional().transform(val => val?.split('\n').map(p => p.trim()).filter(p => p)),
-  dropOffPoints: z.string().optional().transform(val => val?.split('\n').map(p => p.trim()).filter(p => p)),
+  pickupPoints: z.string().optional(),
+  dropOffPoints: z.string().optional(),
   travelDate: z.date({
     required_error: "A travel date is required.",
   }),
@@ -64,7 +64,7 @@ const ownerFormSchema = z.object({
 export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
 
 interface OwnerDashboardProps {
-  onRouteAdded: (newRoute: OwnerFormValues) => void;
+  onRouteAdded: (newRoute: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[] }) => void;
   onSwitchTab: (tab: string) => void;
 }
 
@@ -94,8 +94,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: "",
         fromLocation: "",
         toLocation: "",
-        pickupPoints: [],
-        dropOffPoints: [],
+        pickupPoints: "",
+        dropOffPoints: "",
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -135,7 +135,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }
 
   const handleRouteSubmission = (data: OwnerFormValues) => {
-     onRouteAdded(data);
+    const finalData = {
+      ...data,
+      pickupPoints: data.pickupPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
+      dropOffPoints: data.dropOffPoints?.split('\n').map(p => p.trim()).filter(p => p) || []
+    };
+
+     onRouteAdded(finalData);
       toast({
         title: "Route Added!",
         description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
@@ -150,8 +156,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: profileMobile,
         fromLocation: "",
         toLocation: "",
-        pickupPoints: [],
-        dropOffPoints: [],
+        pickupPoints: "",
+        dropOffPoints: "",
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -305,7 +311,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                             placeholder="Enter each pickup point on a new line" 
                             className="h-24"
                             {...field}
-                            value={Array.isArray(field.value) ? field.value.join('\n') : field.value || ''}
                           />
                         </FormControl>
                         <FormMessage />
@@ -323,7 +328,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                               placeholder="Enter each drop-off point on a new line" 
                               className="h-24"
                               {...field}
-                              value={Array.isArray(field.value) ? field.value.join('\n') : field.value || ''}
                             />
                         </FormControl>
                         <FormMessage />

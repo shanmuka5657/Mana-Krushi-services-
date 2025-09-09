@@ -51,7 +51,7 @@ function DashboardPage() {
     fetchData();
   }, [role]);
 
-  const handleAddRoute = async (newRouteData: OwnerFormValues) => {
+  const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[] }) => {
     const ownerName = getCurrentUserName();
     if (!ownerName) {
         console.error("Owner name not found, cannot add route.");
