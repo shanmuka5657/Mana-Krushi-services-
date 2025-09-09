@@ -36,7 +36,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
-import { calculateToll } from "@/app/actions";
 
 interface MyRoutesProps {
   routes: Route[];
@@ -64,11 +63,8 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [toll, setToll] = useState<number>(0);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [earningsMap, setEarningsMap] = useState<Record<string, { loading: boolean, value: number | null }>>({});
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -98,7 +94,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   useEffect(() => {
     const fetchBookingsAndProfile = async () => {
         setAllBookings(await getBookings(true)); // Admin/Owner can see all
-        setProfile(await getProfile());
     }
     fetchBookingsAndProfile();
   }, []);
@@ -202,15 +197,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     });
   }
 
-  const shouldCalculateEarnings = (route: Route, bookedSeats: number) => {
-      const routeDateTime = new Date(route.travelDate);
-      const [hours, minutes] = route.arrivalTime.split(':').map(Number);
-      routeDateTime.setHours(hours, minutes);
-      const isComplete = routeDateTime < new Date();
-      const isFull = bookedSeats >= route.availableSeats;
-      return isComplete || isFull;
-  }
-
   const getStatusInfo = (status: Booking['status']) => {
     switch(status) {
       case 'Confirmed':
@@ -221,63 +207,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
         return { icon: AlertCircle, color: 'text-muted-foreground', label: status };
     }
   }
-
-  const calculateEarnings = async (route: Route) => {
-      if (earningsMap[route.id]?.value !== null && earningsMap[route.id]?.value !== undefined) return;
-      if (earningsMap[route.id]?.loading) return;
-
-      setEarningsMap(prev => ({ ...prev, [route.id]: { loading: true, value: null } }));
-
-      try {
-        const routeBookings = allBookings.filter(b => {
-            const routeDate = new Date(route.travelDate);
-            const bookingDate = new Date(b.departureDate);
-            const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                              routeDate.getMonth() === bookingDate.getMonth() &&
-                              routeDate.getDate() === bookingDate.getDate();
-            const bookingTime = format(bookingDate, 'HH:mm');
-
-            // Calculate earnings based on confirmed or completed bookings
-            return (
-                b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-                isSameDay &&
-                bookingTime === route.departureTime &&
-                (b.status === "Completed" || b.status === "Confirmed")
-            );
-        });
-
-        if (routeBookings.length === 0) {
-            setEarningsMap(prev => ({ ...prev, [route.id]: { loading: false, value: 0 } }));
-            return;
-        }
-
-        const totalRevenue = routeBookings.reduce((acc, b) => acc + b.amount, 0);
-        
-        const tollResult = await calculateToll({ from: route.fromLocation, to: route.toLocation });
-        const estimatedToll = tollResult.estimatedTollCost || 0;
-        
-        const fuelCost = (route.distance && profile?.mileage) 
-            ? (route.distance / profile.mileage) * 100 // Assuming fuel price of 100
-            : 0;
-
-        const finalEarnings = totalRevenue - fuelCost - estimatedToll;
-        setEarningsMap(prev => ({ ...prev, [route.id]: { loading: false, value: finalEarnings } }));
-      } catch (error) {
-        console.error("Failed to calculate earnings:", error);
-        setEarningsMap(prev => ({ ...prev, [route.id]: { loading: false, value: null } })); // Set to null on error
-      }
-  }
   
-  useEffect(() => {
-    routes.forEach(route => {
-        const bookedSeats = getBookedSeats(route);
-        if (shouldCalculateEarnings(route, bookedSeats)) {
-            calculateEarnings(route);
-        }
-    });
-  }, [routes, allBookings, profile]);
-
-
   return (
     <Card className="shadow-sm mt-6">
       <CardHeader>
@@ -331,7 +261,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
               <TableHead>Date</TableHead>
               <TableHead>Departure</TableHead>
               <TableHead>Seats Left</TableHead>
-              <TableHead>Earnings</TableHead>
               <TableHead className="rounded-r-lg text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -340,8 +269,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
               filteredRoutes.map((route) => {
                   const bookedSeats = getBookedSeats(route);
                   const availableSeats = route.availableSeats - bookedSeats;
-                  const earnings = earningsMap[route.id];
-                  const showEarnings = shouldCalculateEarnings(route, bookedSeats);
                   return (
                     <TableRow key={route.id}>
                       <TableCell className="font-medium">{route.fromLocation}</TableCell>
@@ -349,15 +276,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                       <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
                       <TableCell>{route.departureTime}</TableCell>
                       <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
-                      <TableCell>
-                        {showEarnings ? (
-                           earnings?.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                               earnings?.value !== null && earnings?.value !== undefined ? `₹${earnings.value.toFixed(2)}` : 'N/A'
-                           )
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
                       <TableCell className="flex gap-2 justify-center">
                           <Button
                             variant="outline"
@@ -379,7 +297,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 text-center">
                   No routes found.
                 </TableCell>
               </TableRow>
