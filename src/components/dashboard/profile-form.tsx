@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel } from "lucide-react";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
@@ -31,6 +31,7 @@ const profileFormSchema = z.object({
   address: z.string().optional(),
   vehicleType: z.string().optional(),
   vehicleNumber: z.string().optional(),
+  mileage: z.coerce.number().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -48,6 +49,7 @@ export default function ProfileForm() {
       address: "",
       vehicleType: "",
       vehicleNumber: "",
+      mileage: 0,
     },
   });
 
@@ -66,6 +68,7 @@ export default function ProfileForm() {
             address: '',
             vehicleType: '',
             vehicleNumber: '',
+            mileage: 0,
         };
 
         if (userProfile) {
@@ -211,6 +214,22 @@ export default function ProfileForm() {
                           <div className="relative">
                             <Car className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input placeholder="e.g., AP 01 AB 1234" {...field} className="pl-10" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="mileage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vehicle Mileage (km/l)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Fuel className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="number" placeholder="e.g., 20" {...field} className="pl-10" />
                           </div>
                         </FormControl>
                         <FormMessage />
