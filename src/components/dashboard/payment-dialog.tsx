@@ -23,10 +23,10 @@ interface PaymentDialogProps {
 }
 
 const paymentMethods = [
-    { id: "gpay", name: "Google Pay" },
-    { id: "phonepe", name: "PhonePe" },
-    { id: "paytm", name: "Paytm" },
-    { id: "upi", name: "UPI" },
+    { id: "gpay", name: "Google Pay", url: "gpay://upi/pay" },
+    { id: "phonepe", name: "PhonePe", url: "phonepe://pay" },
+    { id: "paytm", name: "Paytm", url: "paytmmp://pay" },
+    { id: "upi", name: "UPI", url: "upi://pay" },
 ]
 
 export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }: PaymentDialogProps) {
@@ -35,18 +35,30 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
   const { toast } = useToast();
   
   const handlePayment = () => {
+    const method = paymentMethods.find(m => m.id === selectedMethod);
+    if (!method) return;
+
+    // Open the payment app URL
+    window.open(method.url, '_blank');
+    
     setIsProcessing(true);
-    // Simulate API call
+    onOpenChange(false); // Close the dialog immediately
+
+    // Simulate waiting for payment confirmation
+    toast({
+      title: "Waiting for Payment...",
+      description: "Complete the payment in your selected app. We'll verify it shortly.",
+    });
+
     setTimeout(() => {
       setIsProcessing(false);
-      onOpenChange(false);
       onPaymentSuccess();
       toast({
         title: "Payment Successful!",
         description: "Your one-time fee has been paid.",
         action: <CheckCircle className="text-green-500" />
       });
-    }, 2000);
+    }, 5000); // Wait 5 seconds to simulate verification
   };
 
   return (
