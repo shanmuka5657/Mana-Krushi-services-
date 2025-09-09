@@ -1,12 +1,13 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
+  "short_name": "KrushiSvc",
   "description": "Travel Agent Management System",
   "icons": [
     {
       "src": "/images/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/images/icon-512x512.png",
@@ -15,128 +16,66 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#10b981",
-  "background_color": "#ffffff",
-  "start_url": "/",
+  "start_url": "/login",
   "display": "standalone",
+  "background_color": "#F0F4F8",
+  "theme_color": "#16a34a",
   "orientation": "any",
-  "id": "/?source=pwa",
+  "id": "/?utm_source=pwa",
   "scope": "/",
   "lang": "en-US",
-  "dir": "ltr",
-  "categories": [
-    "business",
-    "travel",
-    "management"
-  ],
+  "dir": "auto",
+  "categories": ["business", "travel", "management"],
   "display_override": [
     "standalone",
     "minimal-ui"
   ],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "shortcuts": [
-    {
-      "name": "New Booking",
-      "short_name": "New",
-      "description": "Create a new booking",
-      "url": "/dashboard?action=new-booking",
-      "icons": [
-        {
-          "src": "/images/icon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "View Bookings",
-      "short_name": "Bookings",
-      "description": "View all your bookings",
-      "url": "/bookings",
-      "icons": [
-        {
-          "src": "/images/icon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
   "screenshots": [
     {
       "src": "/images/screenshot-desktop.png",
-      "type": "image/png",
       "sizes": "1280x720",
-      "form_factor": "wide"
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop View"
     },
     {
       "src": "/images/screenshot-mobile.png",
+      "sizes": "720x1280",
       "type": "image/png",
-      "sizes": "640x1136",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Booking",
+      "url": "/dashboard?role=passenger",
+      "description": "Start a new booking"
+    },
+    {
+      "name": "My Routes",
+      "url": "/dashboard?role=owner&tab=my-routes",
+      "description": "View your created routes"
     }
   ],
   "share_target": {
-    "action": "/share-target",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
+    "action": "/share-handler",
     "params": {
       "title": "title",
       "text": "text",
       "url": "url"
     }
   },
-  "file_handlers": [
-    {
-      "action": "/open-file",
-      "accept": {
-        "text/plain": [
-          ".txt"
-        ]
-      }
-    }
-  ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+mana",
-      "url": "/protocol-handler?path=%s"
-    }
-  ],
+  "file_handlers": [],
   "launch_handler": {
-    "client_mode": [
-      "navigate-existing",
-      "auto"
-    ]
+    "client_mode": "navigate-existing"
   },
+  "protocol_handlers": [],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "widgets": [],
   "edge_side_panel": {},
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "scope_extensions": [
-    {
-      "origin": "*.manakrushi.com"
-    }
-  ],
-  "widgets": [
-    {
-      "name": "Recent Bookings",
-      "description": "View your recent bookings.",
-      "tag": "recent-bookings",
-      "template": "booking-list",
-      "ms_ac_template": "booking-list",
-      "data": "{ 'bookings': [] }",
-      "screenshots": [
-        {
-          "src": "/images/widget-screenshot.png",
-          "sizes": "600x400",
-          "label": "Recent Bookings Widget"
-        }
-      ],
-      "icons": [
-        {
-          "src": "/images/icon-192x192.png",
-          "sizes": "192x192"
-        }
-      ],
-      "auth": false,
-      "update": 86400
-    }
-  ]
+  "note_taking": {},
+  "scope_extensions": []
 }
