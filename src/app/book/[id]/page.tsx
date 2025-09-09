@@ -9,7 +9,7 @@ import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestor
 import { getApp } from "firebase/app";
 
 
-import { getRoutes, getProfile, getCurrentUser } from "@/lib/storage";
+import { getRoutes, getProfile, getCurrentUser, getBookings } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,7 @@ export default function BookRidePage() {
   const [route, setRoute] = useState<Route | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [message, setMessage] = useState("");
+  const [isBooking, setIsBooking] = useState(false);
 
   useEffect(() => {
     const fetchRoute = async () => {
@@ -39,7 +40,8 @@ export default function BookRidePage() {
   }, [params.id]);
 
   const handleBooking = async () => {
-    if (!route) return;
+    if (!route || isBooking) return;
+    setIsBooking(true);
 
     const passengerProfile = await getProfile();
     const passengerEmail = getCurrentUser();
@@ -51,20 +53,45 @@ export default function BookRidePage() {
             variant: "destructive",
         });
         router.push('/profile?role=passenger');
+        setIsBooking(false);
         return;
     }
     
+    // Check for available seats
+    const allBookings = await getBookings(true); // Get all bookings
+    const bookingsForThisRoute = allBookings.filter(b => {
+        const routeDate = new Date(route.travelDate);
+        const bookingDate = new Date(b.departureDate);
+        return (
+            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+            routeDate.getFullYear() === bookingDate.getFullYear() &&
+            routeDate.getMonth() === bookingDate.getMonth() &&
+            routeDate.getDate() === bookingDate.getDate() &&
+            format(bookingDate, "HH:mm") === route.departureTime &&
+            b.status !== "Cancelled"
+        )
+    });
+
+    if (bookingsForThisRoute.length >= route.availableSeats) {
+         toast({
+            title: "Ride Sold Out",
+            description: "Sorry, there are no more available seats for this ride.",
+            variant: "destructive",
+        });
+        setIsBooking(false);
+        return;
+    }
+
     const db = getFirestore(getApp());
-    // Create a new document reference first to get the ID
     const newBookingRef = doc(collection(db, 'bookings'));
 
     const newBooking: Booking = {
-        id: newBookingRef.id, // Use the real Firestore ID
+        id: newBookingRef.id,
         client: passengerProfile.name,
         clientEmail: passengerEmail,
         destination: `${route.fromLocation} to ${route.toLocation}`,
         departureDate: new Date(route.travelDate),
-        returnDate: new Date(route.travelDate), // Not applicable for one-way, but schema requires it
+        returnDate: new Date(route.travelDate), 
         amount: route.price,
         status: "Confirmed",
         travelers: "1",
@@ -77,7 +104,6 @@ export default function BookRidePage() {
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
     newBooking.departureDate.setHours(depHours, depMinutes);
 
-    // Now save the booking with the correct ID
     await setDoc(newBookingRef, newBooking);
 
     toast({
@@ -86,6 +112,7 @@ export default function BookRidePage() {
     });
 
     router.push('/bookings?role=passenger');
+    setIsBooking(false);
   };
 
   if (!isLoaded) {
@@ -159,9 +186,18 @@ export default function BookRidePage() {
                 </CardContent>
             </Card>
 
-            <Button size="lg" className="w-full" onClick={handleBooking}>
-                <Zap className="mr-2 h-4 w-4" />
-                Book
+            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking}>
+                {isBooking ? (
+                    <>
+                        <Zap className="mr-2 h-4 w-4 animate-spin" />
+                        Booking...
+                    </>
+                ) : (
+                    <>
+                        <Zap className="mr-2 h-4 w-4" />
+                        Book
+                    </>
+                )}
             </Button>
         </main>
     </div>
