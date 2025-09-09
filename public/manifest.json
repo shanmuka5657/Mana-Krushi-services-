@@ -4,13 +4,13 @@
   "description": "Travel Agent Management System",
   "icons": [
     {
-      "src": "/images/icon-192x192.png",
+      "src": "https://picsum.photos/192",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/icon-512x512.png",
+      "src": "https://picsum.photos/512",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -32,14 +32,14 @@
   ],
   "screenshots": [
     {
-      "src": "/images/screenshot-desktop.png",
+      "src": "https://picsum.photos/1280/720",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Desktop View"
     },
     {
-      "src": "/images/screenshot-mobile.png",
+      "src": "https://picsum.photos/720/1280",
       "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow",
