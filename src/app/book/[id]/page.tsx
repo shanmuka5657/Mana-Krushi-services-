@@ -58,18 +58,20 @@ export default function BookRidePage() {
     }
     
     // Check for available seats
-    const allBookings = await getBookings(true); // Get all bookings
+    const allBookings = await getBookings(true); // Get all bookings for seat check
     const bookingsForThisRoute = allBookings.filter(b => {
         const routeDate = new Date(route.travelDate);
         const bookingDate = new Date(b.departureDate);
+        const routeDateStr = format(routeDate, 'yyyy-MM-dd');
+        const bookingDateStr = format(bookingDate, 'yyyy-MM-dd');
+        const bookingTimeStr = format(bookingDate, 'HH:mm');
+
         return (
             b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-            routeDate.getFullYear() === bookingDate.getFullYear() &&
-            routeDate.getMonth() === bookingDate.getMonth() &&
-            routeDate.getDate() === bookingDate.getDate() &&
-            format(bookingDate, "HH:mm") === route.departureTime &&
+            routeDateStr === bookingDateStr &&
+            bookingTimeStr === route.departureTime &&
             b.status !== "Cancelled"
-        )
+        );
     });
 
     if (bookingsForThisRoute.length >= route.availableSeats) {
