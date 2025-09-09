@@ -14,20 +14,61 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
+import React from 'react';
+import { Download } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
+// Define the interface for the event, as it's not standard in all TS lib versions.
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed',
+    platform: string,
+  }>;
+  prompt(): Promise<void>;
+}
+
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      installPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setInstallPrompt(null);
+      });
+    }
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,6 +158,15 @@ export function LoginForm() {
           </Link>
         </div>
       </CardContent>
+      {installPrompt && (
+        <CardFooter className="flex-col gap-2 border-t pt-6">
+           <p className="text-sm text-center text-muted-foreground">For a better experience, install the app on your device.</p>
+           <Button variant="outline" onClick={handleInstallClick} className="w-full">
+             <Download className="mr-2 h-4 w-4" />
+            Install App
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
