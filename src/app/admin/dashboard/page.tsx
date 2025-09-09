@@ -66,8 +66,6 @@ const NewUserItem = ({ profile }: { profile: Profile }) => (
 function AdminDashboardPage() {
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalOwners: 0,
-    totalPassengers: 0,
     totalRoutes: 0,
     totalBookings: 0,
     totalRevenue: 0,
@@ -88,9 +86,6 @@ function AdminDashboardPage() {
         .filter(b => b.paymentStatus === 'Paid')
         .reduce((sum, b) => sum + (b.amount || 0), 0);
       
-      const ownerCount = profiles.filter(p => p.role === 'owner').length;
-      const passengerCount = profiles.filter(p => p.role === 'passenger').length;
-      
       // Calculate subscription revenue (₹50 per owner with a plan)
       const subscriptionRevenue = profiles.filter(p => p.role === 'owner' && p.planExpiryDate).length * 50;
 
@@ -105,8 +100,6 @@ function AdminDashboardPage() {
 
       setStats({
         totalUsers: profiles.length,
-        totalOwners: ownerCount,
-        totalPassengers: passengerCount,
         totalRoutes: routes.length,
         totalBookings: bookings.length,
         totalRevenue: totalRevenue,
@@ -124,10 +117,8 @@ function AdminDashboardPage() {
   return (
     <AppLayout>
         <div className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
-                <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} href="/admin/users?role=owner" />
-                <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} href="/admin/users?role=passenger" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
                 <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" />
