@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Car, Star, Zap, Users } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Car, Star, Zap, Users, Milestone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -273,7 +273,13 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
                                   </div>
                                   <div>
                                       <div className="font-semibold">{route.fromLocation}</div>
-                                      <div className="font-semibold mt-8">{route.toLocation}</div>
+                                       {route.distance && (
+                                        <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
+                                          <Milestone className="h-3 w-3" />
+                                          <span>{route.distance.toFixed(0)} km</span>
+                                        </div>
+                                      )}
+                                      <div className="font-semibold mt-2">{route.toLocation}</div>
                                   </div>
                               </div>
                               <div className="text-right">

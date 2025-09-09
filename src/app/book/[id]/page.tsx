@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Zap, MapPin } from "lucide-react";
+import { ArrowLeft, Zap, MapPin, Milestone } from "lucide-react";
 import { format } from "date-fns";
 import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
@@ -147,7 +147,14 @@ export default function BookRidePage() {
                      <div className="flex gap-4">
                         <div>
                             <div className="font-semibold">{route.departureTime}</div>
-                            <div className="h-10"></div>
+                             <div className="h-10 text-xs text-muted-foreground flex items-center">
+                                {route.distance && (
+                                    <div className="flex items-center gap-2">
+                                        <Milestone className="h-4 w-4" />
+                                        <span>{route.distance} km</span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="font-semibold">{route.arrivalTime}</div>
                         </div>
                         <div className="flex flex-col items-center">
@@ -156,9 +163,9 @@ export default function BookRidePage() {
                             <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary mb-1"></div>
                         </div>
                         <div>
-                            <div className="text-muted-foreground">{route.fromLocation}</div>
+                            <div className="font-semibold">{route.fromLocation}</div>
                             <div className="h-10"></div>
-                            <div className="text-muted-foreground">{route.toLocation}</div>
+                            <div className="font-semibold">{route.toLocation}</div>
                         </div>
                     </div>
                 </CardContent>
