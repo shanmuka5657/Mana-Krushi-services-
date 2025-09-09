@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, Route, Book, DollarSign, User, Calendar, Shield } from "lucide-react";
@@ -11,16 +12,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-const StatCard = ({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) => (
-    <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-        </CardContent>
-    </Card>
+const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href: string }) => (
+    <Link href={href}>
+        <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+            </CardContent>
+        </Card>
+    </Link>
 );
 
 const RecentBookingItem = ({ booking }: { booking: Booking }) => (
@@ -81,12 +84,17 @@ function AdminDashboardPage() {
         getBookings(true),
       ]);
 
-      const totalRevenue = bookings
+      const bookingRevenue = bookings
         .filter(b => b.paymentStatus === 'Paid')
         .reduce((sum, b) => sum + (b.amount || 0), 0);
       
       const ownerCount = profiles.filter(p => p.role === 'owner').length;
       const passengerCount = profiles.filter(p => p.role === 'passenger').length;
+      
+      // Calculate subscription revenue (₹50 per owner with a plan)
+      const subscriptionRevenue = profiles.filter(p => p.role === 'owner' && p.planExpiryDate).length * 50;
+
+      const totalRevenue = bookingRevenue + subscriptionRevenue;
       
       const sortedBookings = [...bookings].sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
       setRecentBookings(sortedBookings.slice(0, 5));
@@ -117,12 +125,12 @@ function AdminDashboardPage() {
     <AppLayout>
         <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard title="Total Users" value={stats.totalUsers} icon={Users} />
-                <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} />
-                <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} />
-                <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} />
-                <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} />
-                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={DollarSign} />
+                <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
+                <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} href="/admin/users" />
+                <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} href="/admin/users" />
+                <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
+                <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
+                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={DollarSign} href="/admin/payments" />
             </div>
 
              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
