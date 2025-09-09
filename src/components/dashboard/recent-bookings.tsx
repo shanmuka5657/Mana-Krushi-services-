@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -219,7 +219,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 <Milestone className="h-5 w-5 text-muted-foreground" />
                                 <div className="flex flex-col">
                                     <span className="text-sm text-muted-foreground">Distance</span>
-                                    <span className="font-medium">{getDistanceForBooking(selectedBooking) ? `${getDistanceForBooking(selectedBooking)?.toFixed(0)} km` : 'N/A'}</span>
+                                    <span className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : 'N/A'}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -254,6 +254,17 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 {selectedBooking.vehicleType || 'N/A'}
                                 </span>
                             </div>
+                            </div>
+                             <div className="flex items-center gap-4">
+                                <Shield className="h-5 w-5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                    <span className="text-sm text-muted-foreground">
+                                    Vehicle Number
+                                    </span>
+                                    <span className="font-medium">
+                                    {selectedBooking.vehicleNumber || 'N/A'}
+                                    </span>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="flex items-center gap-4">

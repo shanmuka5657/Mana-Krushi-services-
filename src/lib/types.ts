@@ -15,6 +15,7 @@ export type Booking = {
   driverName?: string;
   driverMobile?: string;
   vehicleType?: string;
+  vehicleNumber?: string;
   paymentMethod?: "Cash" | "UPI" | "Pending";
   paymentStatus?: "Paid" | "Unpaid";
   report?: string;
@@ -36,6 +37,7 @@ export type Route = {
   arrivalTime: string;
   availableSeats: number;
   vehicleType: string;
+  vehicleNumber: string;
   price: number;
   rating: number;
 };

@@ -105,6 +105,7 @@ export default function BookRidePage() {
         driverName: route.driverName,
         driverMobile: route.driverMobile,
         vehicleType: route.vehicleType,
+        vehicleNumber: route.vehicleNumber,
         distance: route.distance,
     };
     

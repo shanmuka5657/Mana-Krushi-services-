@@ -1,9 +1,10 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2 } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { useEffect, useState } from "react";
 
@@ -58,6 +59,7 @@ const ownerFormSchema = z.object({
   arrivalTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   availableSeats: z.coerce.number().int().positive("Available seats must be a positive number."),
   vehicleType: z.string().min(2, "Vehicle type is required."),
+  vehicleNumber: z.string().min(2, "Vehicle number is required."),
   price: z.coerce.number().positive("Price must be a positive number."),
   rating: z.coerce.number().min(1).max(5).default(Math.round((Math.random() * 2 + 3) * 10) / 10), // Random rating between 3 and 5
 });
@@ -103,6 +105,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         arrivalTime: "18:00",
         availableSeats: 1,
         vehicleType: "",
+        vehicleNumber: "",
         price: 500,
         rating: 4.5,
     },
@@ -196,6 +199,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         arrivalTime: "18:00",
         availableSeats: 1,
         vehicleType: "",
+        vehicleNumber: "",
         price: 500,
         rating: 4.5
       });
@@ -506,6 +510,22 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                 />
               </div>
+               <FormField
+                control={form.control}
+                name="vehicleNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Vehicle Number</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Shield className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input placeholder="e.g., AP 01 AB 1234" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="price"

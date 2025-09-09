@@ -39,7 +39,8 @@ function AdminAllRoutesPage() {
             'Arrival': r.arrivalTime,
             'Seats': r.availableSeats,
             'Price': r.price,
-            'Vehicle': r.vehicleType
+            'Vehicle': r.vehicleType,
+            'Vehicle Number': r.vehicleNumber,
         }));
         exportToCsv('all-routes.csv', dataToExport);
     }
