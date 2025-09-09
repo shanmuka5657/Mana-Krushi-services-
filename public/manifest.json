@@ -4,25 +4,25 @@
   "description": "Travel Agent Management System",
   "icons": [
     {
-      "src": "/images/logo-any.png",
+      "src": "https://i.ibb.co/7v3w6v7/mk-services.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/logo-any-512.png",
+      "src": "https://i.ibb.co/7v3w6v7/mk-services.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/logo-maskable.png",
+      "src": "https://i.ibb.co/7v3w6v7/mk-services.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/images/logo-maskable-512.png",
+      "src": "https://i.ibb.co/7v3w6v7/mk-services.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -70,7 +70,7 @@
     },
     {
       "name": "My Routes",
-      "url": "/dashboard?role=owner&amp;tab=my-routes",
+      "url": "/dashboard?role=owner&tab=my-routes",
       "description": "View your created routes"
     }
   ],
