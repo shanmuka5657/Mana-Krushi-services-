@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, MapPin } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car } from "lucide-react";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
@@ -29,6 +29,8 @@ const profileFormSchema = z.object({
   mobile: z.string().regex(/^\d{10}$/, { message: "Enter a valid 10-digit mobile number." }),
   email: z.string().email({ message: "Invalid email address." }),
   address: z.string().optional(),
+  vehicleType: z.string().optional(),
+  vehicleNumber: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -44,6 +46,8 @@ export default function ProfileForm() {
       mobile: "",
       email: "",
       address: "",
+      vehicleType: "",
+      vehicleNumber: "",
     },
   });
 
@@ -60,6 +64,8 @@ export default function ProfileForm() {
             email: userEmail || '',
             mobile: '',
             address: '',
+            vehicleType: '',
+            vehicleNumber: '',
         };
 
         if (userProfile) {
@@ -158,8 +164,8 @@ export default function ProfileForm() {
                   </FormItem>
                 )}
               />
-
-               <FormField
+              
+              <FormField
                 control={form.control}
                 name="address"
                 render={({ field }) => (
@@ -176,6 +182,44 @@ export default function ProfileForm() {
                   </FormItem>
                 )}
               />
+
+              {profile?.role === 'owner' && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="vehicleType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vehicle Type</FormLabel>
+                        <FormControl>
+                           <div className="relative">
+                            <Car className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="e.g., Sedan, SUV, etc." {...field} className="pl-10" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="vehicleNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vehicle Number</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Car className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="e.g., AP 01 AB 1234" {...field} className="pl-10" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
 
               <Button type="submit" className="w-full">
                 Save Changes

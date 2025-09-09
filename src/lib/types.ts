@@ -47,6 +47,8 @@ export type Profile = {
     mobile: string;
     email: string;
     address?: string;
+    vehicleType?: string;
+    vehicleNumber?: string;
     planExpiryDate?: Date;
     role?: 'owner' | 'passenger' | 'admin';
 }

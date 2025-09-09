@@ -60,6 +60,8 @@ const ownerFormSchema = z.object({
   availableSeats: z.coerce.number().int().positive("Available seats must be a positive number."),
   price: z.coerce.number().positive("Price must be a positive number."),
   rating: z.coerce.number().min(1).max(5).default(Math.round((Math.random() * 2 + 3) * 10) / 10), // Random rating between 3 and 5
+  vehicleType: z.string().optional(),
+  vehicleNumber: z.string().optional(),
 });
 
 export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
@@ -83,6 +85,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         setProfile(userProfile);
         if (!userProfile || !userProfile.mobile || userProfile.mobile === '0000000000') {
           setShowProfilePrompt(true);
+        } else if (!userProfile.vehicleType || !userProfile.vehicleNumber) {
+            toast({
+                title: "Vehicle Info Missing",
+                description: "Please add your vehicle type and number in your profile.",
+                variant: "destructive",
+            });
+            setShowProfilePrompt(true);
         }
     }
     checkProfile();
@@ -104,6 +113,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         availableSeats: 1,
         price: 500,
         rating: 4.5,
+        vehicleType: "",
+        vehicleNumber: "",
     },
   });
   
@@ -122,14 +133,32 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }, [form]);
 
   async function onSubmit(data: OwnerFormValues) {
-    setRouteDataToSubmit(data);
+    // Make sure vehicle info is in the profile
+    const userProfile = await getProfile();
+    if (!userProfile || !userProfile.vehicleType || !userProfile.vehicleNumber) {
+        toast({
+            title: "Vehicle Information Required",
+            description: "Please update your vehicle type and number in your profile before adding a route.",
+            variant: "destructive"
+        });
+        onSwitchTab('profile');
+        return;
+    }
+    
+    const dataWithVehicleInfo = {
+        ...data,
+        vehicleType: userProfile.vehicleType,
+        vehicleNumber: userProfile.vehicleNumber,
+    };
+
+    setRouteDataToSubmit(dataWithVehicleInfo);
 
     // Check if the user has an active plan
-    const hasActivePlan = profile?.planExpiryDate && new Date(profile.planExpiryDate) > new Date();
+    const hasActivePlan = userProfile?.planExpiryDate && new Date(userProfile.planExpiryDate) > new Date();
 
     if (hasActivePlan) {
       // If they have a plan, add the route directly
-      handleRouteSubmission(data);
+      handleRouteSubmission(dataWithVehicleInfo);
     } else {
       // Otherwise, open the payment dialog
       setIsPaymentDialogOpen(true);
@@ -220,7 +249,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
           <AlertDialogHeader>
             <AlertDialogTitle>Complete Your Profile</AlertDialogTitle>
             <AlertDialogDescription>
-              Please complete your profile details before adding a route. This helps passengers know who they are traveling with.
+              Please complete your profile details, including vehicle information, before adding a route. This helps passengers know who they are traveling with.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
