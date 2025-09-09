@@ -13,57 +13,61 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { saveCurrentUser, getProfile } from '@/lib/storage';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-  role: z.enum(['owner', 'passenger', 'admin'], { required_error: 'Please select a role.' }),
 });
 
 export function LoginForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
       password: '',
-      role: 'passenger',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you'd validate credentials. Here we just save the session.
-    
-    // Hardcode admin credentials for demonstration
-    if (values.role === 'admin') {
-      if (values.email !== 'admin@example.com' || values.password !== 'admin123') {
-        form.setError('email', { message: 'Invalid admin credentials.' });
-        form.setError('password', { message: ' ' });
-        return;
+    // Hardcoded admin check
+    if (values.email === 'admin@example.com') {
+      if (values.password === 'admin123') {
+        saveCurrentUser(values.email, 'Admin', 'admin');
+        router.push(`/admin/dashboard`);
+      } else {
+        form.setError('password', { message: 'Invalid admin password.' });
       }
+      return;
     }
 
-    const userProfile = await getProfile(values.email); // Pass email to get specific profile
-    const name = userProfile?.name || values.email.split('@')[0];
-    saveCurrentUser(values.email, name, values.role);
-    
-    if (values.role === 'admin') {
-        router.push(`/admin/dashboard`);
-    } else {
-        router.push(`/dashboard?role=${values.role}`);
+    // Fetch profile for regular users
+    const userProfile = await getProfile(values.email);
+
+    if (!userProfile || !userProfile.role) {
+      toast({
+        title: "Login Failed",
+        description: "No account found with this email. Please sign up.",
+        variant: "destructive",
+      });
+      form.setError('email', { message: 'No account found with this email.' });
+      return;
     }
+
+    // In a real app, you would validate the password against the backend/database.
+    // Here we assume the password is correct if the profile exists.
+
+    const name = userProfile.name || values.email.split('@')[0];
+    saveCurrentUser(userProfile.email, name, userProfile.role);
+    
+    router.push(`/dashboard?role=${userProfile.role}`);
   }
 
   return (
@@ -97,28 +101,6 @@ export function LoginForm() {
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Login as</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="owner">Owner</SelectItem>
-                        <SelectItem value="passenger">Passenger</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
                   <FormMessage />
                 </FormItem>
               )}
