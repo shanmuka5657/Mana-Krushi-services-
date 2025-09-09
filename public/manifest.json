@@ -4,13 +4,13 @@
   "description": "Travel Agent Management System",
   "icons": [
     {
-      "src": "https://picsum.photos/192",
+      "src": "https://picsum.photos/192/192",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/512",
+      "src": "https://picsum.photos/512/512",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -21,11 +21,15 @@
   "background_color": "#F0F4F8",
   "theme_color": "#16a34a",
   "orientation": "any",
-  "id": "/?utm_source=pwa",
+  "id": "com.manakrushiservices.app",
   "scope": "/",
   "lang": "en-US",
   "dir": "auto",
-  "categories": ["business", "travel", "management"],
+  "categories": [
+    "business",
+    "travel",
+    "management"
+  ],
   "display_override": [
     "standalone",
     "minimal-ui"
