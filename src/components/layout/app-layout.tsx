@@ -46,6 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole } from "@/lib/storage";
+import { useToast } from "@/hooks/use-toast";
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
 interface BeforeInstallPromptEvent extends Event {
@@ -61,13 +62,18 @@ interface BeforeInstallPromptEvent extends Event {
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
   const [userName, setUserName] = React.useState("User");
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
   const [role, setRole] = React.useState('passenger');
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+  const [isStandalone, setIsStandalone] = React.useState(true); // Default to true to hide button SSR
 
   React.useEffect(() => {
+    // This will only run on the client
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
@@ -166,6 +172,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         }
         setInstallPrompt(null);
       });
+    } else {
+       toast({
+        title: "App is not installable",
+        description: "The app might already be installed or your browser doesn't support installation.",
+       });
     }
   };
 
@@ -199,14 +210,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton className="justify-start" tooltip="Install App" onClick={handleInstallClick}>
-                        <Download />
-                        <span>Install App</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
+            {!isStandalone && (
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton className="justify-start" tooltip="Install App" onClick={handleInstallClick}>
+                            <Download />
+                            <span>Install App</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            )}
         </SidebarFooter>
       </Sidebar>
 

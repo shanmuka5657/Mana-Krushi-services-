@@ -41,8 +41,12 @@ export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
+  const [isStandalone, setIsStandalone] = React.useState(true); // Default to true to hide button SSR
 
   React.useEffect(() => {
+    // This will only run on the client
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
@@ -66,6 +70,11 @@ export function LoginForm() {
         }
         setInstallPrompt(null);
       });
+    } else {
+       toast({
+        title: "App is not installable",
+        description: "The app might already be installed or your browser doesn't support installation.",
+       });
     }
   };
 
@@ -159,7 +168,7 @@ export function LoginForm() {
             </Link>
           </div>
         </CardContent>
-        {installPrompt && (
+        {!isStandalone && (
             <CardFooter className="flex-col gap-2">
                 <div className="w-full h-px bg-border" />
                 <Button variant="outline" className="w-full" onClick={handleInstallClick}>
