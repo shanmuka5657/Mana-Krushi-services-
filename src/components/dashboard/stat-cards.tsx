@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase, Users, Plane, ListTodo } from "lucide-react";
+import { Briefcase, Users, IndianRupee, ListTodo } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface Stat {
@@ -27,8 +27,8 @@ const stats: Stat[] = [
     style: { iconBg: "bg-chart-2/20", iconColor: "text-chart-2" },
   },
   {
-    icon: Plane,
-    value: "$24,560",
+    icon: IndianRupee,
+    value: "₹24,560",
     label: "Revenue",
     style: { iconBg: "bg-accent/20", iconColor: "text-accent" },
   },

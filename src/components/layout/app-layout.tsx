@@ -4,7 +4,7 @@
 import {
   BarChart,
   Briefcase,
-  DollarSign,
+  IndianRupee,
   HelpCircle,
   Home,
   LayoutDashboard,
@@ -108,7 +108,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/users`, icon: Users, label: "Users" },
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
-    { href: `/admin/payments`, icon: DollarSign, label: "All Payments" },
+    { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -117,7 +117,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/profile?role=owner`, icon: User, label: "Profile" },
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
-    { href: `/payments?role=owner`, icon: DollarSign, label: "Payments" },
+    { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },

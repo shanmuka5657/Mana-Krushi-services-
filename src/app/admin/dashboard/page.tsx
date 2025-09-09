@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, DollarSign, User, Calendar, Shield } from "lucide-react";
+import { Users, Route, Book, IndianRupee, User, Calendar, Shield } from "lucide-react";
 import { getRoutes, getBookings, getAllProfiles } from "@/lib/storage";
 import type { Booking, Route as RouteType, Profile } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -130,7 +130,7 @@ function AdminDashboardPage() {
                 <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} href="/admin/users" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
-                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={DollarSign} href="/admin/payments" />
+                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" />
             </div>
 
              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">

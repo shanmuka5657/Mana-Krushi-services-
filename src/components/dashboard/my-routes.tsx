@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2 } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2 } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -438,13 +438,13 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                                <p className="text-sm text-muted-foreground mb-2">Payment</p>
                                {booking.paymentStatus === 'Paid' ? (
                                     <div className="flex items-center gap-2">
-                                        <DollarSign className="h-5 w-5 text-green-500" />
+                                        <IndianRupee className="h-5 w-5 text-green-500" />
                                         <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
                                     </div>
                                ) : (
                                 <div className="flex gap-2">
                                     <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'Cash')}>
-                                        <DollarSign className="mr-2 h-4 w-4" /> Cash
+                                        <IndianRupee className="mr-2 h-4 w-4" /> Cash
                                     </Button>
                                     <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'UPI')}>
                                        <Sparkles className="mr-2 h-4 w-4" /> UPI

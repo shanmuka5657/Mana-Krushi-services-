@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getBookings } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { format } from 'date-fns';
-import { DollarSign, User, Car, Download } from 'lucide-react';
+import { IndianRupee, User, Car, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
@@ -79,7 +79,7 @@ function AdminPaymentsPage() {
                                     <TableCell className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" />{payment.client}</TableCell>
                                     <TableCell><Car className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.driverName}</TableCell>
                                     <TableCell>{format(new Date(payment.departureDate), 'PPP')}</TableCell>
-                                    <TableCell><DollarSign className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.amount.toFixed(2)}</TableCell>
+                                    <TableCell><IndianRupee className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.amount.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <Badge variant={payment.paymentMethod === 'Cash' ? 'secondary' : 'default'}>{payment.paymentMethod}</Badge>
                                     </TableCell>

@@ -216,7 +216,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                 name="budget"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Budget ($)</FormLabel>
+                    <FormLabel>Budget (₹)</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 2000" {...field} />
                     </FormControl>
