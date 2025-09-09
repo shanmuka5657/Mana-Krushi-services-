@@ -1,89 +1,36 @@
 {
+  "theme_color": "#f39c12",
+  "background_color": "#2d3748",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/login",
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
   "description": "Travel Agent Management System",
   "icons": [
     {
-      "src": "https://i.ibb.co/L1j3xY9/logo.png",
+      "src": "https://i.ibb.co/6y4jK2T/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/L1j3xY9/logo.png",
+      "src": "https://i.ibb.co/6y4jK2T/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/L1j3xY9/logo.png",
+      "src": "https://i.ibb.co/6y4jK2T/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/L1j3xY9/logo.png",
+      "src": "https://i.ibb.co/6y4jK2T/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "start_url": "/login",
-  "display": "standalone",
-  "background_color": "#F0F4F8",
-  "theme_color": "#16a34a",
-  "orientation": "any",
-  "id": "com.manakrushiservices.app",
-  "scope": "/",
-  "lang": "en-US",
-  "dir": "auto",
-  "categories": [
-    "business",
-    "travel",
-    "management"
-  ],
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
-  "screenshots": [
-    {
-      "src": "https://picsum.photos/1280/720",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Desktop View"
-    },
-    {
-      "src": "https://picsum.photos/720/1280",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mobile View"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "New Booking",
-      "url": "/dashboard?role=passenger",
-      "description": "Start a new booking"
-    },
-    {
-      "name": "My Routes",
-      "url": "/dashboard?role=owner&tab=my-routes",
-      "description": "View your created routes"
-    }
-  ],
-  "share_target": {
-    "action": "/share-handler",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "prefer_related_applications": false
+  ]
 }
