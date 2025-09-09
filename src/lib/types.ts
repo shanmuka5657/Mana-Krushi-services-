@@ -20,6 +20,7 @@ export type Booking = {
   paymentStatus?: "Paid" | "Unpaid";
   report?: string;
   distance?: number;
+  toll?: number;
 };
 
 export type Route = {

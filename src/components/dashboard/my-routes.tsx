@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Route, Booking } from "@/lib/types";
+import type { Route, Booking, Profile } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
-import { getBookings, saveBookings } from "@/lib/storage";
+import { getBookings, saveBookings, getProfile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,12 +42,15 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [toll, setToll] = useState<number>(0);
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchBookingsAndProfile = async () => {
         setAllBookings(await getBookings(true)); // Admin/Owner can see all
+        setProfile(await getProfile());
     }
-    fetchBookings();
+    fetchBookingsAndProfile();
   }, []);
 
   const getBookedSeats = (route: Route) => {
@@ -92,6 +95,8 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
     );
     setSelectedRoute(route);
     setBookingsForRoute(routeBookings);
+    const totalToll = routeBookings.reduce((acc, b) => acc + (b.toll || 0), 0);
+    setToll(totalToll);
   };
   
   const handlePayment = async (bookingId: string, method: 'Cash' | 'UPI') => {
@@ -115,6 +120,25 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
       description: `Payment for booking ${bookingId} has been recorded as ${method}.`,
     });
   }
+
+  const handleTollUpdate = async () => {
+     if (!selectedRoute) return;
+     const bookingsToUpdate = await getBookings(true);
+     const updatedBookings = bookingsToUpdate.map(b => {
+         const isForThisRoute = bookingsForRoute.some(rb => rb.id === b.id);
+         if (isForThisRoute) {
+             return { ...b, toll: toll / bookingsForRoute.length }; // Distribute toll among bookings
+         }
+         return b;
+     });
+     await saveBookings(updatedBookings);
+     setAllBookings(updatedBookings);
+     setBookingsForRoute(prev => prev.map(b => ({ ...b, toll: toll / prev.length })));
+     toast({
+        title: "Toll Updated",
+        description: `Toll of ₹${toll} has been recorded for this route.`,
+     })
+  }
   
   const isRideComplete = (route: Route) => {
       const routeDateTime = new Date(route.travelDate);
@@ -132,6 +156,34 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
       default:
         return { icon: AlertCircle, color: 'text-muted-foreground', label: status };
     }
+  }
+
+  const calculateEarnings = (route: Route) => {
+      const routeBookings = allBookings.filter(b => {
+        const routeDate = new Date(route.travelDate);
+        const bookingDate = new Date(b.departureDate);
+        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                          routeDate.getMonth() === bookingDate.getMonth() &&
+                          routeDate.getDate() === bookingDate.getDate();
+        const bookingTime = format(bookingDate, 'HH:mm');
+
+        return (
+            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+            isSameDay &&
+            bookingTime === route.departureTime &&
+            b.status === "Completed"
+        );
+    });
+
+    const totalRevenue = routeBookings.reduce((acc, b) => acc + b.amount, 0);
+    const totalToll = routeBookings.reduce((acc, b) => acc + (b.toll || 0), 0);
+    
+    // Simple calculation for now. AI calculation would be more complex.
+    const fuelCost = (route.distance && profile?.mileage) 
+        ? (route.distance / profile.mileage) * 100 // Assuming fuel price of 100
+        : 0;
+
+    return totalRevenue - fuelCost - totalToll;
   }
 
   return (
@@ -188,6 +240,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                 <TableHead>Date</TableHead>
                 <TableHead>Departure</TableHead>
                 <TableHead>Seats Left</TableHead>
+                <TableHead>Earnings</TableHead>
                 <TableHead className="rounded-r-lg">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -196,6 +249,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                 filteredRoutes.map((route) => {
                     const bookedSeats = getBookedSeats(route);
                     const availableSeats = route.availableSeats - bookedSeats;
+                    const earnings = calculateEarnings(route);
                     return (
                       <TableRow key={route.id}>
                         <TableCell className="font-medium">{route.fromLocation}</TableCell>
@@ -203,6 +257,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                         <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
                         <TableCell>{route.departureTime}</TableCell>
                         <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
+                         <TableCell>₹{earnings.toFixed(2)}</TableCell>
                         <TableCell>
                           <DialogTrigger asChild>
                             <Button
@@ -219,7 +274,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     No routes found.
                   </TableCell>
                 </TableRow>
@@ -295,6 +350,22 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                 ) : (
                   <p>No bookings for this route yet.</p>
                 )}
+
+                 {isRideComplete(selectedRoute) && bookingsForRoute.length > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                        <h4 className="text-sm font-medium mb-2">Post-Trip Details</h4>
+                        <div className="flex items-center gap-2">
+                            <Input 
+                                type="number" 
+                                placeholder="Total Toll Paid (₹)"
+                                value={toll || ''}
+                                onChange={(e) => setToll(Number(e.target.value))}
+                                className="max-w-xs"
+                            />
+                            <Button size="sm" onClick={handleTollUpdate}>Save Toll</Button>
+                        </div>
+                    </div>
+                 )}
               </div>
             </DialogContent>
           )}
