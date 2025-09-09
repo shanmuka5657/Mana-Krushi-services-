@@ -68,3 +68,21 @@ export const CalculateDistanceOutputSchema = z.object({
     distance: z.number().describe('The approximate driving distance in kilometers.'),
 });
 export type CalculateDistanceOutput = z.infer<typeof CalculateDistanceOutputSchema>;
+
+// Zod Schemas for Toll Calculator AI Flow
+export const TollCalculatorInputSchema = z.object({
+  from: z.string().describe('The starting point of the route.'),
+  to: z.string().describe('The destination of the route.'),
+});
+export type TollCalculatorInput = z.infer<typeof TollCalculatorInputSchema>;
+
+export const TollCalculatorOutputSchema = z.object({
+  estimatedTollCost: z
+    .number()
+    .describe('The estimated total toll cost in Indian Rupees (INR) for the given route.'),
+  estimatedTollCount: z
+    .number()
+    .int()
+    .describe('The estimated number of toll plazas along the route.'),
+});
+export type TollCalculatorOutput = z.infer<typeof TollCalculatorOutputSchema>;

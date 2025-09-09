@@ -3,8 +3,9 @@
 
 import { findDestinations } from "@/ai/flows/smart-destination-finder";
 import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-calculator";
+import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { z } from "zod";
-import { CalculateDistanceInputSchema } from "@/lib/types";
+import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 
 
 const SuggestDestinationsInput = z.object({
@@ -55,4 +56,24 @@ export async function calculateDistance(input: { from: string, to: string }) {
         console.error(e);
         return { error: "An unexpected error occurred while calculating the distance." };
     }
+}
+
+export async function calculateToll(input: { from: string; to: string }) {
+  const validatedInput = TollCalculatorInputSchema.safeParse(input);
+  if (!validatedInput.success) {
+    return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+  }
+
+  try {
+    const result = await calculateTollFlow(validatedInput.data);
+    if (!result) {
+      return { error: 'Could not calculate toll.' };
+    }
+    return {
+      estimatedTollCost: result.estimatedTollCost,
+    };
+  } catch (e) {
+    console.error(e);
+    return { error: 'An unexpected error occurred while calculating the toll.' };
+  }
 }

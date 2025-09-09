@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2 } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
+import { calculateToll } from "@/app/actions";
 
 interface MyRoutesProps {
   routes: Route[];
@@ -67,6 +68,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [toll, setToll] = useState<number>(0);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [earningsMap, setEarningsMap] = useState<Record<string, { loading: boolean, value: number | null }>>({});
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -143,8 +145,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     );
     setSelectedRoute(route);
     setBookingsForRoute(routeBookings);
-    const totalToll = routeBookings.reduce((acc, b) => acc + (b.toll || 0), 0);
-    setToll(totalToll);
     setIsViewDialogOpen(true);
   };
   
@@ -202,25 +202,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     });
   }
 
-  const handleTollUpdate = async () => {
-     if (!selectedRoute) return;
-     const bookingsToUpdate = await getBookings(true);
-     const updatedBookings = bookingsToUpdate.map(b => {
-         const isForThisRoute = bookingsForRoute.some(rb => rb.id === b.id);
-         if (isForThisRoute) {
-             return { ...b, toll: toll / bookingsForRoute.length }; // Distribute toll among bookings
-         }
-         return b;
-     });
-     await saveBookings(updatedBookings);
-     setAllBookings(updatedBookings);
-     setBookingsForRoute(prev => prev.map(b => ({ ...b, toll: toll / prev.length })));
-     toast({
-        title: "Toll Updated",
-        description: `Toll of ₹${toll} has been recorded for this route.`,
-     })
-  }
-  
   const isRideComplete = (route: Route) => {
       const routeDateTime = new Date(route.travelDate);
       const [hours, minutes] = route.arrivalTime.split(':').map(Number);
@@ -239,33 +220,59 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     }
   }
 
-  const calculateEarnings = (route: Route) => {
-      const routeBookings = allBookings.filter(b => {
-        const routeDate = new Date(route.travelDate);
-        const bookingDate = new Date(b.departureDate);
-        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                          routeDate.getMonth() === bookingDate.getMonth() &&
-                          routeDate.getDate() === bookingDate.getDate();
-        const bookingTime = format(bookingDate, 'HH:mm');
+  const calculateEarnings = async (route: Route) => {
+      if (earningsMap[route.id]?.value !== null && earningsMap[route.id]?.value !== undefined) return;
+      if (earningsMap[route.id]?.loading) return;
 
-        return (
-            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-            isSameDay &&
-            bookingTime === route.departureTime &&
-            b.status === "Completed"
-        );
-    });
+      setEarningsMap(prev => ({ ...prev, [route.id]: { loading: true, value: null } }));
 
-    const totalRevenue = routeBookings.reduce((acc, b) => acc + b.amount, 0);
-    const totalToll = routeBookings.reduce((acc, b) => acc + (b.toll || 0), 0);
-    
-    // Simple calculation for now. AI calculation would be more complex.
-    const fuelCost = (route.distance && profile?.mileage) 
-        ? (route.distance / profile.mileage) * 100 // Assuming fuel price of 100
-        : 0;
+      try {
+        const routeBookings = allBookings.filter(b => {
+            const routeDate = new Date(route.travelDate);
+            const bookingDate = new Date(b.departureDate);
+            const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                              routeDate.getMonth() === bookingDate.getMonth() &&
+                              routeDate.getDate() === bookingDate.getDate();
+            const bookingTime = format(bookingDate, 'HH:mm');
 
-    return totalRevenue - fuelCost - totalToll;
+            return (
+                b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+                isSameDay &&
+                bookingTime === route.departureTime &&
+                b.status === "Completed"
+            );
+        });
+
+        if (routeBookings.length === 0) {
+            setEarningsMap(prev => ({ ...prev, [route.id]: { loading: false, value: 0 } }));
+            return;
+        }
+
+        const totalRevenue = routeBookings.reduce((acc, b) => acc + b.amount, 0);
+        
+        const tollResult = await calculateToll({ from: route.fromLocation, to: route.toLocation });
+        const estimatedToll = tollResult.estimatedTollCost || 0;
+        
+        const fuelCost = (route.distance && profile?.mileage) 
+            ? (route.distance / profile.mileage) * 100 // Assuming fuel price of 100
+            : 0;
+
+        const finalEarnings = totalRevenue - fuelCost - estimatedToll;
+        setEarningsMap(prev => ({ ...prev, [route.id]: { loading: false, value: finalEarnings } }));
+      } catch (error) {
+        console.error("Failed to calculate earnings:", error);
+        setEarningsMap(prev => ({ ...prev, [route.id]: { loading: false, value: null } })); // Set to null on error
+      }
   }
+  
+  useEffect(() => {
+    routes.forEach(route => {
+        if (isRideComplete(route)) {
+            calculateEarnings(route);
+        }
+    });
+  }, [routes, allBookings, profile]);
+
 
   return (
     <Card className="shadow-sm mt-6">
@@ -329,7 +336,8 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
               filteredRoutes.map((route) => {
                   const bookedSeats = getBookedSeats(route);
                   const availableSeats = route.availableSeats - bookedSeats;
-                  const earnings = calculateEarnings(route);
+                  const earnings = earningsMap[route.id];
+                  const rideHasCompleted = isRideComplete(route);
                   return (
                     <TableRow key={route.id}>
                       <TableCell className="font-medium">{route.fromLocation}</TableCell>
@@ -337,7 +345,15 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                       <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
                       <TableCell>{route.departureTime}</TableCell>
                       <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
-                        <TableCell>₹{earnings.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {rideHasCompleted ? (
+                           earnings?.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
+                               earnings?.value !== null && earnings?.value !== undefined ? `₹${earnings.value.toFixed(2)}` : 'N/A'
+                           )
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
                       <TableCell className="flex gap-2 justify-center">
                           <Button
                             variant="outline"
@@ -437,22 +453,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                 ) : (
                   <p>No bookings for this route yet.</p>
                 )}
-
-                 {selectedRoute && isRideComplete(selectedRoute) && bookingsForRoute.length > 0 && (
-                    <div className="mt-4 pt-4 border-t">
-                        <h4 className="text-sm font-medium mb-2">Post-Trip Details</h4>
-                        <div className="flex items-center gap-2">
-                            <Input 
-                                type="number" 
-                                placeholder="Total Toll Paid (₹)"
-                                value={toll || ''}
-                                onChange={(e) => setToll(Number(e.target.value))}
-                                className="max-w-xs"
-                            />
-                            <Button size="sm" onClick={handleTollUpdate}>Save Toll</Button>
-                        </div>
-                    </div>
-                 )}
               </div>
             </DialogContent>
         </Dialog>
