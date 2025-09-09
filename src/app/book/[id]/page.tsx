@@ -62,14 +62,17 @@ export default function BookRidePage() {
     const bookingsForThisRoute = allBookings.filter(b => {
         const routeDate = new Date(route.travelDate);
         const bookingDate = new Date(b.departureDate);
-        const routeDateStr = format(routeDate, 'yyyy-MM-dd');
-        const bookingDateStr = format(bookingDate, 'yyyy-MM-dd');
-        const bookingTimeStr = format(bookingDate, 'HH:mm');
+        // Compare year, month, and day
+        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                          routeDate.getMonth() === bookingDate.getMonth() &&
+                          routeDate.getDate() === bookingDate.getDate();
+
+        const bookingTime = format(bookingDate, 'HH:mm');
 
         return (
             b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-            routeDateStr === bookingDateStr &&
-            bookingTimeStr === route.departureTime &&
+            isSameDay &&
+            bookingTime === route.departureTime &&
             b.status !== "Cancelled"
         );
     });
@@ -104,7 +107,7 @@ export default function BookRidePage() {
     };
     
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
-    newBooking.departureDate.setHours(depHours, depMinutes);
+    newBooking.departureDate.setHours(depHours, depMinutes, 0, 0); // Also reset seconds/ms
 
     await setDoc(newBookingRef, newBooking);
 
