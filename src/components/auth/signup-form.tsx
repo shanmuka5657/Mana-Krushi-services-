@@ -56,6 +56,7 @@ export function SignupForm() {
       name: '',
       email: '',
       password: '',
+      role: 'passenger',
     },
   });
   
@@ -67,13 +68,14 @@ export function SignupForm() {
   async function handleConfirmation() {
     if (!formData) return;
 
-    saveCurrentUser(formData.email, formData.name);
+    saveCurrentUser(formData.email, formData.name, formData.role);
 
-    // Save the initial profile. We'll add a dummy mobile number.
+    // Save the initial profile.
     await saveProfile({
       name: formData.name,
       email: formData.email,
       mobile: '0000000000', // Dummy number to be updated in profile settings
+      role: formData.role,
     });
     
     setShowConfirmation(false);

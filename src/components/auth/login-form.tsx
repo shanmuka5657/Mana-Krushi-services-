@@ -29,7 +29,7 @@ import { saveCurrentUser, getProfile } from '@/lib/storage';
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
-  role: z.enum(['owner', 'passenger'], { required_error: 'Please select a role.' }),
+  role: z.enum(['owner', 'passenger', 'admin'], { required_error: 'Please select a role.' }),
 });
 
 export function LoginForm() {
@@ -45,10 +45,25 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // In a real app, you'd validate credentials. Here we just save the session.
-    const userProfile = await getProfile(); // We don't have separate user objects, so we get the name from a profile if it exists
+    
+    // Hardcode admin credentials for demonstration
+    if (values.role === 'admin') {
+      if (values.email !== 'admin@example.com' || values.password !== 'admin123') {
+        form.setError('email', { message: 'Invalid admin credentials.' });
+        form.setError('password', { message: ' ' });
+        return;
+      }
+    }
+
+    const userProfile = await getProfile(values.email); // Pass email to get specific profile
     const name = userProfile?.name || values.email.split('@')[0];
-    saveCurrentUser(values.email, name);
-    router.push(`/dashboard?role=${values.role}`);
+    saveCurrentUser(values.email, name, values.role);
+    
+    if (values.role === 'admin') {
+        router.push(`/admin/dashboard`);
+    } else {
+        router.push(`/dashboard?role=${values.role}`);
+    }
   }
 
   return (
@@ -101,6 +116,7 @@ export function LoginForm() {
                       <SelectContent>
                         <SelectItem value="owner">Owner</SelectItem>
                         <SelectItem value="passenger">Passenger</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                   <FormMessage />

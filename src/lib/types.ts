@@ -38,4 +38,5 @@ export type Profile = {
     mobile: string;
     email: string;
     planExpiryDate?: Date;
+    role?: 'owner' | 'passenger' | 'admin';
 }

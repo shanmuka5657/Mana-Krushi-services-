@@ -140,6 +140,24 @@ export const getProfileFromFirestore = async (email: string): Promise<Profile | 
     return null;
 }
 
+export const getAllProfilesFromFirestore = async (): Promise<Profile[]> => {
+    if (!profilesCollection) return [];
+    try {
+        const snapshot = await getDocs(profilesCollection);
+        return snapshot.docs.map(doc => {
+             const data = doc.data();
+            return {
+                ...data,
+                email: doc.id,
+                planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
+            } as Profile
+        });
+    } catch(e) {
+        console.error("Error getting all profiles from Firestore", e);
+        return [];
+    }
+};
+
 export const saveProfileToFirestore = async (profile: Profile) => {
     if (!profilesCollection || !db) return;
     const docRef = doc(db, "profiles", profile.email);

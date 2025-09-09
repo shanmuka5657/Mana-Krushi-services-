@@ -16,6 +16,8 @@ import {
   LogOut,
   Plane,
   Download,
+  Shield,
+  Book,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -42,7 +44,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { clearCurrentUser, getCurrentUserName, getCurrentUser } from "@/lib/storage";
+import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole } from "@/lib/storage";
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
 interface BeforeInstallPromptEvent extends Event {
@@ -80,18 +82,34 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const name = getCurrentUserName();
     const email = getCurrentUser();
-    if (name) {
-      setUserName(name);
-      setUserInitial(name.charAt(0).toUpperCase());
-    } else if (email) {
-      const fallbackName = email.split('@')[0];
-      setUserName(fallbackName);
-      setUserInitial(fallbackName.charAt(0).toUpperCase());
+    const roleFromSession = getCurrentUserRole() || 'passenger';
+    setRole(roleFromSession);
+
+    if (roleFromSession === 'admin') {
+      setUserName('Admin');
+      setUserInitial('A');
+      setUserRole('Administrator');
+    } else {
+      if (name) {
+        setUserName(name);
+        setUserInitial(name.charAt(0).toUpperCase());
+      } else if (email) {
+        const fallbackName = email.split('@')[0];
+        setUserName(fallbackName);
+        setUserInitial(fallbackName.charAt(0).toUpperCase());
+      }
+      setUserRole(roleFromSession === 'owner' ? 'Owner' : 'Passenger');
     }
-    const roleFromUrl = new URLSearchParams(window.location.search).get('role') || 'passenger';
-    setRole(roleFromUrl);
-    setUserRole(roleFromUrl === 'owner' ? 'Owner' : 'Passenger');
   }, []);
+
+  const adminNavItems = [
+    { href: `/admin/dashboard`, icon: LayoutDashboard, label: "Dashboard" },
+    { href: `/admin/users`, icon: Users, label: "Users" },
+    { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
+    { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
+    { href: `/admin/payments`, icon: DollarSign, label: "All Payments" },
+    { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
+  ];
 
   const ownerNavItems = [
     { href: `/dashboard?role=owner`, icon: LayoutDashboard, label: "Dashboard" },
@@ -113,7 +131,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
   ];
   
-  const navItems = role === 'owner' ? ownerNavItems : passengerNavItems;
+  const getNavItems = () => {
+    switch (role) {
+      case 'admin':
+        return adminNavItems;
+      case 'owner':
+        return ownerNavItems;
+      default:
+        return passengerNavItems;
+    }
+  };
+
+  const navItems = getNavItems();
 
 
   const handleLogout = () => {
@@ -185,7 +214,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             <SidebarTrigger className="md:hidden" />
             <h2 className="hidden text-2xl font-semibold md:block">
-              Travel Agent Dashboard
+              {role === 'admin' ? 'Admin Panel' : 'Travel Agent Dashboard'}
             </h2>
           </div>
           <div className="flex flex-1 items-center justify-end gap-4">
@@ -215,10 +244,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(`/profile?role=${role}`)}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
+                 {role !== 'admin' && (
+                  <DropdownMenuItem onClick={() => router.push(`/profile?role=${role}`)}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                 )}
                 <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
