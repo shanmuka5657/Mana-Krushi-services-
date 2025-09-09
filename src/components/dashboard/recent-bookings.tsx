@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Booking } from "@/lib/types";
+import type { Booking, Route } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +24,11 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone } from "lucide-react";
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { getBookings, saveBookings } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes } from "@/lib/storage";
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
   switch (status) {
@@ -52,9 +52,17 @@ interface RecentBookingsProps {
 
 const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [routes, setRoutes] = useState<Route[]>([]);
   const [reportText, setReportText] = useState("");
   const { toast } = useToast();
   const [dialogAction, setDialogAction] = useState<'view' | 'report' | null>(null);
+
+  useEffect(() => {
+    const fetchRoutes = async () => {
+        setRoutes(await getRoutes(true)); // Admin/Owner can see all
+    }
+    fetchRoutes();
+  }, []);
   
   const isRideComplete = (booking: Booking) => {
     const rideEndTime = new Date(booking.departureDate); // This should ideally be arrival time if available
@@ -100,6 +108,23 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
         return 'Completed';
     }
     return booking.status;
+  }
+  
+  const getDistanceForBooking = (booking: Booking) => {
+      const bookingTime = format(new Date(booking.departureDate), 'HH:mm');
+      const bookingDate = new Date(booking.departureDate);
+      
+      const relatedRoute = routes.find(route => {
+          const routeDate = new Date(route.travelDate);
+          const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                            routeDate.getMonth() === bookingDate.getMonth() &&
+                            routeDate.getDate() === bookingDate.getDate();
+
+          return route.departureTime === bookingTime && 
+                 `${route.fromLocation} to ${route.toLocation}` === booking.destination && 
+                 isSameDay;
+      });
+      return relatedRoute?.distance;
   }
 
   return (
@@ -183,6 +208,20 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
+                             <div className="flex items-center gap-4">
+                                <MapPin className="h-5 w-5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                    <span className="text-sm text-muted-foreground">Destination</span>
+                                    <span className="font-medium">{selectedBooking.destination}</span>
+                                </div>
+                            </div>
+                             <div className="flex items-center gap-4">
+                                <Milestone className="h-5 w-5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                    <span className="text-sm text-muted-foreground">Distance</span>
+                                    <span className="font-medium">{getDistanceForBooking(selectedBooking) ? `${getDistanceForBooking(selectedBooking)?.toFixed(0)} km` : 'N/A'}</span>
+                                </div>
+                            </div>
                             <div className="flex items-center gap-4">
                             <User className="h-5 w-5 text-muted-foreground" />
                             <div className="flex flex-col">

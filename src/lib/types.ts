@@ -18,6 +18,7 @@ export type Booking = {
   paymentMethod?: "Cash" | "UPI" | "Pending";
   paymentStatus?: "Paid" | "Unpaid";
   report?: string;
+  distance?: number;
 };
 
 export type Route = {

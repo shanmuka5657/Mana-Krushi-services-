@@ -105,6 +105,7 @@ export default function BookRidePage() {
         driverName: route.driverName,
         driverMobile: route.driverMobile,
         vehicleType: route.vehicleType,
+        distance: route.distance,
     };
     
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
@@ -151,7 +152,7 @@ export default function BookRidePage() {
                                 {route.distance && (
                                     <div className="flex items-center gap-2">
                                         <Milestone className="h-4 w-4" />
-                                        <span>{route.distance} km</span>
+                                        <span>{route.distance.toFixed(0)} km</span>
                                     </div>
                                 )}
                             </div>
