@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,29 +14,62 @@ import { Badge as UiBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/utils';
 
+type FilterRole = 'all' | 'owner' | 'passenger';
+
 function AdminUsersPage() {
-    const [profiles, setProfiles] = useState<Profile[]>([]);
+    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    
+    const initialRole = (searchParams.get('role') as FilterRole) || 'all';
+    const [filter, setFilter] = useState<FilterRole>(initialRole);
 
     useEffect(() => {
         const fetchProfiles = async () => {
-            const allProfiles = await getAllProfiles();
-            setProfiles(allProfiles);
+            const profiles = await getAllProfiles();
+            setAllProfiles(profiles);
             setIsLoaded(true);
         };
         fetchProfiles();
     }, []);
+    
+    const handleFilterChange = (newFilter: FilterRole) => {
+        setFilter(newFilter);
+        const params = new URLSearchParams(window.location.search);
+        if (newFilter === 'all') {
+            params.delete('role');
+        } else {
+            params.set('role', newFilter);
+        }
+        router.push(`/admin/users?${params.toString()}`);
+    }
+
+    const filteredProfiles = useMemo(() => {
+        if (filter === 'all') return allProfiles;
+        return allProfiles.filter(p => p.role === filter);
+    }, [allProfiles, filter]);
 
     const handleExport = () => {
-        const dataToExport = profiles.map(p => ({
+        const dataToExport = filteredProfiles.map(p => ({
             Name: p.name,
             Email: p.email,
             Mobile: p.mobile,
             Role: p.role,
             'Plan Expiry': p.planExpiryDate ? format(new Date(p.planExpiryDate), 'PPP') : 'N/A'
         }));
-        exportToCsv('users.csv', dataToExport);
+        exportToCsv(`${filter}-users.csv`, dataToExport);
     }
+
+    const getPageInfo = () => {
+        switch(filter) {
+            case 'owner': return { title: "All Owners", description: "A list of all registered vehicle owners." };
+            case 'passenger': return { title: "All Passengers", description: "A list of all registered passengers." };
+            default: return { title: "All Users", description: "A list of all registered users in the system." };
+        }
+    }
+    
+    const { title, description } = getPageInfo();
 
     if (!isLoaded) {
         return <AppLayout><div>Loading users...</div></AppLayout>;
@@ -44,15 +78,24 @@ function AdminUsersPage() {
     return (
         <AppLayout>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle>All Users</CardTitle>
-                        <CardDescription>A list of all registered users in the system.</CardDescription>
+                <CardHeader>
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <CardTitle>{title}</CardTitle>
+                            <CardDescription>{description}</CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                             <Button onClick={handleExport} variant="outline" size="sm">
+                                <Download className="mr-2 h-4 w-4" />
+                                Export
+                            </Button>
+                        </div>
+                   </div>
+                    <div className="flex items-center space-x-2 pt-4">
+                        <Button variant={filter === 'all' ? 'default' : 'outline'} onClick={() => handleFilterChange('all')}>All</Button>
+                        <Button variant={filter === 'owner' ? 'default' : 'outline'} onClick={() => handleFilterChange('owner')}>Owners</Button>
+                        <Button variant={filter === 'passenger' ? 'default' : 'outline'} onClick={() => handleFilterChange('passenger')}>Passengers</Button>
                     </div>
-                    <Button onClick={handleExport} variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                    </Button>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -66,7 +109,7 @@ function AdminUsersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {profiles.length > 0 ? profiles.map(profile => (
+                            {filteredProfiles.length > 0 ? filteredProfiles.map(profile => (
                                 <TableRow key={profile.email}>
                                     <TableCell className="font-medium flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {profile.name}</TableCell>
                                     <TableCell><Mail className="h-4 w-4 mr-2 inline text-muted-foreground" />{profile.email}</TableCell>
@@ -89,7 +132,7 @@ function AdminUsersPage() {
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">No users found.</TableCell>
+                                    <TableCell colSpan={5} className="h-24 text-center">No users found for this filter.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -101,5 +144,9 @@ function AdminUsersPage() {
 }
 
 export default function UsersPage() {
-    return <AdminUsersPage />;
+    return (
+        <Suspense fallback={<AppLayout><div>Loading...</div></AppLayout>}>
+            <AdminUsersPage />
+        </Suspense>
+    );
 }

@@ -126,8 +126,8 @@ function AdminDashboardPage() {
         <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
-                <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} href="/admin/users" />
-                <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} href="/admin/users" />
+                <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} href="/admin/users?role=owner" />
+                <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} href="/admin/users?role=passenger" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
                 <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" />
