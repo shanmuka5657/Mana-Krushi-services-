@@ -4,25 +4,25 @@
   "description": "Travel Agent Management System",
   "icons": [
     {
-      "src": "https://i.ibb.co/L05f7g3/mk-logo-192.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/jHv6D3b/mk-logo-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/L05f7g3/mk-logo-192.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/jHv6D3b/mk-logo-512.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
