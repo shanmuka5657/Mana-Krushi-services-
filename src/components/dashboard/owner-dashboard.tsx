@@ -525,7 +525,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="number" placeholder="e.g., 50" {...field} className="pl-10" />
+                          <Input type="number" placeholder="e.g., 500" {...field} className="pl-10" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -544,3 +544,5 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </>
   );
 }
+
+    
