@@ -5,28 +5,28 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#121212",
   "icons": [
     {
-      "src": "https://i.ibb.co/7jHzB9d/logo.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/7jHzB9d/logo.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/7jHzB9d/logo.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/7jHzB9d/logo.png",
+      "src": "https://i.ibb.co/L1j3xY9/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
