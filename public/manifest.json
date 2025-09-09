@@ -6,31 +6,67 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
-  "theme_color": "#10b981",
+  "theme_color": "#16a34a",
   "orientation": "any",
   "lang": "en-US",
   "dir": "ltr",
-  "scope": "/",
+  "categories": ["business", "travel", "management"],
   "id": "/?source=pwa",
-  "categories": [
-    "business",
-    "productivity",
-    "travel"
-  ],
   "icons": [
     {
       "src": "/images/icon-192x192.png",
+      "type": "image/png",
       "sizes": "192x192",
-      "type": "image/png"
+      "purpose": "any maskable"
     },
     {
       "src": "/images/icon-512x512.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
   ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
+  "screenshots": [
+    {
+      "src": "/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Mana Krushi Services - Desktop View"
+    },
+    {
+      "src": "/images/screenshot-mobile.png",
+      "sizes": "640x1136",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mana Krushi Services - Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Booking",
+      "short_name": "New",
+      "description": "Create a new booking",
+      "url": "/dashboard?role=passenger&action=new-booking",
+      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your existing bookings",
+      "url": "/bookings?role=passenger",
+      "icons": [{ "src": "/images/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+   "share_target": {
+    "action": "/share-handler",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
   },
-  "prefer_related_applications": false
+  "related_applications": [],
+  "iarc_rating_id": ""
 }
