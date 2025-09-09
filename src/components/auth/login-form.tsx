@@ -58,7 +58,11 @@ export function LoginForm() {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
-      setIsInstallDialogOpen(true); // Automatically show the dialog
+      // Only show the dialog automatically once per session, if not already seen.
+      if (!sessionStorage.getItem('installPromptSeen')) {
+        setIsInstallDialogOpen(true); 
+        sessionStorage.setItem('installPromptSeen', 'true');
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -191,6 +195,15 @@ export function LoginForm() {
             </Link>
           </div>
         </CardContent>
+        {installPrompt && (
+            <CardFooter className="flex-col gap-2">
+                <div className="w-full h-px bg-border" />
+                <Button variant="outline" className="w-full" onClick={handleInstallClick}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Install App
+                </Button>
+            </CardFooter>
+        )}
       </Card>
     </>
   );
