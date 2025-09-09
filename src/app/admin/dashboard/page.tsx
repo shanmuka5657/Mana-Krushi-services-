@@ -3,10 +3,13 @@
 
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Route, Book, DollarSign } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Users, Route, Book, DollarSign, User, Calendar, Shield } from "lucide-react";
 import { getRoutes, getBookings, getAllProfiles } from "@/lib/storage";
 import type { Booking, Route as RouteType, Profile } from "@/lib/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 const StatCard = ({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) => (
     <Card>
@@ -20,6 +23,43 @@ const StatCard = ({ title, value, icon: Icon }: { title: string, value: string |
     </Card>
 );
 
+const RecentBookingItem = ({ booking }: { booking: Booking }) => (
+    <div className="flex items-center">
+        <Avatar className="h-9 w-9">
+             <AvatarImage src={`https://ui-avatars.com/api/?name=${booking.client.replace(' ', '+')}&background=random`} />
+            <AvatarFallback>{booking.client.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="ml-4 space-y-1">
+            <p className="text-sm font-medium leading-none">{booking.client}</p>
+            <p className="text-sm text-muted-foreground">{booking.destination}</p>
+        </div>
+        <div className="ml-auto font-medium">₹{booking.amount.toFixed(2)}</div>
+    </div>
+);
+
+const NewUserItem = ({ profile }: { profile: Profile }) => (
+     <div className="flex items-center gap-4">
+        <Avatar className="hidden h-9 w-9 sm:flex">
+             <AvatarImage src={`https://ui-avatars.com/api/?name=${profile.name.replace(' ', '+')}&background=random`} />
+            <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="grid gap-1">
+            <p className="text-sm font-medium leading-none">{profile.name}</p>
+            <p className="text-sm text-muted-foreground">{profile.email}</p>
+        </div>
+        <div className="ml-auto text-right">
+             <Badge variant={profile.role === 'owner' ? 'secondary' : 'outline'}>{profile.role}</Badge>
+            {profile.planExpiryDate && (
+                 <div className="text-xs text-muted-foreground mt-1 flex items-center justify-end gap-1">
+                    <Shield className="h-3 w-3 text-green-500" />
+                    <span>{format(new Date(profile.planExpiryDate), "dd MMM yyyy")}</span>
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+
 function AdminDashboardPage() {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -29,6 +69,8 @@ function AdminDashboardPage() {
     totalBookings: 0,
     totalRevenue: 0,
   });
+  const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
+  const [newUsers, setNewUsers] = useState<Profile[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -45,6 +87,13 @@ function AdminDashboardPage() {
       
       const ownerCount = profiles.filter(p => p.role === 'owner').length;
       const passengerCount = profiles.filter(p => p.role === 'passenger').length;
+      
+      const sortedBookings = [...bookings].sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+      setRecentBookings(sortedBookings.slice(0, 5));
+
+      // Assuming profiles don't have a creation date, we'll just take the first few as "new"
+      setNewUsers(profiles.slice(0, 5));
+
 
       setStats({
         totalUsers: profiles.length,
@@ -66,24 +115,37 @@ function AdminDashboardPage() {
 
   return (
     <AppLayout>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Total Users" value={stats.totalUsers} icon={Users} />
-        <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} />
-        <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} />
-        <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} />
-        <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} />
-        <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={DollarSign} />
-      </div>
-      <div className="mt-8">
-        <Card>
-            <CardHeader>
-                <CardTitle>Welcome, Admin!</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p>Use the navigation on the left to manage users, view all routes, bookings, and payments.</p>
-            </CardContent>
-        </Card>
-      </div>
+        <div className="space-y-8">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <StatCard title="Total Users" value={stats.totalUsers} icon={Users} />
+                <StatCard title="Total Owners" value={stats.totalOwners} icon={Users} />
+                <StatCard title="Total Passengers" value={stats.totalPassengers} icon={Users} />
+                <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} />
+                <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} />
+                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={DollarSign} />
+            </div>
+
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Bookings</CardTitle>
+                        <CardDescription>The 5 most recent bookings from across the platform.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {recentBookings.length > 0 ? recentBookings.map(b => <RecentBookingItem key={b.id} booking={b} />) : <p className="text-sm text-muted-foreground">No bookings yet.</p>}
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>New Users</CardTitle>
+                        <CardDescription>The most recently registered users.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                       {newUsers.length > 0 ? newUsers.map(p => <NewUserItem key={p.email} profile={p} />) : <p className="text-sm text-muted-foreground">No users yet.</p>}
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     </AppLayout>
   );
 }
