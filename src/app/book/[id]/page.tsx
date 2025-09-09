@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Zap, MapPin, Milestone } from "lucide-react";
+import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users } from "lucide-react";
 import { format } from "date-fns";
 import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
@@ -12,7 +12,7 @@ import { getApp } from "firebase/app";
 import { getRoutes, getProfile, getCurrentUser, getBookings } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,20 +24,54 @@ export default function BookRidePage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [isBooking, setIsBooking] = useState(false);
+  const [numberOfSeats, setNumberOfSeats] = useState(1);
+  const [availableSeats, setAvailableSeats] = useState(0);
 
   useEffect(() => {
-    const fetchRoute = async () => {
+    const fetchRouteAndBookings = async () => {
         const routes = await getRoutes();
         const routeId = typeof params.id === 'string' ? params.id : '';
         const foundRoute = routes.find((r) => r.id === routeId);
+        
         if (foundRoute) {
             setRoute(foundRoute);
             setMessage(`Hello, I've just booked your ride! I'd be glad to travel with you. Can I get more information?`);
+            
+            // Calculate available seats
+            const allBookings = await getBookings(true);
+            const bookingsForThisRoute = allBookings.filter(b => {
+                const routeDate = new Date(foundRoute.travelDate);
+                const bookingDate = new Date(b.departureDate);
+
+                const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                                  routeDate.getMonth() === bookingDate.getMonth() &&
+                                  routeDate.getDate() === bookingDate.getDate();
+
+                const bookingTime = format(bookingDate, 'HH:mm');
+
+                return (
+                    b.destination === `${foundRoute.fromLocation} to ${foundRoute.toLocation}` &&
+                    isSameDay &&
+                    bookingTime === foundRoute.departureTime &&
+                    b.status !== "Cancelled"
+                );
+            });
+            const bookedSeats = bookingsForThisRoute.reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+            setAvailableSeats(foundRoute.availableSeats - bookedSeats);
         }
         setIsLoaded(true);
     }
-    fetchRoute();
+    fetchRouteAndBookings();
   }, [params.id]);
+  
+  const handleSeatChange = (amount: number) => {
+      setNumberOfSeats(prev => {
+          const newSeats = prev + amount;
+          if (newSeats < 1) return 1;
+          if (newSeats > availableSeats) return availableSeats;
+          return newSeats;
+      })
+  }
 
   const handleBooking = async () => {
     if (!route || isBooking) return;
@@ -57,36 +91,16 @@ export default function BookRidePage() {
         return;
     }
     
-    // Check for available seats
-    const allBookings = await getBookings(true); // Get all bookings for seat check
-    const bookingsForThisRoute = allBookings.filter(b => {
-        const routeDate = new Date(route.travelDate);
-        const bookingDate = new Date(b.departureDate);
-
-        // Compare year, month, and day
-        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                          routeDate.getMonth() === bookingDate.getMonth() &&
-                          routeDate.getDate() === bookingDate.getDate();
-
-        const bookingTime = format(bookingDate, 'HH:mm');
-
-        return (
-            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-            isSameDay &&
-            bookingTime === route.departureTime &&
-            b.status !== "Cancelled"
-        );
-    });
-
-    if (bookingsForThisRoute.length >= route.availableSeats) {
+    if (numberOfSeats > availableSeats) {
          toast({
-            title: "Ride Sold Out",
-            description: "Sorry, there are no more available seats for this ride.",
+            title: "Not enough seats",
+            description: `Sorry, there are only ${availableSeats} seats available for this ride.`,
             variant: "destructive",
         });
         setIsBooking(false);
         return;
     }
+
 
     const db = getFirestore(getApp());
     const newBookingRef = doc(collection(db, 'bookings'));
@@ -98,9 +112,9 @@ export default function BookRidePage() {
         destination: `${route.fromLocation} to ${route.toLocation}`,
         departureDate: new Date(route.travelDate),
         returnDate: new Date(route.travelDate), 
-        amount: route.price,
+        amount: route.price * numberOfSeats,
         status: "Confirmed",
-        travelers: "1",
+        travelers: String(numberOfSeats),
         mobile: passengerProfile.mobile,
         driverName: route.driverName,
         driverMobile: route.driverMobile,
@@ -110,13 +124,13 @@ export default function BookRidePage() {
     };
     
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
-    newBooking.departureDate.setHours(depHours, depMinutes, 0, 0); // Also reset seconds/ms
+    newBooking.departureDate.setHours(depHours, depMinutes, 0, 0);
 
     await setDoc(newBookingRef, newBooking);
 
     toast({
         title: "Booking Confirmed!",
-        description: "Your ride has been successfully booked.",
+        description: `Your ride for ${numberOfSeats} seat(s) has been successfully booked.`,
     });
 
     router.push('/bookings?role=passenger');
@@ -220,13 +234,29 @@ export default function BookRidePage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Price summary</CardTitle>
+                    <CardDescription>
+                        {availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                    <div className="flex justify-between">
-                        <span>1 seat: ₹{(route.price || 0).toFixed(2)}</span>
-                        <span className="font-semibold">Cash</span>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <Users className="h-5 w-5 text-muted-foreground" />
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1}>
+                                    <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="font-bold text-lg w-10 text-center">{numberOfSeats}</span>
+                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-xl font-bold">₹{(route.price * numberOfSeats).toFixed(2)}</div>
+                            <div className="text-sm text-muted-foreground">Pay in the car</div>
+                        </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">Pay in the car</p>
                 </CardContent>
             </Card>
 
@@ -245,7 +275,7 @@ export default function BookRidePage() {
                 </CardContent>
             </Card>
 
-            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking}>
+            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking || availableSeats === 0}>
                 {isBooking ? (
                     <>
                         <Zap className="mr-2 h-4 w-4 animate-spin" />
@@ -254,7 +284,7 @@ export default function BookRidePage() {
                 ) : (
                     <>
                         <Zap className="mr-2 h-4 w-4" />
-                        Book
+                        {availableSeats > 0 ? `Book for ${numberOfSeats} seat(s)` : 'Sold Out'}
                     </>
                 )}
             </Button>
@@ -262,3 +292,5 @@ export default function BookRidePage() {
     </div>
   );
 }
+
+    
