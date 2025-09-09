@@ -9,7 +9,7 @@ import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestor
 import { getApp } from "firebase/app";
 
 
-import { getRoutes, getBookings, saveBookings, getProfile } from "@/lib/storage";
+import { getRoutes, getBookings, saveBookings, getProfile, getCurrentUser } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +42,9 @@ export default function BookRidePage() {
     if (!route) return;
 
     const passengerProfile = await getProfile();
-    if (!passengerProfile) {
+    const passengerEmail = getCurrentUser();
+
+    if (!passengerProfile || !passengerEmail) {
         toast({
             title: "Profile Incomplete",
             description: "Please complete your profile before booking.",
@@ -61,9 +63,10 @@ export default function BookRidePage() {
     const newBooking: Booking = {
         id: newBookingRef.id, // Use the real Firestore ID
         client: passengerProfile.name,
+        clientEmail: passengerEmail,
         destination: `${route.fromLocation} to ${route.toLocation}`,
-        departureDate: route.travelDate,
-        returnDate: route.travelDate, // Not applicable for one-way, but schema requires it
+        departureDate: new Date(route.travelDate),
+        returnDate: new Date(route.travelDate), // Not applicable for one-way, but schema requires it
         amount: route.price,
         status: "Confirmed",
         travelers: "1",
@@ -84,7 +87,7 @@ export default function BookRidePage() {
         description: "Your ride has been successfully booked.",
     });
 
-    router.push('/dashboard?role=passenger');
+    router.push('/bookings?role=passenger');
   };
 
   if (!isLoaded) {

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import RecentBookings from '@/components/dashboard/recent-bookings';
-import { getBookings, saveBookings, getCurrentUserName } from '@/lib/storage';
+import { getBookings, saveBookings, getCurrentUserName, getCurrentUser } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -14,23 +14,21 @@ function BookingsPageContent() {
     const [isLoaded, setIsLoaded] = useState(false);
     const searchParams = useSearchParams();
     const role = searchParams.get('role') || 'passenger';
-    const currentUserName = getCurrentUserName();
 
     useEffect(() => {
         const fetchBookings = async () => {
             const allBookings = await getBookings();
             let userBookings: Booking[] = [];
+            const currentUserEmail = getCurrentUser();
+            const currentUserName = getCurrentUserName();
 
-            if (role === 'passenger') {
-                const passengerName = getCurrentUserName();
-                if (passengerName) {
-                    userBookings = allBookings.filter(b => b.client === passengerName);
-                }
-            } else if (role === 'owner') {
-                const ownerName = getCurrentUserName();
-                userBookings = allBookings.filter(b => b.driverName === ownerName);
+            if (role === 'passenger' && currentUserEmail) {
+                userBookings = allBookings.filter(b => b.clientEmail === currentUserEmail);
+            } else if (role === 'owner' && currentUserName) {
+                userBookings = allBookings.filter(b => b.driverName === currentUserName);
             }
             
+            userBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
             setBookings(userBookings);
             setIsLoaded(true);
         };
@@ -43,15 +41,16 @@ function BookingsPageContent() {
         await saveBookings(updatedAllBookings);
         
         let userBookings: Booking[] = [];
-        if (role === 'passenger') {
-            const passengerName = getCurrentUserName();
-             if (passengerName) {
-                userBookings = updatedAllBookings.filter(b => b.client === passengerName);
-            }
-        } else if (role === 'owner') {
-            const ownerName = getCurrentUserName();
-            userBookings = updatedAllBookings.filter(b => b.driverName === ownerName);
+        const currentUserEmail = getCurrentUser();
+        const currentUserName = getCurrentUserName();
+
+        if (role === 'passenger' && currentUserEmail) {
+            userBookings = updatedAllBookings.filter(b => b.clientEmail === currentUserEmail);
+        } else if (role === 'owner' && currentUserName) {
+            userBookings = updatedAllBookings.filter(b => b.driverName === currentUserName);
         }
+        
+        userBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
         setBookings(userBookings);
     };
 

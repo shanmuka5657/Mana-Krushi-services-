@@ -2,6 +2,7 @@
 export type Booking = {
   id: string;
   client: string;
+  clientEmail?: string;
   destination: string;
   departureDate: Date;
   returnDate: Date;

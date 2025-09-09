@@ -90,7 +90,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
     });
     await saveBookings(updatedBookings);
     setAllBookings(updatedBookings);
-    setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, paymentMethod: method, paymentStatus: 'Paid', status: 'Completed'} : b))
+    setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, clientEmail: b.clientEmail, paymentMethod: method, paymentStatus: 'Paid', status: 'Completed'} : b))
     toast({
       title: "Payment Recorded",
       description: `Payment for booking ${bookingId} has been recorded as ${method}.`,
