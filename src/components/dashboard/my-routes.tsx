@@ -202,11 +202,13 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     });
   }
 
-  const isRideComplete = (route: Route) => {
+  const shouldCalculateEarnings = (route: Route, bookedSeats: number) => {
       const routeDateTime = new Date(route.travelDate);
       const [hours, minutes] = route.arrivalTime.split(':').map(Number);
       routeDateTime.setHours(hours, minutes);
-      return routeDateTime < new Date();
+      const isComplete = routeDateTime < new Date();
+      const isFull = bookedSeats >= route.availableSeats;
+      return isComplete || isFull;
   }
 
   const getStatusInfo = (status: Booking['status']) => {
@@ -235,11 +237,12 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                               routeDate.getDate() === bookingDate.getDate();
             const bookingTime = format(bookingDate, 'HH:mm');
 
+            // Calculate earnings based on confirmed or completed bookings
             return (
                 b.destination === `${route.fromLocation} to ${route.toLocation}` &&
                 isSameDay &&
                 bookingTime === route.departureTime &&
-                b.status === "Completed"
+                (b.status === "Completed" || b.status === "Confirmed")
             );
         });
 
@@ -267,7 +270,8 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   
   useEffect(() => {
     routes.forEach(route => {
-        if (isRideComplete(route)) {
+        const bookedSeats = getBookedSeats(route);
+        if (shouldCalculateEarnings(route, bookedSeats)) {
             calculateEarnings(route);
         }
     });
@@ -337,7 +341,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                   const bookedSeats = getBookedSeats(route);
                   const availableSeats = route.availableSeats - bookedSeats;
                   const earnings = earningsMap[route.id];
-                  const rideHasCompleted = isRideComplete(route);
+                  const showEarnings = shouldCalculateEarnings(route, bookedSeats);
                   return (
                     <TableRow key={route.id}>
                       <TableCell className="font-medium">{route.fromLocation}</TableCell>
@@ -346,7 +350,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                       <TableCell>{route.departureTime}</TableCell>
                       <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
                       <TableCell>
-                        {rideHasCompleted ? (
+                        {showEarnings ? (
                            earnings?.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
                                earnings?.value !== null && earnings?.value !== undefined ? `₹${earnings.value.toFixed(2)}` : 'N/A'
                            )
@@ -397,6 +401,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                   bookingsForRoute.map(booking => {
                     const StatusIcon = getStatusInfo(booking.status).icon;
                     const statusColor = getStatusInfo(booking.status).color;
+                    const isComplete = new Date(booking.departureDate) < new Date();
                     return (
                     <div key={booking.id} className="border p-4 rounded-md space-y-4">
                        <div className="flex items-start gap-4">
@@ -428,7 +433,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                           </div>
                       </div>
 
-                        {selectedRoute && isRideComplete(selectedRoute) && (
+                        {isComplete && (
                             <div className="mt-4 pt-4 border-t">
                                <p className="text-sm text-muted-foreground mb-2">Payment</p>
                                {booking.paymentStatus === 'Paid' ? (
@@ -632,5 +637,3 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
 };
 
 export default MyRoutes;
-
-    
