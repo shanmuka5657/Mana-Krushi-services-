@@ -21,20 +21,41 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
-import { getBookings, saveBookings, getProfile } from "@/lib/storage";
+import { User, Phone, Users, Calendar as CalendarIcon, DollarSign, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin } from "lucide-react";
+import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "../ui/textarea";
 
 interface MyRoutesProps {
   routes: Route[];
 }
 
-const MyRoutes = ({ routes }: MyRoutesProps) => {
+const editRouteSchema = z.object({
+  fromLocation: z.string().min(2, "From location is required"),
+  toLocation: z.string().min(2, "To location is required"),
+  travelDate: z.date(),
+  departureTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
+  arrivalTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
+  availableSeats: z.coerce.number().int().positive(),
+  price: z.coerce.number().positive(),
+  pickupPoints: z.string().optional(),
+  dropOffPoints: z.string().optional(),
+});
+
+
+const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
+  const [routes, setRoutes] = useState<Route[]>(initialRoutes);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [fromFilter, setFromFilter] = useState("");
@@ -44,6 +65,33 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [toll, setToll] = useState<number>(0);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  
+  const form = useForm<z.infer<typeof editRouteSchema>>({
+    resolver: zodResolver(editRouteSchema),
+  });
+
+  useEffect(() => {
+    setRoutes(initialRoutes);
+  }, [initialRoutes]);
+
+  useEffect(() => {
+    if (selectedRoute && isEditDialogOpen) {
+      form.reset({
+        fromLocation: selectedRoute.fromLocation,
+        toLocation: selectedRoute.toLocation,
+        travelDate: new Date(selectedRoute.travelDate),
+        departureTime: selectedRoute.departureTime,
+        arrivalTime: selectedRoute.arrivalTime,
+        availableSeats: selectedRoute.availableSeats,
+        price: selectedRoute.price,
+        pickupPoints: selectedRoute.pickupPoints?.join('\n') || '',
+        dropOffPoints: selectedRoute.dropOffPoints?.join('\n') || '',
+      });
+    }
+  }, [selectedRoute, isEditDialogOpen, form]);
+
 
   useEffect(() => {
     const fetchBookingsAndProfile = async () => {
@@ -97,7 +145,40 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
     setBookingsForRoute(routeBookings);
     const totalToll = routeBookings.reduce((acc, b) => acc + (b.toll || 0), 0);
     setToll(totalToll);
+    setIsViewDialogOpen(true);
   };
+  
+  const handleEditClick = (route: Route) => {
+    setSelectedRoute(route);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSubmit = async (data: z.infer<typeof editRouteSchema>) => {
+    if (!selectedRoute) return;
+
+    const allRoutes = await getRoutes(true);
+
+    const updatedRoutes = allRoutes.map(r => 
+      r.id === selectedRoute.id 
+      ? { 
+          ...r, 
+          ...data,
+          pickupPoints: data.pickupPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
+          dropOffPoints: data.dropOffPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
+        } 
+      : r
+    );
+
+    await saveRoutes(updatedRoutes);
+    setRoutes(updatedRoutes);
+    toast({
+      title: "Route Updated",
+      description: "The route details have been successfully updated."
+    });
+    setIsEditDialogOpen(false);
+    setSelectedRoute(null);
+  }
+
   
   const handlePayment = async (bookingId: string, method: 'Cash' | 'UPI') => {
     const bookingsToUpdate = await getBookings(true);
@@ -231,62 +312,68 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                  <Button variant="ghost" onClick={() => { setFromFilter(''); setToFilter(''); setDateFilter(undefined); }}>Clear</Button>
             )}
         </div>
-        <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedRoute(null)}>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
-                <TableHead className="rounded-l-lg">From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Departure</TableHead>
-                <TableHead>Seats Left</TableHead>
-                <TableHead>Earnings</TableHead>
-                <TableHead className="rounded-r-lg">Actions</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
+              <TableHead className="rounded-l-lg">From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Departure</TableHead>
+              <TableHead>Seats Left</TableHead>
+              <TableHead>Earnings</TableHead>
+              <TableHead className="rounded-r-lg text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredRoutes.length > 0 ? (
+              filteredRoutes.map((route) => {
+                  const bookedSeats = getBookedSeats(route);
+                  const availableSeats = route.availableSeats - bookedSeats;
+                  const earnings = calculateEarnings(route);
+                  return (
+                    <TableRow key={route.id}>
+                      <TableCell className="font-medium">{route.fromLocation}</TableCell>
+                      <TableCell>{route.toLocation}</TableCell>
+                      <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
+                      <TableCell>{route.departureTime}</TableCell>
+                      <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
+                        <TableCell>₹{earnings.toFixed(2)}</TableCell>
+                      <TableCell className="flex gap-2 justify-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewClick(route)}
+                          >
+                            View Bookings
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleEditClick(route)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" /> Edit
+                          </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  No routes found.
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredRoutes.length > 0 ? (
-                filteredRoutes.map((route) => {
-                    const bookedSeats = getBookedSeats(route);
-                    const availableSeats = route.availableSeats - bookedSeats;
-                    const earnings = calculateEarnings(route);
-                    return (
-                      <TableRow key={route.id}>
-                        <TableCell className="font-medium">{route.fromLocation}</TableCell>
-                        <TableCell>{route.toLocation}</TableCell>
-                        <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
-                        <TableCell>{route.departureTime}</TableCell>
-                        <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
-                         <TableCell>₹{earnings.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewClick(route)}
-                            >
-                              View Bookings
-                            </Button>
-                          </DialogTrigger>
-                        </TableCell>
-                      </TableRow>
-                    )
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    No routes found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          {selectedRoute && (
+            )}
+          </TableBody>
+        </Table>
+
+        {/* View Bookings Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
             <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Bookings for {selectedRoute.fromLocation} to {selectedRoute.toLocation}</DialogTitle>
+                <DialogTitle>Bookings for {selectedRoute?.fromLocation} to {selectedRoute?.toLocation}</DialogTitle>
                 <DialogDescription>
-                  {format(new Date(selectedRoute.travelDate), "PPP")} at {selectedRoute.departureTime}
+                  {selectedRoute && format(new Date(selectedRoute.travelDate), "PPP")} at {selectedRoute?.departureTime}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -325,7 +412,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                           </div>
                       </div>
 
-                        {isRideComplete(selectedRoute) && (
+                        {selectedRoute && isRideComplete(selectedRoute) && (
                             <div className="mt-4 pt-4 border-t">
                                <p className="text-sm text-muted-foreground mb-2">Payment</p>
                                {booking.paymentStatus === 'Paid' ? (
@@ -351,7 +438,7 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                   <p>No bookings for this route yet.</p>
                 )}
 
-                 {isRideComplete(selectedRoute) && bookingsForRoute.length > 0 && (
+                 {selectedRoute && isRideComplete(selectedRoute) && bookingsForRoute.length > 0 && (
                     <div className="mt-4 pt-4 border-t">
                         <h4 className="text-sm font-medium mb-2">Post-Trip Details</h4>
                         <div className="flex items-center gap-2">
@@ -368,7 +455,176 @@ const MyRoutes = ({ routes }: MyRoutesProps) => {
                  )}
               </div>
             </DialogContent>
-          )}
+        </Dialog>
+        
+        {/* Edit Route Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Route</DialogTitle>
+              <DialogDescription>Make changes to your route details below.</DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleEditSubmit)} className="space-y-4 py-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="fromLocation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>From</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="toLocation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>To</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="travelDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Travel Date</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                     <FormField
+                        control={form.control}
+                        name="departureTime"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Departure Time</FormLabel>
+                                <FormControl>
+                                    <Input type="time" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    <FormField
+                        control={form.control}
+                        name="arrivalTime"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Arrival Time</FormLabel>
+                                <FormControl>
+                                    <Input type="time" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                  </div>
+                  
+                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="availableSeats"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Available Seats</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                        <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Price per Seat (₹)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                   </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="pickupPoints"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pickup Points</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="One point per line" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="dropOffPoints"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Drop-off Points</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="One point per line" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="ghost">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit">Save Changes</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
         </Dialog>
       </CardContent>
     </Card>
