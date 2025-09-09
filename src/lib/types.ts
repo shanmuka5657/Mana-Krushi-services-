@@ -36,8 +36,8 @@ export type Route = {
   departureTime: string;
   arrivalTime: string;
   availableSeats: number;
-  vehicleType: string;
-  vehicleNumber: string;
+  vehicleType?: string;
+  vehicleNumber?: string;
   price: number;
   rating: number;
 };
@@ -46,6 +46,7 @@ export type Profile = {
     name: string;
     mobile: string;
     email: string;
+    address?: string;
     planExpiryDate?: Date;
     role?: 'owner' | 'passenger' | 'admin';
 }

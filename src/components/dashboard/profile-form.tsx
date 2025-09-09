@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
@@ -22,11 +22,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { saveProfile, getProfile, getCurrentUser, getCurrentUserName } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
+import { Textarea } from "../ui/textarea";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   mobile: z.string().regex(/^\d{10}$/, { message: "Enter a valid 10-digit mobile number." }),
   email: z.string().email({ message: "Invalid email address." }),
+  address: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -41,6 +43,7 @@ export default function ProfileForm() {
       name: "",
       mobile: "",
       email: "",
+      address: "",
     },
   });
 
@@ -56,6 +59,7 @@ export default function ProfileForm() {
             name: userName || (userEmail ? userEmail.split('@')[0] : ''),
             email: userEmail || '',
             mobile: '',
+            address: '',
         };
 
         if (userProfile) {
@@ -149,6 +153,24 @@ export default function ProfileForm() {
                         <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input type="email" placeholder="Enter your email" {...field} className="pl-10" disabled />
                       </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+               <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                        <Textarea 
+                          placeholder="Enter your full address" 
+                          className="h-24"
+                          {...field}
+                        />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
