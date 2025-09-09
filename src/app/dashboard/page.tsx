@@ -11,7 +11,7 @@ import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from 'react';
-import { getBookings, saveBookings, getRoutes, addRoute, getCurrentUserName } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, addRoute, getCurrentUserName, getCurrentUser } from "@/lib/storage";
 import MyRoutes from "@/components/dashboard/my-routes";
 import ProfileForm from "@/components/dashboard/profile-form";
 
@@ -32,9 +32,10 @@ function DashboardPage() {
       
       setAllBookings(bookingsFromStorage);
       const currentUserName = getCurrentUserName();
+      const currentUserEmail = getCurrentUser();
 
       if (role === 'passenger') {
-        const filteredBookings = currentUserName ? bookingsFromStorage.filter(b => b.client === currentUserName) : [];
+        const filteredBookings = currentUserEmail ? bookingsFromStorage.filter(b => b.clientEmail === currentUserEmail) : [];
         setUserBookings(filteredBookings);
         setRoutes(allRoutes);
       } else {
@@ -74,9 +75,9 @@ function DashboardPage() {
     const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
     await saveBookings(updatedAllBookings);
     setAllBookings(updatedAllBookings);
-    const currentUserName = getCurrentUserName();
+    const currentUserEmail = getCurrentUser();
     if (role === 'passenger') {
-      setUserBookings(currentUserName ? updatedAllBookings.filter(b => b.client === currentUserName) : []);
+      setUserBookings(currentUserEmail ? updatedAllBookings.filter(b => b.clientEmail === currentUserEmail) : []);
     } else {
       const ownerName = getCurrentUserName();
       const ownerBookings = ownerName ? updatedAllBookings.filter(b => b.driverName === ownerName) : [];
