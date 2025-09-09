@@ -555,5 +555,3 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
 };
 
 export default MyRoutes;
-
-    
