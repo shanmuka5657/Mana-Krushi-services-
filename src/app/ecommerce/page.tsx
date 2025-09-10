@@ -95,16 +95,21 @@ function EcommercePageContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
     
-    const runCuelinksScript = `
-      function runCuelinks() {
-        if (typeof window.cuelinks?.js?.run === 'function') {
-          window.cuelinks.js.run();
-        } else {
-          setTimeout(runCuelinks, 200);
-        }
-      }
-      runCuelinks();
-    `;
+    useEffect(() => {
+        // This function will repeatedly try to run the Cuelinks script
+        // until it is available. This is necessary for Single Page Applications.
+        const intervalId = setInterval(() => {
+            if (typeof (window as any).cuelinks?.js?.run === 'function') {
+                (window as any).cuelinks.js.run();
+                // Once it runs successfully, we can stop checking.
+                clearInterval(intervalId);
+            }
+        }, 500); // Check every 500ms
+
+        // Clean up the interval when the component unmounts to prevent memory leaks.
+        return () => clearInterval(intervalId);
+    }, []); // The empty dependency array means this runs once when the component mounts.
+
 
     const filteredPartners = useMemo(() => {
         if (!query) {
@@ -117,9 +122,6 @@ function EcommercePageContent() {
 
     return (
         <AppLayout>
-            <Script id="cuelinks-runner" strategy="afterInteractive">
-              {runCuelinksScript}
-            </Script>
             <Card>
                 <CardHeader>
                     <CardTitle>Our Partners</CardTitle>
