@@ -43,7 +43,7 @@ const partners = [
         name: "Flipkart",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
-        href: "https://www.flipkart.com"
+        href: "https://ltsrn.in/bOB"
     },
     {
         name: "Ajio",
@@ -80,6 +80,12 @@ const partners = [
         profit: "Flat Rs 2500 Profit",
         logoUrl: "https://i.ibb.co/ZpQDy8yB/Screenshot-2025-09-10-16-45-25-696-com-whatsapp.jpg",
         href: "https://www.sbicard.com/en-in/personal/credit-cards/shopping/cashback-sbi-card"
+    },
+    {
+        name: "Rio - UPI Rupay Credit Card",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
+        href: "https://clnk.in/w593"
     }
 ];
 
