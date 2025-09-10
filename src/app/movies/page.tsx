@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Film, Clapperboard, Tv, Search, Loader2 } from 'lucide-react';
+import { Film, Clapperboard, Tv, Search, Loader2, PlayCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
@@ -14,11 +14,11 @@ import type { MovieSite } from '@/lib/types';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com/movies', color: 'bg-red-50' },
-    { name: 'Tubi', icon: <Tv className="h-10 w-10 text-orange-500" />, href: 'https://tubitv.com/', color: 'bg-orange-50' },
-    { name: 'Pluto TV', icon: <Tv className="h-10 w-10 text-blue-500" />, href: 'https://pluto.tv/', color: 'bg-blue-50' },
-    { name: 'Crackle', icon: <Clapperboard className="h-10 w-10 text-yellow-500" />, href: 'https://www.crackle.com/', color: 'bg-yellow-50' },
+    { name: 'JioCinema', icon: <Film className="h-10 w-10 text-pink-500" />, href: 'https://www.jiocinema.com/', color: 'bg-pink-50' },
+    { name: 'MX Player', icon: <PlayCircle className="h-10 w-10 text-blue-500" />, href: 'https://www.mxplayer.in/', color: 'bg-blue-50' },
+    { name: 'Hotstar', icon: <Tv className="h-10 w-10 text-blue-800" />, href: 'https://www.hotstar.com/in/explore', color: 'bg-blue-50' },
     { name: 'Plex', icon: <Tv className="h-10 w-10 text-green-500" />, href: 'https://www.plex.tv/watch-free', color: 'bg-green-50' },
-    { name: 'Vudu', icon: <Clapperboard className="h-10 w-10 text-cyan-500" />, href: 'https://www.vudu.com/content/movies/uxpage/Free-Movies-TV/140', color: 'bg-cyan-50' },
+    { name: 'Tubi', icon: <Tv className="h-10 w-10 text-orange-500" />, href: 'https://tubitv.com/', color: 'bg-orange-50' },
 ];
 
 function MoviesPageContent() {
@@ -110,7 +110,7 @@ function MoviesPageContent() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Free Movie Platforms</CardTitle>
-                        <CardDescription>Explore these platforms for free movies and TV shows.</CardDescription>
+                        <CardDescription>Explore these platforms for free movies and TV shows available in India.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
