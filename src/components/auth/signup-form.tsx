@@ -87,7 +87,8 @@ export function SignupForm() {
   return (
     <>
       <div className="flex flex-col items-center text-center mb-6">
-        <h2 className="text-2xl font-bold">Mana Krushi Services</h2>
+        <Image src="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png" alt="logo" width={100} height={100} />
+        <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
       </div>
       <Card className="w-full max-w-lg">
         <CardHeader>
