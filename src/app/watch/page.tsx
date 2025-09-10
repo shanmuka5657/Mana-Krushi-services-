@@ -38,7 +38,6 @@ const apps = [
     }
 ];
 
-
 function WatchPageContent() {
     return (
         <AppLayout>
