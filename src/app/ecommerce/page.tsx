@@ -29,7 +29,7 @@ const partners = [
         name: "Flipkart store 2",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/P9tqW8K/flipkart-removebg-preview.png",
-        href: "#"
+        href: "https://fktr.in/Fy8fl6D"
     },
     {
         name: "Ajio New Store",
