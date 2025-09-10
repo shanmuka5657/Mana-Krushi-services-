@@ -37,7 +37,6 @@ function DashboardPage() {
       if (role === 'passenger') {
         const filteredBookings = currentUserEmail ? bookingsFromStorage.filter(b => b.clientEmail === currentUserEmail) : [];
         setUserBookings(filteredBookings);
-        setRoutes(allRoutes);
       } else {
         const ownerName = getCurrentUserName();
         const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
@@ -117,7 +116,7 @@ function DashboardPage() {
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
           <TabsContent value="find-ride">
-            <PassengerDashboard routes={routes} onSwitchTab={handleTabSwitch} />
+            <PassengerDashboard onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-bookings">
             <RecentBookings bookings={userBookings} onUpdateBooking={handleUpdateBooking} />

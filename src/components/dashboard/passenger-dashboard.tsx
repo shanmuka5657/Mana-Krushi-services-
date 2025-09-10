@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Car, Star, Zap, Users, Milestone } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,10 +28,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import type { Route, Booking } from "@/lib/types";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { getProfile, getBookings } from "@/lib/storage";
+import { getProfile } from "@/lib/storage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,32 +51,12 @@ const searchFormSchema = z.object({
 type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 interface PassengerDashboardProps {
-  routes: Route[];
   onSwitchTab: (tab: string) => void;
 }
 
-const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
-    try {
-        const departure = new Date(`1970-01-01T${departureTime}:00`);
-        const arrival = new Date(`1970-01-01T${arrivalTime}:00`);
-        const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
-        if (diffMinutes < 0) return "";
 
-        const hours = Math.floor(diffMinutes / 60);
-        const minutes = diffMinutes % 60;
-        
-        return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
-
-    } catch (e) {
-        return "";
-    }
-}
-
-export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDashboardProps) {
-  const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
+export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
-  const [allBookings, setAllBookings] = useState<Booking[]>([]);
-  const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -89,8 +66,6 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
-        const bookings = await getBookings(true); // Fetch all bookings
-        setAllBookings(bookings);
     };
     checkProfileAndFetchBookings();
   }, []);
@@ -103,46 +78,13 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
     },
   });
   
-  const getBookedSeats = (route: Route) => {
-     return allBookings.filter(b => {
-        const routeDate = new Date(route.travelDate);
-        const bookingDate = new Date(b.departureDate);
-        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                          routeDate.getMonth() === bookingDate.getMonth() &&
-                          routeDate.getDate() === bookingDate.getDate();
-        const bookingTime = format(bookingDate, 'HH:mm');
-
-        return (
-            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-            isSameDay &&
-            bookingTime === route.departureTime &&
-            b.status !== "Cancelled"
-        );
-    }).length;
-  }
-
   function onSubmit(data: SearchFormValues) {
-    const searchDateStr = format(data.travelDate, "yyyy-MM-dd");
-    
-    const results = routes.filter(route => {
-        const routeDateStr = format(new Date(route.travelDate), "yyyy-MM-dd");
-
-        const fromMatch = route.fromLocation.trim().toLowerCase() === data.fromLocation.trim().toLowerCase();
-        const toMatch = route.toLocation.trim().toLowerCase() === data.toLocation.trim().toLowerCase();
-        const dateMatch = searchDateStr === routeDateStr;
-        
-        return fromMatch && toMatch && dateMatch;
+    const params = new URLSearchParams({
+        from: data.fromLocation,
+        to: data.toLocation,
+        date: format(data.travelDate, 'yyyy-MM-dd')
     });
-
-    setAvailableOwners(results);
-
-    if (results.length === 0) {
-        toast({
-            title: "No Routes Found",
-            description: "No owners are currently serving this route on the selected date.",
-            variant: "destructive",
-        });
-    }
+    router.push(`/find-ride?${params.toString()}`);
   }
 
   return (
@@ -169,7 +111,7 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
                 alt="Find a ride"
                 width={600}
                 height={200}
-                className="rounded-lg object-contain w-full h-auto max-h-[200px] mb-4"
+                className="rounded-lg object-contain w-full h-auto"
                 data-ai-hint="road trip"
             />
             <h2 className="text-2xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
@@ -263,78 +205,6 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
                 </Form>
             </CardContent>
         </Card>
-
-        {availableOwners.length > 0 && (
-          <div className="space-y-4">
-              <h2 className="text-xl font-bold">Available Rides</h2>
-              {availableOwners.map((route) => {
-                  const bookedSeats = getBookedSeats(route);
-                  const availableSeats = route.availableSeats - bookedSeats;
-
-                  return (
-                  <Card key={route.id} className="overflow-hidden">
-                      <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                              <div className="flex gap-4">
-                                  <div>
-                                      <div className="font-semibold">{route.departureTime}</div>
-                                      <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
-                                      <div className="font-semibold mt-2">{route.arrivalTime}</div>
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                    <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
-                                    <div className="w-px h-10 bg-border my-1"></div>
-                                    <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
-                                  </div>
-                                  <div>
-                                      <div className="font-semibold">{route.fromLocation}</div>
-                                       {route.distance && (
-                                        <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
-                                          <Milestone className="h-3 w-3" />
-                                          <span>{route.distance.toFixed(0)} km</span>
-                                        </div>
-                                      )}
-                                      <div className="font-semibold mt-2">{route.toLocation}</div>
-                                  </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-lg font-bold">
-                                    ₹{(route.price || 0).toFixed(2)}
-                                </div>
-                                <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
-                                    <Users className="h-4 w-4" />
-                                    <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
-                                </div>
-                              </div>
-                          </div>
-                      </CardContent>
-                      <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
-                          <div className="flex items-center gap-3">
-                              <Car className="text-muted-foreground" />
-                              <Avatar className="h-8 w-8">
-                                  <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                  <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                  <div className="font-semibold text-sm">{route.driverName}</div>
-                                  <div className="flex items-center gap-1">
-                                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                      <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
-                                  </div>
-                              </div>
-                          </div>
-                          {availableSeats > 0 && (
-                            <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
-                                <Zap className="mr-2 h-4 w-4" />
-                                Book Now
-                            </Button>
-                          )}
-                      </CardFooter>
-                  </Card>
-                  )
-              })}
-          </div>
-        )}
     </div>
   );
 }

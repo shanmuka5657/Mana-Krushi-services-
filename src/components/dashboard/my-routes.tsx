@@ -113,7 +113,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
             bookingTime === route.departureTime &&
             b.status !== "Cancelled"
         );
-    }).reduce((acc, b) => acc + Number(b.travelers || 1), 0);
+    }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
   }
 
   const filteredRoutes = useMemo(() => {
