@@ -21,6 +21,7 @@ import {
   Book,
   Loader2,
   Video,
+  ShoppingCart,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -143,6 +144,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
+    { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
     { href: `/watch?role=passenger`, icon: Video, label: "Watch" },
