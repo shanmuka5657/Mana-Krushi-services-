@@ -92,6 +92,12 @@ const partners = [
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://clnk.in/w594"
+    },
+    {
+        name: "RupeeRedee",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
+        href: "https://linksredirect.com/?cid=245979&source=linkkit&url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.rupeeredee.app"
     }
 ];
 
@@ -123,6 +129,8 @@ function EcommercePageContent() {
         const runCuelinks = () => {
             if (typeof (window as any).cuelinks?.js?.run === 'function') {
                 (window as any).cuelinks.js.run();
+                // If it runs successfully, we can stop checking.
+                clearInterval(intervalId);
             }
         };
 
@@ -131,9 +139,7 @@ function EcommercePageContent() {
 
         // Also set up an interval to keep trying, in case the script loads later.
         // This is a robust way to handle scripts that might load asynchronously.
-        const intervalId = setInterval(() => {
-            runCuelinks();
-        }, 500); // Check every 500ms
+        const intervalId = setInterval(runCuelinks, 500); // Check every 500ms
 
         // Clean up the interval when the component is unmounted to prevent memory leaks.
         return () => clearInterval(intervalId);
