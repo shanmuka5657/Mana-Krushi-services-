@@ -70,7 +70,7 @@ function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: st
         <a href={href} target="_blank" rel="noopener noreferrer" className="block w-full">
             <Card className="w-full transition-all hover:bg-muted/50 hover:shadow-sm">
                 <CardContent className="p-3 flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full border bg-background flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="w-16 h-16 rounded-lg border bg-background flex items-center justify-center overflow-hidden flex-shrink-0">
                          <Image src={logoUrl} alt={`${name} logo`} width={60} height={60} className="object-contain" />
                     </div>
                     <div className="flex-grow">
