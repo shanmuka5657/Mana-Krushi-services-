@@ -165,7 +165,7 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
 
         <div className="text-center">
             <Image 
-                src="https://picsum.photos/seed/cars-happy/600/200" 
+                src="https://picsum.photos/seed/happy-cars/600/200" 
                 alt="Two cars travelling happily"
                 width={600}
                 height={200}
@@ -338,3 +338,5 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
     </div>
   );
 }
+
+    
