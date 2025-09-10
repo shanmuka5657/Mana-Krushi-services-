@@ -196,7 +196,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-        router.push(`/search?q=${searchQuery}`);
+        const targetPath = pathname === '/ecommerce' ? '/ecommerce' : '/search';
+        router.push(`${targetPath}?q=${searchQuery}`);
     }
   }
 
@@ -260,7 +261,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="relative w-full max-w-xs sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by driver, vehicle..."
+                placeholder={pathname === '/ecommerce' ? "Search for partners..." : "Search by driver, vehicle..."}
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

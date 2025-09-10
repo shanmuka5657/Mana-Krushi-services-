@@ -2,9 +2,10 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 const partners = [
     {
@@ -83,17 +84,39 @@ function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: st
 }
 
 function EcommercePageContent() {
+    const searchParams = useSearchParams();
+    const query = searchParams.get('q') || '';
+
+    const filteredPartners = useMemo(() => {
+        if (!query) {
+            return partners;
+        }
+        return partners.filter(partner => 
+            partner.name.toLowerCase().includes(query.toLowerCase())
+        );
+    }, [query]);
+
     return (
         <AppLayout>
             <Card>
                 <CardHeader>
                     <CardTitle>Our Partners</CardTitle>
-                    <CardDescription>Explore exclusive offers from our partners.</CardDescription>
+                    <CardDescription>
+                        {query 
+                            ? `Showing ${filteredPartners.length} results for "${query}"`
+                            : "Explore exclusive offers from our partners."}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    {partners.map((partner, index) => (
-                        <PartnerCard key={index} {...partner} />
-                    ))}
+                    {filteredPartners.length > 0 ? (
+                        filteredPartners.map((partner, index) => (
+                            <PartnerCard key={index} {...partner} />
+                        ))
+                    ) : (
+                        <div className="text-center py-10">
+                            <p className="text-muted-foreground">No partners found matching your search.</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </AppLayout>
