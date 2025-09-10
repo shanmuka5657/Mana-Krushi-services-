@@ -39,7 +39,6 @@ export default function RootLayout({
         </Script>
         <Script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js" strategy="afterInteractive"></Script>
         <script
-          type="text/javascript"
           dangerouslySetInnerHTML={{
             __html: `
               var cId = '245924';
