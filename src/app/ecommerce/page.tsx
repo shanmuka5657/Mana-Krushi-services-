@@ -86,6 +86,12 @@ const partners = [
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://clnk.in/w593"
+    },
+    {
+        name: "Aceblend",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
+        href: "https://clnk.in/w594"
     }
 ];
 
