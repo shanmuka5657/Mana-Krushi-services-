@@ -1,18 +1,19 @@
 {
-  "name": "MK Service",
-  "short_name": "MK Services",
-  "start_url": ".",
+  "name": "Mana Krushi Services",
+  "short_name": "MK Service",
+  "description": "Travel Agent Management System",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#0284c7",
   "icons": [
     {
-      "src": "https://i.ibb.co/C0W21mP/logo-192.png",
+      "src": "https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/bF5gT6d/logo-512.png",
+      "src": "https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png",
       "sizes": "512x512",
       "type": "image/png"
     }

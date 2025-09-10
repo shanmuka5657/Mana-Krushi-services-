@@ -29,7 +29,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
         {/* Favicon (Browser Tab Icon) */}
-        <link rel="icon" href="https://i.ibb.co/7jHzB9d/logo.png" type="image/png" />
+        <link rel="icon" href="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png" type="image/png" />
       </head>
       <body>
         {children}
