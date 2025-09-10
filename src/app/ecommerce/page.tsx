@@ -28,7 +28,7 @@ const partners = [
     {
         name: "Flipkart store 2",
         profit: "Upto 8% Profit",
-        logoUrl: "https://i.ibb.co/P9tqW8K/flipkart-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
         href: "https://fktr.in/Fy8fl6D"
     },
     {
