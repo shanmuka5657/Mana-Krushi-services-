@@ -109,8 +109,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
             <Image 
                 src="https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png" 
                 alt="Find a ride"
-                width={600}
-                height={200}
+                width={691}
+                height={225}
                 className="rounded-lg object-contain w-full h-auto"
                 data-ai-hint="road trip"
             />
