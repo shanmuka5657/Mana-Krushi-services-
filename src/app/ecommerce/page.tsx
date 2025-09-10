@@ -17,7 +17,7 @@ const partners = [
         name: "Axis MyZone Credit Card Store",
         profit: "Flat Rs 2380 Profit",
         logoUrl: "https://i.ibb.co/CbfV88G/axis-removebg-preview.png",
-        href: "#"
+        href: "https://bitli.in/46cvNbg"
     },
     {
         name: "Axis Flipkart Credit Card Store",
