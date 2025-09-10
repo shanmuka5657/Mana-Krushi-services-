@@ -146,7 +146,7 @@ export function LoginForm() {
       </AlertDialog>
       <div className="flex flex-col items-center text-center mb-6">
           <img 
-              src="https://i.ibb.co/7jHzB9d/logo.png"
+              src="https://i.ibb.co/fY9YmZg/file-00000000dad0622f92ca201d38c47e43.png"
               alt="Mana Krushi Services Logo"
               width={80}
               height={80}
@@ -206,10 +206,10 @@ export function LoginForm() {
                     variant="outline" 
                     className="w-full" 
                     onClick={() => installState === 'ready' && setShowInstallDialog(true)}
-                    disabled={installState === 'checking'}
+                    disabled={installState !== 'ready'}
                 >
                     {installState === 'checking' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {installState === 'checking' ? "Checking..." : "Install App"}
+                    {installState === 'checking' ? "Checking..." : (installState === 'ready' ? "Install App" : "Installed")}
                     {installState === 'ready' && <Download className="ml-2 h-4 w-4" />}
                 </Button>
             </CardFooter>
