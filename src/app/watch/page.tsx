@@ -9,7 +9,7 @@ const apps = [
     {
         name: 'WhatsApp',
         icon: <MessageSquare className="h-10 w-10 text-green-500" />,
-        href: 'whatsapp://',
+        href: 'whatsapp://app',
         color: 'bg-green-50'
     },
     {
@@ -21,13 +21,13 @@ const apps = [
     {
         name: 'Facebook',
         icon: <Facebook className="h-10 w-10 text-blue-800" />,
-        href: 'fb://',
+        href: 'https://www.facebook.com/login/',
         color: 'bg-blue-50'
     },
     {
         name: 'Instagram',
         icon: <Instagram className="h-10 w-10 text-pink-600" />,
-        href: 'instagram://',
+        href: 'https://www.instagram.com/accounts/login/',
         color: 'bg-pink-50'
     },
     {
