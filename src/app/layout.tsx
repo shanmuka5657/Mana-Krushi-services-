@@ -30,14 +30,14 @@ export default function RootLayout({
         />
         {/* Favicon (Browser Tab Icon) */}
         <link rel="icon" href="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png" type="image/png" />
-      </head>
-      <body>
-        {children}
-        <Toaster />
         <Script type="text/javascript" id="infolinks-config">
           {`var infolinks_pid = 3439958; var infolinks_wsid = 0;`}
         </Script>
         <Script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js" strategy="afterInteractive"></Script>
+      </head>
+      <body>
+        {children}
+        <Toaster />
         <script
           type="text/javascript"
           dangerouslySetInnerHTML={{
