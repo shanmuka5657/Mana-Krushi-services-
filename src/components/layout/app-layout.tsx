@@ -20,7 +20,7 @@ import {
   Shield,
   Book,
   Loader2,
-  Video,
+  Film,
   ShoppingCart,
 } from "lucide-react";
 import * as React from "react";
@@ -123,7 +123,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
-    { href: `/watch`, icon: Video, label: "Watch" },
+    { href: `/entertainment`, icon: Film, label: "Entertainment" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -135,7 +135,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
     { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
-    { href: `/watch?role=owner`, icon: Video, label: "Watch" },
+    { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
   ];
@@ -147,7 +147,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
-    { href: `/watch?role=passenger`, icon: Video, label: "Watch" },
+    { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
   ];
