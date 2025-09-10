@@ -29,6 +29,12 @@ const partners = [
         href: "https://www.flipkart.com/axis-bank-credit-card-store"
     },
     {
+        name: "AU Small Finance Bank",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/yQWJ9f3/au-bank.jpg",
+        href: "https://clnk.in/w59c"
+    },
+    {
         name: "Flipkart",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
