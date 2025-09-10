@@ -71,6 +71,8 @@ export function LoginForm() {
         } else {
           console.log('User dismissed the install prompt');
         }
+        setInstallPrompt(null);
+        setIsInstallReady(false);
       });
     }
   };
@@ -165,16 +167,26 @@ export function LoginForm() {
             </Link>
           </div>
         </CardContent>
-        {!isStandalone && isInstallReady && (
+        {!isStandalone && (
             <CardFooter className="flex-col gap-2">
                 <div className="w-full h-px bg-border" />
                 <Button 
                     variant="outline" 
                     className="w-full" 
                     onClick={handleInstallClick}
+                    disabled={!isInstallReady}
                 >
-                    <Download className="mr-2 h-4 w-4" />
-                    Install App
+                    {isInstallReady ? (
+                      <>
+                        <Download className="mr-2 h-4 w-4" />
+                        Install App
+                      </>
+                    ) : (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Checking for App...
+                      </>
+                    )}
                 </Button>
             </CardFooter>
         )}

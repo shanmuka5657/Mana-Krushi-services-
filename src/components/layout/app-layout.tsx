@@ -174,6 +174,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         } else {
           console.log('User dismissed the install prompt');
         }
+        setInstallPrompt(null);
+        setIsInstallReady(false);
       });
     }
   };
@@ -208,16 +210,26 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-            {!isStandalone && isInstallReady && (
+            {!isStandalone && (
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton 
                             className="justify-start" 
                             tooltip="Install App" 
                             onClick={handleInstallClick}
+                            disabled={!isInstallReady}
                         >
-                            <Download />
-                            <span>Install App</span>
+                           {isInstallReady ? (
+                              <>
+                                <Download />
+                                <span>Install App</span>
+                              </>
+                            ) : (
+                              <>
+                                <Loader2 className="animate-spin" />
+                                <span>Checking...</span>
+                              </>
+                            )}
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
