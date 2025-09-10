@@ -19,7 +19,7 @@ function WatchPageContent() {
                             src="https://www.youtube.com/embed/LXb3EKWsInQ"
                             title="YouTube video player"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
+                            allowFullScreen={true}
                         ></iframe>
                     </div>
                     <p className="text-sm text-muted-foreground mt-2">
@@ -33,7 +33,7 @@ function WatchPageContent() {
 
 export default function WatchPage() {
     return (
-        <Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
             <WatchPageContent />
         </Suspense>
     );
