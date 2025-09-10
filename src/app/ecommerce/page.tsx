@@ -35,7 +35,7 @@ const partners = [
         name: "Ajio New Store",
         profit: "Upto 10% Profit",
         logoUrl: "https://i.ibb.co/tCgLpP3/ajio-removebg-preview.png",
-        href: "#"
+        href: "https://ajiio.in/DB82Cf0"
     },
     {
         name: "Myntra New",
