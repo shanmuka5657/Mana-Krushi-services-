@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AppLayout } from '@/components/layout/app-layout';
@@ -12,7 +11,7 @@ const partners = [
         name: "HSBC Platinum Credit Card",
         profit: "Flat Rs 3000 Profit",
         logoUrl: "https://i.ibb.co/r7pS0vj/hssc-removebg-preview.png",
-        href: "#"
+        href: "https://bitli.in/cbX2s28"
     },
     {
         name: "Axis MyZone Credit Card Store",
