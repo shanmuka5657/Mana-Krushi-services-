@@ -95,11 +95,16 @@ function EcommercePageContent() {
     const query = searchParams.get('q') || '';
 
     useEffect(() => {
-        // Manually trigger Cuelinks to process links on this page
-        if (typeof window !== 'undefined' && (window as any).cuelinks) {
-          (window as any).cuelinks.js.run();
-        }
-      }, []);
+        // Cuelinks script loads asynchronously. We need to wait for it.
+        const interval = setInterval(() => {
+            if (typeof window !== 'undefined' && (window as any).cuelinks) {
+                (window as any).cuelinks.js.run();
+                clearInterval(interval); // Stop checking once it's found and run
+            }
+        }, 100); // Check every 100ms
+
+        return () => clearInterval(interval); // Cleanup on component unmount
+      }, [query]); // Rerun if the page search query changes
 
     const filteredPartners = useMemo(() => {
         if (!query) {
