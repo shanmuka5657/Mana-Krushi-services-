@@ -3,27 +3,23 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
+import { Video } from 'lucide-react';
 
 function WatchPageContent() {
     return (
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>Embedded YouTube Video</CardTitle>
-                    <CardDescription>If you get bored, you can watch a video right here in the app.</CardDescription>
+                    <CardTitle>Watch</CardTitle>
+                    <CardDescription>This content has been removed.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="aspect-video w-full overflow-hidden rounded-lg border">
-                        <iframe
-                            className="w-full h-full"
-                            src="https://www.youtube.com/embed/LXb3EKWsInQ"
-                            title="YouTube video player"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen={true}
-                        ></iframe>
+                <CardContent className="flex flex-col items-center justify-center text-center py-20">
+                     <div className="p-4 bg-muted rounded-full mb-4">
+                        <Video className="h-12 w-12 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                        This is an embedded YouTube video. You can change the video by updating the URL in the `src` attribute of the `<iframe>` tag.
+                    <h3 className="text-xl font-semibold">Content Removed</h3>
+                    <p className="text-muted-foreground mt-2 max-w-md">
+                        The embedded video has been removed from this page.
                     </p>
                 </CardContent>
             </Card>
