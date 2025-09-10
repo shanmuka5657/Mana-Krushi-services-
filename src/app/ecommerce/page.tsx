@@ -3,7 +3,7 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
@@ -93,6 +93,13 @@ function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: st
 function EcommercePageContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
+
+    useEffect(() => {
+        // Manually trigger Cuelinks to process links on this page
+        if (typeof window !== 'undefined' && (window as any).cuelinks) {
+          (window as any).cuelinks.js.run();
+        }
+      }, []);
 
     const filteredPartners = useMemo(() => {
         if (!query) {
