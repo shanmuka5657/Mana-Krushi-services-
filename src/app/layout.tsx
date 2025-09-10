@@ -38,18 +38,21 @@ export default function RootLayout({
           {`var infolinks_pid = 3439958; var infolinks_wsid = 0;`}
         </Script>
         <Script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></Script>
-        <script type='text/javascript' id="cuelinks-script" dangerouslySetInnerHTML={{
-          __html: `
-            var cId = '245924';
-            (function(d, t) {
-              var s = d.createElement(t);
-              s.type = 'text/javascript';
-              s.async = true;
-              s.src = (d.location.protocol == 'https:' ? 'https://cdn0.cuelinks.com/js/' : 'http://cdn0.cuelinks.com/js/') + 'cuelinksv2.js';
-              d.getElementsByTagName('body')[0].appendChild(s);
-            }(document, 'script'));
-          `
-        }}/>
+        <script
+          type='text/javascript'
+          dangerouslySetInnerHTML={{
+            __html: `
+              var cId = '245924';
+              (function(d, t) {
+                var s = d.createElement(t);
+                s.type = 'text/javascript';
+                s.async = true;
+                s.src = (d.location.protocol == 'https:' ? 'https://cdn0.cuelinks.com/js/' : 'http://cdn0.cuelinks.com/js/') + 'cuelinksv2.js';
+                d.getElementsByTagName('body')[0].appendChild(s);
+              }(document, 'script'));
+            `,
+          }}
+        />
       </body>
     </html>
   );
