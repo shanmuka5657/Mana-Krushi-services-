@@ -23,7 +23,7 @@ const partners = [
         name: "Axis Flipkart Credit Card Store",
         profit: "Flat Rs 2380 Profit",
         logoUrl: "https://i.ibb.co/CbfV88G/axis-removebg-preview.png",
-        href: "#"
+        href: "https://bitli.in/jFcR7mp"
     },
     {
         name: "Flipkart store 2",
