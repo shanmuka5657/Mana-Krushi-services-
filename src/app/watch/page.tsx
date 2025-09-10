@@ -9,13 +9,13 @@ const apps = [
     {
         name: 'WhatsApp',
         icon: <MessageSquare className="h-10 w-10 text-green-500" />,
-        href: 'whatsapp://',
+        href: 'whatsapp://send?text=Hello%20from%20Mana%20Krushi%20Services!',
         color: 'bg-green-50'
     },
     {
         name: 'YouTube',
         icon: <Youtube className="h-10 w-10 text-red-600" />,
-        href: 'youtube://',
+        href: 'https://www.youtube.com',
         color: 'bg-red-50'
     },
     {
