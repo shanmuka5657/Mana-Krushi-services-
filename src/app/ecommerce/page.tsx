@@ -34,6 +34,12 @@ const partners = [
         href: "https://clnk.in/w59c"
     },
     {
+        name: "BookMyShow",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/hCjQc0f/bookmyshow-logo.png",
+        href: "https://clnk.in/w59G"
+    },
+    {
         name: "Flipkart",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
