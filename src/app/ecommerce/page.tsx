@@ -52,7 +52,7 @@ const partners = [
     {
         name: "BuyKaro",
         profit: "Upto 18% Profit",
-        logoUrl: "https://i.ibb.co/pP23VpY/buy-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/f30tsFj/Screenshot-2025-09-10-16-44-51-303-com-whatsapp.jpg",
         href: "https://bitli.in/HZ3TC24"
     },
     {
