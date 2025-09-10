@@ -16,13 +16,13 @@ const partners = [
     {
         name: "Axis MyZone Credit Card Store",
         profit: "Flat Rs 2380 Profit",
-        logoUrl: "https://i.ibb.co/CbfV88G/axis-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
         href: "https://bitli.in/46cvNbg"
     },
     {
         name: "Axis Flipkart Credit Card Store",
         profit: "Flat Rs 2380 Profit",
-        logoUrl: "https://i.ibb.co/CbfV88G/axis-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
         href: "https://bitli.in/jFcR7mp"
     },
     {
