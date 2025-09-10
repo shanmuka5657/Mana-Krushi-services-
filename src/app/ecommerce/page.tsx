@@ -58,7 +58,7 @@ const partners = [
     {
         name: "SBI Cashback Credit Card",
         profit: "Flat Rs 2500 Profit",
-        logoUrl: "https://i.ibb.co/k2x6s6S/sbi-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/ZpQDy8yB/Screenshot-2025-09-10-16-45-25-696-com-whatsapp.jpg",
         href: "https://bitli.in/3Kcj3ST"
     }
 ];
