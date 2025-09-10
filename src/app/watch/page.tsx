@@ -9,7 +9,7 @@ const apps = [
     {
         name: 'WhatsApp',
         icon: <MessageSquare className="h-10 w-10 text-green-500" />,
-        href: 'whatsapp://send?text=Hello%20from%20Mana%20Krushi%20Services!',
+        href: 'whatsapp://',
         color: 'bg-green-50'
     },
     {
