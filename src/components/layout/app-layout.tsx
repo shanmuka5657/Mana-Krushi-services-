@@ -219,17 +219,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             onClick={handleInstallClick}
                             disabled={!isInstallReady}
                         >
-                           {isInstallReady ? (
-                              <>
-                                <Download />
-                                <span>Install App</span>
-                              </>
-                            ) : (
-                              <>
-                                <Loader2 className="animate-spin" />
-                                <span>Checking...</span>
-                              </>
-                            )}
+                           <Download />
+                           <span>Install App</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

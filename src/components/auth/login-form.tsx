@@ -176,17 +176,8 @@ export function LoginForm() {
                     onClick={handleInstallClick}
                     disabled={!isInstallReady}
                 >
-                    {isInstallReady ? (
-                      <>
-                        <Download className="mr-2 h-4 w-4" />
-                        Install App
-                      </>
-                    ) : (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Checking for App...
-                      </>
-                    )}
+                    <Download className="mr-2 h-4 w-4" />
+                    Install App
                 </Button>
             </CardFooter>
         )}
