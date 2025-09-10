@@ -44,16 +44,10 @@ const partners = [
         href: "https://myntr.it/33Qke2S"
     },
     {
-        name: "Amazon",
-        profit: "Upto 10.2% Profit",
-        logoUrl: "https://i.ibb.co/3sNSt2N/amazon-removebg-preview.png",
-        href: "#"
-    },
-    {
         name: "Dot and Key Store",
         profit: "Upto 15% Profit",
         logoUrl: "https://i.ibb.co/9vWn4M9/dot-removebg-preview.png",
-        href: "#"
+        href: "https://bitli.in/PF1Thjk"
     },
     {
         name: "BuyKaro",
