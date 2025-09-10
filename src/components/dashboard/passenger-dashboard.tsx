@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, Car, Star, Zap, Users, Milestone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -161,6 +162,20 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <div className="text-center">
+            <Image 
+                src="https://picsum.photos/seed/cars-happy/600/200" 
+                alt="Two cars travelling happily"
+                width={600}
+                height={200}
+                className="rounded-lg object-cover w-full h-auto max-h-[200px] mb-4"
+                data-ai-hint="happy travel cars"
+            />
+            <h2 className="text-2xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
+            <p className="text-muted-foreground">Find a ride with trusted owners.</p>
+        </div>
+
         <Card className="shadow-sm mt-6">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
