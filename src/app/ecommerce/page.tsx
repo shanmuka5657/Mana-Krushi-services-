@@ -110,7 +110,7 @@ function EcommercePageContent() {
                 // Once it runs successfully, we can stop checking.
                 clearInterval(intervalId);
             }
-        }, 500); // Check every 500ms
+        }, 100); // Check every 100ms, more aggressively.
 
         // Clean up the interval when the component unmounts to prevent memory leaks.
         return () => clearInterval(intervalId);
