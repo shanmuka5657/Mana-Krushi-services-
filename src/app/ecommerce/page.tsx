@@ -13,55 +13,55 @@ const partners = [
         name: "HSBC Platinum Credit Card",
         profit: "Flat Rs 3000 Profit",
         logoUrl: "https://i.ibb.co/HL7bzmLQ/Screenshot-2025-09-10-16-10-48-382-com-whatsapp.jpg",
-        href: "https://bitli.in/cbX2s28"
+        href: "https://www.hsbc.co.in/credit-cards/products/platinum/"
     },
     {
         name: "Axis MyZone Credit Card Store",
         profit: "Flat Rs 2380 Profit",
         logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
-        href: "https://bitli.in/46cvNbg"
+        href: "https://www.axisbank.com/retail/cards/credit-card/my-zone-credit-card/"
     },
     {
         name: "Axis Flipkart Credit Card Store",
         profit: "Flat Rs 2380 Profit",
-        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
-        href: "https://bitli.in/jFcR7mp"
+        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot.png",
+        href: "https://www.flipkart.com/axis-bank-credit-card-store"
     },
     {
-        name: "Flipkart store 2",
+        name: "Flipkart",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
-        href: "https://fktr.in/Fy8fl6D"
+        href: "https://www.flipkart.com"
     },
     {
-        name: "Ajio New Store",
+        name: "Ajio",
         profit: "Upto 10% Profit",
         logoUrl: "https://i.ibb.co/MDpS82Nn/Screenshot-2025-09-10-16-42-56-634-com-whatsapp.jpg",
-        href: "https://ajiio.in/DB82Cf0"
+        href: "https://www.ajio.com"
     },
     {
-        name: "Myntra New",
+        name: "Myntra",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/PJ1jwbR/Screenshot-2025-09-10-16-43-27-664-com-whatsapp.jpg",
-        href: "https://myntr.it/33Qke2S"
+        href: "https://www.myntra.com"
     },
     {
         name: "Dot and Key Store",
         profit: "Upto 15% Profit",
         logoUrl: "https://i.ibb.co/nMYr6d5C/Screenshot-2025-09-10-16-44-04-673-com-whatsapp.jpg",
-        href: "https://bitli.in/PF1Thjk"
+        href: "https://www.dotandkey.com"
     },
     {
         name: "BuyKaro",
         profit: "Upto 18% Profit",
         logoUrl: "https://i.ibb.co/f30tsFj/Screenshot-2025-09-10-16-44-51-303-com-whatsapp.jpg",
-        href: "https://bitli.in/HZ3TC24"
+        href: "https://www.buykaro.com"
     },
     {
         name: "SBI Cashback Credit Card",
         profit: "Flat Rs 2500 Profit",
         logoUrl: "https://i.ibb.co/ZpQDy8yB/Screenshot-2025-09-10-16-45-25-696-com-whatsapp.jpg",
-        href: "https://bitli.in/3Kcj3ST"
+        href: "https://www.sbicard.com/en-in/personal/credit-cards/shopping/cashback-sbi-card"
     }
 ];
 
