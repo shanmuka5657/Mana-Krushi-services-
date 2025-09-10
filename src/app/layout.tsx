@@ -29,9 +29,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
         {/* Favicon (Browser Tab Icon) */}
-        <link rel="icon" href="https://i.ibb.co/C0W21mP/logo-192.png" type="image/png" />
+        <link rel="icon" href="https://i.ibb.co/7jHzB9d/logo.png" type="image/png" />
       </head>
-      <body className="font-body antialiased">
+      <body>
         {children}
         <Toaster />
       </body>
