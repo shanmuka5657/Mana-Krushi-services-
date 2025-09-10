@@ -7,7 +7,6 @@ import { Suspense, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import Script from 'next/script';
 
 const partners = [
     {
@@ -38,7 +37,7 @@ const partners = [
         name: "Flipkart",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
-        href: "https://ltsrn.in/bOB"
+        href: "https://www.flipkart.com"
     },
     {
         name: "Ajio",
@@ -102,12 +101,25 @@ function EcommercePageContent() {
     const query = searchParams.get('q') || '';
     
     useEffect(() => {
-        // This effect will run after the component mounts.
-        // We check if the global runCuelinks function (from layout.tsx) exists and call it.
-        if (typeof (window as any).runCuelinks === 'function') {
-            (window as any).runCuelinks();
-        }
-    }, [query]); // Rerun this effect if the search query changes
+        // This function will try to run the Cuelinks script.
+        const runCuelinks = () => {
+            if (typeof (window as any).cuelinks?.js?.run === 'function') {
+                (window as any).cuelinks.js.run();
+            }
+        };
+
+        // Run it once, just in case the script is already loaded.
+        runCuelinks();
+
+        // Also set up an interval to keep trying, in case the script loads later.
+        // This is a robust way to handle scripts that might load asynchronously.
+        const intervalId = setInterval(() => {
+            runCuelinks();
+        }, 500); // Check every 500ms
+
+        // Clean up the interval when the component is unmounted to prevent memory leaks.
+        return () => clearInterval(intervalId);
+    }, []);
 
 
     const filteredPartners = useMemo(() => {
