@@ -10,7 +10,7 @@ const partners = [
     {
         name: "HSBC Platinum Credit Card",
         profit: "Flat Rs 3000 Profit",
-        logoUrl: "https://i.ibb.co/r7pS0vj/hssc-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/HL7bzmLQ/Screenshot-2025-09-10-16-10-48-382-com-whatsapp.jpg",
         href: "https://bitli.in/cbX2s28"
     },
     {
