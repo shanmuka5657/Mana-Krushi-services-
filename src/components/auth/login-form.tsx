@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import Image from 'next/image';
 
 
 const formSchema = z.object({
@@ -143,6 +144,15 @@ export function LoginForm() {
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
+      <div className="flex flex-col items-center text-center mb-6">
+          <Image 
+              src="https://i.ibb.co/7jHzB9d/logo.png"
+              alt="Mana Krushi Services Logo"
+              width={80}
+              height={80}
+              className="mb-4"
+          />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Login</CardTitle>

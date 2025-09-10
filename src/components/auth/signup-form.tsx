@@ -36,6 +36,7 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveCurrentUser, saveProfile } from '@/lib/storage';
+import Image from 'next/image';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -85,6 +86,15 @@ export function SignupForm() {
 
   return (
     <>
+      <div className="flex flex-col items-center text-center mb-6">
+          <Image 
+              src="https://i.ibb.co/7jHzB9d/logo.png"
+              alt="Mana Krushi Services Logo"
+              width={80}
+              height={80}
+              className="mb-4"
+          />
+      </div>
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Create an Account</CardTitle>
