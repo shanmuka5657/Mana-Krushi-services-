@@ -43,6 +43,8 @@ const prompt = ai.definePrompt({
   
   Only include services that offer the movie for free with ads or in a free tier. Do not include sites that require a subscription, rental, or purchase. Do not include illegal sites.
   
+  Specifically check if the movie is available for free on YouTube (with ads) and include it in the results if it is.
+
   If you cannot find any free, legal streaming options, return an empty array for the sites.`,
 });
 
