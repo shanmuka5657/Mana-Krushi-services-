@@ -71,6 +71,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = React.useState('passenger');
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   React.useEffect(() => {
     // This will only run on the client
@@ -179,6 +180,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       });
     }
   };
+  
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+        router.push(`/search?q=${searchQuery}`);
+    }
+  }
 
 
   return (
@@ -240,8 +247,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="relative w-full max-w-xs sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search bookings, clients..."
+                placeholder="Search by driver, vehicle..."
                 className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
               />
             </div>
             <DropdownMenu>
