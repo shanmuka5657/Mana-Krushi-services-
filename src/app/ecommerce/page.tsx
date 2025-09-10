@@ -34,7 +34,7 @@ const partners = [
     {
         name: "Ajio New Store",
         profit: "Upto 10% Profit",
-        logoUrl: "https://i.ibb.co/tCgLpP3/ajio-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/MDpS82Nn/Screenshot-2025-09-10-16-42-56-634-com-whatsapp.jpg",
         href: "https://ajiio.in/DB82Cf0"
     },
     {
