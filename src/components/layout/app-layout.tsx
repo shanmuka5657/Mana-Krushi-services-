@@ -121,6 +121,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
+    { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
     { href: `/watch`, icon: Video, label: "Watch" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
@@ -131,6 +132,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
+    { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
     { href: `/watch?role=owner`, icon: Video, label: "Watch" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
@@ -142,6 +144,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
+    { href: 'https://bitli.in/a97nkGy', icon: IndianRupee, label: "Apply for Loan" },
     { href: `/watch?role=passenger`, icon: Video, label: "Watch" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
@@ -167,7 +170,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
   
   const handleNavClick = (href: string) => {
-    router.push(href);
+    if (href.startsWith('http')) {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    } else {
+      router.push(href);
+    }
   };
   
   const handleInstallClick = () => {
