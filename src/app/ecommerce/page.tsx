@@ -46,6 +46,12 @@ const partners = [
         href: "https://www.myntra.com"
     },
     {
+        name: "Amazon.in",
+        profit: "Upto 12% Profit",
+        logoUrl: "https://i.ibb.co/dGk5wzZ/amazon-in-logo.jpg",
+        href: "https://www.amazon.in"
+    },
+    {
         name: "Dot and Key Store",
         profit: "Upto 15% Profit",
         logoUrl: "https://i.ibb.co/nMYr6d5C/Screenshot-2025-09-10-16-44-04-673-com-whatsapp.jpg",
