@@ -21,9 +21,6 @@ import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 import { Download, Loader2 } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import Image from 'next/image';
-
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -45,22 +42,16 @@ export function LoginForm() {
   const { toast } = useToast();
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
-  const [installState, setInstallState] = React.useState<'checking' | 'ready' | 'installed'>('checking');
-  const [showInstallDialog, setShowInstallDialog] = React.useState(false);
-
 
   React.useEffect(() => {
     // This will only run on the client
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
-      setInstallState('installed');
     }
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
-      setInstallState('ready');
-      setShowInstallDialog(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -75,13 +66,12 @@ export function LoginForm() {
       installPrompt.prompt();
       installPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          setInstallState('installed');
+          setIsStandalone(true);
           toast({ title: "Installation Complete!", description: "The app has been successfully installed." });
         } else {
            toast({ title: "Installation Cancelled", variant: "destructive" });
         }
         setInstallPrompt(null);
-        setShowInstallDialog(false);
       });
     }
   };
@@ -130,20 +120,6 @@ export function LoginForm() {
 
   return (
     <>
-      <AlertDialog open={showInstallDialog} onOpenChange={setShowInstallDialog}>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle>Install Mana Krushi Services</AlertDialogTitle>
-                  <AlertDialogDescription>
-                      The app is ready to be installed on your device for a better experience.
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                  <Button variant="ghost" onClick={() => setShowInstallDialog(false)}>Later</Button>
-                  <Button onClick={handleInstallClick}>Install Now</Button>
-              </AlertDialogFooter>
-          </AlertDialogContent>
-      </AlertDialog>
       <div className="flex flex-col items-center text-center mb-6">
         <h2 className="text-2xl font-bold">Mana Krushi Services</h2>
       </div>
@@ -199,12 +175,11 @@ export function LoginForm() {
                 <Button 
                     variant="outline" 
                     className="w-full" 
-                    onClick={() => installState === 'ready' && setShowInstallDialog(true)}
-                    disabled={installState !== 'ready'}
+                    onClick={handleInstallClick}
+                    disabled={!installPrompt}
                 >
-                    {installState === 'checking' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {installState === 'checking' ? "Checking..." : (installState === 'ready' ? "Install App" : "Installed")}
-                    {installState === 'ready' && <Download className="ml-2 h-4 w-4" />}
+                    <Download className="mr-2 h-4 w-4" />
+                    Install App
                 </Button>
             </CardFooter>
         )}

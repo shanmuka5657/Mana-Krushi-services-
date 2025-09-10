@@ -48,7 +48,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Button } from "../ui/button";
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
@@ -72,22 +71,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = React.useState('passenger');
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
-  const [installState, setInstallState] = React.useState<'checking' | 'ready' | 'installed'>('checking');
-  const [showInstallDialog, setShowInstallDialog] = React.useState(false);
-
 
   React.useEffect(() => {
     // This will only run on the client
     if(window.matchMedia('(display-mode: standalone)').matches) {
         setIsStandalone(true);
-        setInstallState('installed');
     }
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
-      setInstallState('ready');
-      setShowInstallDialog(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -174,11 +167,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   
   const handleInstallClick = () => {
     if (installPrompt) {
-      setShowInstallDialog(false);
       installPrompt.prompt();
       installPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          setInstallState('installed');
+          setIsStandalone(true);
           toast({ title: "Installation Complete!", description: "The app has been successfully installed." });
         } else {
            toast({ title: "Installation Cancelled", variant: "destructive" });
@@ -191,20 +183,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-       <AlertDialog open={showInstallDialog} onOpenChange={setShowInstallDialog}>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle>Install Mana Krushi Services</AlertDialogTitle>
-                  <AlertDialogDescription>
-                      The app is ready to be installed on your device for a better experience.
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                  <Button variant="ghost" onClick={() => setShowInstallDialog(false)}>Later</Button>
-                  <Button onClick={handleInstallClick}>Install Now</Button>
-              </AlertDialogFooter>
-          </AlertDialogContent>
-      </AlertDialog>
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
@@ -238,12 +216,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         <SidebarMenuButton 
                             className="justify-start" 
                             tooltip="Install App" 
-                            onClick={() => installState === 'ready' && setShowInstallDialog(true)}
-                            disabled={installState !== 'ready'}
+                            onClick={handleInstallClick}
+                            disabled={!installPrompt}
                         >
-                           {installState === 'checking' && <Loader2 className="animate-spin" />}
-                           {installState !== 'checking' && <Download />}
-                           <span>{installState === 'checking' ? "Checking..." : "Install App"}</span>
+                           <Download />
+                           <span>Install App</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
