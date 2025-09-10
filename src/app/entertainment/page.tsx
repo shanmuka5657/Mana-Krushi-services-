@@ -4,7 +4,7 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed } from 'lucide-react';
+import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed, Film } from 'lucide-react';
 
 const apps = [
     {
@@ -36,6 +36,12 @@ const apps = [
         icon: <UtensilsCrossed className="h-10 w-10 text-red-500" />,
         href: 'zomato://',
         color: 'bg-red-50'
+    },
+    {
+        name: 'Movies',
+        icon: <Film className="h-10 w-10 text-gray-700" />,
+        href: 'https://www.imdb.com',
+        color: 'bg-gray-100'
     }
 ];
 
