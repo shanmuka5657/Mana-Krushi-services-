@@ -53,7 +53,7 @@ const partners = [
         name: "BuyKaro",
         profit: "Upto 18% Profit",
         logoUrl: "https://i.ibb.co/pP23VpY/buy-removebg-preview.png",
-        href: "#"
+        href: "https://bitli.in/HZ3TC24"
     },
     {
         name: "SBI Cashback Credit Card",
