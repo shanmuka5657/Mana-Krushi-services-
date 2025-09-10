@@ -41,7 +41,7 @@ const partners = [
         name: "Myntra New",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/tKgN3xK/myntra-removebg-preview.png",
-        href: "#"
+        href: "https://myntr.it/33Qke2S"
     },
     {
         name: "Amazon",
