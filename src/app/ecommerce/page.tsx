@@ -95,10 +95,19 @@ function EcommercePageContent() {
     const query = searchParams.get('q') || '';
 
     useEffect(() => {
-        // This function is now defined globally in layout.tsx
-        if (typeof (window as any).runCuelinks === 'function') {
-            (window as any).runCuelinks();
-        }
+        // This function will repeatedly check if the Cuelinks script is ready
+        // and run it. This is necessary for Single Page Applications (SPAs)
+        // where page content changes without a full reload.
+        const intervalId = setInterval(() => {
+            if (typeof (window as any).cuelinks?.js?.run === 'function') {
+                (window as any).cuelinks.js.run();
+                // Once it runs successfully, we can stop checking.
+                clearInterval(intervalId);
+            }
+        }, 100); // Check every 100 milliseconds
+
+        // Cleanup function to clear the interval if the user navigates away
+        return () => clearInterval(intervalId);
       }, [query]); // Rerun if the page search query changes
 
     const filteredPartners = useMemo(() => {
