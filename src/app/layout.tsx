@@ -35,7 +35,7 @@ export default function RootLayout({
         {children}
         <Toaster />
         <Script type="text/javascript" id="infolinks-config">
-          {`var infolinks_pid = 3439956; var infolinks_wsid = 0;`}
+          {`var infolinks_pid = 3439958; var infolinks_wsid = 0;`}
         </Script>
         <Script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></Script>
       </body>
