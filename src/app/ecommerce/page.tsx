@@ -7,6 +7,7 @@ import { Suspense, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import Script from 'next/script';
 
 const partners = [
     {
@@ -93,22 +94,17 @@ function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: st
 function EcommercePageContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
-
-    useEffect(() => {
-        // This function will repeatedly check if the Cuelinks script is ready
-        // and run it. This is necessary for Single Page Applications (SPAs)
-        // where page content changes without a full reload.
-        const intervalId = setInterval(() => {
-            if (typeof (window as any).cuelinks?.js?.run === 'function') {
-                (window as any).cuelinks.js.run();
-                // Once it runs successfully, we can stop checking.
-                clearInterval(intervalId);
-            }
-        }, 100); // Check every 100 milliseconds
-
-        // Cleanup function to clear the interval if the user navigates away
-        return () => clearInterval(intervalId);
-      }, [query]); // Rerun if the page search query changes
+    
+    const runCuelinksScript = `
+      function runCuelinks() {
+        if (typeof window.cuelinks?.js?.run === 'function') {
+          window.cuelinks.js.run();
+        } else {
+          setTimeout(runCuelinks, 200);
+        }
+      }
+      runCuelinks();
+    `;
 
     const filteredPartners = useMemo(() => {
         if (!query) {
@@ -121,6 +117,9 @@ function EcommercePageContent() {
 
     return (
         <AppLayout>
+            <Script id="cuelinks-runner" strategy="afterInteractive">
+              {runCuelinksScript}
+            </Script>
             <Card>
                 <CardHeader>
                     <CardTitle>Our Partners</CardTitle>
