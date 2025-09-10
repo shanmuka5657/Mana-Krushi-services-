@@ -145,7 +145,7 @@ export function LoginForm() {
           </AlertDialogContent>
       </AlertDialog>
       <div className="flex flex-col items-center text-center mb-6">
-          <Image 
+          <img 
               src="https://i.ibb.co/7jHzB9d/logo.png"
               alt="Mana Krushi Services Logo"
               width={80}
