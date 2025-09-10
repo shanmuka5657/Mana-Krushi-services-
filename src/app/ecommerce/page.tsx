@@ -46,7 +46,7 @@ const partners = [
     {
         name: "Dot and Key Store",
         profit: "Upto 15% Profit",
-        logoUrl: "https://i.ibb.co/9vWn4M9/dot-removebg-preview.png",
+        logoUrl: "https://i.ibb.co/nMYr6d5C/Screenshot-2025-09-10-16-44-04-673-com-whatsapp.jpg",
         href: "https://bitli.in/PF1Thjk"
     },
     {
