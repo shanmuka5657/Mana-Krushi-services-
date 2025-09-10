@@ -102,19 +102,12 @@ function EcommercePageContent() {
     const query = searchParams.get('q') || '';
     
     useEffect(() => {
-        // This function will repeatedly try to run the Cuelinks script
-        // until it is available. This is necessary for Single Page Applications.
-        const intervalId = setInterval(() => {
-            if (typeof (window as any).cuelinks?.js?.run === 'function') {
-                (window as any).cuelinks.js.run();
-                // Once it runs successfully, we can stop checking.
-                clearInterval(intervalId);
-            }
-        }, 100); // Check every 100ms, more aggressively.
-
-        // Clean up the interval when the component unmounts to prevent memory leaks.
-        return () => clearInterval(intervalId);
-    }, []); // The empty dependency array means this runs once when the component mounts.
+        // This effect will run after the component mounts.
+        // We check if the global runCuelinks function (from layout.tsx) exists and call it.
+        if (typeof (window as any).runCuelinks === 'function') {
+            (window as any).runCuelinks();
+        }
+    }, [query]); // Rerun this effect if the search query changes
 
 
     const filteredPartners = useMemo(() => {
