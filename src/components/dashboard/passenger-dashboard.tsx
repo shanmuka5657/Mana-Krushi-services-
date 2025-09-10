@@ -169,7 +169,7 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
                 alt="Find a ride"
                 width={600}
                 height={200}
-                className="rounded-lg object-cover w-full h-auto max-h-[200px] mb-4"
+                className="rounded-lg object-contain w-full h-auto max-h-[200px] mb-4"
                 data-ai-hint="road trip"
             />
             <h2 className="text-2xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
