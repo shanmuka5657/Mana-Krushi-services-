@@ -40,7 +40,7 @@ export default function RootLayout({
         <Script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js" strategy="afterInteractive"></Script>
         <Script type="text/javascript" id="cuelinks-script" strategy="afterInteractive">
           {`
-            var cId = '245924';
+            var cuelinks_channel_id = '245924';
             (function(d, t) {
               var s = d.createElement(t);
               s.type = 'text/javascript';
