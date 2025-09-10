@@ -206,7 +206,7 @@ export function LoginForm() {
                     variant="outline" 
                     className="w-full" 
                     onClick={() => installState === 'ready' && setShowInstallDialog(true)}
-                    disabled={installState !== 'ready'}
+                    disabled={installState === 'checking'}
                 >
                     {installState === 'checking' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {installState === 'checking' ? "Checking..." : "Install App"}
