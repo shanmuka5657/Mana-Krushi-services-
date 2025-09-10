@@ -122,6 +122,12 @@ function FindRideResultsPage() {
                         {availableOwners.map((route) => {
                             const bookedSeats = getBookedSeats(route);
                             const availableSeats = route.availableSeats - bookedSeats;
+                            
+                            const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
+                            const departureDateTime = new Date(route.travelDate);
+                            departureDateTime.setHours(depHours, depMinutes, 0, 0);
+                            const isPast = departureDateTime < new Date();
+
 
                             return (
                             <Card key={route.id} className="overflow-hidden">
@@ -175,7 +181,7 @@ function FindRideResultsPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    {availableSeats > 0 && (
+                                    {availableSeats > 0 && !isPast && (
                                     <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
                                         <Zap className="mr-2 h-4 w-4" />
                                         Book Now

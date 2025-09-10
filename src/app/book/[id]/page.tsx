@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users } from "lucide-react";
+import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function BookRidePage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function BookRidePage() {
   const [isBooking, setIsBooking] = useState(false);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [availableSeats, setAvailableSeats] = useState(0);
+  const [isPast, setIsPast] = useState(false);
 
   useEffect(() => {
     const fetchRouteAndBookings = async () => {
@@ -37,6 +39,13 @@ export default function BookRidePage() {
             setRoute(foundRoute);
             setMessage(`Hello, I've just booked your ride! I'd be glad to travel with you. Can I get more information?`);
             
+            const [depHours, depMinutes] = foundRoute.departureTime.split(':').map(Number);
+            const departureDateTime = new Date(foundRoute.travelDate);
+            departureDateTime.setHours(depHours, depMinutes, 0, 0);
+            if (departureDateTime < new Date()) {
+                setIsPast(true);
+            }
+
             // Calculate available seats
             const allBookings = await getBookings(true);
             const bookingsForThisRoute = allBookings.filter(b => {
@@ -74,7 +83,7 @@ export default function BookRidePage() {
   }
 
   const handleBooking = async () => {
-    if (!route || isBooking) return;
+    if (!route || isBooking || isPast) return;
     setIsBooking(true);
 
     const passengerProfile = await getProfile();
@@ -159,6 +168,15 @@ export default function BookRidePage() {
         </header>
 
         <main className="p-4 space-y-4">
+            {isPast && (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Ride in Past</AlertTitle>
+                    <AlertDescription>
+                        This ride has already departed and can no longer be booked.
+                    </AlertDescription>
+                </Alert>
+            )}
             <Card>
                 <CardHeader>
                     <CardTitle>{format(new Date(route.travelDate), 'EEE dd MMM')}</CardTitle>
@@ -247,11 +265,11 @@ export default function BookRidePage() {
                          <div className="flex items-center gap-4">
                             <Users className="h-5 w-5 text-muted-foreground" />
                             <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1}>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1 || isPast}>
                                     <Minus className="h-4 w-4" />
                                 </Button>
                                 <span className="font-bold text-lg w-10 text-center">{numberOfSeats}</span>
-                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats}>
+                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats || isPast}>
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -275,11 +293,12 @@ export default function BookRidePage() {
                         placeholder="Introduce yourself..."
                         rows={4}
                         className="bg-muted/50"
+                        disabled={isPast}
                     />
                 </CardContent>
             </Card>
 
-            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking || availableSeats === 0}>
+            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking || availableSeats === 0 || isPast}>
                 {isBooking ? (
                     <>
                         <Zap className="mr-2 h-4 w-4 animate-spin" />
@@ -288,7 +307,7 @@ export default function BookRidePage() {
                 ) : (
                     <>
                         <Zap className="mr-2 h-4 w-4" />
-                        {availableSeats > 0 ? `Book for ${numberOfSeats} seat(s)` : 'Sold Out'}
+                        {isPast ? 'Ride has departed' : (availableSeats > 0 ? `Book for ${numberOfSeats} seat(s)` : 'Sold Out')}
                     </>
                 )}
             </Button>
