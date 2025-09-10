@@ -9,31 +9,31 @@ const apps = [
     {
         name: 'WhatsApp',
         icon: <MessageSquare className="h-10 w-10 text-green-500" />,
-        href: 'https://www.whatsapp.com/',
+        href: 'whatsapp://',
         color: 'bg-green-50'
     },
     {
         name: 'YouTube',
         icon: <Youtube className="h-10 w-10 text-red-600" />,
-        href: 'https://www.youtube.com/',
+        href: 'youtube://',
         color: 'bg-red-50'
     },
     {
         name: 'Facebook',
         icon: <Facebook className="h-10 w-10 text-blue-800" />,
-        href: 'https://www.facebook.com/',
+        href: 'fb://',
         color: 'bg-blue-50'
     },
     {
         name: 'Instagram',
         icon: <Instagram className="h-10 w-10 text-pink-600" />,
-        href: 'https://www.instagram.com/',
+        href: 'instagram://',
         color: 'bg-pink-50'
     },
     {
         name: 'Zomato',
         icon: <UtensilsCrossed className="h-10 w-10 text-red-500" />,
-        href: 'https://www.zomato.com/',
+        href: 'zomato://',
         color: 'bg-red-50'
     }
 ];
