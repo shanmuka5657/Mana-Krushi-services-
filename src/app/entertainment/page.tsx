@@ -40,7 +40,7 @@ const apps = [
     {
         name: 'Movies',
         icon: <Film className="h-10 w-10 text-gray-700" />,
-        href: 'https://www.imdb.com',
+        href: '/movies',
         color: 'bg-gray-100'
     }
 ];
@@ -59,7 +59,7 @@ function EntertainmentPageContent() {
                             <a
                                 key={app.name}
                                 href={app.href}
-                                target="_blank"
+                                target={app.href.startsWith('http') ? '_blank' : '_self'}
                                 rel="noopener noreferrer"
                                 className="group"
                             >

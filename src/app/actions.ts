@@ -4,6 +4,7 @@
 import { findDestinations } from "@/ai/flows/smart-destination-finder";
 import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-calculator";
 import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
+import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 
@@ -75,5 +76,24 @@ export async function calculateToll(input: { from: string; to: string }) {
   } catch (e) {
     console.error(e);
     return { error: 'An unexpected error occurred while calculating the toll.' };
+  }
+}
+
+const FindMovieInput = z.object({
+  movieName: z.string().min(1, "Please enter a movie name."),
+});
+
+export async function findMovie(input: { movieName: string }) {
+  const validatedInput = FindMovieInput.safeParse(input);
+  if (!validatedInput.success) {
+    return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+  }
+
+  try {
+    const result = await findMovieFlow(validatedInput.data);
+    return { sites: result.sites };
+  } catch (e) {
+    console.error(e);
+    return { error: 'An unexpected error occurred while searching for the movie.' };
   }
 }

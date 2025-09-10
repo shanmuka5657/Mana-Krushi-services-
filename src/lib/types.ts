@@ -55,6 +55,11 @@ export type Profile = {
     role?: 'owner' | 'passenger' | 'admin';
 }
 
+export type MovieSite = {
+    name: string;
+    link: string;
+}
+
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({
