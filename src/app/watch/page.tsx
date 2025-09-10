@@ -10,21 +10,21 @@ function WatchPageContent() {
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>Embedded Video</CardTitle>
-                    <CardDescription>Here's an example of how you can display a video in your app.</CardDescription>
+                    <CardTitle>Embedded YouTube Video</CardTitle>
+                    <CardDescription>If you get bored, you can watch a video right here in the app.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="aspect-video w-full overflow-hidden rounded-lg border">
-                        <video 
-                            controls 
-                            src="https://www.w3schools.com/html/mov_bbb.mp4" 
-                            className="w-full h-full object-cover"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
+                        <iframe
+                            className="w-full h-full"
+                            src="https://www.youtube.com/embed/LXb3EKWsInQ"
+                            title="YouTube video player"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                        ></iframe>
                     </div>
                     <p className="text-sm text-muted-foreground mt-2">
-                        This is a sample video. You can replace the `src` attribute with a link to your own video file (e.g., from a hosting service or your own storage).
+                        This is an embedded YouTube video. You can change the video by updating the URL in the `src` attribute of the `<iframe>` tag.
                     </p>
                 </CardContent>
             </Card>
