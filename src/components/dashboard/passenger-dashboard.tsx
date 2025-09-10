@@ -165,12 +165,12 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
 
         <div className="text-center">
             <Image 
-                src="https://picsum.photos/seed/car-travel/600/200" 
-                alt="Cars traveling on a scenic road"
+                src="https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png" 
+                alt="Find a ride"
                 width={600}
                 height={200}
                 className="rounded-lg object-cover w-full h-auto max-h-[200px] mb-4"
-                data-ai-hint="cars travel"
+                data-ai-hint="road trip"
             />
             <h2 className="text-2xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
             <p className="text-muted-foreground">Find a ride with trusted owners.</p>
@@ -338,5 +338,3 @@ export default function PassengerDashboard({ routes, onSwitchTab }: PassengerDas
     </div>
   );
 }
-
-    
