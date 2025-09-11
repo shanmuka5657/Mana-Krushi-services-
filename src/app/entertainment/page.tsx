@@ -27,6 +27,15 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
+    const adsterraBannerScript = `
+      atOptions = {
+        'key' : '6563c4ab89bf446cc6ca2af6af14fc66',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    `;
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -72,12 +81,15 @@ function EntertainmentPageContent() {
                     </CardContent>
                 </Card>
                 
-                {/* Placeholder for Video Ad */}
-                <Card className="bg-neutral-800 text-white flex items-center justify-center aspect-video">
-                     <CardContent className="text-center p-6">
-                        <Film className="h-12 w-12 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold">Video Ad Placeholder</h3>
-                        <p className="text-sm text-neutral-300">Paste your video ad unit code here.</p>
+                {/* Banner Ad */}
+                <Card>
+                    <CardContent className="p-4 flex items-center justify-center">
+                        <div>
+                            <Script id="adsterra-banner-config" strategy="lazyOnload">
+                                {adsterraBannerScript}
+                            </Script>
+                            <Script async={true} src="//exportseats.com/6563c4ab89bf446cc6ca2af6af14fc66/invoke.js" strategy="lazyOnload" />
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -169,5 +181,3 @@ export default function EntertainmentPage() {
         </Suspense>
     );
 }
-
-    
