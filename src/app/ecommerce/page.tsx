@@ -19,7 +19,7 @@ const partners = [
     {
         name: "Axis MyZone Credit Card Store",
         profit: "Flat Rs 2380 Profit",
-        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
+        logoUrl: "https://i.ibb.co/wK5G2P4/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
         href: "https://www.axisbank.com/retail/cards/credit-card/my-zone-credit-card/"
     },
     {
@@ -131,7 +131,7 @@ const partners = [
         href: "https://clnk.in/w6hk"
     },
     {
-        name: "Kotak Mahindra Bank",
+        name: "Kotak 811 Savings Account",
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/pvCJmNJw/Whats-App-Image-2025-09-11-at-14-08-10.jpg",
         href: "https://clnk.in/w6hB"
@@ -140,7 +140,7 @@ const partners = [
 
 function AxisBanner() {
     return (
-        <a href="https://clnk.in/w6f1" target="_blank" rel="noopener noreferrer" className="block w-full group">
+        <a href="https://clnk.in/w6f1" target="_blank" rel="noopener noreferrer" className="block w-full group mb-6">
             <Card className="w-full overflow-hidden relative text-white aspect-[4/1] md:aspect-[5/1]">
                  <Image 
                     src="https://picsum.photos/seed/axis-banner/1200/240"
