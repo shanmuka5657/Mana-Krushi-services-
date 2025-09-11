@@ -31,7 +31,7 @@ const partners = [
     {
         name: "Axis Bank DSA",
         profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
+        logoUrl: "https://i.ibb.co/wK5G2P4/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
         href: "https://clnk.in/w6f1"
     },
     {
@@ -91,7 +91,7 @@ const partners = [
     {
         name: "Rio - UPI Rupay Credit Card",
         profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
+        logoUrl: "https://i.ibb.co/Yc5Yv7g/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://clnk.in/w593"
     },
     {
@@ -132,8 +132,8 @@ function AxisBanner() {
                     data-ai-hint="bank offer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-800/80 via-purple-600/60 to-transparent p-4 md:p-6 flex flex-col justify-center">
-                    <h3 className="text-lg md:text-2xl font-bold">Axis Bank DSA</h3>
-                    <p className="mt-1 text-xs md:text-sm max-w-xs">Become a Direct Selling Agent and earn.</p>
+                    <h3 className="text-lg md:text-2xl font-bold">Axis Bank Digital Saving Account</h3>
+                    <p className="mt-1 text-xs md:text-sm max-w-xs">Open a zero balance account online.</p>
                     <Button size="sm" className="mt-3 w-fit bg-white text-purple-900 hover:bg-gray-100 text-xs md:text-sm">
                         Apply Now <ShoppingCart className="ml-2 h-4 w-4" />
                     </Button>
