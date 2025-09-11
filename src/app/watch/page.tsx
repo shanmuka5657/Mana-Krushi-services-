@@ -3,68 +3,45 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed } from 'lucide-react';
+import { Link as LinkIcon, ChevronRight } from 'lucide-react';
 
-const apps = [
-    {
-        name: 'WhatsApp',
-        icon: <MessageSquare className="h-10 w-10 text-green-500" />,
-        href: 'whatsapp://app',
-        color: 'bg-green-50'
-    },
-    {
-        name: 'YouTube',
-        icon: <Youtube className="h-10 w-10 text-red-600" />,
-        href: 'https://www.youtube.com',
-        color: 'bg-red-50'
-    },
-    {
-        name: 'Facebook',
-        icon: <Facebook className="h-10 w-10 text-blue-800" />,
-        href: 'https://www.facebook.com/login/',
-        color: 'bg-blue-50'
-    },
-    {
-        name: 'Instagram',
-        icon: <Instagram className="h-10 w-10 text-pink-600" />,
-        href: 'https://www.instagram.com/accounts/login/',
-        color: 'bg-pink-50'
-    },
-    {
-        name: 'Zomato',
-        icon: <UtensilsCrossed className="h-10 w-10 text-red-500" />,
-        href: 'zomato://',
-        color: 'bg-red-50'
-    }
+const smartLinks = [
+    { name: "Special Offer 1", href: "https://exportseats.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" },
+    { name: "Exclusive Deal 1", href: "https://exportseats.com/dh3vxuj481?key=b7533711b8862e5c235d94f55f71534a" },
+    { name: "Exclusive Deal 2", href: "https://exportseats.com/g0hq2kzg4?key=3dc62533b21bbb2a8759a09979857f8e" },
+    { name: "Special Offer 2", href: "https://exportseats.com/m2jivq7i5?key=21be6efcb2e0598d5cc7a099cc5be61d" },
+    { name: "Limited Time Offer", href: "https://exportseats.com/dpmz0i2c?key=7daf2adf8e65b73e02e8812c28801773" },
+    { name: "Special Offer 3", href: "https://exportseats.com/qkjn3gymx?key=f37d577acabc18cde27215069997adf6" },
 ];
+
+function SmartLinkCard({ name, href }: { name: string, href: string }) {
+    return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="block w-full group">
+            <Card className="w-full transition-all hover:bg-muted/50 hover:shadow-sm">
+                <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <LinkIcon className="h-6 w-6 text-primary" />
+                        <p className="font-semibold text-foreground">{name}</p>
+                    </div>
+                    <ChevronRight className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                </CardContent>
+            </Card>
+        </a>
+    )
+}
 
 function WatchPageContent() {
     return (
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>Popular Apps</CardTitle>
-                    <CardDescription>Quick links to some of your favorite applications.</CardDescription>
+                    <CardTitle>Special Offers & Deals</CardTitle>
+                    <CardDescription>Explore these exclusive links.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {apps.map((app) => (
-                            <a
-                                key={app.name}
-                                href={app.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group"
-                            >
-                                <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 ${app.color}`}>
-                                    <div className="mb-4">
-                                        {app.icon}
-                                    </div>
-                                    <h3 className="font-semibold text-lg text-foreground">{app.name}</h3>
-                                </Card>
-                            </a>
-                        ))}
-                    </div>
+                <CardContent className="space-y-3">
+                   {smartLinks.map((link) => (
+                       <SmartLinkCard key={link.href} name={link.name} href={link.href} />
+                   ))}
                 </CardContent>
             </Card>
         </AppLayout>
