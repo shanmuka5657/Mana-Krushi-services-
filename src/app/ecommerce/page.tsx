@@ -43,7 +43,7 @@ const partners = [
         name: "Flipkart",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg",
-        href: "https://ltsrn.in/bOB"
+        href: "https://clnk.in/w6fv"
     },
     {
         name: "Ajio",
