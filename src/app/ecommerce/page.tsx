@@ -123,9 +123,9 @@ const partners = [
 function AxisBanner() {
     return (
         <a href="https://clnk.in/w6f1" target="_blank" rel="noopener noreferrer" className="block w-full group">
-            <Card className="w-full overflow-hidden relative text-white aspect-[5/1] md:aspect-[6/1]">
+            <Card className="w-full overflow-hidden relative text-white aspect-[4/1] md:aspect-[5/1]">
                  <Image 
-                    src="https://picsum.photos/seed/axis-banner/1200/200"
+                    src="https://picsum.photos/seed/axis-banner/1200/240"
                     alt="Axis Bank Banner"
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
