@@ -22,6 +22,7 @@ import {
   Loader2,
   Film,
   ShoppingCart,
+  MonitorPlay,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -124,6 +125,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
+    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -137,6 +139,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
+    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
   ];
@@ -149,6 +152,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
+    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
   ];
