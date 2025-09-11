@@ -30,6 +30,7 @@ export default function RootLayout({
       <body>
         {children}
         <script type="text/javascript" dangerouslySetInnerHTML={{ __html: cuelinksScript }} />
+        <script type='text/javascript' src='//exportseats.com/18/6e/e8/186ee8d3ed422373beaa184909e3545c.js'></script>
       </body>
     </html>
   );

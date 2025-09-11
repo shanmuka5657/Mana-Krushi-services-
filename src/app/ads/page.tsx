@@ -62,7 +62,7 @@ function AdsPageContent() {
                         <CardTitle>Banner Ad (320x50)</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 flex items-center justify-center">
-                        <div className="border-2 border-red-500 p-1">
+                        <div>
                             <Script id="adsterra-banner-config" strategy="lazyOnload">
                                 {bannerAdScript}
                             </Script>
