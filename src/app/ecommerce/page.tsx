@@ -129,6 +129,12 @@ const partners = [
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://clnk.in/w6hk"
+    },
+    {
+        name: "Kotak Mahindra Bank",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/pvCJmNJw/Whats-App-Image-2025-09-11-at-14-08-10.jpg",
+        href: "https://clnk.in/w6hB"
     }
 ];
 
@@ -225,3 +231,5 @@ export default function EcommercePage() {
         </Suspense>
     )
 }
+
+    
