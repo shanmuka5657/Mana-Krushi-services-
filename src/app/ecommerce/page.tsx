@@ -98,6 +98,12 @@ const partners = [
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://linksredirect.com/?cid=245979&source=linkkit&url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.rupeeredee.app"
+    },
+    {
+        name: "Creative AI",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
+        href: "https://clnk.in/w6d4"
     }
 ];
 
