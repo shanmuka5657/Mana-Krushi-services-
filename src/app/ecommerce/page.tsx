@@ -132,13 +132,6 @@ function AxisBanner() {
                     data-ai-hint="bank offer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-800/80 via-purple-600/60 to-transparent p-4 md:p-6 flex flex-col justify-center">
-                    <Image
-                        src="https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg"
-                        alt="Axis Bank Logo"
-                        width={100}
-                        height={30}
-                        className="mb-2 rounded"
-                    />
                     <h3 className="text-lg md:text-2xl font-bold">Axis Bank DSA</h3>
                     <p className="mt-1 text-xs md:text-sm max-w-xs">Become a Direct Selling Agent and earn.</p>
                     <Button size="sm" className="mt-3 w-fit bg-white text-purple-900 hover:bg-gray-100 text-xs md:text-sm">
@@ -242,5 +235,3 @@ export default function EcommercePage() {
         </Suspense>
     )
 }
-
-    
