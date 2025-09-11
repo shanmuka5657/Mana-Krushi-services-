@@ -133,6 +133,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
+    { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
