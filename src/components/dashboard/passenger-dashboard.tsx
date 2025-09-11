@@ -129,15 +129,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialog>
 
         <div className="text-center">
-            <Image 
-                src="https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png" 
-                alt="Find a ride"
-                width={691}
-                height={225}
-                className="rounded-lg object-contain w-full h-auto"
-                data-ai-hint="road trip"
-            />
-            <h2 className="text-2xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mt-4">Your Next Adventure Awaits!</h2>
             <p className="text-muted-foreground">Find a ride with trusted owners.</p>
         </div>
 
