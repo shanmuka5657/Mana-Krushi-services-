@@ -11,24 +11,6 @@ import { Button } from '@/components/ui/button';
 
 const partners = [
     {
-        name: "HSBC Platinum Credit Card",
-        profit: "Flat Rs 3000 Profit",
-        logoUrl: "https://i.ibb.co/HL7bzmLQ/Screenshot-2025-09-10-16-10-48-382-com-whatsapp.jpg",
-        href: "https://www.hsbc.co.in/credit-cards/products/platinum/"
-    },
-    {
-        name: "Axis MyZone Credit Card Store",
-        profit: "Flat Rs 2380 Profit",
-        logoUrl: "https://i.ibb.co/wK5G2P4/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
-        href: "https://www.axisbank.com/retail/cards/credit-card/my-zone-credit-card/"
-    },
-    {
-        name: "Axis Flipkart Credit Card Store",
-        profit: "Flat Rs 2380 Profit",
-        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot.png",
-        href: "https://www.flipkart.com/axis-bank-credit-card-store"
-    },
-    {
         name: "AU Small Finance Bank",
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/9HnQ0BCP/Whats-App-Image-2025-09-11-at-13-24-36.jpg",
@@ -75,18 +57,6 @@ const partners = [
         profit: "Upto 18% Profit",
         logoUrl: "https://i.ibb.co/f30tsFj/Screenshot-2025-09-10-16-44-51-303-com-whatsapp.jpg",
         href: "https://www.buykaro.com"
-    },
-    {
-        name: "SBI Cashback Credit Card",
-        profit: "Flat Rs 2500 Profit",
-        logoUrl: "https://i.ibb.co/ZpQDy8yB/Screenshot-2025-09-10-16-45-25-696-com-whatsapp.jpg",
-        href: "https://www.sbicard.com/en-in/personal/credit-cards/shopping/cashback-sbi-card"
-    },
-    {
-        name: "Rio - UPI Rupay Credit Card",
-        profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/Yc5Yv7g/Screenshot-2024-07-28-at-12-07-21-AM.png",
-        href: "https://clnk.in/w593"
     },
     {
         name: "Aceblend",
