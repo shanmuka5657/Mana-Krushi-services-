@@ -56,6 +56,16 @@ function AdsPageContent() {
                     </CardContent>
                 </Card>
 
+                 {/* Social Bar Ad */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Social Bar Ad</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                       <Script type='text/javascript' src='//exportseats.com/18/6e/e8/186ee8d3ed422373beaa184909e3545c.js' strategy="lazyOnload" />
+                    </CardContent>
+                </Card>
+
             </div>
         </AppLayout>
     );
