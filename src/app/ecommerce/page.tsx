@@ -29,12 +29,6 @@ const partners = [
         href: "https://www.flipkart.com/axis-bank-credit-card-store"
     },
     {
-        name: "Axis Bank DSA",
-        profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/wK5G2P4/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
-        href: "https://clnk.in/w6f1"
-    },
-    {
         name: "AU Small Finance Bank",
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/9HnQ0BCP/Whats-App-Image-2025-09-11-at-13-24-36.jpg",
@@ -101,12 +95,6 @@ const partners = [
         href: "https://clnk.in/w594"
     },
     {
-        name: "RupeeRedee",
-        profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
-        href: "https://linksredirect.com/?cid=245979&source=linkkit&url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.rupeeredee.app"
-    },
-    {
         name: "Creative AI",
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
@@ -117,12 +105,6 @@ const partners = [
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://clnk.in/w6fh"
-    },
-    {
-        name: "Bajaj Finserv Personal Loan",
-        profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
-        href: "https://clnk.in/w6hf"
     },
     {
         name: "IndusInd Saving Account",
