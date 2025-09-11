@@ -17,6 +17,17 @@ export default function RootLayout({
     }());
   `;
 
+  const popunderScript = `
+    // Popunder script
+    (function() {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = '//exportseats.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js';
+        document.head.appendChild(script);
+    })();
+  `;
+
+
   return (
     <html lang="en">
       <head>
@@ -30,6 +41,7 @@ export default function RootLayout({
       <body>
         {children}
         <script type="text/javascript" dangerouslySetInnerHTML={{ __html: cuelinksScript }} />
+        <script type="text/javascript" dangerouslySetInnerHTML={{ __html: popunderScript }} />
       </body>
     </html>
   );

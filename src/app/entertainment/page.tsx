@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
+import Script from 'next/script';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com/movies', color: 'bg-red-50' },
@@ -145,11 +146,14 @@ function EntertainmentPageContent() {
                     </CardContent>
                 </Card>
                 
-                {/* Placeholder for Banner Ad */}
-                <Card className="bg-muted flex items-center justify-center aspect-[5/1]">
-                     <CardContent className="text-center p-6">
-                        <h3 className="text-xl font-semibold text-muted-foreground">Banner Ad Placeholder</h3>
-                        <p className="text-sm text-muted-foreground">Paste your banner ad unit code here.</p>
+                {/* Native Banner Ad */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recommended For You</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <Script async={true} data-cfasync="false" src="//exportseats.com/143386acea5fdd4b99b856043235c82b/invoke.js" />
+                         <div id="container-143386acea5fdd4b99b856043235c82b"></div>
                     </CardContent>
                 </Card>
 
