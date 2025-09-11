@@ -29,6 +29,12 @@ const partners = [
         href: "https://www.flipkart.com/axis-bank-credit-card-store"
     },
     {
+        name: "Axis Bank DSA",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg",
+        href: "https://clnk.in/w6f1"
+    },
+    {
         name: "AU Small Finance Bank",
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/yQWJ9f3/au-bank.jpg",
@@ -114,29 +120,29 @@ const partners = [
     }
 ];
 
-function FlipkartBanner() {
+function AxisBanner() {
     return (
-        <a href="https://clnk.in/w6fv" target="_blank" rel="noopener noreferrer" className="block w-full group">
+        <a href="https://clnk.in/w6f1" target="_blank" rel="noopener noreferrer" className="block w-full group">
             <Card className="w-full overflow-hidden relative text-white aspect-[5/1] md:aspect-[6/1]">
                  <Image 
-                    src="https://picsum.photos/seed/flipkart-banner/1200/200"
-                    alt="Flipkart Sale Banner"
+                    src="https://picsum.photos/seed/axis-banner/1200/200"
+                    alt="Axis Bank Banner"
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    data-ai-hint="shopping sale"
+                    data-ai-hint="bank offer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-800/80 via-blue-600/60 to-transparent p-4 md:p-6 flex flex-col justify-center">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-800/80 via-purple-600/60 to-transparent p-4 md:p-6 flex flex-col justify-center">
                     <Image
-                        src="https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg"
-                        alt="Flipkart Logo"
+                        src="https://i.ibb.co/Ld4mj8X1/Screenshot-2025-09-10-16-18-00-679-com-whatsapp.jpg"
+                        alt="Axis Bank Logo"
                         width={100}
                         height={30}
-                        className="mb-2"
+                        className="mb-2 rounded"
                     />
-                    <h3 className="text-lg md:text-2xl font-bold">Big Savings Days!</h3>
-                    <p className="mt-1 text-xs md:text-sm max-w-xs">Up to 8% Profit on your favorite products.</p>
-                    <Button size="sm" className="mt-3 w-fit bg-yellow-400 text-blue-900 hover:bg-yellow-500 text-xs md:text-sm">
-                        Shop Now <ShoppingCart className="ml-2 h-4 w-4" />
+                    <h3 className="text-lg md:text-2xl font-bold">Axis Bank DSA</h3>
+                    <p className="mt-1 text-xs md:text-sm max-w-xs">Become a Direct Selling Agent and earn.</p>
+                    <Button size="sm" className="mt-3 w-fit bg-white text-purple-900 hover:bg-gray-100 text-xs md:text-sm">
+                        Apply Now <ShoppingCart className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             </Card>
@@ -202,7 +208,7 @@ function EcommercePageContent() {
     return (
         <AppLayout>
             <div className="space-y-6">
-                <FlipkartBanner />
+                <AxisBanner />
                 <Card>
                     <CardHeader>
                         <CardTitle>Our Partners</CardTitle>
@@ -236,3 +242,5 @@ export default function EcommercePage() {
         </Suspense>
     )
 }
+
+    
