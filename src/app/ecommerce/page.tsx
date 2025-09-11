@@ -117,26 +117,25 @@ const partners = [
 function FlipkartBanner() {
     return (
         <a href="https://clnk.in/w6fv" target="_blank" rel="noopener noreferrer" className="block w-full group">
-            <Card className="w-full overflow-hidden relative text-white">
+            <Card className="w-full overflow-hidden relative text-white aspect-[5/1] md:aspect-[6/1]">
                  <Image 
-                    src="https://picsum.photos/seed/flipkart-banner/1200/300"
+                    src="https://picsum.photos/seed/flipkart-banner/1200/200"
                     alt="Flipkart Sale Banner"
-                    width={1200}
-                    height={300}
-                    className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                     data-ai-hint="shopping sale"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-800/80 via-blue-600/70 to-transparent p-6 flex flex-col justify-center">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-800/80 via-blue-600/60 to-transparent p-4 md:p-6 flex flex-col justify-center">
                     <Image
                         src="https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg"
                         alt="Flipkart Logo"
-                        width={120}
-                        height={40}
-                        className="mb-4"
+                        width={100}
+                        height={30}
+                        className="mb-2"
                     />
-                    <h3 className="text-2xl md:text-3xl font-bold">Big Savings Days!</h3>
-                    <p className="mt-1 text-sm md:text-base">Up to 8% Profit on your favorite products.</p>
-                    <Button size="sm" className="mt-4 w-fit bg-yellow-400 text-blue-900 hover:bg-yellow-500">
+                    <h3 className="text-lg md:text-2xl font-bold">Big Savings Days!</h3>
+                    <p className="mt-1 text-xs md:text-sm max-w-xs">Up to 8% Profit on your favorite products.</p>
+                    <Button size="sm" className="mt-3 w-fit bg-yellow-400 text-blue-900 hover:bg-yellow-500 text-xs md:text-sm">
                         Shop Now <ShoppingCart className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
@@ -144,6 +143,7 @@ function FlipkartBanner() {
         </a>
     )
 }
+
 
 function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: string, logoUrl: string, href: string }) {
     return (
