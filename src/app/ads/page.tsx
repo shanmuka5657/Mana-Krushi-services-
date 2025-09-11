@@ -5,7 +5,8 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
 import Script from 'next/script';
-import { MonitorPlay } from 'lucide-react';
+import { MonitorPlay, Link } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function AdsPageContent() {
     const bannerAdScript = `
@@ -42,6 +43,21 @@ function AdsPageContent() {
                             </Script>
                             <Script async={true} src="//exportseats.com/6563c4ab89bf446cc6ca2af6af14fc66/invoke.js" strategy="lazyOnload" />
                         </div>
+                    </CardContent>
+                </Card>
+                
+                {/* Direct Link Ad */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Direct Link Ad</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <a href="https://exportseats.com/m2jivq7i5?key=21be6efcb2e0598d5cc7a099cc5be61d" target="_blank" rel="noopener noreferrer">
+                            <Button className="w-full">
+                                <Link className="mr-2 h-4 w-4" />
+                                Click to View Offer
+                            </Button>
+                        </a>
                     </CardContent>
                 </Card>
 
