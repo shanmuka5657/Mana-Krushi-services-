@@ -5,8 +5,9 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ShoppingCart } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 const partners = [
     {
@@ -113,6 +114,37 @@ const partners = [
     }
 ];
 
+function FlipkartBanner() {
+    return (
+        <a href="https://clnk.in/w6fv" target="_blank" rel="noopener noreferrer" className="block w-full group">
+            <Card className="w-full overflow-hidden relative text-white">
+                 <Image 
+                    src="https://picsum.photos/seed/flipkart-banner/1200/300"
+                    alt="Flipkart Sale Banner"
+                    width={1200}
+                    height={300}
+                    className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                    data-ai-hint="shopping sale"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-800/80 via-blue-600/70 to-transparent p-6 flex flex-col justify-center">
+                    <Image
+                        src="https://i.ibb.co/wZSZ4WpG/Screenshot-2025-09-10-16-42-10-763-com-whatsapp.jpg"
+                        alt="Flipkart Logo"
+                        width={120}
+                        height={40}
+                        className="mb-4"
+                    />
+                    <h3 className="text-2xl md:text-3xl font-bold">Big Savings Days!</h3>
+                    <p className="mt-1 text-sm md:text-base">Up to 8% Profit on your favorite products.</p>
+                    <Button size="sm" className="mt-4 w-fit bg-yellow-400 text-blue-900 hover:bg-yellow-500">
+                        Shop Now <ShoppingCart className="ml-2 h-4 w-4" />
+                    </Button>
+                </div>
+            </Card>
+        </a>
+    )
+}
+
 function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: string, logoUrl: string, href: string }) {
     return (
         <a href={href} target="_blank" rel="noopener noreferrer" className="block w-full">
@@ -169,27 +201,30 @@ function EcommercePageContent() {
 
     return (
         <AppLayout>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Our Partners</CardTitle>
-                    <CardDescription>
-                        {query 
-                            ? `Showing ${filteredPartners.length} results for "${query}"`
-                            : "Explore exclusive offers from our partners."}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {filteredPartners.length > 0 ? (
-                        filteredPartners.map((partner, index) => (
-                            <PartnerCard key={index} {...partner} />
-                        ))
-                    ) : (
-                        <div className="text-center py-10">
-                            <p className="text-muted-foreground">No partners found matching your search.</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            <div className="space-y-6">
+                <FlipkartBanner />
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Our Partners</CardTitle>
+                        <CardDescription>
+                            {query 
+                                ? `Showing ${filteredPartners.length} results for "${query}"`
+                                : "Explore exclusive offers from our partners."}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {filteredPartners.length > 0 ? (
+                            filteredPartners.map((partner, index) => (
+                                <PartnerCard key={index} {...partner} />
+                            ))
+                        ) : (
+                            <div className="text-center py-10">
+                                <p className="text-muted-foreground">No partners found matching your search.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </AppLayout>
     );
 }
