@@ -55,7 +55,7 @@ const partners = [
         name: "Myntra",
         profit: "Upto 8% Profit",
         logoUrl: "https://i.ibb.co/PJ1jwbR/Screenshot-2025-09-10-16-43-27-664-com-whatsapp.jpg",
-        href: "https://www.myntra.com"
+        href: "https://clnk.in/w6d7"
     },
     {
         name: "Amazon.in",
