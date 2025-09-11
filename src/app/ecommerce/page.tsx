@@ -37,7 +37,7 @@ const partners = [
     {
         name: "AU Small Finance Bank",
         profit: "Earn Profit",
-        logoUrl: "https://i.ibb.co/yQWJ9f3/au-bank.jpg",
+        logoUrl: "https://i.ibb.co/9HnQ0BCP/Whats-App-Image-2025-09-11-at-13-24-36.jpg",
         href: "https://clnk.in/w59c"
     },
     {
