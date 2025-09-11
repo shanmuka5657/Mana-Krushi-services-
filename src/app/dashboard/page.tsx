@@ -152,7 +152,9 @@ function DashboardPage() {
              <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-routes">
+            <KotakBanner />
             <MyRoutes routes={routes} />
+            <PoonawallaBanner />
           </TabsContent>
            <TabsContent value="profile">
             <ProfileForm />
