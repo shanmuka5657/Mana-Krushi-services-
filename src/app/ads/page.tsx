@@ -18,6 +18,16 @@ function AdsPageContent() {
         'params' : {}
       };
     `;
+    
+    const banner468x60Script = `
+      atOptions = {
+		'key' : 'c6669511fdc1c44d2ff58fb29647cc91',
+		'format' : 'iframe',
+		'height' : 60,
+		'width' : 468,
+		'params' : {}
+	  };
+    `;
 
     return (
         <AppLayout>
@@ -29,6 +39,21 @@ function AdsPageContent() {
                         </CardTitle>
                         <CardDescription>This page is dedicated to displaying various ad formats.</CardDescription>
                     </CardHeader>
+                </Card>
+
+                {/* Banner Ad 468x60 */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Banner Ad (468x60)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 flex items-center justify-center">
+                        <div>
+                            <Script id="adsterra-banner-468-config" strategy="lazyOnload">
+                                {banner468x60Script}
+                            </Script>
+                            <Script async={true} src="//exportseats.com/c6669511fdc1c44d2ff58fb29647cc91/invoke.js" strategy="lazyOnload" />
+                        </div>
+                    </CardContent>
                 </Card>
                 
                 {/* Banner Ad 320x50 */}
