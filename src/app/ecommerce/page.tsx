@@ -123,6 +123,12 @@ const partners = [
         profit: "Earn Profit",
         logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
         href: "https://clnk.in/w6hf"
+    },
+    {
+        name: "IndusInd Saving Account",
+        profit: "Earn Profit",
+        logoUrl: "https://i.ibb.co/b3wPVSF/Screenshot-2024-07-28-at-12-07-21-AM.png",
+        href: "https://clnk.in/w6hk"
     }
 ];
 
@@ -173,28 +179,6 @@ function EcommercePageContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
     
-    useEffect(() => {
-        // This function will try to run the Cuelinks script.
-        const runCuelinks = () => {
-            if (typeof (window as any).cuelinks?.js?.run === 'function') {
-                (window as any).cuelinks.js.run();
-                // If it runs successfully, we can stop checking.
-                clearInterval(intervalId);
-            }
-        };
-
-        // Run it once, just in case the script is already loaded.
-        runCuelinks();
-
-        // Also set up an interval to keep trying, in case the script loads later.
-        // This is a robust way to handle scripts that might load asynchronously.
-        const intervalId = setInterval(runCuelinks, 500); // Check every 500ms
-
-        // Clean up the interval when the component is unmounted to prevent memory leaks.
-        return () => clearInterval(intervalId);
-    }, []);
-
-
     const filteredPartners = useMemo(() => {
         if (!query) {
             return partners;
