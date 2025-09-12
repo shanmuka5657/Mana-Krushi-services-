@@ -105,6 +105,11 @@ function BajajBanner() {
 
 function FeaturedRides({ routes }: { routes: Route[] }) {
   const router = useRouter();
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+
+  useEffect(() => {
+    getBookings(true).then(setAllBookings);
+  }, []);
 
   if (!routes || routes.length === 0) {
     return null;
@@ -128,13 +133,6 @@ function FeaturedRides({ routes }: { routes: Route[] }) {
    }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
  }
   
-  // A bit of a hack: we need all bookings to calculate available seats, 
-  // but we don't want to fetch it inside this component. Assuming it's fast enough.
-  const [allBookings, setAllBookings] = useState<Booking[]>([]);
-  useEffect(() => {
-    getBookings(true).then(setAllBookings);
-  }, []);
-
   // Show the 5 most recent promoted rides
   const featured = routes
     .filter(r => r.isPromoted)
@@ -160,7 +158,7 @@ function FeaturedRides({ routes }: { routes: Route[] }) {
              const isPast = new Date(route.travelDate) < new Date();
 
             return (
-              <CarouselItem key={route.id} className="md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={route.id} className="basis-full md:basis-1/2 lg:basis-1/3">
                  <Card className="overflow-hidden h-full flex flex-col">
                     <CardHeader>
                         <CardTitle className="truncate">{route.fromLocation} to {route.toLocation}</CardTitle>
