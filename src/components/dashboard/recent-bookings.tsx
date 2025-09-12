@@ -141,71 +141,73 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       </CardHeader>
       <CardContent>
         <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedBooking(null)}>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
-                <TableHead className="rounded-l-lg">Booking ID</TableHead>
-                <TableHead>Destination</TableHead>
-                <TableHead>Departure</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="rounded-r-lg">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bookings.length > 0 ? (
-                bookings.map((booking) => {
-                  const status = getBookingStatus(booking);
-                  return (
-                  <TableRow key={booking.id}>
-                    <TableCell className="font-medium">{booking.id}</TableCell>
-                    <TableCell>{booking.destination}</TableCell>
-                    <TableCell>{format(new Date(booking.departureDate), "dd MMM yyyy, HH:mm")}</TableCell>
-                    <TableCell className="text-right">
-                      ₹{(booking.amount || 0).toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getStatusBadgeClass(status)}
-                      >
-                       {status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                       <div className="flex gap-2">
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenDialog(booking, 'view')}
-                          >
-                            View
+          <div className="w-full overflow-x-auto">
+            <Table className="min-w-[600px]">
+              <TableHeader>
+                <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
+                  <TableHead className="rounded-l-lg">Booking ID</TableHead>
+                  <TableHead>Destination</TableHead>
+                  <TableHead>Departure</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="rounded-r-lg">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bookings.length > 0 ? (
+                  bookings.map((booking) => {
+                    const status = getBookingStatus(booking);
+                    return (
+                    <TableRow key={booking.id}>
+                      <TableCell className="font-medium font-mono text-xs">{booking.id}</TableCell>
+                      <TableCell className="whitespace-nowrap">{booking.destination}</TableCell>
+                      <TableCell className="whitespace-nowrap">{format(new Date(booking.departureDate), "dd MMM, HH:mm")}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
+                        ₹{(booking.amount || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={getStatusBadgeClass(status)}
+                        >
+                        {status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenDialog(booking, 'view')}
+                            >
+                              View
+                            </Button>
+                          </DialogTrigger>
+                          <Button variant="secondary" size="sm" onClick={() => router.push(`/track/${booking.id}`)}>
+                              <Map className="mr-2 h-4 w-4" /> Track
                           </Button>
-                        </DialogTrigger>
-                        <Button variant="secondary" size="sm" onClick={() => router.push(`/track/${booking.id}`)}>
-                            <Map className="mr-2 h-4 w-4" /> Track
-                        </Button>
-                        {status === 'Completed' && !booking.report && (
-                            <DialogTrigger asChild>
-                                <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'report')}>
-                                    <AlertCircle className="h-4 w-4 mr-2" /> Report
-                                </Button>
-                            </DialogTrigger>
-                        )}
-                      </div>
+                          {status === 'Completed' && !booking.report && (
+                              <DialogTrigger asChild>
+                                  <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'report')}>
+                                      <AlertCircle className="h-4 w-4 mr-2" /> Report
+                                  </Button>
+                              </DialogTrigger>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )})
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      You have no bookings.
                     </TableCell>
                   </TableRow>
-                )})
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    You have no bookings.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
           {selectedBooking && (
             <DialogContent>
@@ -354,3 +356,5 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
+
+    
