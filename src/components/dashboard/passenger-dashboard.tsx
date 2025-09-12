@@ -4,12 +4,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star } from "lucide-react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import type { EmblaCarouselType } from 'embla-carousel-react'
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,13 +39,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
@@ -64,151 +56,54 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
-function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDateChange: (date: Date) => void }) {
+function TopMembers() {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
-    const [emblaApi, setEmblaApi] = useState<EmblaCarouselType | null>(null);
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-    const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-        setSelectedIndex(emblaApi.selectedScrollSnap());
-    }, []);
-
-    const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
-
-    useEffect(() => {
-        if (!emblaApi) return;
-
-        onSelect(emblaApi);
-        emblaApi.on('select', onSelect);
-        emblaApi.on('reInit', onSelect);
-
-        const timer = setInterval(() => {
-            if (emblaApi.canScrollNext()) {
-                emblaApi.scrollNext();
-            } else {
-                emblaApi.scrollTo(0);
-            }
-        }, 5000);
-
-        return () => {
-            clearInterval(timer)
-            emblaApi.off('select', onSelect);
-        };
-    }, [emblaApi, onSelect]);
-
+    
     useEffect(() => {
         const fetchTopRoutes = async () => {
             const allRoutes = await getRoutes(true);
-            const now = new Date();
-            
-            const upcomingRoutesForDate = allRoutes.filter(route => {
-                const routeDate = new Date(route.travelDate);
-                const isSelectedDate = isSameDay(routeDate, selectedDate);
-
-                if (!isSelectedDate) return false;
-                
-                if (isSameDay(selectedDate, new Date())) {
-                    const [hours, minutes] = route.departureTime.split(':').map(Number);
-                    const departureDateTime = new Date(routeDate.getTime());
-                    departureDateTime.setHours(hours, minutes, 0, 0);
-                    return departureDateTime > now;
-                }
-                
-                return true;
-            });
-            
-            const sortedRoutes = [...upcomingRoutesForDate].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            const sortedRoutes = [...allRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
             setTopRoutes(sortedRoutes.slice(0, 5));
         }
         fetchTopRoutes();
-    }, [selectedDate]);
+    }, []);
+
+    if (topRoutes.length === 0) {
+        return null;
+    }
 
     return (
         <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Top Members for {format(selectedDate, "dd MMM")}</CardTitle>
-                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                    <PopoverTrigger asChild>
-                    <Button
-                        variant={"outline"}
-                        className={cn(
-                        "w-[200px] justify-start text-left font-normal",
-                        !selectedDate && "text-muted-foreground"
-                        )}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                    <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => {
-                            onDateChange(date || new Date());
-                            setIsCalendarOpen(false);
-                        }}
-                        initialFocus
-                    />
-                    </PopoverContent>
-                </Popover>
+            <CardHeader>
+                <CardTitle>Top Members</CardTitle>
             </CardHeader>
             <CardContent>
                  {topRoutes.length > 0 ? (
-                    <div className="relative">
-                        <Carousel setApi={setEmblaApi} opts={{ loop: true }} className="w-full max-w-sm mx-auto">
-                            <CarouselContent>
-                            {topRoutes.map(route => (
-                                    <CarouselItem key={route.id}>
-                                        <div className="flex items-center gap-4 w-full">
-                                            <Avatar className="h-16 w-16 rounded-md">
-                                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                                <AvatarFallback className="rounded-md">{route.driverName.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1">
-                                                <div className="text-sm font-bold text-muted-foreground">
-                                                    {route.fromLocation} to {route.toLocation}
-                                                </div>
-                                                <div className="text-xs text-muted-foreground font-semibold">
-                                                    {route.departureTime} - {route.arrivalTime}
-                                                </div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-sm font-medium">{route.driverName}</span>
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                                        <span className="text-xs text-muted-foreground font-bold">{(route.rating || 0).toFixed(1)}</span>
-                                                    </div>
-                                                </div>
-                                                <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
-                                            </div>
-                                        </div>
-                                    </CarouselItem>
-                                ))}
-                            </CarouselContent>
-                            {topRoutes.length > 1 && (
-                                <>
-                                    <CarouselPrevious />
-                                    <CarouselNext />
-                                </>
-                            )}
-                        </Carousel>
-                        <div className="flex justify-center gap-2 mt-4">
-                            {topRoutes.map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => scrollTo(index)}
-                                    className={cn(
-                                        "h-2 w-2 rounded-full",
-                                        index === selectedIndex ? "bg-primary" : "bg-muted"
-                                    )}
-                                />
-                            ))}
+                    <div className="flex items-center gap-4 w-full">
+                        <Avatar className="h-16 w-16 rounded-md">
+                            <AvatarImage src={`https://ui-avatars.com/api/?name=${topRoutes[0].driverName.replace(' ', '+')}&background=random`} />
+                            <AvatarFallback className="rounded-md">{topRoutes[0].driverName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                            <div className="text-sm font-bold text-muted-foreground">
+                                {topRoutes[0].fromLocation} to {topRoutes[0].toLocation}
+                            </div>
+                            <div className="text-xs text-muted-foreground font-semibold">
+                                {topRoutes[0].departureTime} - {topRoutes[0].arrivalTime}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-sm font-medium">{topRoutes[0].driverName}</span>
+                                <div className="flex items-center gap-1">
+                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                    <span className="text-xs text-muted-foreground font-bold">{(topRoutes[0].rating || 0).toFixed(1)}</span>
+                                </div>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{format(new Date(topRoutes[0].travelDate), 'dd MMM')}</span>
                         </div>
                     </div>
                 ) : (
                     <div className="text-center py-4 text-muted-foreground">
-                        <p>No upcoming rides found for this date.</p>
+                        <p>No upcoming rides found.</p>
                     </div>
                 )}
             </CardContent>
@@ -265,18 +160,17 @@ function BajajBanner() {
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [topMembersDate, setTopMembersDate] = useState(new Date());
   const router = useRouter();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
-    const checkProfileAndFetchData = async () => {
+    const checkProfile = async () => {
         const profile = await getProfile();
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
-    };
-    checkProfileAndFetchData();
+    }
+    checkProfile();
   }, []);
   
   const form = useForm<SearchFormValues>({
@@ -318,7 +212,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <IndusIndBanner />
 
-        <TopMembers selectedDate={topMembersDate} onDateChange={setTopMembersDate} />
+        <TopMembers />
         
         <Card className="shadow-sm mt-6">
             <CardHeader>
