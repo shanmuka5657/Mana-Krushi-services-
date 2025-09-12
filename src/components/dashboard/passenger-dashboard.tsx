@@ -162,9 +162,9 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                             {topRoutes.map(route => (
                                     <CarouselItem key={route.id}>
                                         <div className="flex items-center gap-4 w-full">
-                                            <Avatar className="h-16 w-16">
+                                            <Avatar className="h-16 w-16 rounded-md">
                                                 <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                                <AvatarFallback className="rounded-md">{route.driverName.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
                                                 <div className="text-sm font-bold text-muted-foreground">
