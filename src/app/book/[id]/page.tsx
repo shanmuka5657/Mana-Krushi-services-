@@ -5,17 +5,27 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
-import { getFirestore, addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { getFirestore, addDoc, collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
 
 
-import { getRoutes, getProfile, getCurrentUser, getBookings } from "@/lib/storage";
+import { getRoutes, getProfile, getCurrentUser, getBookings, saveBookings } from "@/lib/storage";
 import type { Route, Booking } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function BookRidePage() {
   const router = useRouter();
@@ -28,6 +38,7 @@ export default function BookRidePage() {
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [availableSeats, setAvailableSeats] = useState(0);
   const [isPast, setIsPast] = useState(false);
+  const [existingBooking, setExistingBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     const fetchRouteAndBookings = async () => {
@@ -109,6 +120,25 @@ export default function BookRidePage() {
         setIsBooking(false);
         return;
     }
+    
+    // Check for existing booking
+    const allBookings = await getBookings();
+    const routeDate = new Date(route.travelDate);
+    const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
+    routeDate.setHours(depHours, depMinutes, 0, 0);
+
+    const foundExistingBooking = allBookings.find(b => 
+        b.clientEmail === passengerEmail &&
+        b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+        new Date(b.departureDate).getTime() === routeDate.getTime() &&
+        b.status !== "Cancelled"
+    );
+
+    if (foundExistingBooking) {
+        setExistingBooking(foundExistingBooking);
+        setIsBooking(false);
+        return;
+    }
 
 
     const db = getFirestore(getApp());
@@ -119,8 +149,8 @@ export default function BookRidePage() {
         client: passengerProfile.name,
         clientEmail: passengerEmail,
         destination: `${route.fromLocation} to ${route.toLocation}`,
-        departureDate: new Date(route.travelDate),
-        returnDate: new Date(route.travelDate), 
+        departureDate: routeDate,
+        returnDate: routeDate, 
         amount: route.price * numberOfSeats,
         status: "Confirmed",
         travelers: String(numberOfSeats),
@@ -132,9 +162,6 @@ export default function BookRidePage() {
         distance: route.distance,
     };
     
-    const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
-    bookingData.departureDate.setHours(depHours, depMinutes, 0, 0);
-
     const newBooking = Object.fromEntries(
       Object.entries(bookingData).filter(([, value]) => value !== undefined)
     );
@@ -149,6 +176,47 @@ export default function BookRidePage() {
     router.push('/bookings?role=passenger');
     setIsBooking(false);
   };
+  
+  const handleUpdateBooking = async () => {
+    if (!existingBooking || !route) return;
+    
+    setIsBooking(true);
+    const totalSeats = (Number(existingBooking.travelers) || 0) + numberOfSeats;
+
+    if (totalSeats > route.availableSeats) {
+         toast({
+            title: "Not enough seats",
+            description: `Cannot add ${numberOfSeats} more seats. Only ${availableSeats} seats available in total.`,
+            variant: "destructive",
+        });
+        setIsBooking(false);
+        setExistingBooking(null);
+        return;
+    }
+
+    const updatedBooking: Booking = {
+      ...existingBooking,
+      travelers: String(totalSeats),
+      amount: route.price * totalSeats,
+    };
+
+    const db = getFirestore(getApp());
+    const bookingRef = doc(db, 'bookings', existingBooking.id);
+    await updateDoc(bookingRef, {
+        travelers: updatedBooking.travelers,
+        amount: updatedBooking.amount,
+    });
+
+    toast({
+        title: "Booking Updated!",
+        description: `Your booking now has ${totalSeats} seat(s).`,
+    });
+
+    router.push('/bookings?role=passenger');
+    setIsBooking(false);
+    setExistingBooking(null);
+  };
+
 
   if (!isLoaded) {
     return <div>Loading...</div>;
@@ -159,6 +227,7 @@ export default function BookRidePage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-muted/20">
         <header className="bg-background shadow-sm p-4 flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -313,5 +382,21 @@ export default function BookRidePage() {
             </Button>
         </main>
     </div>
+    
+      <AlertDialog open={!!existingBooking} onOpenChange={(open) => !open && setExistingBooking(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
+            <AlertDialogDescription>
+              You already have a booking for this ride with {existingBooking?.travelers} seat(s). Would you like to add the new {numberOfSeats} seat(s) to your existing booking?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
