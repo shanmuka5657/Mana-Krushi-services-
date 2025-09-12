@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile, getRoutes, getBookings, getAllProfiles } from "@/lib/storage";
+import { getProfile, getRoutes, getBookings } from "@/lib/storage";
 import type { Route, Booking, Profile } from "@/lib/types";
 import {
   AlertDialog,
@@ -79,7 +79,6 @@ const getTravelDuration = (departureTime: string, arrivalTime: string): string =
 function TopMembers() {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
-    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const router = useRouter();
@@ -87,13 +86,11 @@ function TopMembers() {
     
     useEffect(() => {
         const fetchTopRoutes = async () => {
-            const [allRoutes, bookings, profiles] = await Promise.all([
+            const [allRoutes, bookings] = await Promise.all([
                 getRoutes(true),
                 getBookings(true),
-                getAllProfiles()
             ]);
             setAllBookings(bookings);
-            setAllProfiles(profiles);
             
             const today = new Date(currentDate);
             today.setHours(0, 0, 0, 0);
@@ -140,11 +137,6 @@ function TopMembers() {
            );
        }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
-     
-    const getDriverProfilePic = (driverName: string) => {
-        const profile = allProfiles.find(p => p.name === driverName);
-        return profile?.avatarUrl;
-    }
 
 
     if (topRoutes.length === 0) {
@@ -235,7 +227,6 @@ function TopMembers() {
                  {topRoutes.map(route => {
                     const bookedSeats = getBookedSeats(route);
                     const availableSeats = route.availableSeats - bookedSeats;
-                    const driverPic = getDriverProfilePic(route.driverName);
                     return (
                         <CarouselItem key={route.id}>
                             <Card className={cn("overflow-hidden transition-all", route.isPromoted && "border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10")}>
@@ -291,7 +282,7 @@ function TopMembers() {
                                  <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-4">
                                         <Avatar className="h-10 w-10">
-                                            <AvatarImage src={driverPic || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-grow">
