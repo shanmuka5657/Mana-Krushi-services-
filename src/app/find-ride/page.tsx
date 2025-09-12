@@ -10,8 +10,8 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getRoutes, getBookings } from '@/lib/storage';
-import type { Route, Booking } from '@/lib/types';
+import { getRoutes, getBookings, getAllProfiles } from '@/lib/storage';
+import type { Route, Booking, Profile } from '@/lib/types';
 import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -40,6 +40,7 @@ function FindRideResultsPage() {
     
     const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
+    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     
     const from = searchParams.get('from') || '';
@@ -53,12 +54,14 @@ function FindRideResultsPage() {
                 return;
             };
 
-            const [routes, bookings] = await Promise.all([
+            const [routes, bookings, profiles] = await Promise.all([
                 getRoutes(true),
                 getBookings(true),
+                getAllProfiles(),
             ]);
 
             setAllBookings(bookings);
+            setAllProfiles(profiles);
 
             const searchDate = new Date(date);
             
@@ -98,6 +101,11 @@ function FindRideResultsPage() {
            );
        }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
+     
+    const getDriverProfile = (ownerEmail?: string): Profile | undefined => {
+        if (!ownerEmail) return undefined;
+        return allProfiles.find(p => p.email === ownerEmail);
+    }
 
     if (!isLoaded) {
         return <AppLayout><div>Loading results...</div></AppLayout>
@@ -127,6 +135,7 @@ function FindRideResultsPage() {
                         {availableOwners.map((route) => {
                             const bookedSeats = getBookedSeats(route);
                             const availableSeats = route.availableSeats - bookedSeats;
+                            const driverProfile = getDriverProfile(route.ownerEmail);
                             
                             const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
                             const departureDateTime = new Date(route.travelDate);
@@ -181,7 +190,7 @@ function FindRideResultsPage() {
                                     <div className="flex items-center gap-3">
                                         <Car className="text-muted-foreground" />
                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                            <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>

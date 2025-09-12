@@ -26,10 +26,10 @@ const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: st
     </Link>
 );
 
-const RecentBookingItem = ({ booking }: { booking: Booking }) => (
+const RecentBookingItem = ({ booking, profile }: { booking: Booking, profile?: Profile }) => (
     <div className="flex items-center">
         <Avatar className="h-9 w-9">
-             <AvatarImage src={`https://ui-avatars.com/api/?name=${booking.client.replace(' ', '+')}&background=random`} />
+             <AvatarImage src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${booking.client.replace(' ', '+')}&background=random`} />
             <AvatarFallback>{booking.client.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="ml-4 space-y-1">
@@ -43,7 +43,7 @@ const RecentBookingItem = ({ booking }: { booking: Booking }) => (
 const NewUserItem = ({ profile }: { profile: Profile }) => (
      <div className="flex items-center gap-4">
         <Avatar className="hidden h-9 w-9 sm:flex">
-             <AvatarImage src={`https://ui-avatars.com/api/?name=${profile.name.replace(' ', '+')}&background=random`} />
+             <AvatarImage src={profile.selfieDataUrl || `https://ui-avatars.com/api/?name=${profile.name.replace(' ', '+')}&background=random`} />
             <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="grid gap-1">
@@ -72,6 +72,7 @@ function AdminDashboardPage() {
   });
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
   const [newUsers, setNewUsers] = useState<Profile[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -81,6 +82,7 @@ function AdminDashboardPage() {
         getRoutes(true),
         getBookings(true),
       ]);
+      setAllProfiles(profiles);
 
       const bookingRevenue = bookings
         .filter(b => b.paymentStatus === 'Paid')
@@ -109,6 +111,10 @@ function AdminDashboardPage() {
     };
     fetchAdminData();
   }, []);
+  
+  const getProfileForBooking = (booking: Booking): Profile | undefined => {
+    return allProfiles.find(p => p.email === booking.clientEmail);
+  }
 
   if (!isLoaded) {
     return <AppLayout><div>Loading admin dashboard...</div></AppLayout>;
@@ -131,7 +137,7 @@ function AdminDashboardPage() {
                         <CardDescription>The 5 most recent bookings from across the platform.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {recentBookings.length > 0 ? recentBookings.map(b => <RecentBookingItem key={b.id} booking={b} />) : <p className="text-sm text-muted-foreground">No bookings yet.</p>}
+                        {recentBookings.length > 0 ? recentBookings.map(b => <RecentBookingItem key={b.id} booking={b} profile={getProfileForBooking(b)} />) : <p className="text-sm text-muted-foreground">No bookings yet.</p>}
                     </CardContent>
                 </Card>
                  <Card>
