@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -109,68 +109,71 @@ function BajajBanner() {
     )
 }
 
-function PromotedOwners() {
+function FeaturedRides() {
     const router = useRouter();
-    const [promotedRoutes, setPromotedRoutes] = useState<Route[]>([]);
-
+    const [featuredRoutes, setFeaturedRoutes] = useState<Route[]>([]);
+    
     useEffect(() => {
         const fetchRoutes = async () => {
-        const allRoutes = await getRoutes(true);
-        const promoted = allRoutes.filter(route => route.isPromoted);
-        setPromotedRoutes(promoted);
+            const allRoutes = await getRoutes(true);
+            const promoted = allRoutes.filter(route => route.isPromoted && new Date(route.travelDate) >= new Date());
+            promoted.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
+            setFeaturedRoutes(promoted);
         };
         fetchRoutes();
     }, []);
 
-    const promotedOwners = useMemo(() => {
-        const ownersMap = new Map<string, { name: string; rating: number }>();
-        promotedRoutes.forEach(route => {
-        if (!ownersMap.has(route.ownerName)) {
-            ownersMap.set(route.ownerName, { name: route.ownerName, rating: route.rating });
-        }
-        });
-        return Array.from(ownersMap.values());
-    }, [promotedRoutes]);
-    
-    if (promotedOwners.length === 0) {
+    if (featuredRoutes.length === 0) {
         return null;
-    }
-
-    const handleOwnerClick = (ownerName: string) => {
-        router.push(`/search?q=${encodeURIComponent(ownerName)}`);
     }
 
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <Sparkles className="h-6 w-6 text-yellow-500" />
-                <h2 className="text-2xl font-bold">Promoted Owners</h2>
+                <h2 className="text-2xl font-bold">Featured Rides</h2>
             </div>
             <Carousel
                 opts={{
                     align: "start",
-                    loop: true,
                 }}
                 className="w-full"
             >
                 <CarouselContent>
-                {promotedOwners.map((owner, index) => (
+                {featuredRoutes.map((route, index) => (
                     <CarouselItem key={index} className="basis-full md:basis-1/2 lg:basis-1/3">
-                         <Card className="w-full transition-all hover:shadow-md cursor-pointer" onClick={() => handleOwnerClick(owner.name)}>
-                            <CardContent className="p-4 flex items-center gap-4">
-                                <Avatar className="h-12 w-12 border-2 border-yellow-400">
-                                    <AvatarImage src={`https://ui-avatars.com/api/?name=${owner.name.replace(' ', '+')}&background=random`} />
-                                    <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-grow">
-                                    <p className="font-semibold text-lg">{owner.name}</p>
-                                    <div className="flex items-center gap-1">
-                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                        <span className="text-sm font-bold">{owner.rating.toFixed(1)}</span>
-                                        <span className="text-xs text-muted-foreground">Rating</span>
+                        <Card className="w-full transition-all hover:shadow-md cursor-pointer" onClick={() => router.push(`/book/${route.id}`)}>
+                             <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-lg">{route.fromLocation} to {route.toLocation}</CardTitle>
+                                    <div className="text-lg font-bold">₹{route.price.toFixed(2)}</div>
+                                </div>
+                                <CardDescription className="flex items-center gap-4 pt-1">
+                                    <div className="flex items-center gap-2">
+                                        <CalendarIcon className="h-4 w-4" />
+                                        <span>{format(new Date(route.travelDate), 'dd MMM')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4" />
+                                        <span>{route.departureTime}</span>
+                                    </div>
+                                </CardDescription>
+                            </CardHeader>
+                            <CardFooter>
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                        <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <div className="font-semibold text-sm">{route.driverName}</div>
+                                        <div className="flex items-center gap-1">
+                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                            <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </CardContent>
+                            </CardFooter>
                         </Card>
                     </CarouselItem>
                 ))}
@@ -237,7 +240,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <IndusIndBanner />
         
-        <PromotedOwners />
+        <FeaturedRides />
 
         <Card className="shadow-sm">
             <CardHeader>
@@ -339,7 +342,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                 </Form>
             </CardContent>
         </Card>
-        <BajajBanner />
     </div>
   );
 }
