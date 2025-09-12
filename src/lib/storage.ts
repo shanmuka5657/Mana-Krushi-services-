@@ -69,11 +69,8 @@ export const getProfile = async (email?: string): Promise<Profile | null> => {
 
 export const getAllProfiles = async (): Promise<Profile[]> => {
     if (!isBrowser) return [];
-    const role = getCurrentUserRole();
-    if (role !== 'admin') {
-        console.error("Unauthorized attempt to fetch all profiles.");
-        return [];
-    }
+    // This function needs to be public to allow fetching driver avatars.
+    // Security should be handled by Firestore rules if sensitive data is involved.
     return await getAllProfilesFromFirestore();
 }
 
