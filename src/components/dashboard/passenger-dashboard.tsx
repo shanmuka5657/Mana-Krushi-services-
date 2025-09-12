@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -284,21 +285,21 @@ function TopMembers() {
                                     </div>
                                 </CardContent>
                                  <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-center">
-                                            {route.vehicleType && <p className="text-xs font-medium text-muted-foreground">{route.vehicleType}</p>}
-                                            <Car className="text-muted-foreground" />
-                                        </div>
-                                        <Avatar className="h-8 w-8">
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-10 w-10">
                                             <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <div>
+                                        <div className="flex-grow">
                                             <div className="font-semibold text-sm">{route.driverName}</div>
                                             <div className="flex items-center gap-1">
                                                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                                 <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
                                             </div>
+                                        </div>
+                                        <div className="text-center ml-4">
+                                            {route.vehicleType && <p className="text-xs font-medium text-muted-foreground">{route.vehicleType}</p>}
+                                            <Car className="text-muted-foreground" />
                                         </div>
                                     </div>
                                     {availableSeats > 0 && (
@@ -529,4 +530,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   );
 }
 
-    
