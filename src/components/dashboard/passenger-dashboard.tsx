@@ -271,7 +271,10 @@ function TopMembers() {
                                 </CardContent>
                                  <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <Car className="text-muted-foreground" />
+                                        <div className="text-center">
+                                            {route.vehicleType && <p className="text-xs font-medium text-muted-foreground">{route.vehicleType}</p>}
+                                            <Car className="text-muted-foreground" />
+                                        </div>
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
