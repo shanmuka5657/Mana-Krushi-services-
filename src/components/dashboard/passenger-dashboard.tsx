@@ -6,9 +6,10 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import type { EmblaCarouselType } from 'embla-carousel-react'
 
 import { Button } from "@/components/ui/button";
 import {
@@ -65,6 +66,21 @@ interface PassengerDashboardProps {
 
 function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDateChange: (date: Date) => void }) {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
+    const [emblaApi, setEmblaApi] = useState<EmblaCarouselType | null>(null);
+
+    useEffect(() => {
+        if (!emblaApi) return;
+
+        const timer = setInterval(() => {
+            if (emblaApi.canScrollNext()) {
+                emblaApi.scrollNext();
+            } else {
+                emblaApi.scrollTo(0);
+            }
+        }, 5000);
+
+        return () => clearInterval(timer);
+    }, [emblaApi]);
 
     useEffect(() => {
         const fetchTopRoutes = async () => {
@@ -132,21 +148,33 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                     </PopoverContent>
                 </Popover>
             </CardHeader>
-            <CardContent className="flex flex-wrap justify-center sm:justify-around items-start gap-4">
+            <CardContent>
                  {topRoutes.length > 0 ? (
-                    topRoutes.map(route => (
-                        <div key={route.id} className="flex flex-col items-center gap-2 text-center w-24">
-                            <div className="text-xs font-bold text-muted-foreground h-8">
-                                {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
-                            </div>
-                            <Avatar>
-                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs font-medium">{route.driverName}</span>
-                            <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
-                        </div>
-                    ))
+                     <Carousel setApi={setEmblaApi} opts={{ loop: true }} className="w-full max-w-xs mx-auto">
+                        <CarouselContent>
+                           {topRoutes.map(route => (
+                                <CarouselItem key={route.id}>
+                                    <div className="flex flex-col items-center gap-2 text-center w-full">
+                                        <div className="text-xs font-bold text-muted-foreground h-8">
+                                            {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                                        </div>
+                                        <Avatar>
+                                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <span className="text-sm font-medium">{route.driverName}</span>
+                                        <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                         {topRoutes.length > 1 && (
+                            <>
+                                <CarouselPrevious />
+                                <CarouselNext />
+                            </>
+                        )}
+                    </Carousel>
                 ) : (
                     <div className="text-center py-4 text-muted-foreground">
                         <p>No upcoming rides found for this date.</p>
