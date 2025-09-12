@@ -86,123 +86,6 @@ function IndusIndBanner() {
     )
 }
 
-function FeaturedRides() {
-  const [promotedRoutes, setPromotedRoutes] = useState<Route[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchPromotedRoutes = async () => {
-      setIsLoading(true);
-      const allRoutes = await getRoutes(true); // Fetch all routes
-      const upcomingPromoted = allRoutes.filter(route => {
-        const routeDate = new Date(route.travelDate);
-        return route.isPromoted && routeDate >= new Date(new Date().setHours(0,0,0,0));
-      });
-      setPromotedRoutes(upcomingPromoted);
-      setIsLoading(false);
-    };
-
-    fetchPromotedRoutes();
-  }, []);
-
-  if (isLoading) {
-    return (
-        <div className="space-y-4 mt-6">
-            <h2 className="text-2xl font-bold tracking-tight">Featured Rides</h2>
-            <div className="relative">
-                <Carousel opts={{ align: "start" }} className="w-full">
-                    <CarouselContent>
-                        {Array.from({ length: 3 }).map((_, index) => (
-                            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                               <Card className="w-full animate-pulse bg-muted">
-                                    <CardContent className="p-4 space-y-3">
-                                        <div className="h-5 w-3/4 rounded bg-muted-foreground/20"></div>
-                                        <div className="h-4 w-1/2 rounded bg-muted-foreground/20"></div>
-                                        <div className="h-4 w-1/4 rounded bg-muted-foreground/20"></div>
-                                        <div className="flex items-center justify-between pt-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-8 w-8 rounded-full bg-muted-foreground/20"></div>
-                                                <div className="h-5 w-20 rounded bg-muted-foreground/20"></div>
-                                            </div>
-                                            <div className="h-8 w-20 rounded-md bg-muted-foreground/20"></div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-            </div>
-        </div>
-    );
-  }
-
-  if (promotedRoutes.length === 0) {
-    return null; // Don't render the section if there are no promoted rides
-  }
-  
-  const handleRideClick = (rideId: string) => {
-    router.push(`/book/${rideId}`);
-  };
-
-  return (
-    <div className="space-y-4 mt-6">
-      <h2 className="text-2xl font-bold tracking-tight">Featured Rides</h2>
-      <div className="relative">
-        <Carousel opts={{ align: "start" }} className="w-full">
-          <CarouselContent>
-            {promotedRoutes.map((route) => (
-              <CarouselItem key={route.id} className="md:basis-1/2 lg:basis-1/3">
-                <Card className="w-full transition-all border-2 border-yellow-400 bg-yellow-50/50 dark:bg-yellow-900/10 cursor-pointer hover:shadow-lg" onClick={() => handleRideClick(route.id)}>
-                   <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                           <div>
-                            <h3 className="font-bold text-lg">{route.fromLocation} → {route.toLocation}</h3>
-                             <p className="text-sm text-muted-foreground">{format(new Date(route.travelDate), "EEE, dd MMM")} at {route.departureTime}</p>
-                           </div>
-                           <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
-                                <Sparkles className="mr-1 h-3 w-3" />
-                                Promoted
-                           </Badge>
-                        </div>
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center gap-2">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                    <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="text-sm font-semibold">{route.driverName}</p>
-                                    <div className="flex items-center gap-1">
-                                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                                        <span className="text-xs font-medium">{route.rating.toFixed(1)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                             <div className="text-right">
-                                <p className="font-bold text-lg">₹{route.price.toFixed(2)}</p>
-                                <p className="text-xs text-muted-foreground">per seat</p>
-                            </div>
-                        </div>
-                   </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {promotedRoutes.length > 3 && (
-            <>
-                <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 hidden lg:flex" />
-                <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 hidden lg:flex" />
-            </>
-          )}
-        </Carousel>
-      </div>
-    </div>
-  );
-}
-
-
 function BajajBanner() {
     return (
         <a href="https://clnk.in/w6hf" target="_blank" rel="noopener noreferrer" className="block w-full group mt-6">
@@ -380,8 +263,10 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                 </Form>
             </CardContent>
         </Card>
-        <FeaturedRides />
+
         <BajajBanner />
     </div>
   );
 }
+
+    
