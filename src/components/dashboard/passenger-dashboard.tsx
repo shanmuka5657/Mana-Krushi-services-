@@ -241,7 +241,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                             )}
                         />
                     </div>
-                     <Button type="submit" className="w-full md:w-auto" disabled={isSearching}>
+                     <Button type="submit" className="w-full" disabled={isSearching}>
                         {isSearching ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

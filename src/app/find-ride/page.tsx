@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import Image from 'next/image';
 
 import { AppLayout } from '@/components/layout/app-layout';
@@ -60,14 +60,14 @@ function FindRideResultsPage() {
 
             setAllBookings(bookings);
 
-            const searchDateStr = date;
+            const searchDate = new Date(date);
             
             const results = routes.filter(route => {
-                const routeDateStr = format(new Date(route.travelDate), "yyyy-MM-dd");
+                const routeDate = new Date(route.travelDate);
 
                 const fromMatch = route.fromLocation.trim().toLowerCase() === from.trim().toLowerCase();
                 const toMatch = route.toLocation.trim().toLowerCase() === to.trim().toLowerCase();
-                const dateMatch = searchDateStr === routeDateStr;
+                const dateMatch = isSameDay(searchDate, routeDate);
                 
                 return fromMatch && toMatch && dateMatch;
             });
