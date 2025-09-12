@@ -164,7 +164,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <IndusIndBanner />
         
-        <Card className="shadow-sm">
+        <Card className="shadow-sm mt-6">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
             </CardHeader>
