@@ -282,8 +282,7 @@ function TopMembers() {
                                     </div>
                                     {availableSeats > 0 && (
                                     <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
-                                        <Zap className="mr-2 h-4 w-4" />
-                                        Book Now
+                                        Book
                                     </Button>
                                     )}
                                 </CardFooter>
@@ -509,4 +508,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   );
 }
 
-    
