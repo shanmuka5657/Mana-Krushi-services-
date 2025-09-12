@@ -124,15 +124,6 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
         fetchTopRoutes();
     }, [selectedDate]);
 
-    const getInitials = (name: string) => {
-        if (!name) return '';
-        const words = name.split(' ');
-        if (words.length > 1) {
-            return words.map(n => n[0]).slice(0, 2).join('').toUpperCase();
-        }
-        return name.slice(0, 3).toUpperCase();
-    }
-
     return (
         <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -171,8 +162,8 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                             {topRoutes.map(route => (
                                     <CarouselItem key={route.id}>
                                         <div className="flex flex-col items-center gap-2 text-center w-full">
-                                            <div className="text-xs font-bold text-muted-foreground h-8">
-                                                {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                                            <div className="text-sm font-bold text-muted-foreground h-8">
+                                                {route.fromLocation} to {route.toLocation}
                                             </div>
                                             <Avatar>
                                                 <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
