@@ -6,9 +6,10 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Autoplay from "embla-carousel-autoplay";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -81,6 +82,9 @@ function TopMembers() {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const router = useRouter();
+    const plugin = useRef(
+        Autoplay({ delay: 5000, stopOnInteraction: true })
+    );
     
     useEffect(() => {
         const fetchTopRoutes = async () => {
@@ -212,10 +216,10 @@ function TopMembers() {
             </CardHeader>
             <CardContent>
                 <Carousel
-                    opts={{
-                        align: "start",
-                        loop: true,
-                    }}
+                    plugins={[plugin.current]}
+                    className="w-full"
+                    onMouseEnter={plugin.current.stop}
+                    onMouseLeave={plugin.current.reset}
                 >
                  <CarouselContent>
                  {topRoutes.map(route => {
@@ -507,4 +511,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
-
