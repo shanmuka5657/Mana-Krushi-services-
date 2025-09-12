@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -148,7 +148,7 @@ function FeaturedRides() {
                                     <CardTitle className="text-lg">{route.fromLocation} to {route.toLocation}</CardTitle>
                                     <div className="text-lg font-bold">₹{route.price.toFixed(2)}</div>
                                 </div>
-                                <CardDescription className="flex items-center gap-4 pt-1">
+                                <div className="text-sm text-muted-foreground flex items-center gap-4 pt-1">
                                     <div className="flex items-center gap-2">
                                         <CalendarIcon className="h-4 w-4" />
                                         <span>{format(new Date(route.travelDate), 'dd MMM')}</span>
@@ -157,7 +157,7 @@ function FeaturedRides() {
                                         <Clock className="h-4 w-4" />
                                         <span>{route.departureTime}</span>
                                     </div>
-                                </CardDescription>
+                                </div>
                             </CardHeader>
                             <CardFooter>
                                 <div className="flex items-center gap-3">
@@ -245,7 +245,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         <Card className="shadow-sm">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
-                <CardDescription>Search for available rides to your destination.</CardDescription>
+                <p className="text-muted-foreground">Search for available rides to your destination.</p>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -342,6 +342,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                 </Form>
             </CardContent>
         </Card>
+        <BajajBanner />
     </div>
   );
 }
