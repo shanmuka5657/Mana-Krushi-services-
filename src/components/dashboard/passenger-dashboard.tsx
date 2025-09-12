@@ -83,9 +83,7 @@ function TopMembers() {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const router = useRouter();
-    const plugin = useRef(
-        Autoplay({ delay: 5000, stopOnInteraction: true })
-    );
+    const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
     
     useEffect(() => {
         const fetchTopRoutes = async () => {
@@ -536,4 +534,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   );
 }
 
-    
