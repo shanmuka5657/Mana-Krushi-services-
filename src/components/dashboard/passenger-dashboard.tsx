@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, isSameDay } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone, Shield } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -253,21 +253,29 @@ function TopMembers() {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                        <div className="text-lg font-bold">
-                                            ₹{(route.price || 0).toFixed(2)}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
-                                            <Users className="h-4 w-4" />
-                                            <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
-                                        </div>
+                                            <div className="text-lg font-bold">
+                                                ₹{(route.price || 0).toFixed(2)}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                                <Users className="h-4 w-4" />
+                                                <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    {route.isPromoted && (
-                                        <Badge variant="secondary" className="mt-3 bg-yellow-200 text-yellow-800 border-yellow-300">
-                                            <Sparkles className="mr-1 h-3 w-3" />
-                                            Promoted
-                                        </Badge>
-                                    )}
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {route.isPromoted && (
+                                            <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
+                                                <Sparkles className="mr-1 h-3 w-3" />
+                                                Promoted
+                                            </Badge>
+                                        )}
+                                        {route.isPromoted && (
+                                            <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
+                                                <Shield className="mr-1 h-3 w-3" />
+                                                Insurance: Yes
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </CardContent>
                                  <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-3">
@@ -514,3 +522,5 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
+
+    
