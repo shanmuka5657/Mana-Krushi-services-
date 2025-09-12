@@ -63,28 +63,39 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
-const topMembers = [
-    { name: 'Ravi Kumar' },
-    { name: 'Anjali Sharma' },
-    { name: 'Sanjay Patel' },
-    { name: 'Priya Singh' },
-    { name: 'Vikram Reddy' },
-];
+const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).slice(0, 3).join('').toUpperCase();
+}
 
 function TopMembers() {
+    const [topRoutes, setTopRoutes] = useState<Route[]>([]);
+
+    useEffect(() => {
+        const fetchTopRoutes = async () => {
+            const allRoutes = await getRoutes(true); // Fetch all routes
+            // Sort by rating and get top 5
+            const sortedRoutes = [...allRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            setTopRoutes(sortedRoutes.slice(0, 5));
+        }
+        fetchTopRoutes();
+    }, []);
+
     return (
         <Card className="mb-6">
             <CardHeader>
                 <CardTitle>Top Members</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap justify-center sm:justify-around items-center gap-4">
-                {topMembers.map(member => (
-                    <div key={member.name} className="flex flex-col items-center gap-2 text-center w-20">
+                {topRoutes.map(route => (
+                    <div key={route.id} className="flex flex-col items-center gap-2 text-center w-24">
+                        <div className="text-xs font-bold text-muted-foreground">
+                            {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                        </div>
                         <Avatar>
-                            <AvatarImage src={`https://ui-avatars.com/api/?name=${member.name.replace(' ', '+')}&background=random`} />
-                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span className="text-xs font-medium">{member.name}</span>
+                        <span className="text-xs font-medium">{route.driverName}</span>
                     </div>
                 ))}
             </CardContent>
@@ -195,7 +206,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <TopMembers />
         
-        <Card className="shadow-sm">
+        <Card className="shadow-sm mt-6">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
             </CardHeader>
@@ -299,3 +310,5 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
+
+    
