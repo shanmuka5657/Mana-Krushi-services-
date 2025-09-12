@@ -146,17 +146,6 @@ function FeaturedRides() {
                              <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-lg">{route.fromLocation} to {route.toLocation}</CardTitle>
-                                    <div className="text-lg font-bold">₹{route.price.toFixed(2)}</div>
-                                </div>
-                                <div className="text-sm text-muted-foreground flex items-center gap-4 pt-1">
-                                    <div className="flex items-center gap-2">
-                                        <CalendarIcon className="h-4 w-4" />
-                                        <span>{format(new Date(route.travelDate), 'dd MMM')}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4" />
-                                        <span>{route.departureTime}</span>
-                                    </div>
                                 </div>
                             </CardHeader>
                             <CardFooter>
