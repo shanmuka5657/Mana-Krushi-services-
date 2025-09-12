@@ -24,11 +24,12 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map } from "lucide-react";
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { getBookings, saveBookings, getRoutes } from "@/lib/storage";
+import { useRouter } from "next/navigation";
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
   switch (status) {
@@ -56,6 +57,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [reportText, setReportText] = useState("");
   const { toast } = useToast();
   const [dialogAction, setDialogAction] = useState<'view' | 'report' | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRoutes = async () => {
@@ -181,6 +183,9 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             View
                           </Button>
                         </DialogTrigger>
+                        <Button variant="secondary" size="sm" onClick={() => router.push(`/track/${booking.id}`)}>
+                            <Map className="mr-2 h-4 w-4" /> Track
+                        </Button>
                         {status === 'Completed' && !booking.report && (
                             <DialogTrigger asChild>
                                 <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'report')}>
