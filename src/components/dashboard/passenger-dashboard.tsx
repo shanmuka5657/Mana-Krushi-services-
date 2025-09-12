@@ -58,24 +58,110 @@ interface PassengerDashboardProps {
 
 function TopMembers() {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
+    const [currentDate, setCurrentDate] = useState<Date>(new Date());
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     
     useEffect(() => {
         const fetchTopRoutes = async () => {
             const allRoutes = await getRoutes(true);
-            const sortedRoutes = [...allRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            
+            const today = new Date(currentDate);
+            today.setHours(0, 0, 0, 0);
+
+            const filteredRoutes = allRoutes.filter(route => {
+                const routeDate = new Date(route.travelDate);
+                routeDate.setHours(0, 0, 0, 0);
+                
+                if (routeDate.getTime() !== today.getTime()) {
+                    return false;
+                }
+
+                const [hours, minutes] = route.departureTime.split(':').map(Number);
+                const departureDateTime = new Date(route.travelDate);
+                departureDateTime.setHours(hours, minutes);
+
+                return departureDateTime > new Date();
+            });
+
+            const sortedRoutes = [...filteredRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
             setTopRoutes(sortedRoutes.slice(0, 5));
         }
         fetchTopRoutes();
-    }, []);
+    }, [currentDate]);
 
     if (topRoutes.length === 0) {
-        return null;
+        return (
+             <Card className="mb-6">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Top Members</CardTitle>
+                     <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-[180px] justify-start text-left font-normal",
+                                    !currentDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {currentDate ? format(currentDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                            <Calendar
+                                mode="single"
+                                selected={currentDate}
+                                onSelect={(date) => {
+                                    if(date) {
+                                        setCurrentDate(date);
+                                        setIsCalendarOpen(false);
+                                    }
+                                }}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-4 text-muted-foreground">
+                        <p>No upcoming rides found for this date.</p>
+                    </div>
+                </CardContent>
+            </Card>
+        );
     }
 
     return (
         <Card className="mb-6">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Top Members</CardTitle>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-[180px] justify-start text-left font-normal",
+                                !currentDate && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {currentDate ? format(currentDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                            mode="single"
+                            selected={currentDate}
+                            onSelect={(date) => {
+                                if(date) {
+                                    setCurrentDate(date);
+                                    setIsCalendarOpen(false);
+                                }
+                            }}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
             </CardHeader>
             <CardContent>
                  {topRoutes.length > 0 ? (
@@ -270,12 +356,12 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                                         !field.value && "text-muted-foreground"
                                         )}
                                     >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
                                         {field.value ? (
                                         format(field.value, "PPP")
                                         ) : (
                                         <span>Pick a date</span>
                                         )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
                                     </FormControl>
                                 </PopoverTrigger>
@@ -321,3 +407,5 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
+
+    
