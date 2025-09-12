@@ -70,6 +70,8 @@ interface BookingFormProps {
 export default function BookingForm({ onBookingCreated }: BookingFormProps) {
   const [isFindingDestinations, setIsFindingDestinations] = useState(false);
   const { toast } = useToast();
+  const [isDepartureCalendarOpen, setIsDepartureCalendarOpen] = useState(false);
+  const [isReturnCalendarOpen, setIsReturnCalendarOpen] = useState(false);
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -232,7 +234,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Departure Date</FormLabel>
-                    <Popover>
+                    <Popover open={isDepartureCalendarOpen} onOpenChange={setIsDepartureCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -255,7 +257,10 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                              field.onChange(date);
+                              setIsDepartureCalendarOpen(false);
+                          }}
                           disabled={(date) =>
                             date < new Date(new Date().setHours(0, 0, 0, 0))
                           }
@@ -291,7 +296,7 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Return Date</FormLabel>
-                    <Popover>
+                    <Popover open={isReturnCalendarOpen} onOpenChange={setIsReturnCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -314,7 +319,10 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setIsReturnCalendarOpen(false);
+                          }}
                           disabled={(date) =>
                             date < (form.getValues("departureDate") || new Date(new Date().setHours(0, 0, 0, 0)))
                           }

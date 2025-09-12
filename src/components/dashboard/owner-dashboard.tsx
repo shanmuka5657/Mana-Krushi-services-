@@ -127,6 +127,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<OwnerFormValues | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -510,7 +511,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Travel Date</FormLabel>
-                      <Popover>
+                      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
@@ -533,7 +534,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                           <Calendar
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={(date) => {
+                                field.onChange(date)
+                                setIsCalendarOpen(false)
+                            }}
                             disabled={(date) =>
                               date < new Date(new Date().setHours(0, 0, 0, 0))
                             }

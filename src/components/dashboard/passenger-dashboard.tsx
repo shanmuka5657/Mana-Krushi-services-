@@ -68,6 +68,7 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
     const [emblaApi, setEmblaApi] = useState<EmblaCarouselType | null>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
         setSelectedIndex(emblaApi.selectedScrollSnap());
@@ -136,7 +137,7 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
         <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Top Members for {format(selectedDate, "dd MMM")}</CardTitle>
-                 <Popover>
+                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                     <Button
                         variant={"outline"}
@@ -153,7 +154,10 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                     <Calendar
                         mode="single"
                         selected={selectedDate}
-                        onSelect={(date) => onDateChange(date || new Date())}
+                        onSelect={(date) => {
+                            onDateChange(date || new Date());
+                            setIsCalendarOpen(false);
+                        }}
                         initialFocus
                     />
                     </PopoverContent>
@@ -261,6 +265,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   const [isSearching, setIsSearching] = useState(false);
   const [topMembersDate, setTopMembersDate] = useState(new Date());
   const router = useRouter();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
     const checkProfileAndFetchData = async () => {
@@ -359,7 +364,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                             render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Date</FormLabel>
-                                <Popover>
+                                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                                 <PopoverTrigger asChild>
                                     <FormControl>
                                     <Button
@@ -382,7 +387,10 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                                     <Calendar
                                     mode="single"
                                     selected={field.value}
-                                    onSelect={field.onChange}
+                                    onSelect={(date) => {
+                                        field.onChange(date);
+                                        setIsCalendarOpen(false);
+                                    }}
                                     disabled={(date) =>
                                         date < new Date(new Date().setHours(0, 0, 0, 0))
                                     }

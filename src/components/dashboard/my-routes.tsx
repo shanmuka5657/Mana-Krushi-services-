@@ -65,6 +65,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -227,7 +228,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                 onChange={(e) => setToFilter(e.target.value)}
                 className="max-w-sm"
             />
-             <Popover>
+             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
@@ -244,7 +245,10 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                 <Calendar
                   mode="single"
                   selected={dateFilter}
-                  onSelect={setDateFilter}
+                  onSelect={(date) => {
+                      setDateFilter(date);
+                      setIsCalendarOpen(false);
+                  }}
                   initialFocus
                 />
               </PopoverContent>
