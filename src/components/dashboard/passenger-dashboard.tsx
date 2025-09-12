@@ -176,6 +176,9 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                                                     <span className="text-xs text-muted-foreground font-bold">{(route.rating || 0).toFixed(1)}</span>
                                                 </div>
                                             </div>
+                                            <div className="text-xs text-muted-foreground font-semibold">
+                                                {route.departureTime} - {route.arrivalTime}
+                                            </div>
                                             <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                                         </div>
                                     </CarouselItem>
