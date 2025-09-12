@@ -4,8 +4,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock } from "lucide-react";
+import { format } from "date-ns";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -144,25 +144,20 @@ function FeaturedRides() {
                     <CarouselItem key={index} className="basis-full md:basis-1/2 lg:basis-1/3">
                         <Card className="w-full transition-all hover:shadow-md cursor-pointer" onClick={() => router.push(`/book/${route.id}`)}>
                              <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-lg">{route.fromLocation} to {route.toLocation}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardFooter>
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-8 w-8">
+                                    <Avatar className="h-10 w-10">
                                         <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                         <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <div className="font-semibold text-sm">{route.driverName}</div>
+                                        <div className="font-semibold text-base">{route.driverName}</div>
                                         <div className="flex items-center gap-1">
                                             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                            <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
+                                            <span className="text-sm text-muted-foreground">{route.rating.toFixed(1)}</span>
                                         </div>
                                     </div>
                                 </div>
-                            </CardFooter>
+                            </CardHeader>
                         </Card>
                     </CarouselItem>
                 ))}
@@ -335,3 +330,5 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
+
+    
