@@ -26,6 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function BookRidePage() {
   const router = useRouter();
@@ -36,6 +38,7 @@ export default function BookRidePage() {
   const [message, setMessage] = useState("");
   const [isBooking, setIsBooking] = useState(false);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
+  const [seatsToAdd, setSeatsToAdd] = useState(1);
   const [availableSeats, setAvailableSeats] = useState(0);
   const [isPast, setIsPast] = useState(false);
   const [existingBooking, setExistingBooking] = useState<Booking | null>(null);
@@ -135,6 +138,7 @@ export default function BookRidePage() {
     );
 
     if (foundExistingBooking) {
+        setSeatsToAdd(1);
         setExistingBooking(foundExistingBooking);
         setIsBooking(false);
         return;
@@ -181,12 +185,25 @@ export default function BookRidePage() {
     if (!existingBooking || !route) return;
     
     setIsBooking(true);
-    const totalSeats = (Number(existingBooking.travelers) || 0) + numberOfSeats;
+    const totalSeats = (Number(existingBooking.travelers) || 0) + seatsToAdd;
+    
+    // Calculate total seats BOOKED by others, excluding the current user's existing booking.
+    const allBookings = await getBookings(true);
+    const otherBookings = allBookings.filter(b => {
+        const routeDate = new Date(route.travelDate);
+        const bookingDate = new Date(b.departureDate);
+        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() && routeDate.getMonth() === bookingDate.getMonth() && routeDate.getDate() === bookingDate.getDate();
+        const bookingTime = format(bookingDate, 'HH:mm');
+        return b.id !== existingBooking.id && b.destination === `${route.fromLocation} to ${route.toLocation}` && isSameDay && bookingTime === route.departureTime && b.status !== "Cancelled";
+    });
+    const otherBookedSeats = otherBookings.reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+    const remainingSeats = route.availableSeats - otherBookedSeats;
+
 
     if (totalSeats > route.availableSeats) {
          toast({
             title: "Not enough seats",
-            description: `Cannot add ${numberOfSeats} more seats. Only ${availableSeats} seats available in total.`,
+            description: `Cannot add ${seatsToAdd} more seats. Only ${remainingSeats} seats available in total.`,
             variant: "destructive",
         });
         setIsBooking(false);
@@ -333,7 +350,7 @@ export default function BookRidePage() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <Users className="h-6 w-6 text-muted-foreground" />
-                            <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-2">
                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1 || isPast}>
                                     <Minus className="h-4 w-4" />
                                 </Button>
@@ -388,9 +405,21 @@ export default function BookRidePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
             <AlertDialogDescription>
-              You already have a booking for this ride with {existingBooking?.travelers} seat(s). Would you like to add {numberOfSeats} more seat(s) to your existing booking?
+              You have a booking for this ride with {existingBooking?.travelers} seat(s).
+              How many more seats would you like to add?
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="grid gap-2 py-4">
+              <Label htmlFor="seats-to-add">Additional Seats</Label>
+              <Input
+                id="seats-to-add"
+                type="number"
+                value={seatsToAdd}
+                onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
+                min="1"
+                className="col-span-3"
+              />
+            </div>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
@@ -400,3 +429,5 @@ export default function BookRidePage() {
     </>
   );
 }
+
+    
