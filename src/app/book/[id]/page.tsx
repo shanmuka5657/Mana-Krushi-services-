@@ -331,14 +331,14 @@ export default function BookRidePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-4">
-                            <Users className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex items-center gap-4">
+                            <Users className="h-6 w-6 text-muted-foreground" />
                             <div className="flex items-center gap-2">
                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1 || isPast}>
                                     <Minus className="h-4 w-4" />
                                 </Button>
-                                <span className="font-bold text-lg w-10 text-center">{numberOfSeats}</span>
-                                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats || isPast}>
+                                <span className="font-bold text-lg w-8 text-center">{numberOfSeats}</span>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats || isPast}>
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             </div>
