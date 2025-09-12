@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, Users, Milestone, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,15 +20,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile } from "@/lib/storage";
+import { getProfile, getRoutes } from "@/lib/storage";
+import type { Route } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,6 +84,70 @@ function IndusIndBanner() {
     )
 }
 
+function FeaturedRides() {
+  const [featuredRoutes, setFeaturedRoutes] = useState<Route[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      const allRoutes = await getRoutes(true);
+      // Filter for future routes and sort by promotion status
+      const futureRoutes = allRoutes
+        .filter(route => new Date(route.travelDate) >= new Date())
+        .sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
+      setFeaturedRoutes(futureRoutes.slice(0, 9)); // Take top 9 for the carousel
+    };
+    fetchRoutes();
+  }, []);
+
+  if (featuredRoutes.length === 0) {
+    return null; // Don't render anything if there are no featured rides
+  }
+  
+  return (
+    <div className="space-y-6">
+      <CardHeader className="px-0">
+        <CardTitle>Featured Rides</CardTitle>
+        <CardDescription>Check out these popular upcoming rides from our top owners.</CardDescription>
+      </CardHeader>
+      <Carousel
+        opts={{
+          align: "start",
+        }}
+        className="w-full"
+      >
+        <CarouselContent>
+          {featuredRoutes.map((route) => (
+            <CarouselItem key={route.id} className="sm:basis-1/2 md:basis-1/2 lg:basis-1/3">
+               <a href={`/book/${route.id}`} className="block h-full">
+                <Card className="w-full h-full flex flex-col overflow-hidden relative group aspect-[4/1]">
+                   <Image 
+                      src={`https://picsum.photos/seed/${route.id}/600/400`}
+                      alt={`${route.fromLocation} to ${route.toLocation}`}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      data-ai-hint="travel landscape"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    <CardFooter className="p-4 mt-auto z-10 text-white flex flex-col items-start h-full justify-end">
+                       <h3 className="font-bold text-lg">{route.fromLocation} <ArrowRight className="inline h-4 w-4" /> {route.toLocation}</h3>
+                       <div className="text-xs text-gray-200 mt-1">
+                          <span>{format(new Date(route.travelDate), 'dd MMM yyyy')}</span> &bull; <span>{route.departureTime}</span>
+                       </div>
+                    </CardFooter>
+                </Card>
+              </a>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex" />
+        <CarouselNext className="hidden sm:flex" />
+      </Carousel>
+    </div>
+  )
+}
+
+
 function BajajBanner() {
     return (
         <a href="https://clnk.in/w6hf" target="_blank" rel="noopener noreferrer" className="block w-full group mt-6">
@@ -120,6 +192,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     defaultValues: {
       fromLocation: "",
       toLocation: "",
+      travelDate: new Date(),
     },
   });
   
@@ -258,6 +331,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                 </Form>
             </CardContent>
         </Card>
+         <FeaturedRides />
         <BajajBanner />
     </div>
   );
