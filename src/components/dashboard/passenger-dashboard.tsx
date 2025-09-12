@@ -125,11 +125,11 @@ function FeaturedRides({ routes }: { routes: Route[] }) {
             >
                 <CarouselContent>
                     {routes.map((route) => (
-                        <CarouselItem key={route.id} className="md:basis-1/2 lg:basis-1/3">
+                        <CarouselItem key={route.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                             <div className="p-1 h-full">
                                 <Card className="flex flex-col h-full overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
                                     <CardHeader>
-                                        <CardTitle className="text-lg">{route.fromLocation} to {route.toLocation}</CardTitle>
+                                        <CardTitle className="text-base truncate">{route.fromLocation} to {route.toLocation}</CardTitle>
                                     </CardHeader>
                                     <CardContent className="flex-grow">
                                         <div className="flex justify-between items-center text-sm">
@@ -150,7 +150,7 @@ function FeaturedRides({ routes }: { routes: Route[] }) {
                                                 <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <div className="font-semibold text-sm">{route.driverName}</div>
+                                                <div className="font-semibold text-sm truncate">{route.driverName}</div>
                                                 <div className="flex items-center gap-1">
                                                     <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                                     <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
