@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -106,7 +106,7 @@ function BajajBanner() {
 function FeaturedRides({ routes }: { routes: Route[] }) {
   const router = useRouter();
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
-
+  
   useEffect(() => {
     getBookings(true).then(setAllBookings);
   }, []);
