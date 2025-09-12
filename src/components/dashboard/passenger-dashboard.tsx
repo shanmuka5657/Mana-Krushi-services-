@@ -1,11 +1,12 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,8 +29,8 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile, getRoutes } from "@/lib/storage";
-import type { Route } from "@/lib/types";
+import { getProfile, getRoutes, getBookings } from "@/lib/storage";
+import type { Route, Booking } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,14 +57,37 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
+const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
+    try {
+        const departure = new Date(`1970-01-01T${departureTime}:00`);
+        const arrival = new Date(`1970-01-01T${arrivalTime}:00`);
+        const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
+        if (diffMinutes < 0) return "";
+
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        
+        return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+
+    } catch (e) {
+        return "";
+    }
+}
+
 function TopMembers() {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
+    const [allBookings, setAllBookings] = useState<Booking[]>([]);
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const router = useRouter();
     
     useEffect(() => {
         const fetchTopRoutes = async () => {
-            const allRoutes = await getRoutes(true);
+            const [allRoutes, bookings] = await Promise.all([
+                getRoutes(true),
+                getBookings(true)
+            ]);
+            setAllBookings(bookings);
             
             const today = new Date(currentDate);
             today.setHours(0, 0, 0, 0);
@@ -88,6 +112,25 @@ function TopMembers() {
         }
         fetchTopRoutes();
     }, [currentDate]);
+    
+    const getBookedSeats = (route: Route) => {
+        return allBookings.filter(b => {
+           const routeDate = new Date(route.travelDate);
+           const bookingDate = new Date(b.departureDate);
+           const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                             routeDate.getMonth() === bookingDate.getMonth() &&
+                             routeDate.getDate() === bookingDate.getDate();
+           const bookingTime = format(bookingDate, 'HH:mm');
+   
+           return (
+               b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+               isSameDay &&
+               bookingTime === route.departureTime &&
+               b.status !== "Cancelled"
+           );
+       }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+     }
+
 
     if (topRoutes.length === 0) {
         return (
@@ -145,7 +188,7 @@ function TopMembers() {
                         )}
                     >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {currentDate ? format(currentDate, "dd MMM yyyy") : <span>Pick a date</span>}
+                        {currentDate ? format(currentDate, "dd MMM") : <span>Pick a date</span>}
                     </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -163,36 +206,63 @@ function TopMembers() {
                     </PopoverContent>
                 </Popover>
             </CardHeader>
-            <CardContent>
-                <div className="flex items-center gap-4 w-full">
-                    <Avatar className="h-16 w-16 rounded-md">
-                        <AvatarImage src={`https://ui-avatars.com/api/?name=${topRoutes[0].driverName.replace(' ', '+')}&background=random`} />
-                        <AvatarFallback className="rounded-md">{topRoutes[0].driverName.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                        <div className="text-sm font-bold text-muted-foreground">
-                            {topRoutes[0].fromLocation} to {topRoutes[0].toLocation}
-                        </div>
-                        <div className="text-xs text-muted-foreground font-semibold">
-                            {topRoutes[0].departureTime} - {topRoutes[0].arrivalTime}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm font-medium">{topRoutes[0].driverName}</span>
-                            <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                <span className="text-xs text-muted-foreground font-bold">{(topRoutes[0].rating || 0).toFixed(1)}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                           <span className="text-xs text-muted-foreground">{format(new Date(topRoutes[0].travelDate), 'dd MMM')}</span>
-                        </div>
-                        <div className="flex items-center gap-2 font-bold text-sm">
-                           <IndianRupee className="w-4 h-4 text-muted-foreground" />
-                           <span>{(topRoutes[0].price || 0).toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
+            <CardContent className="space-y-4">
+                 {topRoutes.map(route => {
+                    const bookedSeats = getBookedSeats(route);
+                    const availableSeats = route.availableSeats - bookedSeats;
+                    return (
+                        <Card key={route.id} className="overflow-hidden">
+                            <CardContent className="p-4 flex justify-between items-start">
+                                <div className="flex gap-4">
+                                     <div className="flex flex-col items-center">
+                                        <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                        <div className="w-px h-10 bg-border my-1"></div>
+                                        <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">{route.departureTime}</div>
+                                        <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
+                                        <div className="font-semibold mt-2">{route.arrivalTime}</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">{route.fromLocation}</div>
+                                        <div className="font-semibold mt-8">{route.toLocation}</div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-lg font-bold">
+                                        ₹{(route.price || 0).toFixed(2)}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                        <Users className="h-4 w-4" />
+                                        <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                             <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                        <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <div className="font-semibold text-sm">{route.driverName}</div>
+                                        <div className="flex items-center gap-1">
+                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                            <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {availableSeats > 0 && (
+                                <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
+                                    <Zap className="mr-2 h-4 w-4" />
+                                    Book Now
+                                </Button>
+                                )}
+                            </CardFooter>
+                        </Card>
+                    )
+                })}
             </CardContent>
         </Card>
     );
