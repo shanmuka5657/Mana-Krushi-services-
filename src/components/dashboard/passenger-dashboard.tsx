@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Users, Car, Star, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +28,8 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile } from "@/lib/storage";
+import { getProfile, getRoutes } from "@/lib/storage";
+import type { Route } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
 
 const searchFormSchema = z.object({
@@ -100,20 +109,83 @@ function BajajBanner() {
     )
 }
 
+function FeaturedRides({ routes }: { routes: Route[] }) {
+    const router = useRouter();
+    if (routes.length === 0) return null;
+
+    return (
+        <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Featured Rides</h2>
+            <Carousel
+                opts={{
+                    align: "start",
+                    loop: true,
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {routes.map((route) => (
+                        <CarouselItem key={route.id} className="md:basis-1/2 lg:basis-1/3">
+                            <div className="p-1 h-full">
+                                <Card className="flex flex-col h-full overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
+                                    <CardHeader>
+                                        <CardTitle className="text-lg">{route.fromLocation} to {route.toLocation}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="flex-grow">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="font-semibold text-lg">₹{route.price.toFixed(2)}</span>
+                                            <span className="text-muted-foreground">{format(new Date(route.travelDate), "dd MMM")}</span>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <div className="font-semibold text-sm">{route.driverName}</div>
+                                                <div className="flex items-center gap-1">
+                                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                    <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
+                                            <Zap className="mr-2 h-4 w-4" /> Book
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="ml-12" />
+                <CarouselNext className="mr-12" />
+            </Carousel>
+        </div>
+    );
+}
+
 
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [promotedRoutes, setPromotedRoutes] = useState<Route[]>([]);
   const router = useRouter();
 
   useEffect(() => {
-    const checkProfileAndFetchBookings = async () => {
+    const checkProfileAndFetchData = async () => {
         const profile = await getProfile();
         // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
+        
+        const allRoutes = await getRoutes(true);
+        const promoted = allRoutes.filter(r => r.isPromoted);
+        setPromotedRoutes(promoted);
     };
-    checkProfileAndFetchBookings();
+    checkProfileAndFetchData();
   }, []);
   
   const form = useForm<SearchFormValues>({
@@ -152,6 +224,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialog>
 
         <IndusIndBanner />
+        
+        {promotedRoutes.length > 0 && <FeaturedRides routes={promotedRoutes} />}
 
         <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
