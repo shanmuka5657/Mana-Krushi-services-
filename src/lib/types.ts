@@ -26,6 +26,7 @@ export type Booking = {
 export type Route = {
   id: string;
   ownerName: string;
+  ownerEmail: string;
   driverName: string;
   driverMobile: string;
   fromLocation: string;

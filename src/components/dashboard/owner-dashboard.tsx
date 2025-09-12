@@ -39,7 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getProfile, saveProfile } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
@@ -47,6 +47,7 @@ import { calculateDistance } from "@/app/actions";
 
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
+  ownerEmail: z.string().email(),
   driverName: z.string().min(2, "Driver name is required."),
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
@@ -151,6 +152,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     resolver: zodResolver(ownerFormSchema),
     defaultValues: {
         ownerName: "",
+        ownerEmail: "",
         driverName: "",
         driverMobile: "",
         fromLocation: "",
@@ -178,6 +180,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
          if(userProfile?.mobile && userProfile.mobile !== '0000000000') {
             form.setValue('driverMobile', userProfile.mobile);
         }
+        if(userProfile?.email) {
+            form.setValue('ownerEmail', userProfile.email);
+        }
     }
     loadProfile();
   }, [form]);
@@ -195,8 +200,15 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
     
+    const ownerEmail = getCurrentUser();
+    if(!ownerEmail) {
+        toast({ title: "Error", description: "Could not identify current user. Please log in again.", variant: "destructive" });
+        return;
+    }
+
     const dataWithVehicleInfo = {
         ...data,
+        ownerEmail: ownerEmail,
         vehicleType: userProfile.vehicleType,
         vehicleNumber: userProfile.vehicleNumber,
     };
@@ -270,10 +282,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       
       const profileName = form.getValues('ownerName');
       const profileMobile = form.getValues('driverMobile');
+      const profileEmail = form.getValues('ownerEmail');
+
       form.reset({
         ownerName: profileName,
         driverName: profileName,
         driverMobile: profileMobile,
+        ownerEmail: profileEmail,
         fromLocation: "",
         toLocation: "",
         distance: 0,

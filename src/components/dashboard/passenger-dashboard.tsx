@@ -141,9 +141,8 @@ function TopMembers() {
        }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
      
-    const getDriverProfilePic = (driverName: string) => {
-        const profile = allProfiles.find(p => p.name === driverName);
-        return profile?.selfieDataUrl;
+    const getDriverProfile = (ownerEmail: string): Profile | undefined => {
+        return allProfiles.find(p => p.email === ownerEmail);
     }
 
 
@@ -235,7 +234,7 @@ function TopMembers() {
                  {topRoutes.map(route => {
                     const bookedSeats = getBookedSeats(route);
                     const availableSeats = route.availableSeats - bookedSeats;
-                    const driverPic = getDriverProfilePic(route.driverName);
+                    const driverProfile = getDriverProfile(route.ownerEmail);
                     return (
                         <CarouselItem key={route.id}>
                             <Card className={cn("overflow-hidden transition-all", route.isPromoted && "border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10")}>
@@ -291,7 +290,7 @@ function TopMembers() {
                                  <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-4">
                                         <Avatar className="h-10 w-10">
-                                            <AvatarImage src={driverPic || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                            <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-grow">
