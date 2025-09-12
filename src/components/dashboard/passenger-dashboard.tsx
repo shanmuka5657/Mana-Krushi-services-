@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car, ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -39,6 +39,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 const searchFormSchema = z.object({
@@ -53,6 +61,102 @@ type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
+}
+
+function FeaturedRides() {
+  const [featuredRoutes, setFeaturedRoutes] = useState<Route[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      const allRoutes = await getRoutes(true); // Fetch all routes
+      // Feature promoted or highly-rated rides
+      const sortedRoutes = allRoutes
+        .filter(r => new Date(r.travelDate) >= new Date()) // Only future rides
+        .sort((a, b) => {
+          if (a.isPromoted && !b.isPromoted) return -1;
+          if (!a.isPromoted && b.isPromoted) return 1;
+          return b.rating - a.rating;
+        });
+      setFeaturedRoutes(sortedRoutes.slice(0, 5)); // Take top 5
+      setIsLoading(false);
+    };
+    fetchRoutes();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Featured Rides</h2>
+        <Card className="w-full p-4">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+        </Card>
+      </div>
+    );
+  }
+  
+  if (featuredRoutes.length === 0) {
+      return null;
+  }
+
+  return (
+    <div className="space-y-2 mb-8">
+      <h2 className="text-2xl font-bold">Featured Rides</h2>
+      <Carousel
+        opts={{ align: "start" }}
+        className="w-full"
+      >
+        <CarouselContent>
+          {featuredRoutes.map((route) => (
+            <CarouselItem key={route.id} className="basis-full">
+              <Card className="border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10 shadow-md">
+                <CardContent className="p-4">
+                  <div className="text-center mb-3">
+                    <h3 className="font-bold text-lg">{route.fromLocation} to {route.toLocation}</h3>
+                  </div>
+                  <div className="flex justify-between items-center mb-4">
+                     <span className="font-bold text-lg">₹{route.price.toFixed(2)}</span>
+                     <span className="text-sm text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <div className="flex items-center gap-2">
+                         <Avatar className="h-9 w-9 border-2 border-green-400">
+                             <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=0D8ABC&color=fff`} />
+                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="font-semibold">{route.driverName}</p>
+                             <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
+                            </div>
+                        </div>
+                     </div>
+                     <Button onClick={() => router.push(`/book/${route.id}`)}>
+                        <Zap className="mr-2 h-4 w-4"/>
+                        Book
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+      </Carousel>
+    </div>
+  );
+}
+
+function AdventureCallout() {
+    return (
+        <div className="text-center my-8">
+            <h2 className="text-3xl font-bold">Your Next Adventure Awaits!</h2>
+            <p className="text-muted-foreground mt-1">Find a ride with trusted owners.</p>
+        </div>
+    )
 }
 
 function IndusIndBanner() {
@@ -70,29 +174,6 @@ function IndusIndBanner() {
                     <h3 className="text-lg md:text-2xl font-bold">Open an IndusInd Saving Account</h3>
                     <p className="mt-1 text-xs md:text-sm max-w-md">Get exclusive benefits with an IndusInd online saving account.</p>
                     <Button size="sm" className="mt-3 w-fit bg-white text-indigo-900 hover:bg-gray-100 text-xs md:text-sm">
-                        Apply Now <IndianRupee className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            </Card>
-        </a>
-    )
-}
-
-function BajajBanner() {
-    return (
-        <a href="https://clnk.in/w6hf" target="_blank" rel="noopener noreferrer" className="block w-full group mt-6">
-            <Card className="w-full overflow-hidden relative text-white bg-blue-900 aspect-[4/1] md:aspect-[5/1]">
-                 <Image 
-                    src="https://picsum.photos/seed/bajaj-loan/1200/240"
-                    alt="Bajaj Finserv Personal Loan"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105 opacity-20"
-                    data-ai-hint="finance loan"
-                />
-                <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-center items-center text-center">
-                    <h3 className="text-lg md:text-2xl font-bold">Get a Personal Loan up to ₹40 Lakh</h3>
-                    <p className="mt-1 text-xs md:text-sm max-w-md">Bajaj Finserv offers instant approval and disbursal in 24 hours.</p>
-                    <Button size="sm" className="mt-3 w-fit bg-white text-blue-900 hover:bg-gray-100 text-xs md:text-sm">
                         Apply Now <IndianRupee className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
@@ -155,16 +236,17 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialog>
 
         <IndusIndBanner />
+        <FeaturedRides />
+        <AdventureCallout />
         
         <Card className="shadow-sm">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
-                <p className="text-muted-foreground">Search for available rides to your destination.</p>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="space-y-4">
                         <FormField
                             control={form.control}
                             name="fromLocation"
@@ -256,7 +338,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                 </Form>
             </CardContent>
         </Card>
-        <BajajBanner />
     </div>
   );
 }
+
+    
