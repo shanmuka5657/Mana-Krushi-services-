@@ -157,30 +157,31 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
             <CardContent>
                  {topRoutes.length > 0 ? (
                     <div className="relative">
-                        <Carousel setApi={setEmblaApi} opts={{ loop: true }} className="w-full max-w-xs mx-auto">
+                        <Carousel setApi={setEmblaApi} opts={{ loop: true }} className="w-full max-w-sm mx-auto">
                             <CarouselContent>
                             {topRoutes.map(route => (
                                     <CarouselItem key={route.id}>
-                                        <div className="flex flex-col items-center gap-2 text-center w-full">
-                                            <div className="text-sm font-bold text-muted-foreground h-8">
-                                                {route.fromLocation} to {route.toLocation}
-                                            </div>
-                                             <div className="text-xs text-muted-foreground font-semibold">
-                                                {route.departureTime} - {route.arrivalTime}
-                                            </div>
-                                            <Avatar>
+                                        <div className="flex items-center gap-4 w-full">
+                                            <Avatar className="h-16 w-16">
                                                 <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                                 <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                             </Avatar>
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className="text-sm font-medium">{route.driverName}</span>
-                                                <div className="flex items-center gap-1">
-                                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                                    <span className="text-xs text-muted-foreground font-bold">{(route.rating || 0).toFixed(1)}</span>
+                                            <div className="flex-1">
+                                                <div className="text-sm font-bold text-muted-foreground">
+                                                    {route.fromLocation} to {route.toLocation}
                                                 </div>
+                                                <div className="text-xs text-muted-foreground font-semibold">
+                                                    {route.departureTime} - {route.arrivalTime}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-sm font-medium">{route.driverName}</span>
+                                                    <div className="flex items-center gap-1">
+                                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                        <span className="text-xs text-muted-foreground font-bold">{(route.rating || 0).toFixed(1)}</span>
+                                                    </div>
+                                                </div>
+                                                <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                                             </div>
-                                           
-                                            <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                                         </div>
                                     </CarouselItem>
                                 ))}
