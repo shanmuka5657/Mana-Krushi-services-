@@ -69,8 +69,27 @@ function TopMembers() {
     useEffect(() => {
         const fetchTopRoutes = async () => {
             const allRoutes = await getRoutes(true); // Fetch all routes
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const upcomingTodayRoutes = allRoutes.filter(route => {
+                const routeDate = new Date(route.travelDate);
+                const isToday = routeDate.getFullYear() === today.getFullYear() &&
+                                routeDate.getMonth() === today.getMonth() &&
+                                routeDate.getDate() === today.getDate();
+
+                if (!isToday) return false;
+
+                const [hours, minutes] = route.departureTime.split(':').map(Number);
+                const departureDateTime = new Date(routeDate.getTime());
+                departureDateTime.setHours(hours, minutes, 0, 0);
+
+                return departureDateTime > now;
+            });
+            
             // Sort by rating and get top 5
-            const sortedRoutes = [...allRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            const sortedRoutes = [...upcomingTodayRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
             setTopRoutes(sortedRoutes.slice(0, 5));
         }
         fetchTopRoutes();
