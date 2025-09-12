@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -63,37 +63,37 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
-function TopMembers() {
+function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDateChange: (date: Date) => void }) {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
 
     useEffect(() => {
         const fetchTopRoutes = async () => {
-            const allRoutes = await getRoutes(true); // Fetch all routes
-            
+            const allRoutes = await getRoutes(true);
             const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-            const upcomingTodayRoutes = allRoutes.filter(route => {
+            
+            const upcomingRoutesForDate = allRoutes.filter(route => {
                 const routeDate = new Date(route.travelDate);
-                const isToday = routeDate.getFullYear() === today.getFullYear() &&
-                                routeDate.getMonth() === today.getMonth() &&
-                                routeDate.getDate() === today.getDate();
+                const isSelectedDate = isSameDay(routeDate, selectedDate);
 
-                if (!isToday) return false;
-
-                const [hours, minutes] = route.departureTime.split(':').map(Number);
-                const departureDateTime = new Date(routeDate.getTime());
-                departureDateTime.setHours(hours, minutes, 0, 0);
-
-                return departureDateTime > now;
+                if (!isSelectedDate) return false;
+                
+                // If it's today, only show rides that haven't departed
+                if (isSameDay(selectedDate, new Date())) {
+                    const [hours, minutes] = route.departureTime.split(':').map(Number);
+                    const departureDateTime = new Date(routeDate.getTime());
+                    departureDateTime.setHours(hours, minutes, 0, 0);
+                    return departureDateTime > now;
+                }
+                
+                return true; // For future dates, show all rides
             });
             
             // Sort by rating and get top 5
-            const sortedRoutes = [...upcomingTodayRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            const sortedRoutes = [...upcomingRoutesForDate].sort((a, b) => (b.rating || 0) - (a.rating || 0));
             setTopRoutes(sortedRoutes.slice(0, 5));
         }
         fetchTopRoutes();
-    }, []);
+    }, [selectedDate]);
 
     const getInitials = (name: string) => {
         if (!name) return '';
@@ -101,28 +101,57 @@ function TopMembers() {
         if (words.length > 1) {
             return words.map(n => n[0]).slice(0, 2).join('').toUpperCase();
         }
+        // Take first 3 letters if it's one word
         return name.slice(0, 3).toUpperCase();
     }
 
     return (
         <Card className="mb-6">
-            <CardHeader>
-                <CardTitle>Top Members</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Top Members for {format(selectedDate, "dd MMM")}</CardTitle>
+                 <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                        "w-[200px] justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => onDateChange(date || new Date())}
+                        initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
             </CardHeader>
             <CardContent className="flex flex-wrap justify-center sm:justify-around items-start gap-4">
-                {topRoutes.map(route => (
-                    <div key={route.id} className="flex flex-col items-center gap-2 text-center w-24">
-                        <div className="text-xs font-bold text-muted-foreground h-8">
-                            {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                 {topRoutes.length > 0 ? (
+                    topRoutes.map(route => (
+                        <div key={route.id} className="flex flex-col items-center gap-2 text-center w-24">
+                            <div className="text-xs font-bold text-muted-foreground h-8">
+                                {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                            </div>
+                            <Avatar>
+                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs font-medium">{route.driverName}</span>
+                            <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                         </div>
-                        <Avatar>
-                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs font-medium">{route.driverName}</span>
-                         <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
+                    ))
+                ) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                        <p>No upcoming rides found for this date.</p>
                     </div>
-                ))}
+                )}
             </CardContent>
         </Card>
     );
@@ -177,6 +206,7 @@ function BajajBanner() {
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [topMembersDate, setTopMembersDate] = useState(new Date());
   const router = useRouter();
 
   useEffect(() => {
@@ -229,7 +259,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <IndusIndBanner />
 
-        <TopMembers />
+        <TopMembers selectedDate={topMembersDate} onDateChange={setTopMembersDate} />
         
         <Card className="shadow-sm mt-6">
             <CardHeader>
