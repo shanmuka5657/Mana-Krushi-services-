@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +28,8 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile } from "@/lib/storage";
+import { getProfile, getRoutes } from "@/lib/storage";
+import type { Route } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -99,6 +109,79 @@ function BajajBanner() {
     )
 }
 
+function PromotedOwners() {
+    const router = useRouter();
+    const [promotedRoutes, setPromotedRoutes] = useState<Route[]>([]);
+
+    useEffect(() => {
+        const fetchRoutes = async () => {
+        const allRoutes = await getRoutes(true);
+        const promoted = allRoutes.filter(route => route.isPromoted);
+        setPromotedRoutes(promoted);
+        };
+        fetchRoutes();
+    }, []);
+
+    const promotedOwners = useMemo(() => {
+        const ownersMap = new Map<string, { name: string; rating: number }>();
+        promotedRoutes.forEach(route => {
+        if (!ownersMap.has(route.ownerName)) {
+            ownersMap.set(route.ownerName, { name: route.ownerName, rating: route.rating });
+        }
+        });
+        return Array.from(ownersMap.values());
+    }, [promotedRoutes]);
+    
+    if (promotedOwners.length === 0) {
+        return null;
+    }
+
+    const handleOwnerClick = (ownerName: string) => {
+        router.push(`/search?q=${encodeURIComponent(ownerName)}`);
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-yellow-500" />
+                <h2 className="text-2xl font-bold">Promoted Owners</h2>
+            </div>
+            <Carousel
+                opts={{
+                    align: "start",
+                    loop: true,
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                {promotedOwners.map((owner, index) => (
+                    <CarouselItem key={index} className="basis-full md:basis-1/2 lg:basis-1/3">
+                         <Card className="w-full transition-all hover:shadow-md cursor-pointer" onClick={() => handleOwnerClick(owner.name)}>
+                            <CardContent className="p-4 flex items-center gap-4">
+                                <Avatar className="h-12 w-12 border-2 border-yellow-400">
+                                    <AvatarImage src={`https://ui-avatars.com/api/?name=${owner.name.replace(' ', '+')}&background=random`} />
+                                    <AvatarFallback>{owner.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-grow">
+                                    <p className="font-semibold text-lg">{owner.name}</p>
+                                    <div className="flex items-center gap-1">
+                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                        <span className="text-sm font-bold">{owner.rating.toFixed(1)}</span>
+                                        <span className="text-xs text-muted-foreground">Rating</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </CarouselItem>
+                ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+        </div>
+    );
+}
+
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -154,10 +237,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <IndusIndBanner />
         
-        <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
-            <p className="text-muted-foreground">Find a ride with trusted owners.</p>
-        </div>
+        <PromotedOwners />
 
         <Card className="shadow-sm">
             <CardHeader>
