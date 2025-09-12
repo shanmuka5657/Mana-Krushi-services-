@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -38,6 +38,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { getRoutes, getBookings } from "@/lib/storage";
+import type { Route, Booking } from "@/lib/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Car, Star, Users } from "lucide-react";
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -159,6 +164,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         <Card className="shadow-sm">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
+                <CardDescription>Search for available rides to your destination.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -238,7 +244,10 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                             )}
                         />
                     </div>
-                    <Button type="submit" className="w-full md:w-auto">Search</Button>
+                    <Button type="submit" className="w-full md:w-auto">
+                        <Search className="mr-2 h-4 w-4" />
+                        Search Rides
+                    </Button>
                 </form>
                 </Form>
             </CardContent>
