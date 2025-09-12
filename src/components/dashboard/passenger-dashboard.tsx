@@ -59,6 +59,7 @@ interface PassengerDashboardProps {
 function TopMembers() {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     
     useEffect(() => {
         const fetchTopRoutes = async () => {
@@ -91,8 +92,35 @@ function TopMembers() {
     if (topRoutes.length === 0) {
         return (
              <Card className="mb-6">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Top Members</CardTitle>
+                    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[180px] justify-start text-left font-normal",
+                            !currentDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {currentDate ? format(currentDate, "dd MMM yyyy") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={currentDate}
+                          onSelect={(date) => {
+                            if (date) {
+                                setCurrentDate(date);
+                            }
+                            setIsCalendarOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                 </CardHeader>
                 <CardContent>
                     <div className="text-center py-4 text-muted-foreground">
@@ -105,8 +133,35 @@ function TopMembers() {
 
     return (
         <Card className="mb-6">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Top Members</CardTitle>
+                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                        "w-[180px] justify-start text-left font-normal",
+                        !currentDate && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentDate ? format(currentDate, "dd MMM yyyy") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                        mode="single"
+                        selected={currentDate}
+                        onSelect={(date) => {
+                            if (date) {
+                                setCurrentDate(date);
+                            }
+                            setIsCalendarOpen(false);
+                        }}
+                        initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
             </CardHeader>
             <CardContent>
                 <div className="flex items-center gap-4 w-full">
