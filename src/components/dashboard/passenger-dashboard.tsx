@@ -165,6 +165,9 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                                             <div className="text-sm font-bold text-muted-foreground h-8">
                                                 {route.fromLocation} to {route.toLocation}
                                             </div>
+                                             <div className="text-xs text-muted-foreground font-semibold">
+                                                {route.departureTime} - {route.arrivalTime}
+                                            </div>
                                             <Avatar>
                                                 <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                                 <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
@@ -176,9 +179,7 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                                                     <span className="text-xs text-muted-foreground font-bold">{(route.rating || 0).toFixed(1)}</span>
                                                 </div>
                                             </div>
-                                            <div className="text-xs text-muted-foreground font-semibold">
-                                                {route.departureTime} - {route.arrivalTime}
-                                            </div>
+                                           
                                             <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                                         </div>
                                     </CarouselItem>
