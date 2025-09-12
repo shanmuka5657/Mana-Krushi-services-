@@ -39,14 +39,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 const searchFormSchema = z.object({
@@ -109,70 +101,6 @@ function BajajBanner() {
     )
 }
 
-function FeaturedRides() {
-    const router = useRouter();
-    const [featuredRoutes, setFeaturedRoutes] = useState<Route[]>([]);
-    
-    useEffect(() => {
-        const fetchRoutes = async () => {
-            const allRoutes = await getRoutes(true);
-            const promoted = allRoutes.filter(route => route.isPromoted && new Date(route.travelDate) >= new Date());
-            promoted.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
-            setFeaturedRoutes(promoted);
-        };
-        fetchRoutes();
-    }, []);
-
-    if (featuredRoutes.length === 0) {
-        return null;
-    }
-
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-yellow-500" />
-                <h2 className="text-2xl font-bold">Featured Rides</h2>
-            </div>
-            <Carousel
-                opts={{
-                    align: "start",
-                }}
-                className="w-full"
-            >
-                <CarouselContent>
-                {featuredRoutes.map((route, index) => (
-                    <CarouselItem key={index} className="basis-full md:basis-1/2 lg:basis-1/3">
-                        <Card className="w-full transition-all hover:shadow-md cursor-pointer" onClick={() => router.push(`/book/${route.id}`)}>
-                            <CardContent className="p-4">
-                                <div className="flex flex-col justify-between h-full">
-                                    <div>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <div className="font-semibold text-base">{route.driverName}</div>
-                                                <div className="flex items-center gap-1">
-                                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                                    <span className="text-sm text-muted-foreground">{route.rating.toFixed(1)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </CarouselItem>
-                ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden sm:flex" />
-                <CarouselNext className="hidden sm:flex" />
-            </Carousel>
-        </div>
-    );
-}
-
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -228,8 +156,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
 
         <IndusIndBanner />
         
-        <FeaturedRides />
-
         <Card className="shadow-sm">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
