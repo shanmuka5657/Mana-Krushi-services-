@@ -112,7 +112,13 @@ function TopMembers() {
                 return departureDateTime > new Date();
             });
 
-            const sortedRoutes = [...filteredRoutes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            const sortedRoutes = [...filteredRoutes].sort((a, b) => {
+                // Promoted rides first
+                if (a.isPromoted && !b.isPromoted) return -1;
+                if (!a.isPromoted && b.isPromoted) return 1;
+                // Then sort by rating
+                return (b.rating || 0) - (a.rating || 0);
+            });
             setTopRoutes(sortedRoutes.slice(0, 5));
         }
         fetchTopRoutes();
