@@ -41,6 +41,7 @@ export type Route = {
   vehicleNumber?: string;
   price: number;
   rating: number;
+  isPromoted?: boolean;
 };
 
 export type Profile = {

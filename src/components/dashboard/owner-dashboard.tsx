@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee, Sparkles } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -68,7 +69,7 @@ const ownerFormSchema = z.object({
 export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
 
 interface OwnerDashboardProps {
-  onRouteAdded: (newRoute: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[] }) => void;
+  onRouteAdded: (newRoute: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => void;
   onSwitchTab: (tab: string) => void;
 }
 
@@ -123,6 +124,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<OwnerFormValues | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -199,17 +201,26 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     };
 
     setRouteDataToSubmit(dataWithVehicleInfo);
+    setShowPromotionDialog(true);
+  }
+
+  const handlePromotionChoice = (isPromoted: boolean) => {
+    if (!routeDataToSubmit) return;
+
+    const routeDataWithPromotion = { ...routeDataToSubmit, isPromoted };
+    setRouteDataToSubmit(routeDataWithPromotion);
 
     // Check if the user has an active plan
-    const hasActivePlan = userProfile?.planExpiryDate && new Date(userProfile.planExpiryDate) > new Date();
+    const hasActivePlan = profile?.planExpiryDate && new Date(profile.planExpiryDate) > new Date();
 
     if (hasActivePlan) {
       // If they have a plan, add the route directly
-      handleRouteSubmission(dataWithVehicleInfo);
+      handleRouteSubmission(routeDataWithPromotion);
     } else {
       // Otherwise, open the payment dialog
       setIsPaymentDialogOpen(true);
     }
+    setShowPromotionDialog(false);
   }
   
   const handleCalculateDistance = async () => {
@@ -243,7 +254,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       }
   }
 
-  const handleRouteSubmission = (data: OwnerFormValues) => {
+  const handleRouteSubmission = (data: OwnerFormValues & { isPromoted?: boolean }) => {
     const finalData = {
       ...data,
       pickupPoints: data.pickupPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
@@ -303,6 +314,27 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             <AlertDialogAction onClick={() => onSwitchTab('profile')}>
               Go to Profile
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showPromotionDialog} onOpenChange={setShowPromotionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Sparkles className="text-yellow-500" />
+              Promote Your Ride?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Promoted rides are highlighted in search results to attract more passengers. Would you like to promote this ride?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
+            <Button onClick={() => handlePromotionChoice(true)}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Yes, Promote Ride
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

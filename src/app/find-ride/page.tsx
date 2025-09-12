@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRoutes, getBookings } from '@/lib/storage';
 import type { Route, Booking } from '@/lib/types';
-import { Car, Star, Users, Milestone, ArrowLeft, Zap } from 'lucide-react';
+import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
     try {
@@ -69,6 +71,9 @@ function FindRideResultsPage() {
                 
                 return fromMatch && toMatch && dateMatch;
             });
+            
+            // Sort promoted rides to the top
+            results.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
 
             setAvailableOwners(results);
             setIsLoaded(true);
@@ -130,7 +135,7 @@ function FindRideResultsPage() {
 
 
                             return (
-                            <Card key={route.id} className="overflow-hidden">
+                            <Card key={route.id} className={cn("overflow-hidden transition-all", route.isPromoted && "border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10")}>
                                 <CardContent className="p-4">
                                     <div className="flex justify-between items-start">
                                         <div className="flex gap-4">
@@ -165,6 +170,12 @@ function FindRideResultsPage() {
                                         </div>
                                         </div>
                                     </div>
+                                    {route.isPromoted && (
+                                        <Badge variant="secondary" className="mt-3 bg-yellow-200 text-yellow-800 border-yellow-300">
+                                            <Sparkles className="mr-1 h-3 w-3" />
+                                            Promoted
+                                        </Badge>
+                                    )}
                                 </CardContent>
                                 <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-3">
