@@ -87,9 +87,9 @@ function FeaturedRides() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 mb-8">
         <h2 className="text-2xl font-bold">Featured Rides</h2>
-        <Card className="w-full p-4">
+        <Card className="w-full p-10">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
         </Card>
       </div>
@@ -110,19 +110,19 @@ function FeaturedRides() {
         <CarouselContent>
           {featuredRoutes.map((route) => (
             <CarouselItem key={route.id} className="basis-full">
-              <Card className="border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10 shadow-md">
+              <Card className="border-yellow-400 border-2 bg-white dark:bg-card shadow-lg overflow-hidden">
                 <CardContent className="p-4">
                   <div className="text-center mb-3">
                     <h3 className="font-bold text-lg">{route.fromLocation} to {route.toLocation}</h3>
                   </div>
                   <div className="flex justify-between items-center mb-4">
-                     <span className="font-bold text-lg">₹{route.price.toFixed(2)}</span>
-                     <span className="text-sm text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
+                     <span className="font-bold text-lg flex items-center gap-1"><ChevronLeft className="h-5 w-5 text-muted-foreground"/>₹{route.price.toFixed(2)}</span>
+                     <span className="text-sm text-muted-foreground flex items-center gap-1">{format(new Date(route.travelDate), 'dd MMM')} <ChevronRight className="h-5 w-5 text-muted-foreground"/></span>
                   </div>
-                  <div className="flex justify-between items-center">
+                   <div className="border-t pt-3 flex justify-between items-center">
                      <div className="flex items-center gap-2">
                          <Avatar className="h-9 w-9 border-2 border-green-400">
-                             <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=0D8ABC&color=fff`} />
+                             <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=90EE90&color=000`} />
                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -143,8 +143,6 @@ function FeaturedRides() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
       </Carousel>
     </div>
   );
@@ -341,5 +339,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
-
-    
