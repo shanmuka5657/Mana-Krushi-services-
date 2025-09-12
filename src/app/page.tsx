@@ -49,7 +49,7 @@ const initialBookings: Booking[] = [
     id: "#BK004",
     client: "Sophia Davis",
     destination: "Rome, Italy",
-    departureDate: new Date("2023-M-dd"),
+    departureDate: new Date("2023-09-15"),
     returnDate: new Date("2023-09-19"),
     amount: 2150,
     status: "Cancelled",
