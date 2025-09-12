@@ -63,10 +63,6 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
-const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).slice(0, 3).join('').toUpperCase();
-}
-
 function TopMembers() {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
 
@@ -80,15 +76,24 @@ function TopMembers() {
         fetchTopRoutes();
     }, []);
 
+    const getInitials = (name: string) => {
+        if (!name) return '';
+        const words = name.split(' ');
+        if (words.length > 1) {
+            return words.map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        }
+        return name.slice(0, 3).toUpperCase();
+    }
+
     return (
         <Card className="mb-6">
             <CardHeader>
                 <CardTitle>Top Members</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-wrap justify-center sm:justify-around items-center gap-4">
+            <CardContent className="flex flex-wrap justify-center sm:justify-around items-start gap-4">
                 {topRoutes.map(route => (
                     <div key={route.id} className="flex flex-col items-center gap-2 text-center w-24">
-                        <div className="text-xs font-bold text-muted-foreground">
+                        <div className="text-xs font-bold text-muted-foreground h-8">
                             {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
                         </div>
                         <Avatar>
@@ -96,6 +101,7 @@ function TopMembers() {
                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs font-medium">{route.driverName}</span>
+                         <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                     </div>
                 ))}
             </CardContent>
@@ -310,5 +316,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
-
-    
