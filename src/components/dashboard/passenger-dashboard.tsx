@@ -125,7 +125,7 @@ function FeaturedRides({ routes }: { routes: Route[] }) {
             >
                 <CarouselContent>
                     {routes.map((route) => (
-                        <CarouselItem key={route.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                        <CarouselItem key={route.id} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1 h-full">
                                 <Card className="flex flex-col h-full overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
                                     <CardHeader>
