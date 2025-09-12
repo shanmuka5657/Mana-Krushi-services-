@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { EmblaCarouselType } from 'embla-carousel-react'
@@ -67,9 +67,20 @@ interface PassengerDashboardProps {
 function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDateChange: (date: Date) => void }) {
     const [topRoutes, setTopRoutes] = useState<Route[]>([]);
     const [emblaApi, setEmblaApi] = useState<EmblaCarouselType | null>(null);
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
+        setSelectedIndex(emblaApi.selectedScrollSnap());
+    }, []);
+
+    const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
 
     useEffect(() => {
         if (!emblaApi) return;
+
+        onSelect(emblaApi);
+        emblaApi.on('select', onSelect);
+        emblaApi.on('reInit', onSelect);
 
         const timer = setInterval(() => {
             if (emblaApi.canScrollNext()) {
@@ -79,8 +90,11 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
             }
         }, 5000);
 
-        return () => clearInterval(timer);
-    }, [emblaApi]);
+        return () => {
+            clearInterval(timer)
+            emblaApi.off('select', onSelect);
+        };
+    }, [emblaApi, onSelect]);
 
     useEffect(() => {
         const fetchTopRoutes = async () => {
@@ -93,7 +107,6 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
 
                 if (!isSelectedDate) return false;
                 
-                // If it's today, only show rides that haven't departed
                 if (isSameDay(selectedDate, new Date())) {
                     const [hours, minutes] = route.departureTime.split(':').map(Number);
                     const departureDateTime = new Date(routeDate.getTime());
@@ -101,10 +114,9 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                     return departureDateTime > now;
                 }
                 
-                return true; // For future dates, show all rides
+                return true;
             });
             
-            // Sort by rating and get top 5
             const sortedRoutes = [...upcomingRoutesForDate].sort((a, b) => (b.rating || 0) - (a.rating || 0));
             setTopRoutes(sortedRoutes.slice(0, 5));
         }
@@ -117,7 +129,6 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
         if (words.length > 1) {
             return words.map(n => n[0]).slice(0, 2).join('').toUpperCase();
         }
-        // Take first 3 letters if it's one word
         return name.slice(0, 3).toUpperCase();
     }
 
@@ -150,31 +161,45 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
             </CardHeader>
             <CardContent>
                  {topRoutes.length > 0 ? (
-                     <Carousel setApi={setEmblaApi} opts={{ loop: true }} className="w-full max-w-xs mx-auto">
-                        <CarouselContent>
-                           {topRoutes.map(route => (
-                                <CarouselItem key={route.id}>
-                                    <div className="flex flex-col items-center gap-2 text-center w-full">
-                                        <div className="text-xs font-bold text-muted-foreground h-8">
-                                            {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                    <div className="relative">
+                        <Carousel setApi={setEmblaApi} opts={{ loop: true }} className="w-full max-w-xs mx-auto">
+                            <CarouselContent>
+                            {topRoutes.map(route => (
+                                    <CarouselItem key={route.id}>
+                                        <div className="flex flex-col items-center gap-2 text-center w-full">
+                                            <div className="text-xs font-bold text-muted-foreground h-8">
+                                                {getInitials(route.fromLocation)} to {getInitials(route.toLocation)}
+                                            </div>
+                                            <Avatar>
+                                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-sm font-medium">{route.driverName}</span>
+                                            <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                                         </div>
-                                        <Avatar>
-                                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <span className="text-sm font-medium">{route.driverName}</span>
-                                        <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
-                                    </div>
-                                </CarouselItem>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            {topRoutes.length > 1 && (
+                                <>
+                                    <CarouselPrevious />
+                                    <CarouselNext />
+                                </>
+                            )}
+                        </Carousel>
+                        <div className="flex justify-center gap-2 mt-4">
+                            {topRoutes.map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => scrollTo(index)}
+                                    className={cn(
+                                        "h-2 w-2 rounded-full",
+                                        index === selectedIndex ? "bg-primary" : "bg-muted"
+                                    )}
+                                />
                             ))}
-                        </CarouselContent>
-                         {topRoutes.length > 1 && (
-                            <>
-                                <CarouselPrevious />
-                                <CarouselNext />
-                            </>
-                        )}
-                    </Carousel>
+                        </div>
+                    </div>
                 ) : (
                     <div className="text-center py-4 text-muted-foreground">
                         <p>No upcoming rides found for this date.</p>
@@ -240,7 +265,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   useEffect(() => {
     const checkProfileAndFetchData = async () => {
         const profile = await getProfile();
-        // A mobile number of '0000000000' is a dummy number, so we treat it as incomplete.
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
