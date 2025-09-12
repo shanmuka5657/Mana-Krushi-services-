@@ -63,6 +63,35 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
+const topMembers = [
+    { name: 'Ravi Kumar' },
+    { name: 'Anjali Sharma' },
+    { name: 'Sanjay Patel' },
+    { name: 'Priya Singh' },
+    { name: 'Vikram Reddy' },
+];
+
+function TopMembers() {
+    return (
+        <Card className="mb-6">
+            <CardHeader>
+                <CardTitle>Top Members</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap justify-center sm:justify-around items-center gap-4">
+                {topMembers.map(member => (
+                    <div key={member.name} className="flex flex-col items-center gap-2 text-center w-20">
+                        <Avatar>
+                            <AvatarImage src={`https://ui-avatars.com/api/?name=${member.name.replace(' ', '+')}&background=random`} />
+                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs font-medium">{member.name}</span>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+    );
+}
+
 function IndusIndBanner() {
     return (
         <a href="https://clnk.in/w6hk" target="_blank" rel="noopener noreferrer" className="block w-full group mb-6">
@@ -162,9 +191,11 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
           </AlertDialogContent>
         </AlertDialog>
 
-        <div className="mb-6"></div>
+        <IndusIndBanner />
+
+        <TopMembers />
         
-        <Card className="shadow-sm mt-6">
+        <Card className="shadow-sm">
             <CardHeader>
                 <CardTitle>Find a Ride</CardTitle>
             </CardHeader>
@@ -268,5 +299,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
-
-    
