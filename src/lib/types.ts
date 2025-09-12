@@ -54,6 +54,7 @@ export type Profile = {
     mileage?: number;
     planExpiryDate?: Date;
     role?: 'owner' | 'passenger' | 'admin';
+    selfieDataUrl?: string;
 }
 
 export type MovieSite = {

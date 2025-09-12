@@ -50,9 +50,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole } from "@/lib/storage";
+import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole, getProfile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
+import type { Profile } from "@/lib/types";
+
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
 interface BeforeInstallPromptEvent extends Event {
@@ -69,6 +71,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  const [profile, setProfile] = React.useState<Profile | null>(null);
   const [userName, setUserName] = React.useState("User");
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
@@ -96,26 +99,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
-    const name = getCurrentUserName();
-    const email = getCurrentUser();
-    const roleFromSession = getCurrentUserRole() || 'passenger';
-    setRole(roleFromSession);
+    const loadData = async () => {
+      const name = getCurrentUserName();
+      const email = getCurrentUser();
+      const roleFromSession = getCurrentUserRole() || 'passenger';
+      setRole(roleFromSession);
+      const userProfile = await getProfile();
+      setProfile(userProfile);
 
-    if (roleFromSession === 'admin') {
-      setUserName('Admin');
-      setUserInitial('A');
-      setUserRole('Administrator');
-    } else {
-      if (name) {
-        setUserName(name);
-        setUserInitial(name.charAt(0).toUpperCase());
-      } else if (email) {
-        const fallbackName = email.split('@')[0];
-        setUserName(fallbackName);
-        setUserInitial(fallbackName.charAt(0).toUpperCase());
+      if (roleFromSession === 'admin') {
+        setUserName('Admin');
+        setUserInitial('A');
+        setUserRole('Administrator');
+      } else {
+        if (name) {
+          setUserName(name);
+          setUserInitial(name.charAt(0).toUpperCase());
+        } else if (email) {
+          const fallbackName = email.split('@')[0];
+          setUserName(fallbackName);
+          setUserInitial(fallbackName.charAt(0).toUpperCase());
+        }
+        setUserRole(roleFromSession === 'owner' ? 'Owner' : 'Passenger');
       }
-      setUserRole(roleFromSession === 'owner' ? 'Owner' : 'Passenger');
-    }
+    };
+    loadData();
   }, []);
 
   const adminNavItems = [
@@ -282,7 +290,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center gap-3 cursor-pointer">
                   <Avatar className="h-10 w-10 border">
                     <AvatarImage
-                      src={`https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
+                      src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
                       alt={userName}
                     />
                     <AvatarFallback>{userInitial}</AvatarFallback>

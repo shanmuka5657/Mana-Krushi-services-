@@ -4,9 +4,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel } from "lucide-react";
-import { useEffect, useState } from "react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { saveProfile, getProfile, getCurrentUser, getCurrentUserName } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
 import { Textarea } from "../ui/textarea";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -32,6 +35,7 @@ const profileFormSchema = z.object({
   vehicleType: z.string().optional(),
   vehicleNumber: z.string().optional(),
   mileage: z.coerce.number().optional(),
+  selfieDataUrl: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -39,6 +43,10 @@ export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export default function ProfileForm() {
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [selfie, setSelfie] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -50,8 +58,39 @@ export default function ProfileForm() {
       vehicleType: "",
       vehicleNumber: "",
       mileage: 0,
+      selfieDataUrl: "",
     },
   });
+
+  useEffect(() => {
+    const getCameraPermission = async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.error('Camera API not available.');
+            setHasCameraPermission(false);
+            return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        setHasCameraPermission(true);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        setHasCameraPermission(false);
+      }
+    };
+    getCameraPermission();
+
+    // Cleanup function to stop video stream
+    return () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const stream = videoRef.current.srcObject as MediaStream;
+            stream.getTracks().forEach(track => track.stop());
+        }
+    }
+  }, []);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -61,7 +100,7 @@ export default function ProfileForm() {
         const userEmail = getCurrentUser();
         const userName = getCurrentUserName();
 
-        const defaultValues = {
+        const defaultValues: ProfileFormValues = {
             name: userName || (userEmail ? userEmail.split('@')[0] : ''),
             email: userEmail || '',
             mobile: '',
@@ -69,10 +108,16 @@ export default function ProfileForm() {
             vehicleType: '',
             vehicleNumber: '',
             mileage: 0,
+            selfieDataUrl: '',
         };
+        
+        const combinedValues = { ...defaultValues, ...userProfile };
 
         if (userProfile) {
-            form.reset({ ...defaultValues, ...userProfile });
+            form.reset(combinedValues);
+            if (userProfile.selfieDataUrl) {
+                setSelfie(userProfile.selfieDataUrl);
+            }
         } else if (userEmail) {
             form.reset(defaultValues);
         }
@@ -80,10 +125,31 @@ export default function ProfileForm() {
     loadProfile();
   }, [form]);
 
+  const handleTakeSelfie = () => {
+      if (videoRef.current && canvasRef.current) {
+          const video = videoRef.current;
+          const canvas = canvasRef.current;
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const context = canvas.getContext('2d');
+          if (context) {
+              context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+              const dataUrl = canvas.toDataURL('image/png');
+              setSelfie(dataUrl);
+              form.setValue('selfieDataUrl', dataUrl);
+          }
+      }
+  }
+
   async function onSubmit(data: ProfileFormValues) {
     const currentProfile = await getProfile();
-    const profileToSave = { ...currentProfile, ...data };
-    await saveProfile(profileToSave as Profile);
+    const profileToSave: Profile = { ...currentProfile, ...data };
+
+    await saveProfile(profileToSave);
+    
+    // Update local state to reflect changes immediately
+    setProfile(profileToSave);
+
     toast({
       title: "Profile Updated!",
       description: "Your profile has been successfully updated.",
@@ -109,6 +175,46 @@ export default function ProfileForm() {
            </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Picture</CardTitle>
+          <CardDescription>Take a selfie to set your profile picture.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-full sm:w-1/2 space-y-4">
+                    <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                        {selfie ? (
+                             <Image src={selfie} alt="Your selfie" layout="fill" objectFit="cover" />
+                        ) : (
+                           <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
+                        )}
+                        <canvas ref={canvasRef} className="hidden" />
+                    </div>
+                     {hasCameraPermission === false && (
+                        <Alert variant="destructive">
+                            <AlertTitle>Camera Access Required</AlertTitle>
+                            <AlertDescription>
+                                Please allow camera access to use this feature.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                </div>
+                 <div className="w-full sm:w-1/2 flex flex-col items-center gap-4">
+                    <Avatar className="w-24 h-24 text-lg">
+                        <AvatarImage src={selfie || profile?.selfieDataUrl} alt={profile?.name} />
+                        <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                     <Button onClick={handleTakeSelfie} disabled={!hasCameraPermission}>
+                        <Camera className="mr-2 h-4 w-4" />
+                        {selfie ? 'Retake Selfie' : 'Take Selfie'}
+                    </Button>
+                 </div>
+            </div>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>My Profile</CardTitle>
