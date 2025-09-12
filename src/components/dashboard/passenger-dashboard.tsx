@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Car, Star, Users, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile } from "@/lib/storage";
+import { getProfile, getRoutes, getBookings } from "@/lib/storage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +38,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { Route, Booking } from "@/lib/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 
 const searchFormSchema = z.object({
@@ -100,8 +103,124 @@ function BajajBanner() {
     )
 }
 
+function FeaturedRides({ routes }: { routes: Route[] }) {
+  const router = useRouter();
+
+  if (!routes || routes.length === 0) {
+    return null;
+  }
+  
+  const getBookedSeats = (route: Route, allBookings: Booking[]) => {
+    return allBookings.filter(b => {
+       const routeDate = new Date(route.travelDate);
+       const bookingDate = new Date(b.departureDate);
+       const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
+                         routeDate.getMonth() === bookingDate.getMonth() &&
+                         routeDate.getDate() === bookingDate.getDate();
+       const bookingTime = format(bookingDate, 'HH:mm');
+
+       return (
+           b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+           isSameDay &&
+           bookingTime === route.departureTime &&
+           b.status !== "Cancelled"
+       );
+   }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+ }
+  
+  // A bit of a hack: we need all bookings to calculate available seats, 
+  // but we don't want to fetch it inside this component. Assuming it's fast enough.
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  useEffect(() => {
+    getBookings(true).then(setAllBookings);
+  }, []);
+
+  // Show the 5 most recent promoted rides
+  const featured = routes
+    .filter(r => r.isPromoted)
+    .sort((a, b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime())
+    .slice(0, 5);
+  
+  if (featured.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Featured Rides</h2>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent>
+          {featured.map((route) => {
+             const bookedSeats = getBookedSeats(route, allBookings);
+             const availableSeats = route.availableSeats - bookedSeats;
+             const isPast = new Date(route.travelDate) < new Date();
+
+            return (
+              <CarouselItem key={route.id} className="md:basis-1/2 lg:basis-1/3">
+                 <Card className="overflow-hidden h-full flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="truncate">{route.fromLocation} to {route.toLocation}</CardTitle>
+                        <CardDescription>{format(new Date(route.travelDate), "PPP")}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="font-semibold text-lg">{route.departureTime}</p>
+                                <p className="text-sm text-muted-foreground">{route.fromLocation}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-semibold text-lg">{route.arrivalTime}</p>
+                                <p className="text-sm text-muted-foreground">{route.toLocation}</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center mt-4 text-sm">
+                             <div className="flex items-center gap-1 text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>{availableSeats > 0 ? `${availableSeats} left` : 'Sold out'}</span>
+                            </div>
+                            <p className="font-bold text-lg">₹{route.price.toFixed(2)}</p>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                       <div className="flex items-center gap-3">
+                           <Avatar className="h-8 w-8">
+                               <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                               <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                           </Avatar>
+                           <div>
+                               <div className="font-semibold text-sm">{route.driverName}</div>
+                               <div className="flex items-center gap-1">
+                                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                   <span className="text-xs text-muted-foreground">{route.rating.toFixed(1)}</span>
+                               </div>
+                           </div>
+                       </div>
+                        {availableSeats > 0 && !isPast && (
+                          <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
+                            <Zap className="mr-2 h-4 w-4" /> Book
+                          </Button>
+                        )}
+                    </CardFooter>
+                </Card>
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex" />
+        <CarouselNext className="hidden sm:flex" />
+      </Carousel>
+    </div>
+  );
+}
+
+
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [routes, setRoutes] = useState<Route[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -111,6 +230,9 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
+        
+        const allRoutes = await getRoutes(true); // Fetch all routes for featured
+        setRoutes(allRoutes);
     };
     checkProfileAndFetchData();
   }, []);
@@ -151,6 +273,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialog>
 
         <IndusIndBanner />
+
+        <FeaturedRides routes={routes} />
         
         <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-800">Your Next Adventure Awaits!</h2>
