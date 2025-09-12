@@ -388,7 +388,7 @@ export default function BookRidePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
             <AlertDialogDescription>
-              You already have a booking for this ride with {existingBooking?.travelers} seat(s). Would you like to add the new {numberOfSeats} seat(s) to your existing booking?
+              You already have a booking for this ride with {existingBooking?.travelers} seat(s). Would you like to add {numberOfSeats} more seat(s) to your existing booking?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
