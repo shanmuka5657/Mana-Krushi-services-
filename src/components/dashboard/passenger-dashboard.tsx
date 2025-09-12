@@ -5,8 +5,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap } from "lucide-react";
+import { format, isSameDay } from "date-fns";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -41,6 +41,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Badge } from "@/components/ui/badge";
 
 
 const searchFormSchema = z.object({
@@ -147,7 +149,7 @@ function TopMembers() {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {currentDate ? format(currentDate, "dd MMM yyyy") : <span>Pick a date</span>}
+                          {currentDate ? format(currentDate, "dd MMM") : <span>Pick a date</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -177,7 +179,10 @@ function TopMembers() {
     return (
         <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Top Members</CardTitle>
+                <div>
+                    <CardTitle>Top Members</CardTitle>
+                    <CardDescription>Highest rated rides for today.</CardDescription>
+                </div>
                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                     <Button
@@ -206,63 +211,89 @@ function TopMembers() {
                     </PopoverContent>
                 </Popover>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
+                <Carousel
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                >
+                 <CarouselContent>
                  {topRoutes.map(route => {
                     const bookedSeats = getBookedSeats(route);
                     const availableSeats = route.availableSeats - bookedSeats;
                     return (
-                        <Card key={route.id} className="overflow-hidden">
-                            <CardContent className="p-4 flex justify-between items-start">
-                                <div className="flex gap-4">
-                                     <div className="flex flex-col items-center">
-                                        <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
-                                        <div className="w-px h-10 bg-border my-1"></div>
-                                        <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">{route.departureTime}</div>
-                                        <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
-                                        <div className="font-semibold mt-2">{route.arrivalTime}</div>
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">{route.fromLocation}</div>
-                                        <div className="font-semibold mt-8">{route.toLocation}</div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-lg font-bold">
-                                        ₹{(route.price || 0).toFixed(2)}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
-                                        <Users className="h-4 w-4" />
-                                        <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                             <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                        <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <div className="font-semibold text-sm">{route.driverName}</div>
-                                        <div className="flex items-center gap-1">
-                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                            <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
+                        <CarouselItem key={route.id}>
+                            <Card className={cn("overflow-hidden transition-all", route.isPromoted && "border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10")}>
+                                <CardContent className="p-4">
+                                     <div className="flex justify-between items-start">
+                                        <div className="flex gap-4">
+                                            <div>
+                                                <div className="font-semibold">{route.departureTime}</div>
+                                                <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
+                                                <div className="font-semibold mt-2">{route.arrivalTime}</div>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                            <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                            <div className="w-px h-10 bg-border my-1"></div>
+                                            <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold">{route.fromLocation}</div>
+                                                {route.distance && (
+                                                <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
+                                                    <Milestone className="h-3 w-3" />
+                                                    <span>{route.distance.toFixed(0)} km</span>
+                                                </div>
+                                                )}
+                                                <div className="font-semibold mt-2">{route.toLocation}</div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                        <div className="text-lg font-bold">
+                                            ₹{(route.price || 0).toFixed(2)}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                            <Users className="h-4 w-4" />
+                                            <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
+                                        </div>
                                         </div>
                                     </div>
-                                </div>
-                                {availableSeats > 0 && (
-                                <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
-                                    <Zap className="mr-2 h-4 w-4" />
-                                    Book Now
-                                </Button>
-                                )}
-                            </CardFooter>
-                        </Card>
+                                    {route.isPromoted && (
+                                        <Badge variant="secondary" className="mt-3 bg-yellow-200 text-yellow-800 border-yellow-300">
+                                            <Sparkles className="mr-1 h-3 w-3" />
+                                            Promoted
+                                        </Badge>
+                                    )}
+                                </CardContent>
+                                 <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <Car className="text-muted-foreground" />
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <div className="font-semibold text-sm">{route.driverName}</div>
+                                            <div className="flex items-center gap-1">
+                                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {availableSeats > 0 && (
+                                    <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
+                                        <Zap className="mr-2 h-4 w-4" />
+                                        Book Now
+                                    </Button>
+                                    )}
+                                </CardFooter>
+                            </Card>
+                        </CarouselItem>
                     )
                 })}
+                </CarouselContent>
+                </Carousel>
             </CardContent>
         </Card>
     );
@@ -478,3 +509,5 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
+
+    
