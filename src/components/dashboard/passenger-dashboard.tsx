@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-ns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -143,21 +143,25 @@ function FeaturedRides() {
                 {featuredRoutes.map((route, index) => (
                     <CarouselItem key={index} className="basis-full md:basis-1/2 lg:basis-1/3">
                         <Card className="w-full transition-all hover:shadow-md cursor-pointer" onClick={() => router.push(`/book/${route.id}`)}>
-                             <CardHeader>
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="h-10 w-10">
-                                        <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                        <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                    </Avatar>
+                            <CardContent className="p-4">
+                                <div className="flex flex-col justify-between h-full">
                                     <div>
-                                        <div className="font-semibold text-base">{route.driverName}</div>
-                                        <div className="flex items-center gap-1">
-                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                            <span className="text-sm text-muted-foreground">{route.rating.toFixed(1)}</span>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-10 w-10">
+                                                <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
+                                                <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <div className="font-semibold text-base">{route.driverName}</div>
+                                                <div className="flex items-center gap-1">
+                                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                    <span className="text-sm text-muted-foreground">{route.rating.toFixed(1)}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </CardHeader>
+                            </CardContent>
                         </Card>
                     </CarouselItem>
                 ))}
@@ -330,5 +334,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
-
-    
