@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, isSameDay } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Sparkles, Clock, Car } from "lucide-react";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { EmblaCarouselType } from 'embla-carousel-react'
@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -169,7 +169,13 @@ function TopMembers({ selectedDate, onDateChange }: { selectedDate: Date, onDate
                                                 <AvatarImage src={`https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                                 <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                             </Avatar>
-                                            <span className="text-sm font-medium">{route.driverName}</span>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="text-sm font-medium">{route.driverName}</span>
+                                                <div className="flex items-center gap-1">
+                                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                    <span className="text-xs text-muted-foreground font-bold">{(route.rating || 0).toFixed(1)}</span>
+                                                </div>
+                                            </div>
                                             <span className="text-xs text-muted-foreground">{format(new Date(route.travelDate), 'dd MMM')}</span>
                                         </div>
                                     </CarouselItem>
