@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -38,11 +38,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { getRoutes, getBookings } from "@/lib/storage";
-import type { Route, Booking } from "@/lib/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Car, Star, Users } from "lucide-react";
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -106,6 +101,7 @@ function BajajBanner() {
 
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -128,6 +124,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   });
   
   function onSubmit(data: SearchFormValues) {
+    setIsSearching(true);
     const params = new URLSearchParams({
         from: data.fromLocation,
         to: data.toLocation,
@@ -244,9 +241,18 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                             )}
                         />
                     </div>
-                     <Button type="submit" className="w-full md:w-auto">
-                        <Search className="mr-2 h-4 w-4" />
-                        Search Rides
+                     <Button type="submit" className="w-full md:w-auto" disabled={isSearching}>
+                        {isSearching ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Searching...
+                            </>
+                        ) : (
+                            <>
+                                <Search className="mr-2 h-4 w-4" />
+                                Search Rides
+                            </>
+                        )}
                     </Button>
                 </form>
                 </Form>
