@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Users, Car, Star, Zap } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, IndianRupee, Users, Car, Star, Zap, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -134,7 +134,13 @@ function FeaturedRides({ routes }: { routes: Route[] }) {
                                     <CardContent className="flex-grow">
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="font-semibold text-lg">₹{route.price.toFixed(2)}</span>
-                                            <span className="text-muted-foreground">{format(new Date(route.travelDate), "dd MMM")}</span>
+                                            <div className="flex flex-col items-end text-muted-foreground">
+                                                <span>{format(new Date(route.travelDate), "dd MMM")}</span>
+                                                <div className="flex items-center gap-1 text-xs">
+                                                    <Clock className="h-3 w-3" />
+                                                    <span>{route.departureTime}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </CardContent>
                                     <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
@@ -182,7 +188,9 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         }
         
         const allRoutes = await getRoutes(true);
-        const promoted = allRoutes.filter(r => r.isPromoted);
+        const promoted = allRoutes.filter(r => r.isPromoted)
+            .sort((a, b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime())
+            .slice(0, 5);
         setPromotedRoutes(promoted);
     };
     checkProfileAndFetchData();
@@ -323,3 +331,5 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
+
+    
