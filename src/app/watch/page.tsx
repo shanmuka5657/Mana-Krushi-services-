@@ -17,6 +17,7 @@ const smartLinks = [
     { id: "so6", name: "Special Offer 6", href: "https://exportseats.com/khjxsva4?key=e2f5f35bde660d3decfd60ad68291dc1" },
     { id: "so7", name: "Special Offer 7", href: "https://exportseats.com/yscmceke?key=325c6afc1d7d83b30524372aa1e584c4" },
     { id: "so8", name: "Special Offer 8", href: "https://exportseats.com/vp1ge6k02?key=c489b06da0cf1ceed18ed4d4ad470ee4" },
+    { id: "so9", name: "Special Offer 9", href: "https://exportseats.com/krm37igh?key=c7763dda3bed41d5ec713d55160ce80b" },
 ];
 
 function SmartLinkCard({ name, href }: { name: string, href: string }) {
@@ -45,6 +46,7 @@ function SpecialOffer1Card() {
         const offer6 = smartLinks.find(link => link.id === 'so6');
         const offer7 = smartLinks.find(link => link.id === 'so7');
         const offer8 = smartLinks.find(link => link.id === 'so8');
+        const offer9 = smartLinks.find(link => link.id === 'so9');
 
         if (offer1) window.open(offer1.href, '_blank');
         if (offer2) window.open(offer2.href, '_blank');
@@ -54,6 +56,7 @@ function SpecialOffer1Card() {
         if (offer6) window.open(offer6.href, '_blank');
         if (offer7) window.open(offer7.href, '_blank');
         if (offer8) window.open(offer8.href, '_blank');
+        if (offer9) window.open(offer9.href, '_blank');
     };
 
     return (
