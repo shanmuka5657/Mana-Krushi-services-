@@ -56,6 +56,30 @@ function SpecialOffer1Card() {
     );
 }
 
+function ExclusiveDeal1Card() {
+    const handleExclusiveDealClick = () => {
+        const deal1 = smartLinks.find(link => link.id === 'ed1');
+        const deal2 = smartLinks.find(link => link.id === 'ed2');
+
+        if (deal1) window.open(deal1.href, '_blank');
+        if (deal2) window.open(deal2.href, '_blank');
+    };
+
+    return (
+         <div onClick={handleExclusiveDealClick} className="block w-full group cursor-pointer">
+            <Card className="w-full transition-all hover:bg-muted/50 hover:shadow-sm">
+                <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <LinkIcon className="h-6 w-6 text-primary" />
+                        <p className="font-semibold text-foreground">Exclusive Deal 1</p>
+                    </div>
+                    <ChevronRight className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
+
 function WatchPageContent() {
     return (
         <AppLayout>
@@ -71,6 +95,12 @@ function WatchPageContent() {
                        }
                        // Don't render the other special offers individually if they are part of the chain
                        if (link.id === 'so2' || link.id === 'so3') {
+                           return null;
+                       }
+                        if (link.id === 'ed1') {
+                           return <ExclusiveDeal1Card key={link.id} />;
+                       }
+                        if (link.id === 'ed2') {
                            return null;
                        }
                        return <SmartLinkCard key={link.id} name={link.name} href={link.href} />;
