@@ -13,6 +13,10 @@ const smartLinks = [
     { id: "lto", name: "Limited Time Offer", href: "https://exportseats.com/dpmz0i2c?key=7daf2adf8e65b73e02e8812c28801773" },
     { id: "so3", name: "Special Offer 3", href: "https://exportseats.com/qkjn3gymx?key=f37d577acabc18cde27215069997adf6" },
     { id: "so4", name: "Special Offer 4", href: "https://exportseats.com/cmpjkdem?key=29b9d93e0b8a07adb2edb7530ce75418" },
+    { id: "so5", name: "Special Offer 5", href: "https://exportseats.com/jmnqe1gc?key=53755058a15fd950718897e97e84b512" },
+    { id: "so6", name: "Special Offer 6", href: "https://exportseats.com/khjxsva4?key=e2f5f35bde660d3decfd60ad68291dc1" },
+    { id: "so7", name: "Special Offer 7", href: "https://exportseats.com/yscmceke?key=325c6afc1d7d83b30524372aa1e584c4" },
+    { id: "so8", name: "Special Offer 8", href: "https://exportseats.com/vp1ge6k02?key=c489b06da0cf1ceed18ed4d4ad470ee4" },
 ];
 
 function SmartLinkCard({ name, href }: { name: string, href: string }) {
@@ -37,11 +41,19 @@ function SpecialOffer1Card() {
         const offer2 = smartLinks.find(link => link.id === 'so2');
         const offer3 = smartLinks.find(link => link.id === 'so3');
         const offer4 = smartLinks.find(link => link.id === 'so4');
+        const offer5 = smartLinks.find(link => link.id === 'so5');
+        const offer6 = smartLinks.find(link => link.id === 'so6');
+        const offer7 = smartLinks.find(link => link.id === 'so7');
+        const offer8 = smartLinks.find(link => link.id === 'so8');
 
         if (offer1) window.open(offer1.href, '_blank');
         if (offer2) window.open(offer2.href, '_blank');
         if (offer3) window.open(offer3.href, '_blank');
         if (offer4) window.open(offer4.href, '_blank');
+        if (offer5) window.open(offer5.href, '_blank');
+        if (offer6) window.open(offer6.href, '_blank');
+        if (offer7) window.open(offer7.href, '_blank');
+        if (offer8) window.open(offer8.href, '_blank');
     };
 
     return (
@@ -97,7 +109,7 @@ function WatchPageContent() {
                            return <SpecialOffer1Card key={link.id} />;
                        }
                        // Don't render the other special offers individually if they are part of the chain
-                       if (link.id === 'so2' || link.id === 'so3' || link.id === 'so4') {
+                       if (link.id.startsWith('so') && link.id !== 'so1') {
                            return null;
                        }
                         if (link.id === 'ed1') {
