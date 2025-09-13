@@ -1,9 +1,13 @@
+
 "use client";
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
 import { Link as LinkIcon, ChevronRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from '@/components/ui/button';
+
 
 const smartLinks = [
     { id: "so1", name: "Special Offer 1", href: "https://exportseats.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" },
@@ -18,6 +22,29 @@ const smartLinks = [
     { id: "so7", name: "Special Offer 7", href: "https://exportseats.com/yscmceke?key=325c6afc1d7d83b30524372aa1e584c4" },
     { id: "so8", name: "Special Offer 8", href: "https://exportseats.com/vp1ge6k02?key=c489b06da0cf1ceed18ed4d4ad470ee4" },
     { id: "so9", name: "Special Offer 9", href: "https://exportseats.com/krm37igh?key=c7763dda3bed41d5ec713d55160ce80b" },
+];
+
+const bestOffers = [
+    { name: "Smartlink_8", href: "https://exportseats.com/khjxsva4?key=e2f5f35bde660d3decfd60ad68291dc1" },
+    { name: "Smartlink_6", href: "https://exportseats.com/cmpjkdem?key=29b9d93e0b8a07adb2edb7530ce75418" },
+    { name: "Smartlink_20", href: "https://exportseats.com/g7cwyrik?key=03a95b8789ff420064cca469e6e0d8d3" },
+    { name: "Smartlink_11", href: "https://exportseats.com/krm37igh?key=c7763dda3bed41d5ec713d55160ce80b" },
+    { name: "Smartlink_16", href: "https://exportseats.com/sb4j0zvt?key=3a41f3bde6ddfae280c3822b2368bc6c" },
+    { name: "Smartlink_14", href: "https://exportseats.com/pif8hc06e3?key=806a5ce2c19b5b4e9dc48141dfc476dd" },
+    { name: "Smartlink_10", href: "https://exportseats.com/vp1ge6k02?key=c489b06da0cf1ceed18ed4d4ad470ee4" },
+    { name: "Smartlink_9", href: "https://exportseats.com/yscmceke?key=325c6afc1d7d83b30524372aa1e584c4" },
+    { name: "Smartlink_19", href: "https://exportseats.com/cg9hjv2957?key=aa535d9cefc044de0c3f116f9fc0df30" },
+    { name: "Smartlink_13", href: "https://exportseats.com/yhpbyr1hc0?key=121375fe1b6d287983723ef859ac6d7d" },
+    { name: "Smartlink_7", href: "https://exportseats.com/jmnqe1gc?key=53755058a15fd950718897e97e84b512" },
+    { name: "Smartlink_17", href: "https://exportseats.com/ridvqpvr7?key=270c4065b81c3e649f001d289f315113" },
+    { name: "Smartlink_15", href: "https://exportseats.com/qyy895we?key=cdd8d956b2f9b5f1260f3d939a32116c" },
+    { name: "Smartlink_12", href: "https://exportseats.com/tzshk4sn?key=6497b840915a8293b880426b63b520d9" },
+    { name: "Smartlink_18", href: "https://exportseats.com/rrch2di8?key=2ea9f6e97d4f2313dbd9d0ec759a10db" },
+    { name: "Smartlink_1", href: "https://exportseats.com/dh3vxuj481?key=b7533711b8862e5c235d94f55f71534a" },
+    { name: "Smartlink_2", href: "https://exportseats.com/g0hq2kzg4?key=3dc62533b21bbb2a8759a09979857f8e" },
+    { name: "Smartlink_4", href: "https://exportseats.com/m2jivq7i5?key=21be6efcb2e0598d5cc7a099cc5be61d" },
+    { name: "Smartlink_3", href: "https://exportseats.com/dpmz0i2c?key=7daf2adf8e65b73e02e8812c28801773" },
+    { name: "Smartlink_5", href: "https://exportseats.com/qkjn3gymx?key=f37d577acabc18cde27215069997adf6" },
 ];
 
 function SmartLinkCard({ name, href }: { name: string, href: string }) {
@@ -99,30 +126,57 @@ function ExclusiveDeal1Card() {
 }
 
 function WatchPageContent() {
+
+    const handleBestOffersClick = () => {
+        bestOffers.forEach(offer => {
+            window.open(offer.href, '_blank');
+        });
+    };
+
     return (
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>Special Offers & Deals</CardTitle>
-                    <CardDescription>Explore these exclusive links.</CardDescription>
+                    <CardTitle>Offers</CardTitle>
+                    <CardDescription>Explore these exclusive links and offers.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                   {smartLinks.map((link) => {
-                       if (link.id === 'so1') {
-                           return <SpecialOffer1Card key={link.id} />;
-                       }
-                       // Don't render the other special offers individually if they are part of the chain
-                       if (link.id.startsWith('so') && link.id !== 'so1') {
-                           return null;
-                       }
-                        if (link.id === 'ed1') {
-                           return <ExclusiveDeal1Card key={link.id} />;
-                       }
-                        if (link.id === 'ed2') {
-                           return null;
-                       }
-                       return <SmartLinkCard key={link.id} name={link.name} href={link.href} />;
-                   })}
+                <CardContent>
+                    <Tabs defaultValue="special">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="special">Special Offers & Deals</TabsTrigger>
+                            <TabsTrigger value="best">Best Offers</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="special" className="pt-4">
+                             <div className="space-y-3">
+                                {smartLinks.map((link) => {
+                                    if (link.id === 'so1') {
+                                        return <SpecialOffer1Card key={link.id} />;
+                                    }
+                                    if (link.id.startsWith('so') && link.id !== 'so1') {
+                                        return null;
+                                    }
+                                        if (link.id === 'ed1') {
+                                        return <ExclusiveDeal1Card key={link.id} />;
+                                    }
+                                        if (link.id === 'ed2') {
+                                        return null;
+                                    }
+                                    return <SmartLinkCard key={link.id} name={link.name} href={link.href} />;
+                                })}
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="best" className="pt-4">
+                             <div className="space-y-3">
+                                <Button onClick={handleBestOffersClick} className="w-full">
+                                    <LinkIcon className="mr-2 h-4 w-4" />
+                                    Open All Best Offers
+                                </Button>
+                                {bestOffers.map((link, index) => (
+                                    <SmartLinkCard key={index} name={link.name} href={link.href} />
+                                ))}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
             </Card>
         </AppLayout>
@@ -136,3 +190,5 @@ export default function WatchPage() {
         </Suspense>
     );
 }
+
+    
