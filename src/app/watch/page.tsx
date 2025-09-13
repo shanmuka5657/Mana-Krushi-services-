@@ -12,6 +12,7 @@ const smartLinks = [
     { id: "so2", name: "Special Offer 2", href: "https://exportseats.com/m2jivq7i5?key=21be6efcb2e0598d5cc7a099cc5be61d" },
     { id: "lto", name: "Limited Time Offer", href: "https://exportseats.com/dpmz0i2c?key=7daf2adf8e65b73e02e8812c28801773" },
     { id: "so3", name: "Special Offer 3", href: "https://exportseats.com/qkjn3gymx?key=f37d577acabc18cde27215069997adf6" },
+    { id: "so4", name: "Special Offer 4", href: "https://exportseats.com/cmpjkdem?key=29b9d93e0b8a07adb2edb7530ce75418" },
 ];
 
 function SmartLinkCard({ name, href }: { name: string, href: string }) {
@@ -35,10 +36,12 @@ function SpecialOffer1Card() {
         const offer1 = smartLinks.find(link => link.id === 'so1');
         const offer2 = smartLinks.find(link => link.id === 'so2');
         const offer3 = smartLinks.find(link => link.id === 'so3');
+        const offer4 = smartLinks.find(link => link.id === 'so4');
 
         if (offer1) window.open(offer1.href, '_blank');
         if (offer2) window.open(offer2.href, '_blank');
         if (offer3) window.open(offer3.href, '_blank');
+        if (offer4) window.open(offer4.href, '_blank');
     };
 
     return (
@@ -94,7 +97,7 @@ function WatchPageContent() {
                            return <SpecialOffer1Card key={link.id} />;
                        }
                        // Don't render the other special offers individually if they are part of the chain
-                       if (link.id === 'so2' || link.id === 'so3') {
+                       if (link.id === 'so2' || link.id === 'so3' || link.id === 'so4') {
                            return null;
                        }
                         if (link.id === 'ed1') {
