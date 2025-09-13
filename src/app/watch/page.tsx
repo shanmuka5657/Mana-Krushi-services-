@@ -47,6 +47,39 @@ const bestOffers = [
     { name: "Smartlink_5", href: "https://exportseats.com/qkjn3gymx?key=f37d577acabc18cde27215069997adf6" },
 ];
 
+const bumperOffers = [
+    { name: 'Bumper Offer 1', href: 'https://exportseats.com/khjxsva4?key=e2f5f35bde660d3decfd60ad68291dc1' },
+    { name: 'Bumper Offer 2', href: 'https://exportseats.com/cmpjkdem?key=29b9d93e0b8a07adb2edb7530ce75418' },
+    { name: 'Bumper Offer 3', href: 'https://exportseats.com/g7cwyrik?key=03a95b8789ff420064cca469e6e0d8d3' },
+    { name: 'Bumper Offer 4', href: 'https://exportseats.com/krm37igh?key=c7763dda3bed41d5ec713d55160ce80b' },
+    { name: 'Bumper Offer 5', href: 'https://exportseats.com/sb4j0zvt?key=3a41f3bde6ddfae280c3822b2368bc6c' },
+    { name: 'Bumper Offer 6', href: 'https://exportseats.com/pif8hc06e3?key=806a5ce2c19b5b4e9dc48141dfc476dd' },
+    { name: 'Bumper Offer 7', href: 'https://exportseats.com/vp1ge6k02?key=c489b06da0cf1ceed18ed4d4ad470ee4' },
+    { name: 'Bumper Offer 8', href: 'https://exportseats.com/yscmceke?key=325c6afc1d7d83b30524372aa1e584c4' },
+    { name: 'Bumper Offer 9', href: 'https://exportseats.com/cg9hjv2957?key=aa535d9cefc044de0c3f116f9fc0df30' },
+    { name: 'Bumper Offer 10', href: 'https://exportseats.com/yhpbyr1hc0?key=121375fe1b6d287983723ef859ac6d7d' },
+    { name: 'Bumper Offer 11', href: 'https://exportseats.com/jmnqe1gc?key=53755058a15fd950718897e97e84b512' },
+    { name: 'Bumper Offer 12', href: 'https://exportseats.com/ridvqpvr7?key=270c4065b81c3e649f001d289f315113' },
+    { name: 'Bumper Offer 13', href: 'https://exportseats.com/qyy895we?key=cdd8d956b2f9b5f1260f3d939a32116c' },
+    { name: 'Bumper Offer 14', href: 'https://exportseats.com/tzshk4sn?key=6497b840915a8293b880426b63b520d9' },
+    { name: 'Bumper Offer 15', href: 'https://exportseats.com/rrch2di8?key=2ea9f6e97d4f2313dbd9d0ec759a10db' },
+    { name: 'Bumper Offer 16', href: 'https://exportseats.com/gn0rtp68h?key=38b9ae24fed8c22d67b7cda26b9f9185' },
+    { name: 'Bumper Offer 17', href: 'https://exportseats.com/r063ky9w?key=f9b0b6300cbf3d57324614a2d90f413f' },
+    { name: 'Bumper Offer 18', href: 'https://exportseats.com/xs9sbkqc8?key=a44ee277986f2ccdc153fd06cd2285dd' },
+    { name: 'Bumper Offer 19', href: 'https://exportseats.com/u73vga5j?key=d0d54abbdb12ed811cf25ed960bdf59f' },
+    { name: 'Bumper Offer 20', href: 'https://exportseats.com/iq8f7uk8ij?key=0ecfa4f0c7dc637ddf44da1b78b2d903' },
+    { name: 'Bumper Offer 21', href: 'https://exportseats.com/jxdwpjxc?key=8562e589a2f895a6a12e5363c982dc2d' },
+    { name: 'Bumper Offer 22', href: 'https://exportseats.com/vkjz7dn73?key=7176105a20b0a64185eaae28824c5968' },
+    { name: 'Bumper Offer 23', href: 'https://exportseats.com/qp903znizm?key=655122a1d4e9439c8542dcc0989b5baa' },
+    { name: 'Bumper Offer 24', href: 'https://exportseats.com/hfugq62u?key=fed2d0b5fc3b21b5a5be8857f795d410' },
+    { name: 'Bumper Offer 25', href: 'https://exportseats.com/u84i3t7wm?key=1336d3b6c2c7e7955dc2fcb79a6e2153' },
+    { name: 'Bumper Offer 26', href: 'https://exportseats.com/buuq41vt5?key=32b03f1855563c3adc0beb3fcc2a7690' },
+    { name: 'Bumper Offer 27', href: 'https://exportseats.com/kk4i62rfe6?key=75a0be631d8f31823386826601228548' },
+    { name: 'Bumper Offer 28', href: 'https://exportseats.com/yp328dgin?key=f6fec4ba6327dc952736839f224b7aec' },
+    { name: 'Bumper Offer 29', href: 'https://exportseats.com/yhyzuqqa?key=787f92844e2098bedeebc799636e4e91' },
+    { name: 'Bumper Offer 30', href: 'https://exportseats.com/emxqiu94?key=baa83d37604740c29c944b9dbf02683b' },
+];
+
 function SmartLinkCard({ name, href }: { name: string, href: string }) {
     return (
         <a href={href} target="_blank" rel="noopener noreferrer" className="block w-full group">
@@ -132,6 +165,12 @@ function WatchPageContent() {
             window.open(offer.href, '_blank');
         });
     };
+    
+    const handleBumperOfferClick = () => {
+        bumperOffers.forEach(offer => {
+            window.open(offer.href, '_blank');
+        })
+    }
 
     return (
         <AppLayout>
@@ -142,9 +181,10 @@ function WatchPageContent() {
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="special">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="special">Special Offers & Deals</TabsTrigger>
                             <TabsTrigger value="best">Best Offers</TabsTrigger>
+                            <TabsTrigger value="bumper">Bumper Offer</TabsTrigger>
                         </TabsList>
                         <TabsContent value="special" className="pt-4">
                              <div className="space-y-3">
@@ -176,6 +216,17 @@ function WatchPageContent() {
                                 ))}
                             </div>
                         </TabsContent>
+                        <TabsContent value="bumper" className="pt-4">
+                            <div className="space-y-3">
+                                <Button onClick={handleBumperOfferClick} className="w-full">
+                                    <LinkIcon className="mr-2 h-4 w-4" />
+                                    Open All Bumper Offers
+                                </Button>
+                                {bumperOffers.map((link, index) => (
+                                    <SmartLinkCard key={index} name={link.name} href={link.href} />
+                                ))}
+                            </div>
+                        </TabsContent>
                     </Tabs>
                 </CardContent>
             </Card>
@@ -190,5 +241,3 @@ export default function WatchPage() {
         </Suspense>
     );
 }
-
-    
