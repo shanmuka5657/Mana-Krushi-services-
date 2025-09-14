@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
@@ -329,17 +330,17 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={showPromotionDialog} onOpenChange={setShowPromotionDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+      <Dialog open={showPromotionDialog} onOpenChange={setShowPromotionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
               <Sparkles className="text-yellow-500" />
               Promote Your Ride?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
+            </DialogTitle>
+            <DialogDescription>
               Promote your ride to highlight it in search results and provide passengers with ride insurance. This requires a one-time fee of ₹100 for this specific ride.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
             <div className="pt-4">
               <p className="text-sm font-semibold text-foreground mb-2">This is how your ride will look to passengers:</p>
               <Image 
@@ -351,15 +352,17 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                 data-ai-hint="promoted ride"
               />
             </div>
-          <AlertDialogFooter>
-            <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
+          <DialogFooter>
+            <DialogClose asChild>
+                <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
+            </DialogClose>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
               Yes, Pay ₹100 to Promote
             </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <PaymentDialog 
         isOpen={isPaymentDialogOpen}
