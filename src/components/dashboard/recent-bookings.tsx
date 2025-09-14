@@ -58,7 +58,9 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [reportText, setReportText] = useState("");
   const { toast } = useToast();
-  const [dialogAction, setDialogAction] = useState<'view' | 'report' | 'cancel' | null>(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -90,7 +92,6 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
     }
     const updatedBookingData = { ...selectedBooking, report: reportText };
 
-    // Remove undefined values before saving to Firestore
     const updatedBooking = Object.fromEntries(
       Object.entries(updatedBookingData).filter(([, value]) => value !== undefined)
     );
@@ -106,15 +107,10 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       description: "Thank you for your feedback. The owner has been notified.",
     });
     setReportText("");
-    setDialogAction(null);
+    setIsReportOpen(false);
     setSelectedBooking(null);
   };
   
-  const handleOpenDialog = (booking: Booking, action: 'view' | 'report' | 'cancel') => {
-      setSelectedBooking(booking);
-      setDialogAction(action);
-  }
-
   const handleCancelBooking = async () => {
     if (!selectedBooking) return;
     
@@ -132,7 +128,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       variant: 'destructive'
     });
     
-    setDialogAction(null);
+    setIsCancelOpen(false);
     setSelectedBooking(null);
   };
 
@@ -165,12 +161,12 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   }
 
   return (
+    <>
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Bookings</CardTitle>
       </CardHeader>
       <CardContent>
-        <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedBooking(null)}>
           <div className="w-full overflow-x-auto">
             <Table className="min-w-[600px]">
               <TableHeader>
@@ -207,31 +203,25 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <DialogTrigger asChild>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleOpenDialog(booking, 'view')}
+                              onClick={() => { setSelectedBooking(booking); setIsViewOpen(true); }}
                             >
                               View
                             </Button>
-                          </DialogTrigger>
                           <Button variant="secondary" size="sm" onClick={() => router.push(`/track/${booking.id}`)}>
                               <Map className="mr-2 h-4 w-4" /> Track
                           </Button>
                           {status === 'Completed' && !booking.report && (
-                              <DialogTrigger asChild>
-                                  <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'report')}>
-                                      <AlertCircle className="h-4 w-4 mr-2" /> Report
-                                  </Button>
-                              </DialogTrigger>
+                                <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsReportOpen(true); }}>
+                                    <AlertCircle className="h-4 w-4 mr-2" /> Report
+                                </Button>
                           )}
                           {canCancel && (
-                             <DialogTrigger asChild>
-                                <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'cancel')}>
+                                <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsCancelOpen(true); }}>
                                   <Trash2 className="h-4 w-4 mr-2" /> Cancel
                                 </Button>
-                             </DialogTrigger>
                           )}
                         </div>
                       </TableCell>
@@ -247,166 +237,170 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
               </TableBody>
             </Table>
           </div>
-
-          {selectedBooking && (
-            <DialogContent className="max-h-[90vh] flex flex-col">
-                {dialogAction === 'view' ? (
-                    <>
-                        <DialogHeader>
-                            <DialogTitle>Details for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
-                            <DialogDescription>
-                            Passenger, driver and vehicle information for your trip.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4 overflow-y-auto pr-2">
-                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-start gap-3">
-                                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Passenger</p>
-                                        <p className="font-medium">{selectedBooking.client}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Mobile</p>
-                                        <div className="flex items-center gap-1 flex-wrap">
-                                            <p className="font-medium">{selectedBooking.mobile}</p>
-                                            {getProfileForUser(selectedBooking.clientEmail)?.mobileVerified && (
-                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                           </div>
-                           <hr/>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-start gap-3">
-                                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Destination</p>
-                                        <p className="font-medium">{selectedBooking.destination}</p>
-                                    </div>
-                                </div>
-                                 <div className="flex items-start gap-3">
-                                    <Milestone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Distance</p>
-                                        <p className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : (getDistanceForBooking(selectedBooking) ? `${getDistanceForBooking(selectedBooking)?.toFixed(0)} km` : 'N/A')}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-start gap-3">
-                                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Driver</p>
-                                        <p className="font-medium">{selectedBooking.driverName || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                 <div className="flex items-start gap-3">
-                                    <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Driver Mobile</p>
-                                         <div className="flex items-center gap-1 flex-wrap">
-                                            <p className="font-medium">{selectedBooking.driverMobile || 'N/A'}</p>
-                                            {getProfileForUser(selectedBooking.driverEmail)?.mobileVerified && (
-                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                 <div className="flex items-start gap-3">
-                                    <Car className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Vehicle Type</p>
-                                        <p className="font-medium">{selectedBooking.vehicleType || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Vehicle Number</p>
-                                        <p className="font-medium">{selectedBooking.vehicleNumber || 'N/A'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                             <hr />
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex items-start gap-3">
-                                    <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Departure</p>
-                                        <p className="font-medium">{format(new Date(selectedBooking.departureDate), "dd MMM yyyy")}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Time</p>
-                                        <p className="font-medium">{format(new Date(selectedBooking.departureDate), "HH:mm")}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                         <DialogFooter className="mt-auto pt-4 border-t">
-                            <DialogClose asChild>
-                                <Button variant="outline" className="w-full">Close</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </>
-                ) : dialogAction === 'report' ? (
-                    <>
-                         <DialogHeader>
-                            <DialogTitle>Report an issue for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
-                            <DialogDescription>
-                                Your feedback is anonymous and helps us improve our service.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4">
-                            <Textarea 
-                                placeholder="Describe the issue... (e.g., driver behavior, vehicle condition, late arrival)"
-                                value={reportText}
-                                onChange={(e) => setReportText(e.target.value)}
-                                rows={5}
-                            />
-                        </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="ghost" onClick={() => setReportText('')}>Cancel</Button>                            </DialogClose>
-                            <Button onClick={handleReportSubmit}>Submit Report</Button>
-                        </DialogFooter>
-                    </>
-                ) : (
-                   <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                        This action cannot be undone. This will permanently cancel your booking.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <DialogClose asChild>
-                            <AlertDialogCancel>Back</AlertDialogCancel>
-                        </DialogClose>
-                        <AlertDialogAction onClick={handleCancelBooking}>Yes, Cancel Booking</AlertDialogAction>
-                    </AlertDialogFooter>
-                   </AlertDialogContent>
-                )}
-            </DialogContent>
-          )}
-        </Dialog>
       </CardContent>
     </Card>
+
+    {/* View Dialog */}
+    <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+       {selectedBooking && (
+            <DialogContent className="max-h-[90vh] flex flex-col">
+                 <DialogHeader>
+                    <DialogTitle>Details for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
+                    <DialogDescription>
+                    Passenger, driver and vehicle information for your trip.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4 overflow-y-auto pr-2">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                            <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Passenger</p>
+                                <p className="font-medium">{selectedBooking.client}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Mobile</p>
+                                <div className="flex items-center gap-1 flex-wrap">
+                                    <p className="font-medium">{selectedBooking.mobile}</p>
+                                    {getProfileForUser(selectedBooking.clientEmail)?.mobileVerified && (
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                            <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                   </div>
+                   <hr/>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Destination</p>
+                                <p className="font-medium">{selectedBooking.destination}</p>
+                            </div>
+                        </div>
+                         <div className="flex items-start gap-3">
+                            <Milestone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Distance</p>
+                                <p className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : (getDistanceForBooking(selectedBooking) ? `${getDistanceForBooking(selectedBooking)?.toFixed(0)} km` : 'N/A')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                            <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Driver</p>
+                                <p className="font-medium">{selectedBooking.driverName || 'N/A'}</p>
+                            </div>
+                        </div>
+                         <div className="flex items-start gap-3">
+                            <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Driver Mobile</p>
+                                 <div className="flex items-center gap-1 flex-wrap">
+                                    <p className="font-medium">{selectedBooking.driverMobile || 'N/A'}</p>
+                                    {getProfileForUser(selectedBooking.driverEmail)?.mobileVerified && (
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                            <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                         <div className="flex items-start gap-3">
+                            <Car className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Vehicle Type</p>
+                                <p className="font-medium">{selectedBooking.vehicleType || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Vehicle Number</p>
+                                <p className="font-medium">{selectedBooking.vehicleNumber || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                     <hr />
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                            <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Departure</p>
+                                <p className="font-medium">{format(new Date(selectedBooking.departureDate), "dd MMM yyyy")}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div>
+                                <p className="text-sm text-muted-foreground">Time</p>
+                                <p className="font-medium">{format(new Date(selectedBooking.departureDate), "HH:mm")}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <DialogFooter className="mt-auto pt-4 border-t">
+                    <DialogClose asChild>
+                        <Button variant="outline" className="w-full">Close</Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+       )}
+    </Dialog>
+
+    {/* Report Dialog */}
+     <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+        {selectedBooking && (
+             <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Report an issue for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
+                    <DialogDescription>
+                        Your feedback is anonymous and helps us improve our service.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                    <Textarea 
+                        placeholder="Describe the issue... (e.g., driver behavior, vehicle condition, late arrival)"
+                        value={reportText}
+                        onChange={(e) => setReportText(e.target.value)}
+                        rows={5}
+                    />
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="ghost" onClick={() => setReportText('')}>Cancel</Button>
+                    </DialogClose>
+                    <Button onClick={handleReportSubmit}>Submit Report</Button>
+                </DialogFooter>
+            </DialogContent>
+        )}
+     </Dialog>
+
+    {/* Cancel AlertDialog */}
+    <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                This action cannot be undone. This will permanently cancel your booking.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Back</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancelBooking}>Yes, Cancel Booking</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
 export default RecentBookings;
-
-    
