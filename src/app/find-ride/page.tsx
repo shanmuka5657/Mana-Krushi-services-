@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRoutes, getBookings, getAllProfiles } from '@/lib/storage';
 import type { Route, Booking, Profile } from '@/lib/types';
-import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles } from 'lucide-react';
+import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -179,12 +180,20 @@ function FindRideResultsPage() {
                                         </div>
                                         </div>
                                     </div>
-                                    {route.isPromoted && (
-                                        <Badge variant="secondary" className="mt-3 bg-yellow-200 text-yellow-800 border-yellow-300">
-                                            <Sparkles className="mr-1 h-3 w-3" />
-                                            Promoted
-                                        </Badge>
-                                    )}
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {route.isPromoted && (
+                                            <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
+                                                <Sparkles className="mr-1 h-3 w-3" />
+                                                Promoted
+                                            </Badge>
+                                        )}
+                                        {route.isPromoted && (
+                                            <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
+                                                <Shield className="mr-1 h-3 w-3" />
+                                                Insurance: Yes
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </CardContent>
                                 <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-3">

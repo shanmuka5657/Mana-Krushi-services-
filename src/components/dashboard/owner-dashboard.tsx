@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee, Sparkles } from "lucide-react";
 import { format, addMonths } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -336,14 +336,14 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote Your Ride?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Promoted rides are highlighted in search results to attract more passengers. This requires a one-time fee of ₹10. Would you like to promote this ride?
+              Promote your ride to highlight it in search results and provide passengers with ride insurance. This requires a one-time fee of ₹100 for this specific ride.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
-              Yes, Pay ₹10 to Promote
+              Yes, Pay ₹100 to Promote
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -353,9 +353,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         isOpen={isPaymentDialogOpen}
         onOpenChange={setIsPaymentDialogOpen}
         onPaymentSuccess={handlePaymentSuccess}
-        amount="10.00"
-        title="Promote Ride"
-        description="This is a one-time fee to highlight this specific ride in search results."
+        amount="100.00"
+        title="Promote Ride & Add Insurance"
+        description="This one-time fee of ₹100 will feature your ride at the top of search results and provide insurance coverage for this trip."
       />
       
       <IndusIndBanner />
