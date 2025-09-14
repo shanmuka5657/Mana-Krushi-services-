@@ -1,8 +1,8 @@
-
 import { z } from 'zod';
 
 export type Booking = {
   id: string;
+  bookingCode?: string;
   client: string;
   clientEmail?: string;
   destination: string;

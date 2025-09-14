@@ -54,7 +54,7 @@ function ReportsPageContent() {
                             <div className="flex justify-between items-center mb-2">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <AlertCircle className="h-4 w-4" />
-                                    <span>Report for Booking {report.id}</span>
+                                    <span>Report for Booking {report.bookingCode || report.id}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Calendar className="h-4 w-4" />

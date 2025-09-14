@@ -30,6 +30,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
+const generateBookingCode = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'MKS-';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 export default function BookRidePage() {
   const router = useRouter();
   const params = useParams();
@@ -155,6 +164,7 @@ export default function BookRidePage() {
 
     const bookingData: Booking = {
         id: newBookingRef.id,
+        bookingCode: generateBookingCode(),
         client: passengerProfile.name,
         clientEmail: passengerEmail,
         destination: `${route.fromLocation} to ${route.toLocation}`,

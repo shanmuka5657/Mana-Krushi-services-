@@ -55,7 +55,7 @@ function PaymentsPageContent() {
                         <TableBody>
                             {payments.length > 0 ? payments.map(payment => (
                                 <TableRow key={payment.id}>
-                                    <TableCell className="font-mono">{payment.id}</TableCell>
+                                    <TableCell className="font-mono">{payment.bookingCode || payment.id}</TableCell>
                                     <TableCell className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" />{payment.client}</TableCell>
                                     <TableCell>{format(new Date(payment.departureDate), 'PPP')}</TableCell>
                                     <TableCell><IndianRupee className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.amount.toFixed(2)}</TableCell>

@@ -36,7 +36,7 @@ function AdminAllBookingsPage() {
 
     const handleExport = () => {
         const dataToExport = bookings.map(b => ({
-            'Booking ID': b.id,
+            'Booking ID': b.bookingCode || b.id,
             'Client': b.client,
             'Destination': b.destination,
             'Departure Date': format(new Date(b.departureDate), 'yyyy-MM-dd HH:mm'),

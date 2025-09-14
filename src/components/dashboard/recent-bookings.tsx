@@ -166,7 +166,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                     const status = getBookingStatus(booking);
                     return (
                     <TableRow key={booking.id}>
-                      <TableCell className="font-medium font-mono text-xs">{booking.id}</TableCell>
+                      <TableCell className="font-medium font-mono text-xs">{booking.bookingCode || booking.id}</TableCell>
                       <TableCell className="whitespace-nowrap">{booking.destination}</TableCell>
                       <TableCell className="whitespace-nowrap">{format(new Date(booking.departureDate), "dd MMM, HH:mm")}</TableCell>
                       <TableCell className="text-right whitespace-nowrap">
@@ -221,7 +221,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                 {dialogAction === 'view' ? (
                     <>
                         <DialogHeader>
-                            <DialogTitle>Details for booking {selectedBooking.id}</DialogTitle>
+                            <DialogTitle>Details for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
                             <DialogDescription>
                             Passenger, driver and vehicle information for your trip.
                             </DialogDescription>
@@ -344,7 +344,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                 ) : (
                     <>
                          <DialogHeader>
-                            <DialogTitle>Report an issue for booking {selectedBooking.id}</DialogTitle>
+                            <DialogTitle>Report an issue for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
                             <DialogDescription>
                                 Your feedback is anonymous and helps us improve our service.
                             </DialogDescription>
@@ -373,4 +373,3 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
-
