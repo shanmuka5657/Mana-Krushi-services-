@@ -305,21 +305,21 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 <p className="font-medium">{selectedBooking.driverName || 'N/A'}</p>
                             </div>
                         </div>
-                         <div className="flex items-start gap-3">
-                            <a href={`tel:${selectedBooking.driverMobile}`} className="flex items-start gap-3 group">
-                                <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1 group-hover:text-primary transition-colors" />
+                         <div className="flex items-center justify-between">
+                            <div className="flex items-start gap-3">
+                                <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Driver Mobile</p>
-                                    <div className="flex items-center gap-1 flex-wrap">
-                                        <p className="font-medium group-hover:text-primary transition-colors">{selectedBooking.driverMobile || 'N/A'}</p>
-                                        {getProfileForUser(selectedBooking.driverEmail)?.mobileVerified && (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                            </Badge>
-                                        )}
-                                    </div>
+                                    <p className="font-medium">{selectedBooking.driverMobile || 'N/A'}</p>
                                 </div>
-                            </a>
+                            </div>
+                            {selectedBooking.driverMobile && (
+                                <a href={`tel:${selectedBooking.driverMobile}`}>
+                                    <Button variant="outline" size="icon">
+                                        <Phone className="h-4 w-4" />
+                                    </Button>
+                                </a>
+                            )}
                         </div>
                          <div className="flex items-start gap-3">
                             <Car className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
@@ -424,3 +424,5 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
+
+    
