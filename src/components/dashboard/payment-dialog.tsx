@@ -48,7 +48,7 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
         pn: PAYEE_NAME,
         am: AMOUNT,
         cu: "INR",
-        tn: `Fee for ${PAYEE_NAME}`
+        tn: `Fee for ${PAYEE_NAME} Ride Promotion`
     });
 
     const paymentUrl = `${method.scheme}://pay?${upiParams.toString()}`;
@@ -70,7 +70,7 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
       onPaymentSuccess();
       toast({
         title: "Payment Successful!",
-        description: "Your one-time fee has been paid.",
+        description: "Your one-time promotion fee has been paid.",
         action: <CheckCircle className="text-green-500" />
       });
     }, 5000); // Wait 5 seconds to simulate verification
@@ -80,9 +80,9 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>One-Time Maintenance Fee</DialogTitle>
+          <DialogTitle>One-Time Promotion Fee</DialogTitle>
           <DialogDescription>
-            To list your routes, a one-time fee of ₹50 is required for 3 months of service. Please select a payment method.
+            To promote this ride, a one-time fee of ₹50 is required. Please select a payment method.
           </DialogDescription>
         </DialogHeader>
         

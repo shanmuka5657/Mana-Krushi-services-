@@ -225,12 +225,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     setRouteDataToSubmit(routeDataWithPromotion);
 
     if (isPromoted) {
-      const hasActivePlan = profile?.planExpiryDate && new Date(profile.planExpiryDate) > new Date();
-      if (hasActivePlan) {
-        handleRouteSubmission(routeDataWithPromotion);
-      } else {
-        setIsPaymentDialogOpen(true);
-      }
+      setIsPaymentDialogOpen(true);
     } else {
       handleRouteSubmission(routeDataWithPromotion);
     }
@@ -304,14 +299,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }
   
   const handlePaymentSuccess = async () => {
-    if (routeDataToSubmit && profile) {
-      // Update profile with new expiry date
-      const newExpiryDate = addMonths(new Date(), 3);
-      const updatedProfile: Profile = { ...profile, planExpiryDate: newExpiryDate };
-      await saveProfile(updatedProfile);
-      setProfile(updatedProfile); // Update local profile state
-      
-      // Now submit the route
+    if (routeDataToSubmit) {
+      // Logic for handling a successful ONE-TIME promotion payment
+      // For now, it just submits the route as promoted.
+      // If you wanted to, you could save the transaction ID or something similar here.
       handleRouteSubmission(routeDataToSubmit);
     }
   }
@@ -342,7 +333,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote Your Ride?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Promoted rides are highlighted in search results to attract more passengers. Would you like to promote this ride?
+              Promoted rides are highlighted in search results to attract more passengers. This requires a one-time fee. Would you like to promote this ride?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
