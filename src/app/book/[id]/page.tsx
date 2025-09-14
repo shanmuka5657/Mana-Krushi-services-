@@ -30,13 +30,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
-const generateBookingCode = (): string => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = 'MKS-';
-    for (let i = 0; i < 6; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+const generateBookingCode = (bookingCount: number): string => {
+    const nextId = (bookingCount + 1).toString().padStart(4, '0');
+    return `MKS-${nextId}`;
 }
 
 export default function BookRidePage() {
@@ -161,10 +157,13 @@ export default function BookRidePage() {
 
     const db = getFirestore(getApp());
     const newBookingRef = doc(collection(db, 'bookings'));
+    
+    const allBookingsForCount = await getBookings(true);
+    const newBookingCode = generateBookingCode(allBookingsForCount.length);
 
     const bookingData: Booking = {
         id: newBookingRef.id,
-        bookingCode: generateBookingCode(),
+        bookingCode: newBookingCode,
         client: passengerProfile.name,
         clientEmail: passengerEmail,
         destination: `${route.fromLocation} to ${route.toLocation}`,
@@ -452,3 +451,5 @@ export default function BookRidePage() {
     </>
   );
 }
+
+    
