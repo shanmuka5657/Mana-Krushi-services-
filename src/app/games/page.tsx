@@ -7,8 +7,8 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell } from 'lucide-react';
-import { format } from 'date-fns';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer } from 'lucide-react';
+import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 
 const games = [
@@ -41,6 +41,7 @@ function GamesPageContent() {
     const router = useRouter();
     const [latestBooking, setLatestBooking] = useState<Booking | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [timeLeft, setTimeLeft] = useState('');
 
     useEffect(() => {
         const fetchLatestBooking = async () => {
@@ -67,6 +68,32 @@ function GamesPageContent() {
 
         fetchLatestBooking();
     }, []);
+    
+    useEffect(() => {
+        if (!latestBooking) return;
+
+        const intervalId = setInterval(() => {
+            const now = new Date();
+            const departure = new Date(latestBooking.departureDate);
+            const diff = differenceInSeconds(departure, now);
+
+            if (diff <= 0) {
+                setTimeLeft("Your ride is departing now!");
+                clearInterval(intervalId);
+                return;
+            }
+
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+
+            setTimeLeft(
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+            );
+        }, 1000);
+
+        return () => clearInterval(intervalId);
+    }, [latestBooking]);
 
     const handleCallDriver = () => {
         if (latestBooking?.driverMobile) {
@@ -106,6 +133,12 @@ function GamesPageContent() {
                             <Card className="bg-muted/50">
                                 <CardHeader>
                                     <CardTitle>Your Next Ride</CardTitle>
+                                    {timeLeft && (
+                                        <div className="flex items-center gap-2 text-lg font-mono text-primary pt-2">
+                                            <Timer className="h-5 w-5" />
+                                            <span>{timeLeft}</span>
+                                        </div>
+                                    )}
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <div className="font-semibold text-md text-primary">{latestBooking.destination}</div>

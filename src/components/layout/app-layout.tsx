@@ -26,6 +26,7 @@ import {
   Link,
   MapPin,
   Gamepad2,
+  Timer,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
