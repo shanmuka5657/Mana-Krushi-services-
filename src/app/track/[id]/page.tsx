@@ -43,10 +43,20 @@ export default function TrackRidePage() {
                     setDriverProfile(allProfiles.find(p => p.email === foundBooking.driverEmail) || null);
                 }
                 
-                // Construct Google Maps Embed URL
+                // Construct OpenStreetMap URL
                 const [from, to] = foundBooking.destination.split(' to ');
-                const embedMapUrl = `https://www.google.com/maps/embed/v1/directions?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
-                setMapUrl(embedMapUrl);
+                const embedMapUrl = `https://www.openstreetmap.org/export/embed.html?layer=mapnik&bbox=-74.00,40.71,-73.98,40.72`; // Placeholder bbox
+                
+                // A better approach would be to get coords and form a directions URL,
+                // but this works without geocoding. This will center on a generic location.
+                // A real implementation would geocode 'from' and 'to'.
+                const directionsUrl = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${encodeURIComponent(from)};${encodeURIComponent(to)}`;
+                // For embedding, we can't directly show directions easily without JS libs,
+                // so we will show a map centered on a general area.
+                // The directions link is a good alternative if embedding is not a must.
+                // For a simple embed, we just show one of the locations.
+                setMapUrl(`https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker=${liveLocation?.latitude || 17.38},${liveLocation?.longitude || 78.48}`);
+
 
             }
             setIsLoaded(true);
@@ -56,6 +66,11 @@ export default function TrackRidePage() {
 
         const unsubscribe = getLiveLocation(bookingId, (location) => {
             setLiveLocation(location);
+             if (booking) {
+                const [from, to] = booking.destination.split(' to ');
+                // Update map URL when live location is available
+                setMapUrl(`https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker=${location?.latitude || 17.38},${location?.longitude || 78.48}`);
+            }
         });
 
         // This is a placeholder for the driver's side location updates
@@ -78,7 +93,7 @@ export default function TrackRidePage() {
             }
         };
 
-    }, [params.id]);
+    }, [params.id, booking]);
 
     const handleShare = async () => {
         if (!booking) return;
@@ -151,9 +166,12 @@ export default function TrackRidePage() {
                     {liveLocation && (
                         <div 
                             className="absolute bg-blue-500 rounded-full w-4 h-4 border-2 border-white shadow-lg"
-                            // In a real app, you would convert lat/lng to screen coordinates. This is a placeholder.
+                            // This is a very rough approximation. Real implementation would need map library functions.
                             style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} 
                         >
+                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                                Driver
+                             </div>
                              <span className="sr-only">Driver's live location</span>
                         </div>
                     )}
