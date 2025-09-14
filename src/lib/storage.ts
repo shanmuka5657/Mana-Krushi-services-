@@ -83,7 +83,7 @@ export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'pa
     try {
         window.sessionStorage.setItem('currentUserEmail', email);
         window.sessionStorage.setItem('currentUserName', name);
-        window.session_storage.setItem('currentUserRole', role);
+        window.sessionStorage.setItem('currentUserRole', role);
     } catch (error) {
         console.error("Failed to save current user to sessionStorage", error);
     }
