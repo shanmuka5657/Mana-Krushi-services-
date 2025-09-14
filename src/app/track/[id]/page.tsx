@@ -1,14 +1,14 @@
 
 "use client";
 
-import { useState, useEffect, useMemo, memo } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { getBookings, getAllProfiles, stopTracking as stopTrackingInDb, updateLocation as updateLocationInDb } from '@/lib/storage';
+import { getBookings, getAllProfiles } from '@/lib/storage';
 import type { Booking, Profile, LiveLocation } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, MapPin, Loader2, Pin } from 'lucide-react';
+import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { getDatabase, ref, onValue, set } from "firebase/database";
