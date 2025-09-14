@@ -1,15 +1,30 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getBookings, getAllProfiles, getLiveLocation, stopTracking, updateLocation } from '@/lib/storage';
 import type { Booking, Profile, LiveLocation } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, MapPin, Loader2 } from 'lucide-react';
+import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, MapPin, Loader2, Pin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { getDatabase, ref, onValue } from "firebase/database";
+import { getApp } from "firebase/app";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+
+
+// This component will auto-adjust the map view
+function ChangeView({ center, zoom }: { center: L.LatLngExpression, zoom: number }) {
+  const map = useMap();
+  map.setView(center, zoom);
+  return null;
+}
 
 export default function TrackRidePage() {
     const router = useRouter();
@@ -19,8 +34,9 @@ export default function TrackRidePage() {
     const [passengerProfile, setPassengerProfile] = useState<Profile | null>(null);
     const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [mapUrl, setMapUrl] = useState<string | null>(null);
     const [liveLocation, setLiveLocation] = useState<LiveLocation | null>(null);
+    const [mapCenter, setMapCenter] = useState<L.LatLngExpression>([20.5937, 78.9629]); // Default to India
+    const [mapZoom, setMapZoom] = useState(5);
 
     useEffect(() => {
         const bookingId = typeof params.id === 'string' ? params.id : '';
@@ -42,43 +58,41 @@ export default function TrackRidePage() {
                 if(foundBooking.driverEmail) {
                     setDriverProfile(allProfiles.find(p => p.email === foundBooking.driverEmail) || null);
                 }
-                
-                // Construct OpenStreetMap URL
-                const [from, to] = foundBooking.destination.split(' to ');
-                const embedMapUrl = `https://www.openstreetmap.org/export/embed.html?layer=mapnik&bbox=-74.00,40.71,-73.98,40.72`; // Placeholder bbox
-                
-                // A better approach would be to get coords and form a directions URL,
-                // but this works without geocoding. This will center on a generic location.
-                // A real implementation would geocode 'from' and 'to'.
-                const directionsUrl = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${encodeURIComponent(from)};${encodeURIComponent(to)}`;
-                // For embedding, we can't directly show directions easily without JS libs,
-                // so we will show a map centered on a general area.
-                // The directions link is a good alternative if embedding is not a must.
-                // For a simple embed, we just show one of the locations.
-                setMapUrl(`https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker=${liveLocation?.latitude || 17.38},${liveLocation?.longitude || 78.48}`);
-
-
             }
             setIsLoaded(true);
         };
         
         fetchBookingAndProfiles();
 
-        const unsubscribe = getLiveLocation(bookingId, (location) => {
-            setLiveLocation(location);
-             if (booking) {
-                const [from, to] = booking.destination.split(' to ');
-                // Update map URL when live location is available
-                setMapUrl(`https://www.openstreetmap.org/export/embed.html?layer=mapnik&marker=${location?.latitude || 17.38},${location?.longitude || 78.48}`);
+        const app = getApp();
+        const db = getDatabase(app);
+        const rideRef = ref(db, `rides/${bookingId}/actors/driver`);
+
+        const unsubscribe = onValue(rideRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.lat && data.lon) {
+                 const location: LiveLocation = {
+                    latitude: data.lat,
+                    longitude: data.lon,
+                    timestamp: new Date(data.ts),
+                };
+                setLiveLocation(location);
+                setMapCenter([data.lat, data.lon]);
+                setMapZoom(15);
             }
         });
 
-        // This is a placeholder for the driver's side location updates
-        // In a real app, the driver's device would call this function periodically
+        // Simulate driver movement for demo purposes
         const simulateDriverMovement = async () => {
             if (process.env.NODE_ENV === 'development') {
                  console.log("Simulating driver location update for booking: ", bookingId);
-                 await updateLocation(bookingId, { latitude: 17.3850, longitude: 78.4867 }); // Example: Hyderabad
+                 // Simulate movement around a central point
+                 const newLat = 17.3850 + (Math.random() - 0.5) * 0.01;
+                 const newLon = 78.4867 + (Math.random() - 0.5) * 0.01;
+                 
+                 const db_write = getDatabase(getApp());
+                 const node = ref(db_write, `rides/${bookingId}/actors/driver`);
+                 await set(node, { lat: newLat, lon: newLon, ts: Date.now() });
             }
         }
         const intervalId = setInterval(simulateDriverMovement, 10000); // update every 10 seconds
@@ -87,13 +101,9 @@ export default function TrackRidePage() {
         return () => {
             unsubscribe();
             clearInterval(intervalId);
-            if (bookingId) {
-                // In a real app, this would be called when the ride is completed/cancelled
-                // stopTracking(bookingId);
-            }
         };
 
-    }, [params.id, booking]);
+    }, [params.id]);
 
     const handleShare = async () => {
         if (!booking) return;
@@ -109,7 +119,6 @@ export default function TrackRidePage() {
                 await navigator.share(shareData);
                 toast({ title: 'Ride details shared successfully!' });
             } else {
-                // Fallback for browsers that don't support navigator.share
                 await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
                 toast({ title: 'Ride link copied to clipboard!' });
             }
@@ -121,6 +130,15 @@ export default function TrackRidePage() {
             });
         }
     };
+    
+    const driverIcon = useMemo(() => {
+        return new L.Icon({
+            iconUrl: '/car-pin.png', // A custom icon would be better
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+        });
+    }, []);
 
     if (!isLoaded) {
         return (
@@ -140,7 +158,7 @@ export default function TrackRidePage() {
 
     return (
         <div className="min-h-screen bg-muted/20">
-            <header className="bg-background shadow-sm p-4 flex items-center gap-4 sticky top-0 z-10">
+            <header className="bg-background shadow-sm p-4 flex items-center gap-4 sticky top-0 z-40">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft />
                 </Button>
@@ -148,33 +166,21 @@ export default function TrackRidePage() {
             </header>
             
             <main className="flex flex-col">
-                <div className="relative w-full h-64 md:h-96">
-                    {mapUrl ? (
-                         <iframe
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0 }}
-                            loading="lazy"
-                            allowFullScreen
-                            src={mapUrl}>
-                        </iframe>
-                    ) : (
-                        <div className="w-full h-full bg-muted flex items-center justify-center">
-                            <p>Loading map...</p>
-                        </div>
-                    )}
-                    {liveLocation && (
-                        <div 
-                            className="absolute bg-blue-500 rounded-full w-4 h-4 border-2 border-white shadow-lg"
-                            // This is a very rough approximation. Real implementation would need map library functions.
-                            style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} 
-                        >
-                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
-                                Driver
-                             </div>
-                             <span className="sr-only">Driver's live location</span>
-                        </div>
-                    )}
+                <div className="relative w-full h-64 md:h-96 z-0">
+                    <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        {liveLocation && (
+                            <Marker position={[liveLocation.latitude, liveLocation.longitude]}>
+                                <Popup>
+                                    Driver's Location <br /> Last seen: {liveLocation.timestamp.toLocaleTimeString()}
+                                </Popup>
+                            </Marker>
+                        )}
+                        <ChangeView center={mapCenter} zoom={mapZoom} />
+                    </MapContainer>
                 </div>
 
                 <div className="p-4 space-y-4">
@@ -263,4 +269,3 @@ export default function TrackRidePage() {
         </div>
     );
 }
-    

@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Aliasing for leaflet compatibility with Next.js
+    config.resolve.alias['leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css'] = 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+    config.resolve.alias['leaflet/dist/leaflet.css'] = 'leaflet/dist/leaflet.css';
+    return config;
+  },
 };
 
 export default nextConfig;

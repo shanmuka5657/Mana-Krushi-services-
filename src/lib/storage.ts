@@ -3,6 +3,8 @@
 import type { Booking, Route, Profile, LiveLocation } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, updateLiveLocationInFirestore, deleteLiveLocationInFirestore, getLiveLocationFromFirestore } from './firebase';
+import { getDatabase, ref, set } from "firebase/database";
+import { getApp } from "firebase/app";
 
 
 const isBrowser = typeof window !== "undefined";
@@ -77,17 +79,45 @@ export const getAllProfiles = async (): Promise<Profile[]> => {
 // --- Live Location Tracking ---
 export const updateLocation = async (bookingId: string, location: { latitude: number; longitude: number; }) => {
     if (!isBrowser) return;
-    await updateLiveLocationInFirestore(bookingId, location);
+    
+    // Using Realtime Database for this
+    const db = getDatabase(getApp());
+    const node = ref(db, `rides/${bookingId}/actors/driver`);
+    await set(node, { lat: location.latitude, lon: location.longitude, ts: Date.now() });
 }
 
 export const stopTracking = async (bookingId: string) => {
     if (!isBrowser) return;
-    await deleteLiveLocationInFirestore(bookingId);
+    // Remove from Realtime Database
+    const db = getDatabase(getApp());
+    const node = ref(db, `rides/${bookingId}/actors/driver`);
+    await set(node, null);
 }
 
 export const getLiveLocation = (bookingId: string, callback: (location: LiveLocation | null) => void): (() => void) => {
     if (!isBrowser) return () => {};
-    return getLiveLocationFromFirestore(bookingId, callback);
+    // This function now just wraps the RTDB listener setup
+    const db = getDatabase(getApp());
+    const rideRef = ref(db, `rides/${bookingId}/actors/driver`);
+
+    const unsubscribe = onValue(rideRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.lat && data.lon) {
+             const location: LiveLocation = {
+                latitude: data.lat,
+                longitude: data.lon,
+                timestamp: new Date(data.ts),
+            };
+            callback(location);
+        } else {
+            callback(null);
+        }
+    }, (error) => {
+        console.error("Error listening to live location:", error);
+        callback(null);
+    });
+
+    return unsubscribe;
 }
 
 
@@ -97,7 +127,7 @@ export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'pa
     try {
         window.sessionStorage.setItem('currentUserEmail', email);
         window.sessionStorage.setItem('currentUserName', name);
-        window.sessionStorage.setItem('currentUserRole', role);
+        window.session_storage.setItem('currentUserRole', role);
     } catch (error) {
         console.error("Failed to save current user to sessionStorage", error);
     }
