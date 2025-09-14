@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee, Sparkles } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee, Sparkles, Star } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
@@ -46,6 +46,7 @@ import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
 import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 
 const ownerFormSchema = z.object({
@@ -75,6 +76,23 @@ export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
 interface OwnerDashboardProps {
   onRouteAdded: (newRoute: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => void;
   onSwitchTab: (tab: string) => void;
+}
+
+const getTravelDuration = (departureTime?: string, arrivalTime?: string): string => {
+    if (!departureTime || !arrivalTime) return "";
+    try {
+        const departure = new Date(`1970-01-01T${departureTime}:00`);
+        const arrival = new Date(`1970-01-01T${arrivalTime}:00`);
+        const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
+        if (diffMinutes < 0) return "";
+
+        const hours = Math.floor(diffMinutes / 60);
+        
+        return `${hours}h`;
+
+    } catch (e) {
+        return "";
+    }
 }
 
 function IndusIndBanner() {
@@ -192,6 +210,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         }
         if(userProfile?.email) {
             form.setValue('ownerEmail', userProfile.email);
+        }
+        if(userProfile) {
+            setProfile(userProfile);
         }
     }
     loadProfile();
@@ -339,28 +360,76 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote Your Ride?
             </DialogTitle>
             <DialogDescription>
-              Promote your ride to highlight it in search results and provide passengers with ride insurance. This requires a one-time fee of ₹100 for this specific ride.
+              Promote your ride for ₹100 to highlight it in search results and provide passengers with ride insurance.
             </DialogDescription>
           </DialogHeader>
            <div className="pt-4 space-y-2">
-              <p className="text-sm font-semibold text-foreground">This is how your ride will look to passengers:</p>
-              <Card className="border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10 p-4">
-                  <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
-                          <Sparkles className="mr-1 h-3 w-3" />
-                          Promoted
-                      </Badge>
-                      <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
-                          <Shield className="mr-1 h-3 w-3" />
-                          Insurance: Yes
-                      </Badge>
-                  </div>
-                   <div className="text-sm text-muted-foreground mt-2">Your ride will be featured at the top of search results.</div>
-              </Card>
+              <p className="text-sm font-semibold text-foreground">Here's how your ride will look to passengers:</p>
+                <Card className="overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
+                    <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                                <div>
+                                    <div className="font-semibold">{routeDataToSubmit?.departureTime}</div>
+                                    <div className="text-sm text-muted-foreground">{getTravelDuration(routeDataToSubmit?.departureTime, routeDataToSubmit?.arrivalTime)}</div>
+                                    <div className="font-semibold mt-2">{routeDataToSubmit?.arrivalTime}</div>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                <div className="w-px h-10 bg-border my-1"></div>
+                                <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                </div>
+                                <div>
+                                    <div className="font-semibold">{routeDataToSubmit?.fromLocation}</div>
+                                     <div className="text-sm text-muted-foreground">{routeDataToSubmit?.distance ? routeDataToSubmit.distance.toFixed(0) : 0} km</div>
+                                    <div className="font-semibold mt-2">{routeDataToSubmit?.toLocation}</div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                            <div className="text-lg font-bold">
+                                ₹{routeDataToSubmit?.price.toFixed(2)}
+                            </div>
+                            <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                <Users className="h-4 w-4" />
+                                <span>{routeDataToSubmit?.availableSeats} seats left</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
+                                <Sparkles className="mr-1 h-3 w-3" />
+                                Promoted
+                            </Badge>
+                            <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
+                                <Shield className="mr-1 h-3 w-3" />
+                                Insurance: Yes
+                            </Badge>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={profile?.selfieDataUrl} />
+                                <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <div className="font-semibold text-sm">{routeDataToSubmit?.driverName}</div>
+                                <div className="flex items-center gap-1">
+                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                    <span className="text-xs text-muted-foreground">{routeDataToSubmit?.rating.toFixed(1)}</span>
+                                </div>
+                            </div>
+                        </div>
+                         <div className="text-right">
+                           <div className="text-xs font-medium">{profile?.vehicleType}</div>
+                           <Car className="text-muted-foreground h-5 w-5 ml-auto" />
+                        </div>
+                    </CardFooter>
+                </Card>
             </div>
           <DialogFooter>
             <DialogClose asChild>
-                <Button variant="outline">No, Thanks</Button>
+                <Button variant="ghost">No, Thanks</Button>
             </DialogClose>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
@@ -663,3 +732,4 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </>
   );
 }
+
