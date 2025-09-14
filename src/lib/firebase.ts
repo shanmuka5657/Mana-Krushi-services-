@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate } from "firebase/firestore";
-import type { Booking, Route, Profile } from "./types";
+import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc } from "firebase/firestore";
+import type { Booking, Route, Profile, LiveLocation } from "./types";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -40,6 +40,7 @@ try {
 const bookingsCollection = db ? collection(db, "bookings") : null;
 const routesCollection = db ? collection(db, "routes") : null;
 const profilesCollection = db ? collection(db, "profiles") : null;
+const liveLocationsCollection = db ? collection(db, "live-locations") : null;
 
 // --- Bookings ---
 export const getBookingsFromFirestore = async (): Promise<Booking[]> => {
@@ -166,4 +167,42 @@ export const saveProfileToFirestore = async (profile: Profile) => {
     // Remove undefined values before saving to Firestore
     const profileToSave = Object.fromEntries(Object.entries(profile).filter(([_, v]) => v !== undefined));
     await setDoc(docRef, profileToSave, { merge: true });
+}
+
+// --- Live Location ---
+export const updateLiveLocationInFirestore = async (bookingId: string, location: {latitude: number, longitude: number}) => {
+    if (!liveLocationsCollection || !db) return;
+    const docRef = doc(db, "live-locations", bookingId);
+    const locationData: LiveLocation = { ...location, timestamp: new Date() };
+    await setDoc(docRef, locationData, { merge: true });
+}
+
+export const deleteLiveLocationInFirestore = async (bookingId: string) => {
+    if (!liveLocationsCollection || !db) return;
+    const docRef = doc(db, "live-locations", bookingId);
+    await deleteDoc(docRef);
+}
+
+export const getLiveLocationFromFirestore = (bookingId: string, callback: (location: LiveLocation | null) => void): (() => void) => {
+    if (!liveLocationsCollection || !db) return () => {};
+    const docRef = doc(db, "live-locations", bookingId);
+
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const location: LiveLocation = {
+                latitude: data.latitude,
+                longitude: data.longitude,
+                timestamp: data.timestamp.toDate(),
+            };
+            callback(location);
+        } else {
+            callback(null);
+        }
+    }, (error) => {
+        console.error("Error listening to live location:", error);
+        callback(null);
+    });
+
+    return unsubscribe;
 }

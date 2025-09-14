@@ -1,8 +1,8 @@
 
 
-import type { Booking, Route, Profile } from "./types";
+import type { Booking, Route, Profile, LiveLocation } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, updateLiveLocationInFirestore, deleteLiveLocationInFirestore, getLiveLocationFromFirestore } from './firebase';
 
 
 const isBrowser = typeof window !== "undefined";
@@ -72,6 +72,22 @@ export const getAllProfiles = async (): Promise<Profile[]> => {
     // This function needs to be public to allow fetching driver avatars.
     // Security should be handled by Firestore rules if sensitive data is involved.
     return await getAllProfilesFromFirestore();
+}
+
+// --- Live Location Tracking ---
+export const updateLocation = async (bookingId: string, location: { latitude: number; longitude: number; }) => {
+    if (!isBrowser) return;
+    await updateLiveLocationInFirestore(bookingId, location);
+}
+
+export const stopTracking = async (bookingId: string) => {
+    if (!isBrowser) return;
+    await deleteLiveLocationInFirestore(bookingId);
+}
+
+export const getLiveLocation = (bookingId: string, callback: (location: LiveLocation | null) => void): (() => void) => {
+    if (!isBrowser) return () => {};
+    return getLiveLocationFromFirestore(bookingId, callback);
 }
 
 

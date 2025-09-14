@@ -192,7 +192,7 @@ export default function BookRidePage() {
         description: `Your ride for ${numberOfSeats} seat(s) has been successfully booked.`,
     });
 
-    router.push('/bookings?role=passenger');
+    router.push(`/track/${newBooking.id}`);
     setIsBooking(false);
   };
   
@@ -244,7 +244,7 @@ export default function BookRidePage() {
         description: `Your booking now has ${totalSeats} seat(s).`,
     });
 
-    router.push('/bookings?role=passenger');
+    router.push(`/track/${updatedBooking.id}`);
     setIsBooking(false);
     setExistingBooking(null);
   };
@@ -452,4 +452,3 @@ export default function BookRidePage() {
   );
 }
 
-    

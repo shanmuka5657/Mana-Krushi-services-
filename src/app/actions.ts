@@ -7,7 +7,7 @@ import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
-import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, updateLocation as updateLocationInDb, stopTracking as stopTrackingInDb } from "@/lib/storage";
 
 
 const SuggestDestinationsInput = z.object({
@@ -118,4 +118,12 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
     console.error('Error deleting account:', e);
     return { success: false, error: 'An unexpected error occurred.' };
   }
+}
+
+export async function updateLocation(bookingId: string, location: { latitude: number, longitude: number }) {
+  await updateLocationInDb(bookingId, location);
+}
+
+export async function stopTracking(bookingId: string) {
+  await stopTrackingInDb(bookingId);
 }

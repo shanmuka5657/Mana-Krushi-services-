@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export type Booking = {
@@ -65,6 +66,12 @@ export type Profile = {
 export type MovieSite = {
     name: string;
     link: string;
+}
+
+export type LiveLocation = {
+    latitude: number;
+    longitude: number;
+    timestamp: Date;
 }
 
 

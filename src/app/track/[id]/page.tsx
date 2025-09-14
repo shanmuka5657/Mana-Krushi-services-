@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getBookings, getAllProfiles } from '@/lib/storage';
-import type { Booking, Profile } from '@/lib/types';
+import { getBookings, getAllProfiles, getLiveLocation, stopTracking, updateLocation } from '@/lib/storage';
+import type { Booking, Profile, LiveLocation } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, MapPin, Loader2 } from 'lucide-react';
@@ -20,10 +20,16 @@ export default function TrackRidePage() {
     const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [mapUrl, setMapUrl] = useState<string | null>(null);
+    const [liveLocation, setLiveLocation] = useState<LiveLocation | null>(null);
 
     useEffect(() => {
+        const bookingId = typeof params.id === 'string' ? params.id : '';
+        if (!bookingId) {
+            setIsLoaded(true);
+            return;
+        };
+
         const fetchBookingAndProfiles = async () => {
-            const bookingId = typeof params.id === 'string' ? params.id : '';
             const allBookings = await getBookings(true);
             const foundBooking = allBookings.find(b => b.id === bookingId);
 
@@ -45,7 +51,33 @@ export default function TrackRidePage() {
             }
             setIsLoaded(true);
         };
+        
         fetchBookingAndProfiles();
+
+        const unsubscribe = getLiveLocation(bookingId, (location) => {
+            setLiveLocation(location);
+        });
+
+        // This is a placeholder for the driver's side location updates
+        // In a real app, the driver's device would call this function periodically
+        const simulateDriverMovement = async () => {
+            if (process.env.NODE_ENV === 'development') {
+                 console.log("Simulating driver location update for booking: ", bookingId);
+                 await updateLocation(bookingId, { latitude: 17.3850, longitude: 78.4867 }); // Example: Hyderabad
+            }
+        }
+        const intervalId = setInterval(simulateDriverMovement, 10000); // update every 10 seconds
+
+
+        return () => {
+            unsubscribe();
+            clearInterval(intervalId);
+            if (bookingId) {
+                // In a real app, this would be called when the ride is completed/cancelled
+                // stopTracking(bookingId);
+            }
+        };
+
     }, [params.id]);
 
     const handleShare = async () => {
@@ -116,6 +148,15 @@ export default function TrackRidePage() {
                             <p>Loading map...</p>
                         </div>
                     )}
+                    {liveLocation && (
+                        <div 
+                            className="absolute bg-blue-500 rounded-full w-4 h-4 border-2 border-white shadow-lg"
+                            // In a real app, you would convert lat/lng to screen coordinates. This is a placeholder.
+                            style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} 
+                        >
+                             <span className="sr-only">Driver's live location</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-4 space-y-4">
@@ -160,7 +201,7 @@ export default function TrackRidePage() {
                                         <p className="font-semibold">{booking.driverName}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                <a href={`tel:${booking.driverMobile}`} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
                                     <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                                     <div>
                                         <p className="text-sm text-muted-foreground">Driver Mobile</p>
@@ -173,7 +214,7 @@ export default function TrackRidePage() {
                                             )}
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
                         </CardContent>
                     </Card>
