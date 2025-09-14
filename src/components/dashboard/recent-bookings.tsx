@@ -113,7 +113,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const handleCancelBooking = async () => {
     if (!selectedBooking) return;
     
-    const updatedBooking: Booking = { ...selectedBooking, status: "Cancelled", cancellationReason: cancellationReason || undefined };
+    const updatedBooking: Booking = { ...selectedBooking, status: "Cancelled", cancellationReason: cancellationReason || "No reason provided" };
     
     const allBookings = await getBookings();
     const updatedBookings = allBookings.map((b) => b.id === updatedBooking.id ? updatedBooking : b);
@@ -164,6 +164,11 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       });
       return relatedRoute?.distance;
   }
+  
+  const maskPhoneNumber = (phone: string | undefined): string => {
+      if (!phone || phone.length < 10) return 'N/A';
+      return `${phone.substring(0, 5)}xxxxx`;
+  };
 
   return (
     <>
@@ -310,13 +315,14 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Driver Mobile</p>
-                                    <p className="font-medium">{selectedBooking.driverMobile || 'N/A'}</p>
+                                    <p className="font-medium">{maskPhoneNumber(selectedBooking.driverMobile)}</p>
                                 </div>
                             </div>
                             {selectedBooking.driverMobile && (
                                 <a href={`tel:${selectedBooking.driverMobile}`}>
-                                    <Button variant="outline" size="icon">
-                                        <Phone className="h-4 w-4" />
+                                    <Button variant="outline">
+                                        <Phone className="mr-2 h-4 w-4" />
+                                        Call
                                     </Button>
                                 </a>
                             )}
