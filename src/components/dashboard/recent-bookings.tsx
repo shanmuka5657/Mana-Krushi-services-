@@ -373,3 +373,4 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
+
