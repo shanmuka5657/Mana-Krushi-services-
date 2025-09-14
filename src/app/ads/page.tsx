@@ -9,6 +9,7 @@ import { MonitorPlay, Link as LinkIcon, ChevronRight, Timer } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import Image from 'next/image';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const newSmartLinks = [
     { name: "Smartlink_1", href: "https://markswaitingrouge.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" },
@@ -235,6 +236,8 @@ function AdsPageContent() {
 		'params' : {}
 	  };
     `;
+    
+    const { adBanner1 } = placeholderImages;
 
     return (
         <AppLayout>
@@ -253,7 +256,14 @@ function AdsPageContent() {
                 <Card>
                     <CardContent className="p-4">
                         <a href="https://markswaitingrouge.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" target="_blank" rel="noopener noreferrer">
-                            <Image src="https://picsum.photos/seed/adbanner1/728/90" alt="Click here" width={728} height={90} className="w-full h-auto rounded-md" data-ai-hint="advertisement banner" />
+                            <Image 
+                                src={`https://picsum.photos/seed/${adBanner1.seed}/${adBanner1.width}/${adBanner1.height}`}
+                                alt="Click here" 
+                                width={adBanner1.width}
+                                height={adBanner1.height}
+                                className="w-full h-auto rounded-md" 
+                                data-ai-hint={adBanner1.hint}
+                            />
                         </a>
                     </CardContent>
                 </Card>
@@ -319,7 +329,7 @@ function AdsPageContent() {
                 {/* Native Banner Ad */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Native Banner Ad</CardTitle>
+                        <CardTitle>Recommended For You</CardTitle>
                     </CardHeader>
                     <CardContent>
                          <Script async={true} data-cfasync="false" src="//exportseats.com/143386acea5fdd4b99b856043235c82b/invoke.js" strategy="lazyOnload" />
@@ -339,5 +349,3 @@ export default function AdsPage() {
         </Suspense>
     );
 }
-
-    

@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { calculateDistance } from '../actions';
 import { useToast } from '@/hooks/use-toast';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
@@ -137,6 +138,8 @@ function FindRideResultsPage() {
     if (!isLoaded) {
         return <AppLayout><div>Loading results...</div></AppLayout>
     }
+    
+    const { noRoutes } = placeholderImages;
 
     return (
         <AppLayout>
@@ -258,12 +261,12 @@ function FindRideResultsPage() {
                     <Card>
                         <CardContent className="py-12 flex flex-col items-center justify-center text-center">
                             <Image 
-                                src="https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png"
-                                width={200}
-                                height={150}
+                                src={noRoutes.url}
+                                width={noRoutes.width}
+                                height={noRoutes.height}
                                 alt="No routes found"
                                 className="mb-4"
-                                data-ai-hint="empty map"
+                                data-ai-hint={noRoutes.hint}
                             />
                             <h3 className="text-xl font-semibold">No Rides Found</h3>
                             <p className="text-muted-foreground mt-2 max-w-md">

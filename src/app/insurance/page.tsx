@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { ChevronRight, Shield, User, FileText, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const insuranceProviders = [
     {
@@ -49,6 +50,7 @@ function InsuranceProviderListItem({ name, href, description }: { name: string, 
 }
 
 function SampleInsuranceCertificate() {
+    const { ackoLogo } = placeholderImages;
     return (
         <Card className="mb-8">
             <CardHeader>
@@ -66,7 +68,7 @@ function SampleInsuranceCertificate() {
                              <p className="text-sm text-muted-foreground">Policy #TRIP-123456789</p>
                         </div>
                         <div className="w-24 h-12 relative flex-shrink-0">
-                            <Image src="https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg" alt="Acko Logo" layout="fill" objectFit="contain" />
+                            <Image src={ackoLogo.url} alt="Acko Logo" layout="fill" objectFit="contain" />
                         </div>
                     </div>
                     <Separator />

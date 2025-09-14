@@ -1,0 +1,23 @@
+{
+    "adBanner1": {
+        "seed": "adbanner1",
+        "width": 728,
+        "height": 90,
+        "hint": "advertisement banner"
+    },
+    "noRoutes": {
+        "url": "https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png",
+        "width": 200,
+        "height": 150,
+        "hint": "empty map"
+    },
+    "logo": {
+        "url": "https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png",
+        "width": 120,
+        "height": 120,
+        "hint": "logo"
+    },
+    "ackoLogo": {
+        "url": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg"
+    }
+}

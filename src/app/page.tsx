@@ -4,19 +4,21 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import placeholderImages from "@/lib/placeholder-images.json";
 
 export default function WelcomePage() {
   const router = useRouter();
+  const { logo } = placeholderImages;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
       <div className="flex flex-col items-center gap-6">
         <Image
-          src="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png"
+          src={logo.url}
           alt="Mana Krushi Services Logo"
-          width={120}
-          height={120}
-          data-ai-hint="logo"
+          width={logo.width}
+          height={logo.height}
+          data-ai-hint={logo.hint}
         />
         <div>
           <h1 className="text-4xl font-bold tracking-tight">
