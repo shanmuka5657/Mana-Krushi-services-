@@ -78,8 +78,16 @@ function BookingsPageContent() {
                 userBookings = allBookings.filter(b => b.driverName === currentUserName);
             }
             
-            userBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-            setBookings(userBookings);
+            const now = new Date();
+            const upcomingBookings = userBookings
+                .filter(b => new Date(b.departureDate) >= now)
+                .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+
+            const pastBookings = userBookings
+                .filter(b => new Date(b.departureDate) < now)
+                .sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+            
+            setBookings([...upcomingBookings, ...pastBookings]);
             setIsLoaded(true);
         };
         fetchBookings();
@@ -100,8 +108,16 @@ function BookingsPageContent() {
             userBookings = updatedAllBookings.filter(b => b.driverName === currentUserName);
         }
         
-        userBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-        setBookings(userBookings);
+        const now = new Date();
+        const upcomingBookings = userBookings
+            .filter(b => new Date(b.departureDate) >= now)
+            .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+
+        const pastBookings = userBookings
+            .filter(b => new Date(b.departureDate) < now)
+            .sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+
+        setBookings([...upcomingBookings, ...pastBookings]);
     };
 
     if (!isLoaded) {
