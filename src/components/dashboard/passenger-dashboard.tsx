@@ -381,6 +381,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [locations, setLocations] = useState<string[]>([]);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -390,6 +391,21 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         }
     }
     checkProfile();
+  }, []);
+  
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const allRoutes = await getRoutes(true);
+      const allLocations = new Set<string>();
+      allRoutes.forEach(route => {
+        allLocations.add(route.fromLocation);
+        allLocations.add(route.toLocation);
+        route.pickupPoints?.forEach(p => allLocations.add(p));
+        route.dropOffPoints?.forEach(d => allLocations.add(d));
+      });
+      setLocations(Array.from(allLocations));
+    };
+    fetchLocations();
   }, []);
   
   const form = useForm<SearchFormValues>({
@@ -449,7 +465,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                                 <FormControl>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Starting location" {...field} className="pl-10" />
+                                    <Input placeholder="Starting location" {...field} className="pl-10" list="locations-list" />
                                 </div>
                                 </FormControl>
                                 <FormMessage />
@@ -465,13 +481,16 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                                 <FormControl>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Destination" {...field} className="pl-10" />
+                                    <Input placeholder="Destination" {...field} className="pl-10" list="locations-list" />
                                 </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                             )}
                         />
+                        <datalist id="locations-list">
+                          {locations.map(loc => <option key={loc} value={loc} />)}
+                        </datalist>
                          <FormField
                             control={form.control}
                             name="travelDate"
