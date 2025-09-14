@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Popover,
@@ -45,6 +45,7 @@ import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
+import { Badge } from "../ui/badge";
 
 
 const ownerFormSchema = z.object({
@@ -341,20 +342,25 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote your ride to highlight it in search results and provide passengers with ride insurance. This requires a one-time fee of ₹100 for this specific ride.
             </DialogDescription>
           </DialogHeader>
-            <div className="pt-4">
-              <p className="text-sm font-semibold text-foreground mb-2">This is how your ride will look to passengers:</p>
-              <Image 
-                src="https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg"
-                alt="Promoted Ride Example"
-                width={1200}
-                height={350}
-                className="rounded-lg border w-full h-auto"
-                data-ai-hint="promoted ride"
-              />
+           <div className="pt-4 space-y-2">
+              <p className="text-sm font-semibold text-foreground">This is how your ride will look to passengers:</p>
+              <Card className="border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10 p-4">
+                  <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
+                          <Sparkles className="mr-1 h-3 w-3" />
+                          Promoted
+                      </Badge>
+                      <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
+                          <Shield className="mr-1 h-3 w-3" />
+                          Insurance: Yes
+                      </Badge>
+                  </div>
+                   <div className="text-sm text-muted-foreground mt-2">Your ride will be featured at the top of search results.</div>
+              </Card>
             </div>
           <DialogFooter>
             <DialogClose asChild>
-                <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
+                <Button variant="outline">No, Thanks</Button>
             </DialogClose>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
