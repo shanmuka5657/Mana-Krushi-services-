@@ -1,8 +1,8 @@
 
 
-import type { Booking, Route, Profile, LiveLocation } from "./types";
+import type { Booking, Route, Profile } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, updateLiveLocationInFirestore, deleteLiveLocationInFirestore, getLiveLocationFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 
@@ -74,50 +74,6 @@ export const getAllProfiles = async (): Promise<Profile[]> => {
     // This function needs to be public to allow fetching driver avatars.
     // Security should be handled by Firestore rules if sensitive data is involved.
     return await getAllProfilesFromFirestore();
-}
-
-// --- Live Location Tracking ---
-export const updateLocation = async (bookingId: string, location: { latitude: number; longitude: number; }) => {
-    if (!isBrowser) return;
-    
-    // Using Realtime Database for this
-    const db = getDatabase(getApp());
-    const node = ref(db, `rides/${bookingId}/actors/driver`);
-    await set(node, { lat: location.latitude, lon: location.longitude, ts: Date.now() });
-}
-
-export const stopTracking = async (bookingId: string) => {
-    if (!isBrowser) return;
-    // Remove from Realtime Database
-    const db = getDatabase(getApp());
-    const node = ref(db, `rides/${bookingId}/actors/driver`);
-    await set(node, null);
-}
-
-export const getLiveLocation = (bookingId: string, callback: (location: LiveLocation | null) => void): (() => void) => {
-    if (!isBrowser) return () => {};
-    // This function now just wraps the RTDB listener setup
-    const db = getDatabase(getApp());
-    const rideRef = ref(db, `rides/${bookingId}/actors/driver`);
-
-    const unsubscribe = onValue(rideRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && data.lat && data.lon) {
-             const location: LiveLocation = {
-                latitude: data.lat,
-                longitude: data.lon,
-                timestamp: new Date(data.ts),
-            };
-            callback(location);
-        } else {
-            callback(null);
-        }
-    }, (error) => {
-        console.error("Error listening to live location:", error);
-        callback(null);
-    });
-
-    return unsubscribe;
 }
 
 

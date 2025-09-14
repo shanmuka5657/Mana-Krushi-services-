@@ -68,12 +68,6 @@ export type MovieSite = {
     link: string;
 }
 
-export type LiveLocation = {
-    latitude: number;
-    longitude: number;
-    timestamp: Date;
-}
-
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({

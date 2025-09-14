@@ -220,9 +220,6 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             >
                               View
                             </Button>
-                          <Button variant="secondary" size="sm" onClick={() => router.push(`/track/${booking.id}`)}>
-                              <Map className="mr-2 h-4 w-4" /> Track
-                          </Button>
                           {status === 'Completed' && !booking.report && (
                                 <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsReportOpen(true); }}>
                                     <AlertCircle className="h-4 w-4 mr-2" /> Report
@@ -430,5 +427,3 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
-
-    
