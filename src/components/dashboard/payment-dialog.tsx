@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -20,6 +21,9 @@ interface PaymentDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onPaymentSuccess: () => void;
+  amount: string;
+  title: string;
+  description: string;
 }
 
 const paymentMethods = [
@@ -31,9 +35,8 @@ const paymentMethods = [
 
 const UPI_ID = "7569114679@ybl";
 const PAYEE_NAME = "Mana Krushi Services";
-const AMOUNT = "50.00";
 
-export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }: PaymentDialogProps) {
+export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, amount, title, description }: PaymentDialogProps) {
   const [selectedMethod, setSelectedMethod] = useState("gpay");
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
@@ -46,9 +49,9 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
     const upiParams = new URLSearchParams({
         pa: UPI_ID,
         pn: PAYEE_NAME,
-        am: AMOUNT,
+        am: amount,
         cu: "INR",
-        tn: `Fee for ${PAYEE_NAME} Ride Promotion`
+        tn: `Fee for ${PAYEE_NAME} - ${title}`
     });
 
     const paymentUrl = `${method.scheme}://pay?${upiParams.toString()}`;
@@ -68,11 +71,6 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
     setTimeout(() => {
       setIsProcessing(false);
       onPaymentSuccess();
-      toast({
-        title: "Payment Successful!",
-        description: "Your one-time promotion fee has been paid.",
-        action: <CheckCircle className="text-green-500" />
-      });
     }, 5000); // Wait 5 seconds to simulate verification
   };
 
@@ -80,9 +78,9 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>One-Time Promotion Fee</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            To promote this ride, a one-time fee of ₹50 is required. Please select a payment method.
+            {description}
           </DialogDescription>
         </DialogHeader>
         
@@ -114,7 +112,7 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
                 Processing...
               </>
             ) : (
-              "Pay ₹50"
+              `Pay ₹${amount}`
             )}
           </Button>
         </DialogFooter>
@@ -122,5 +120,3 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess }
     </Dialog>
   );
 }
-
-    

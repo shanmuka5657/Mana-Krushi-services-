@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +33,6 @@ import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -143,10 +143,17 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                 variant: "destructive",
             });
             setShowProfilePrompt(true);
+        } else if (!userProfile.planExpiryDate) {
+             toast({
+                title: "Owner Plan Inactive",
+                description: "Please activate your owner plan in your profile to add routes.",
+                variant: "destructive",
+            });
+            onSwitchTab('profile');
         }
     }
     checkProfile();
-  }, []);
+  }, [onSwitchTab]);
 
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
@@ -189,10 +196,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
 
   async function onSubmit(data: OwnerFormValues) {
     const userProfile = await getProfile();
-    if (!userProfile || !userProfile.vehicleType || !userProfile.vehicleNumber) {
+    if (!userProfile || !userProfile.planExpiryDate) {
         toast({
-            title: "Vehicle Information Required",
-            description: "Please update your vehicle type and number in your profile before adding a route.",
+            title: "Owner Plan Required",
+            description: "Please activate your owner plan in your profile before adding a route.",
             variant: "destructive"
         });
         onSwitchTab('profile');
@@ -329,14 +336,14 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote Your Ride?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Promoted rides are highlighted in search results to attract more passengers. This requires a one-time fee. Would you like to promote this ride?
+              Promoted rides are highlighted in search results to attract more passengers. This requires a one-time fee of ₹10. Would you like to promote this ride?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
-              Yes, Promote Ride
+              Yes, Pay ₹10 to Promote
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -346,6 +353,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         isOpen={isPaymentDialogOpen}
         onOpenChange={setIsPaymentDialogOpen}
         onPaymentSuccess={handlePaymentSuccess}
+        amount="10.00"
+        title="Promote Ride"
+        description="This is a one-time fee to highlight this specific ride in search results."
       />
       
       <IndusIndBanner />

@@ -1,12 +1,13 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { format } from "date-fns";
+import { format, addMonths } from "date-fns";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,17 @@ import type { Profile } from "@/lib/types";
 import { Textarea } from "../ui/textarea";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import PaymentDialog from "./payment-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -47,6 +59,8 @@ export default function ProfileForm() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selfie, setSelfie] = useState<string | null>(null);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [showPlanPrompt, setShowPlanPrompt] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -85,7 +99,9 @@ export default function ProfileForm() {
         setHasCameraPermission(false);
       }
     };
-    getCameraPermission();
+    if (!selfie) {
+      getCameraPermission();
+    }
 
     // Cleanup function to stop video stream
     return () => {
@@ -164,11 +180,56 @@ export default function ProfileForm() {
       title: "Profile Updated!",
       description: "Your profile has been successfully updated.",
     });
+
+    if (profileToSave.role === 'owner' && !profileToSave.planExpiryDate) {
+      setShowPlanPrompt(true);
+    }
+  }
+
+  const handleActivatePlan = () => {
+    setShowPlanPrompt(false);
+    setIsPaymentDialogOpen(true);
+  }
+
+  const handlePaymentSuccess = async () => {
+    const newExpiryDate = addMonths(new Date(), 3);
+    const updatedProfile: Profile = { ...profile!, planExpiryDate: newExpiryDate };
+    await saveProfile(updatedProfile);
+    setProfile(updatedProfile); // Update state to show new expiry date
+    toast({
+        title: "Plan Activated!",
+        description: `Your owner plan is now active until ${format(newExpiryDate, 'PPP')}.`,
+        action: <CheckCircle className="text-green-500" />
+    });
   }
 
   return (
     <div className="space-y-6">
-      {profile?.planExpiryDate && (
+      <AlertDialog open={showPlanPrompt} onOpenChange={setShowPlanPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Activate Your Owner Plan</AlertDialogTitle>
+            <AlertDialogDescription>
+              To start adding routes, you need an active owner plan. A one-time fee of ₹50 activates your account for 3 months.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Maybe Later</AlertDialogCancel>
+            <AlertDialogAction onClick={handleActivatePlan}>Pay ₹50 to Activate</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <PaymentDialog 
+        isOpen={isPaymentDialogOpen}
+        onOpenChange={setIsPaymentDialogOpen}
+        onPaymentSuccess={handlePaymentSuccess}
+        amount="50.00"
+        description="This fee activates your owner plan for 3 months, allowing you to add and manage routes."
+        title="Activate Owner Plan"
+      />
+
+      {profile?.role === 'owner' && profile?.planExpiryDate && (
         <Card className="shadow-sm bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
            <CardHeader>
              <CardTitle className="flex items-center gap-2">
