@@ -43,6 +43,7 @@ import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
+import { AlertDialogCancel } from "../ui/alert-dialog";
 
 
 const ownerFormSchema = z.object({
@@ -196,7 +197,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
 
   async function onSubmit(data: OwnerFormValues) {
     const userProfile = await getProfile();
-    if (!userProfile || !userProfile.planExpiryDate) {
+    if (!userProfile?.planExpiryDate) {
         toast({
             title: "Owner Plan Required",
             description: "Please activate your owner plan in your profile before adding a route.",
@@ -338,7 +339,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             <AlertDialogDescription>
               Promote your ride to highlight it in search results and provide passengers with ride insurance. This requires a one-time fee of ₹100 for this specific ride.
             </AlertDialogDescription>
-             <div className="pt-4">
+          </AlertDialogHeader>
+            <div className="pt-4">
               <p className="text-sm font-semibold text-foreground mb-2">This is how your ride will look to passengers:</p>
               <Image 
                 src="https://i.ibb.co/bFk0W6C/promo-example.png"
@@ -349,7 +351,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                 data-ai-hint="promoted ride"
               />
             </div>
-          </AlertDialogHeader>
           <AlertDialogFooter>
             <Button variant="outline" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
             <Button onClick={() => handlePromotionChoice(true)}>
