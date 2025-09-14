@@ -328,7 +328,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       setRouteDataToSubmit(null);
   }
   
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     if (routeDataToSubmit) {
       // ** REAL-WORLD INTEGRATION POINT **
       // An API call to the insurance provider (e.g., Acko) would be made here.
@@ -434,7 +434,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             </div>
           <DialogFooter>
             <DialogClose asChild>
-                <Button variant="ghost" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
+                <Button variant="ghost">No, Thanks</Button>
             </DialogClose>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
@@ -737,3 +737,5 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </>
   );
 }
+
+    
