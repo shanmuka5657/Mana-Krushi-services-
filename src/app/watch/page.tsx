@@ -3,10 +3,12 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Suspense } from 'react';
-import { Link as LinkIcon, ChevronRight } from 'lucide-react';
+import { Suspense, useRef, useState } from 'react';
+import { Link as LinkIcon, ChevronRight, Play, Pause } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 
 const smartLinks = [
@@ -166,31 +168,9 @@ function SmartLinkCard({ name, href }: { name: string, href: string }) {
     )
 }
 
-function SpecialOffer1Card() {
-    const handleSpecialOfferClick = () => {
-        const offer1 = smartLinks.find(link => link.id === 'so1');
-        const offer2 = smartLinks.find(link => link.id === 'so2');
-        const offer3 = smartLinks.find(link => link.id === 'so3');
-        const offer4 = smartLinks.find(link => link.id === 'so4');
-        const offer5 = smartLinks.find(link => link.id === 'so5');
-        const offer6 = smartLinks.find(link => link.id === 'so6');
-        const offer7 = smartLinks.find(link => link.id === 'so7');
-        const offer8 = smartLinks.find(link => link.id === 'so8');
-        const offer9 = smartLinks.find(link => link.id === 'so9');
-
-        if (offer1) window.open(offer1.href, '_blank');
-        if (offer2) window.open(offer2.href, '_blank');
-        if (offer3) window.open(offer3.href, '_blank');
-        if (offer4) window.open(offer4.href, '_blank');
-        if (offer5) window.open(offer5.href, '_blank');
-        if (offer6) window.open(offer6.href, '_blank');
-        if (offer7) window.open(offer7.href, '_blank');
-        if (offer8) window.open(offer8.href, '_blank');
-        if (offer9) window.open(offer9.href, '_blank');
-    };
-
+function SpecialOffer1Card({ onClick }: { onClick: () => void }) {
     return (
-         <div onClick={handleSpecialOfferClick} className="block w-full group cursor-pointer">
+         <div onClick={onClick} className="block w-full group cursor-pointer">
             <Card className="w-full transition-all hover:bg-muted/50 hover:shadow-sm">
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -204,17 +184,9 @@ function SpecialOffer1Card() {
     );
 }
 
-function ExclusiveDeal1Card() {
-    const handleExclusiveDealClick = () => {
-        const deal1 = smartLinks.find(link => link.id === 'ed1');
-        const deal2 = smartLinks.find(link => link.id === 'ed2');
-
-        if (deal1) window.open(deal1.href, '_blank');
-        if (deal2) window.open(deal2.href, '_blank');
-    };
-
+function ExclusiveDeal1Card({ onClick }: { onClick: () => void }) {
     return (
-         <div onClick={handleExclusiveDealClick} className="block w-full group cursor-pointer">
+         <div onClick={onClick} className="block w-full group cursor-pointer">
             <Card className="w-full transition-all hover:bg-muted/50 hover:shadow-sm">
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -229,18 +201,90 @@ function ExclusiveDeal1Card() {
 }
 
 function WatchPageContent() {
+    const { toast } = useToast();
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const [activeProcess, setActiveProcess] = useState<string | null>(null);
+    const [progress, setProgress] = useState(0);
+    const [nextOffer, setNextOffer] = useState('');
 
-    const handleBestOffersClick = () => {
-        bestOffers.forEach(offer => {
-            window.open(offer.href, '_blank');
+    const stopProcess = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        setActiveProcess(null);
+        setProgress(0);
+        setNextOffer('');
+        toast({ title: "Process Stopped", description: "The automatic offer opening has been stopped." });
+    };
+
+    const startSequentialOpening = (offers: {name: string, href: string}[], processName: string) => {
+        if (intervalRef.current) {
+            toast({ title: "Process already running", description: "Another offer opening process is already in progress.", variant: "destructive" });
+            return;
+        }
+
+        let currentIndex = 0;
+        setActiveProcess(processName);
+        
+        toast({
+            title: `Starting ${processName}`,
+            description: `A new offer will open every 40 seconds.`,
         });
+
+        const openNextLink = () => {
+            if (currentIndex < offers.length) {
+                const offer = offers[currentIndex];
+                window.open(offer.href, '_blank');
+                toast({
+                    title: `Opening Offer ${currentIndex + 1}/${offers.length}`,
+                    description: offer.name,
+                });
+                
+                if (currentIndex + 1 < offers.length) {
+                    setNextOffer(offers[currentIndex + 1].name);
+                } else {
+                    setNextOffer('All offers opened!');
+                }
+
+                currentIndex++;
+            } else {
+                stopProcess();
+                toast({ title: `${processName} Complete`, description: "All offers have been opened." });
+            }
+        };
+
+        openNextLink(); // Open the first link immediately
+        intervalRef.current = setInterval(openNextLink, 40000); // Open subsequent links every 40 seconds
+    };
+
+    const handleSpecialOfferClick = () => {
+        const specialOffers = [
+            smartLinks.find(link => link.id === 'so1'),
+            smartLinks.find(link => link.id === 'so2'),
+            smartLinks.find(link => link.id === 'so3'),
+            smartLinks.find(link => link.id === 'so4'),
+            smartLinks.find(link => link.id === 'so5'),
+            smartLinks.find(link => link.id === 'so6'),
+            smartLinks.find(link => link.id === 'so7'),
+            smartLinks.find(link => link.id === 'so8'),
+            smartLinks.find(link => link.id === 'so9'),
+        ].filter(Boolean) as {name: string, href: string}[];
+
+        startSequentialOpening(specialOffers, "Special Offers");
     };
     
-    const handleBumperOfferClick = () => {
-        bumperOffers.forEach(offer => {
-            window.open(offer.href, '_blank');
-        })
+    const handleExclusiveDealClick = () => {
+        const exclusiveDeals = [
+            smartLinks.find(link => link.id === 'ed1'),
+            smartLinks.find(link => link.id === 'ed2'),
+        ].filter(Boolean) as {name: string, href: string}[];
+        startSequentialOpening(exclusiveDeals, "Exclusive Deals");
     }
+
+    const handleBestOffersClick = () => startSequentialOpening(bestOffers, "Best Offers");
+    const handleBumperOfferClick = () => startSequentialOpening(bumperOffers, "Bumper Offers");
+
 
     return (
         <AppLayout>
@@ -250,6 +294,20 @@ function WatchPageContent() {
                     <CardDescription>Explore these exclusive links and offers.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    {activeProcess && (
+                        <Card className="mb-4 bg-muted/50">
+                            <CardHeader>
+                                <CardTitle className="flex items-center justify-between">
+                                    <span>{activeProcess} in Progress...</span>
+                                    <Button variant="destructive" size="sm" onClick={stopProcess}>
+                                        <Pause className="mr-2 h-4 w-4" />
+                                        Stop
+                                    </Button>
+                                </CardTitle>
+                                <CardDescription>Next offer: {nextOffer}</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    )}
                     <Tabs defaultValue="special">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="special">Special Offers & Deals</TabsTrigger>
@@ -260,13 +318,13 @@ function WatchPageContent() {
                              <div className="space-y-3">
                                 {smartLinks.map((link) => {
                                     if (link.id === 'so1') {
-                                        return <SpecialOffer1Card key={link.id} />;
+                                        return <SpecialOffer1Card key={link.id} onClick={handleSpecialOfferClick} />;
                                     }
                                     if (link.id.startsWith('so') && link.id !== 'so1') {
                                         return null;
                                     }
                                         if (link.id === 'ed1') {
-                                        return <ExclusiveDeal1Card key={link.id} />;
+                                        return <ExclusiveDeal1Card key={link.id} onClick={handleExclusiveDealClick} />;
                                     }
                                         if (link.id === 'ed2') {
                                         return null;
@@ -277,9 +335,9 @@ function WatchPageContent() {
                         </TabsContent>
                         <TabsContent value="best" className="pt-4">
                              <div className="space-y-3">
-                                <Button onClick={handleBestOffersClick} className="w-full">
-                                    <LinkIcon className="mr-2 h-4 w-4" />
-                                    Open All Best Offers
+                                <Button onClick={handleBestOffersClick} className="w-full" disabled={!!activeProcess}>
+                                    <Play className="mr-2 h-4 w-4" />
+                                    Open All Best Offers Sequentially
                                 </Button>
                                 {bestOffers.map((link, index) => (
                                     <SmartLinkCard key={index} name={link.name} href={link.href} />
@@ -288,9 +346,9 @@ function WatchPageContent() {
                         </TabsContent>
                         <TabsContent value="bumper" className="pt-4">
                             <div className="space-y-3">
-                                <Button onClick={handleBumperOfferClick} className="w-full">
-                                    <LinkIcon className="mr-2 h-4 w-4" />
-                                    Open All Bumper Offers
+                                <Button onClick={handleBumperOfferClick} className="w-full" disabled={!!activeProcess}>
+                                    <Play className="mr-2 h-4 w-4" />
+                                    Open All Bumper Offers Sequentially
                                 </Button>
                                 {bumperOffers.map((link, index) => (
                                     <SmartLinkCard key={index} name={link.name} href={link.href} />
