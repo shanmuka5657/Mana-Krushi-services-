@@ -58,6 +58,7 @@ export type Profile = {
     planExpiryDate?: Date;
     role?: 'owner' | 'passenger' | 'admin';
     selfieDataUrl?: string;
+    status?: 'active' | 'deleted';
 }
 
 export type MovieSite = {

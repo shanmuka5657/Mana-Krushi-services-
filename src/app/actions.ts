@@ -7,6 +7,7 @@ import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
+import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
 
 
 const SuggestDestinationsInput = z.object({
@@ -95,5 +96,26 @@ export async function findMovie(input: { movieName: string }) {
   } catch (e) {
     console.error(e);
     return { error: 'An unexpected error occurred while searching for the movie.' };
+  }
+}
+
+export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const userEmail = getCurrentUser();
+    if (!userEmail) {
+      return { success: false, error: 'User not logged in.' };
+    }
+
+    const profile = await getProfile(userEmail);
+    if (!profile) {
+      return { success: false, error: 'User profile not found.' };
+    }
+
+    await saveProfile({ ...profile, status: 'deleted' });
+
+    return { success: true };
+  } catch (e) {
+    console.error('Error deleting account:', e);
+    return { success: false, error: 'An unexpected error occurred.' };
   }
 }

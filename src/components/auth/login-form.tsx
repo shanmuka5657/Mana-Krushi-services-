@@ -109,6 +109,16 @@ export function LoginForm() {
       form.setError('email', { message: 'No account found with this email.' });
       return;
     }
+    
+    if (userProfile.status === 'deleted') {
+       toast({
+        title: "Account Deleted",
+        description: "This account has been deleted.",
+        variant: "destructive",
+      });
+      form.setError('email', { message: 'This account has been deleted.' });
+      return;
+    }
 
     // In a real app, you would validate the password against the backend/database.
     // Here we assume the password is correct if the profile exists.
