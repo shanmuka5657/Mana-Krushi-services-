@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getBookings, getAllProfiles, stopTracking as stopTrackingInDb, updateLocation as updateLocationInDb } from '@/lib/storage';
@@ -19,6 +19,7 @@ import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import L from 'leaflet';
 
 
+// Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false, loading: () => <p>Loading map...</p> });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
@@ -27,10 +28,33 @@ const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ss
 
 // This component will auto-adjust the map view
 function ChangeView({ center, zoom }: { center: L.LatLngExpression, zoom: number }) {
-  const map = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false })();
+  const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
+  const map = useMap();
   map.setView(center, zoom);
   return null;
 }
+
+// Create a memoized map component to prevent re-renders
+const LiveMap = memo(({ center, zoom, location }: { center: L.LatLngExpression, zoom: number, location: LiveLocation | null }) => {
+    return (
+        <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {location && (
+                <Marker position={[location.latitude, location.longitude]}>
+                    <Popup>
+                        Driver's Location <br /> Last seen: {location.timestamp.toLocaleTimeString()}
+                    </Popup>
+                </Marker>
+            )}
+            <ChangeView center={center} zoom={zoom} />
+        </MapContainer>
+    );
+});
+LiveMap.displayName = 'LiveMap';
+
 
 export default function TrackRidePage() {
     const router = useRouter();
@@ -110,23 +134,6 @@ export default function TrackRidePage() {
         };
 
     }, [params.id]);
-    
-    const map = useMemo(() => (
-         <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {liveLocation && (
-                <Marker position={[liveLocation.latitude, liveLocation.longitude]}>
-                    <Popup>
-                        Driver's Location <br /> Last seen: {liveLocation.timestamp.toLocaleTimeString()}
-                    </Popup>
-                </Marker>
-            )}
-            <ChangeView center={mapCenter} zoom={mapZoom} />
-        </MapContainer>
-    ), [liveLocation, mapCenter, mapZoom]);
 
     const handleShare = async () => {
         if (!booking) return;
@@ -182,7 +189,7 @@ export default function TrackRidePage() {
             
             <main className="flex flex-col">
                 <div className="relative w-full h-64 md:h-96 z-0">
-                    {map}
+                    <LiveMap center={mapCenter} zoom={mapZoom} location={liveLocation} />
                 </div>
 
                 <div className="p-4 space-y-4">
