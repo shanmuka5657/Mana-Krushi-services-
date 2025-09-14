@@ -335,6 +335,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                     const passengerProfile = getProfileForUser(booking.clientEmail);
                     return (
                     <div key={booking.id} className="border p-4 rounded-md space-y-4">
+                       <p className="font-mono text-xs text-muted-foreground">ID: {booking.bookingCode || booking.id}</p>
                        <div className="flex items-start gap-4">
                           <User className="h-5 w-5 text-muted-foreground mt-1" />
                           <div className="flex flex-col">
