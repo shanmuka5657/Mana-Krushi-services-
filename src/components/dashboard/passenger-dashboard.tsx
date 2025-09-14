@@ -6,10 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, isSameDay } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, IndianRupee, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone, Shield, CheckCircle } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone, Shield, CheckCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
+import { IndusIndBanner, BajajBanner } from "@/components/marketing/ad-banners";
 
 
 const searchFormSchema = z.object({
@@ -330,52 +330,6 @@ function TopMembers() {
     );
 }
 
-function IndusIndBanner() {
-    return (
-        <a href="https://clnk.in/w6hk" target="_blank" rel="noopener noreferrer" className="block w-full group mb-6">
-            <Card className="w-full overflow-hidden relative text-white bg-indigo-900 aspect-[4/1] md:aspect-[5/1]">
-                 <Image 
-                    src="https://picsum.photos/seed/indusind-loan/1200/240"
-                    alt="IndusInd Bank Saving Account"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105 opacity-20"
-                    data-ai-hint="bank offer"
-                />
-                <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-center items-center text-center">
-                    <h3 className="text-lg md:text-2xl font-bold">Open an IndusInd Saving Account</h3>
-                    <p className="mt-1 text-xs md:text-sm max-w-md">Get exclusive benefits with an IndusInd online saving account.</p>
-                    <Button size="sm" className="mt-3 w-fit bg-white text-indigo-900 hover:bg-gray-100 text-xs md:text-sm">
-                        Apply Now <IndianRupee className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            </Card>
-        </a>
-    )
-}
-
-function BajajBanner() {
-    return (
-        <a href="https://clnk.in/w6hf" target="_blank" rel="noopener noreferrer" className="block w-full group mt-6">
-            <Card className="w-full overflow-hidden relative text-white bg-blue-900 aspect-[4/1] md:aspect-[5/1]">
-                 <Image 
-                    src="https://picsum.photos/seed/bajaj-loan/1200/240"
-                    alt="Bajaj Finserv Personal Loan"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105 opacity-20"
-                    data-ai-hint="finance loan"
-                />
-                <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-center items-center text-center">
-                    <h3 className="text-lg md:text-2xl font-bold">Get a Personal Loan up to ₹40 Lakh</h3>
-                    <p className="mt-1 text-xs md:text-sm max-w-md">Bajaj Finserv offers instant approval and disbursal in 24 hours.</p>
-                    <Button size="sm" className="mt-3 w-fit bg-white text-blue-900 hover:bg-gray-100 text-xs md:text-sm">
-                        Apply Now <IndianRupee className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            </Card>
-        </a>
-    )
-}
-
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -558,5 +512,3 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     </div>
   );
 }
-
-    

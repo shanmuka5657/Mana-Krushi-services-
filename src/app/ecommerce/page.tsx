@@ -5,9 +5,9 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { ChevronRight, ShoppingCart } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { AxisBanner } from '@/components/marketing/ad-banners';
 
 const partners = [
     {
@@ -90,30 +90,6 @@ const partners = [
     }
 ];
 
-function AxisBanner() {
-    return (
-        <a href="https://clnk.in/w6f1" target="_blank" rel="noopener noreferrer" className="block w-full group mb-6">
-            <Card className="w-full overflow-hidden relative text-white aspect-[4/1] md:aspect-[5/1]">
-                 <Image 
-                    src="https://picsum.photos/seed/axis-banner/1200/240"
-                    alt="Axis Bank Banner"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    data-ai-hint="bank offer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-800/80 via-purple-600/60 to-transparent p-4 md:p-6 flex flex-col justify-center">
-                    <h3 className="text-lg md:text-2xl font-bold">Axis Bank Digital Saving Account</h3>
-                    <p className="mt-1 text-xs md:text-sm max-w-xs">Open a zero balance account online.</p>
-                    <Button size="sm" className="mt-3 w-fit bg-white text-purple-900 hover:bg-gray-100 text-xs md:text-sm">
-                        Apply Now <ShoppingCart className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            </Card>
-        </a>
-    )
-}
-
-
 function PartnerCard({ name, profit, logoUrl, href }: { name: string, profit: string, logoUrl: string, href: string }) {
     return (
         <a href={href} target="_blank" rel="noopener noreferrer" className="block w-full">
@@ -183,5 +159,3 @@ export default function EcommercePage() {
         </Suspense>
     )
 }
-
-    
