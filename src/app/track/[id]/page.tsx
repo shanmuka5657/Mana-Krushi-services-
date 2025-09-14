@@ -3,20 +3,27 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getBookings, getAllProfiles, getLiveLocation, stopTracking, updateLocation } from '@/lib/storage';
+import dynamic from 'next/dynamic';
+import { getBookings, getAllProfiles, stopTracking as stopTrackingInDb, updateLocation as updateLocationInDb } from '@/lib/storage';
 import type { Booking, Profile, LiveLocation } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, MapPin, Loader2, Pin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, set } from "firebase/database";
 import { getApp } from "firebase/app";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import L from 'leaflet';
+
+
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false, loading: () => <p>Loading map...</p> });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
 
 
 // This component will auto-adjust the map view
