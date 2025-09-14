@@ -166,7 +166,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
-    { href: '/track', icon: MapPin, label: "Track Ride" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
@@ -338,3 +337,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    
