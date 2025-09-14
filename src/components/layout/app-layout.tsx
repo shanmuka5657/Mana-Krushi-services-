@@ -27,6 +27,7 @@ import {
   MapPin,
   Gamepad2,
   Timer,
+  AlertCircle,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -135,6 +136,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
+    { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
@@ -337,5 +339,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    

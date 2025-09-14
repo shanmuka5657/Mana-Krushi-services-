@@ -95,7 +95,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       Object.entries(updatedBookingData).filter(([, value]) => value !== undefined)
     );
     
-    const allBookings = await getBookings();
+    const allBookings = await getBookings(true); // Fetch all bookings to ensure we update the master list
     const updatedBookings = allBookings.map((b: Booking) => b.id === updatedBooking.id ? (updatedBooking as Booking) : b);
     await saveBookings(updatedBookings);
     
@@ -115,7 +115,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
     
     const updatedBooking: Booking = { ...selectedBooking, status: "Cancelled", cancellationReason: cancellationReason || "No reason provided" };
     
-    const allBookings = await getBookings();
+    const allBookings = await getBookings(true);
     const updatedBookings = allBookings.map((b) => b.id === updatedBooking.id ? updatedBooking : b);
     await saveBookings(updatedBookings);
 
