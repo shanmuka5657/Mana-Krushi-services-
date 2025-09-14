@@ -16,6 +16,9 @@ import type { Route, Booking, Profile } from '@/lib/types';
 import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { calculateDistance } from '../actions';
+import { useToast } from '@/hooks/use-toast';
+
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
     try {
@@ -38,6 +41,7 @@ const getTravelDuration = (departureTime: string, arrivalTime: string): string =
 function FindRideResultsPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { toast } = useToast();
     
     const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
@@ -65,25 +69,47 @@ function FindRideResultsPage() {
             setAllProfiles(profiles);
 
             const searchDate = new Date(date);
+            const searchFromLower = from.trim().toLowerCase();
+            const searchToLower = to.trim().toLowerCase();
             
-            const results = routes.filter(route => {
+            const matchedRoutes: Route[] = [];
+
+            for (const route of routes) {
                 const routeDate = new Date(route.travelDate);
-
-                const fromMatch = route.fromLocation.trim().toLowerCase() === from.trim().toLowerCase();
-                const toMatch = route.toLocation.trim().toLowerCase() === to.trim().toLowerCase();
                 const dateMatch = isSameDay(searchDate, routeDate);
-                
-                return fromMatch && toMatch && dateMatch;
-            });
-            
-            // Sort promoted rides to the top
-            results.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
+                if (!dateMatch) continue;
 
-            setAvailableOwners(results);
+                const toMatch = route.toLocation.trim().toLowerCase() === searchToLower;
+                if (!toMatch) continue;
+
+                // Case 1: Exact match
+                const fromMatch = route.fromLocation.trim().toLowerCase() === searchFromLower;
+                if (fromMatch) {
+                    matchedRoutes.push(route);
+                    continue;
+                }
+
+                // Case 2: Intermediate pickup
+                const pickupPoints = route.pickupPoints?.map(p => p.toLowerCase()) || [];
+                const isIntermediatePickup = pickupPoints.includes(searchFromLower);
+
+                if (isIntermediatePickup) {
+                    const distanceResult = await calculateDistance({ from: route.fromLocation, to: from });
+                    
+                    if (distanceResult.distance && distanceResult.distance <= 60) {
+                        matchedRoutes.push(route);
+                    }
+                }
+            }
+
+            // Sort promoted rides to the top
+            matchedRoutes.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
+
+            setAvailableOwners(matchedRoutes);
             setIsLoaded(true);
         }
         fetchAndFilterRoutes();
-    }, [from, to, date]);
+    }, [from, to, date, toast]);
 
     const getBookedSeats = (route: Route) => {
         return allBookings.filter(b => {
