@@ -38,12 +38,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
-import { AlertDialogCancel } from "../ui/alert-dialog";
 
 
 const ownerFormSchema = z.object({
@@ -229,9 +229,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     if (!routeDataToSubmit) return;
 
     const routeDataWithPromotion = { ...routeDataToSubmit, isPromoted };
-    setRouteDataToSubmit(routeDataWithPromotion);
     
     if (isPromoted) {
+      setRouteDataToSubmit(routeDataWithPromotion);
       setIsPaymentDialogOpen(true);
     } else {
       handleRouteSubmission(routeDataWithPromotion);
@@ -347,7 +347,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                 alt="Promoted Ride Example"
                 width={1200}
                 height={350}
-                className="rounded-lg border"
+                className="rounded-lg border w-full h-auto"
                 data-ai-hint="promoted ride"
               />
             </div>
