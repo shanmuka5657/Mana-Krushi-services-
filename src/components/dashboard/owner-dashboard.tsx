@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee, Sparkles, Star } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, IndianRupee, Sparkles, Star, X } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
@@ -332,9 +332,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     if (routeDataToSubmit) {
       // ** REAL-WORLD INTEGRATION POINT **
       // An API call to the insurance provider (e.g., Acko) would be made here.
-      // e.g., await generateInsuranceForRide(routeDataToSubmit);
-      // The policy ID would be stored with the route.
-      
+      // This is where you would call: await generateInsuranceForRide(routeDataToSubmit);
+      // The policy ID returned from the insurer would be stored with the route data.
       handleRouteSubmission(routeDataToSubmit);
     }
   }
@@ -365,11 +364,11 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote Your Ride?
             </DialogTitle>
             <DialogDescription>
-              Promote your ride for ₹100 to highlight it in search results and provide passengers with ride insurance.
+             Promote your ride for ₹100 to highlight it in search results. Promoted rides will also include passenger insurance in the future.
             </DialogDescription>
           </DialogHeader>
            <div className="pt-4 space-y-2">
-              <p className="text-sm font-semibold text-foreground">Here's how your ride will look to passengers:</p>
+              <p className="text-sm font-semibold text-foreground">Here's how your promoted ride will look:</p>
                 <Card className="overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
                     <CardContent className="p-4">
                         <div className="flex justify-between items-start">
@@ -434,7 +433,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             </div>
           <DialogFooter>
             <DialogClose asChild>
-                <Button variant="ghost">No, Thanks</Button>
+                <Button variant="ghost" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
             </DialogClose>
             <Button onClick={() => handlePromotionChoice(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
@@ -449,8 +448,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         onOpenChange={setIsPaymentDialogOpen}
         onPaymentSuccess={handlePaymentSuccess}
         amount="100.00"
-        title="Promote Ride & Add Insurance"
-        description="This one-time fee of ₹100 will feature your ride at the top of search results and provide insurance coverage for this trip."
+        title="Promote Ride"
+        description="This one-time fee of ₹100 will feature your ride at the top of search results."
       />
       
       <IndusIndBanner />
@@ -737,5 +736,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </>
   );
 }
-
-    
