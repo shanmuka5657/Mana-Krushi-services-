@@ -3,10 +3,11 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import Script from 'next/script';
-import { MonitorPlay, Link as LinkIcon, ChevronRight } from 'lucide-react';
+import { MonitorPlay, Link as LinkIcon, ChevronRight, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 const newSmartLinks = [
     { name: "Smartlink_1", href: "https://markswaitingrouge.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" },
@@ -139,6 +140,79 @@ function SmartLinkCard({ name, href }: { name: string; href: string }) {
     );
 }
 
+function AutoAdRotator() {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const selectNewAd = () => {
+            const nextIndex = Math.floor(Math.random() * newSmartLinks.length);
+            const newDuration = Math.floor(Math.random() * 16) + 5; // Random time between 5 and 20 seconds
+            
+            setCurrentIndex(nextIndex);
+            setDuration(newDuration);
+            setTimeRemaining(newDuration);
+        };
+
+        selectNewAd(); // Initial selection
+
+        const adInterval = setInterval(() => {
+            selectNewAd();
+        }, duration * 1000);
+
+        return () => clearInterval(adInterval);
+    }, [duration]);
+
+    useEffect(() => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        
+        intervalRef.current = setInterval(() => {
+            setTimeRemaining(prevTime => {
+                if (prevTime <= 1) {
+                    return duration; // Reset for next ad
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [duration]);
+
+    const currentAd = newSmartLinks[currentIndex];
+    const progress = (timeRemaining / duration) * 100;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Timer />
+                    Auto-Rotating Ad
+                </CardTitle>
+                <CardDescription>A new offer will be shown automatically.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="p-4 border rounded-lg space-y-3">
+                    <p className="font-semibold text-lg">{currentAd.name}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm text-muted-foreground">Next ad in: {timeRemaining}s</p>
+                        <Progress value={progress} className="w-full" />
+                    </div>
+                </div>
+                 <a href={currentAd.href} target="_blank" rel="noopener noreferrer" className="block w-full">
+                    <Button className="w-full">
+                        <LinkIcon className="mr-2 h-4 w-4" />
+                        View Offer
+                    </Button>
+                </a>
+            </CardContent>
+        </Card>
+    )
+}
+
 
 function AdsPageContent() {
     const bannerAdScript = `
@@ -172,6 +246,8 @@ function AdsPageContent() {
                         <CardDescription>This page is dedicated to displaying various ad formats.</CardDescription>
                     </CardHeader>
                 </Card>
+                
+                <AutoAdRotator />
                 
                  {/* New Smartlinks Card */}
                 <Card>
@@ -254,3 +330,5 @@ export default function AdsPage() {
         </Suspense>
     );
 }
+
+    
