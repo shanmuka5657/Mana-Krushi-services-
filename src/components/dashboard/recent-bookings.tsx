@@ -217,7 +217,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
           </div>
 
           {selectedBooking && (
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] flex flex-col">
                 {dialogAction === 'view' ? (
                     <>
                         <DialogHeader>
@@ -226,118 +226,106 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             Passenger, driver and vehicle information for your trip.
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="flex items-center gap-4">
-                                <User className="h-5 w-5 text-muted-foreground" />
-                                <div className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">Passenger Name</span>
-                                    <span className="font-medium">{selectedBooking.client}</span>
+                        <div className="space-y-4 py-4 overflow-y-auto pr-2">
+                           <div className="grid grid-cols-2 gap-4">
+                                <div className="flex items-start gap-3">
+                                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Passenger</p>
+                                        <p className="font-medium">{selectedBooking.client}</p>
+                                    </div>
                                 </div>
-                            </div>
-                             <div className="flex items-center gap-4">
-                                <Phone className="h-5 w-5 text-muted-foreground" />
-                                <div className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">Passenger Mobile</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium">{selectedBooking.mobile}</span>
-                                        {getProfileForUser(selectedBooking.clientEmail)?.mobileVerified && (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                            </Badge>
-                                        )}
+                                <div className="flex items-start gap-3">
+                                    <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Mobile</p>
+                                        <div className="flex items-center gap-1 flex-wrap">
+                                            <p className="font-medium">{selectedBooking.mobile}</p>
+                                            {getProfileForUser(selectedBooking.clientEmail)?.mobileVerified && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                           </div>
+                           <hr/>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex items-start gap-3">
+                                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Destination</p>
+                                        <p className="font-medium">{selectedBooking.destination}</p>
+                                    </div>
+                                </div>
+                                 <div className="flex items-start gap-3">
+                                    <Milestone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Distance</p>
+                                        <p className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : 'N/A'}</p>
                                     </div>
                                 </div>
                             </div>
                             <hr />
-                             <div className="flex items-center gap-4">
-                                <MapPin className="h-5 w-5 text-muted-foreground" />
-                                <div className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">Destination</span>
-                                    <span className="font-medium">{selectedBooking.destination}</span>
-                                </div>
-                            </div>
-                             <div className="flex items-center gap-4">
-                                <Milestone className="h-5 w-5 text-muted-foreground" />
-                                <div className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">Distance</span>
-                                    <span className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                            <User className="h-5 w-5 text-muted-foreground" />
-                            <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">
-                                Driver Name
-                                </span>
-                                <span className="font-medium">
-                                {selectedBooking.driverName || 'N/A'}
-                                </span>
-                            </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                            <Phone className="h-5 w-5 text-muted-foreground" />
-                             <div className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">Driver Mobile</span>
-                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium">{selectedBooking.driverMobile || 'N/A'}</span>
-                                        {getProfileForUser(selectedBooking.driverEmail)?.mobileVerified && (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                            <Car className="h-5 w-5 text-muted-foreground" />
-                            <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">
-                                Vehicle Type
-                                </span>
-                                <span className="font-medium">
-                                {selectedBooking.vehicleType || 'N/A'}
-                                </span>
-                            </div>
-                            </div>
-                             <div className="flex items-center gap-4">
-                                <Shield className="h-5 w-5 text-muted-foreground" />
-                                <div className="flex flex-col">
-                                    <span className="text-sm text-muted-foreground">
-                                    Vehicle Number
-                                    </span>
-                                    <span className="font-medium">
-                                    {selectedBooking.vehicleNumber || 'N/A'}
-                                    </span>
-                                </div>
-                            </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="flex items-center gap-4">
-                                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm text-muted-foreground">
-                                        Departure
-                                        </span>
-                                        <span className="font-medium">
-                                        {format(new Date(selectedBooking.departureDate), "dd MMM yyyy")}
-                                        </span>
+                                <div className="flex items-start gap-3">
+                                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Driver</p>
+                                        <p className="font-medium">{selectedBooking.driverName || 'N/A'}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <Clock className="h-5 w-5 text-muted-foreground" />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm text-muted-foreground">
-                                        Time
-                                        </span>
-                                        <span className="font-medium">
-                                        {format(new Date(selectedBooking.departureDate), "HH:mm")}
-                                        </span>
+                                 <div className="flex items-start gap-3">
+                                    <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Driver Mobile</p>
+                                         <div className="flex items-center gap-1 flex-wrap">
+                                            <p className="font-medium">{selectedBooking.driverMobile || 'N/A'}</p>
+                                            {getProfileForUser(selectedBooking.driverEmail)?.mobileVerified && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div className="flex items-start gap-3">
+                                    <Car className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Vehicle Type</p>
+                                        <p className="font-medium">{selectedBooking.vehicleType || 'N/A'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Vehicle Number</p>
+                                        <p className="font-medium">{selectedBooking.vehicleNumber || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <hr />
+                             <div className="grid grid-cols-2 gap-4">
+                                <div className="flex items-start gap-3">
+                                    <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Departure</p>
+                                        <p className="font-medium">{format(new Date(selectedBooking.departureDate), "dd MMM yyyy")}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Time</p>
+                                        <p className="font-medium">{format(new Date(selectedBooking.departureDate), "HH:mm")}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                         <DialogFooter>
+                         <DialogFooter className="mt-auto pt-4 border-t">
                             <DialogClose asChild>
-                                <Button variant="outline">Close</Button>
+                                <Button variant="outline" className="w-full">Close</Button>
                             </DialogClose>
                         </DialogFooter>
                     </>
@@ -373,4 +361,3 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
-
