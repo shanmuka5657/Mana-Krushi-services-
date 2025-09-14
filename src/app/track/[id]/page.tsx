@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getBookings, getAllProfiles } from '@/lib/storage';
@@ -18,26 +18,42 @@ import 'leaflet/dist/leaflet.css';
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import L from 'leaflet';
 
-
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false, loading: () => <p>Loading map...</p> });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
-
 // This component will auto-adjust the map view without re-rendering the whole map
 function ChangeView({ center, zoom }: { center: L.LatLngExpression, zoom: number }) {
   const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
   if (useMap) {
-    const map = useMap();
-    map.setView(center, zoom);
+    try {
+        const map = useMap();
+        map.setView(center, zoom);
+    } catch(e) {
+        // This can happen in dev mode with strict mode, it's safe to ignore
+        console.warn(e);
+    }
   }
   return null;
 }
 
-// Create a memoized map component to prevent re-renders
 const LiveMap = memo(({ center, zoom, location }: { center: L.LatLngExpression, zoom: number, location: LiveLocation | null }) => {
+    const [isMounted, setIsMounted] = useState(false);
+    
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <div className="flex items-center justify-center h-full bg-muted">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
     return (
         <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
             <TileLayer
