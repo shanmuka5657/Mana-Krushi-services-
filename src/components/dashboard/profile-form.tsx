@@ -130,12 +130,16 @@ export default function ProfileForm() {
       if (videoRef.current && canvasRef.current) {
           const video = videoRef.current;
           const canvas = canvasRef.current;
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
           const context = canvas.getContext('2d');
+          
           if (context) {
-              context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-              const dataUrl = canvas.toDataURL('image/png');
+              const MAX_WIDTH = 800;
+              const scale = MAX_WIDTH / video.videoWidth;
+              canvas.width = MAX_WIDTH;
+              canvas.height = video.videoHeight * scale;
+
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG and quality 0.8
               setSelfie(dataUrl);
               form.setValue('selfieDataUrl', dataUrl);
           }
