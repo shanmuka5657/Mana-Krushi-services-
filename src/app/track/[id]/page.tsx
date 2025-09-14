@@ -23,12 +23,11 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
 
 
 // This component will auto-adjust the map view
 function ChangeView({ center, zoom }: { center: L.LatLngExpression, zoom: number }) {
-  const map = useMap();
+  const map = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false })();
   map.setView(center, zoom);
   return null;
 }
@@ -111,6 +110,23 @@ export default function TrackRidePage() {
         };
 
     }, [params.id]);
+    
+    const map = useMemo(() => (
+         <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {liveLocation && (
+                <Marker position={[liveLocation.latitude, liveLocation.longitude]}>
+                    <Popup>
+                        Driver's Location <br /> Last seen: {liveLocation.timestamp.toLocaleTimeString()}
+                    </Popup>
+                </Marker>
+            )}
+            <ChangeView center={mapCenter} zoom={mapZoom} />
+        </MapContainer>
+    ), [liveLocation, mapCenter, mapZoom]);
 
     const handleShare = async () => {
         if (!booking) return;
@@ -138,14 +154,6 @@ export default function TrackRidePage() {
         }
     };
     
-    const driverIcon = useMemo(() => {
-        return new L.Icon({
-            iconUrl: '/car-pin.png', // A custom icon would be better
-            iconSize: [40, 40],
-            iconAnchor: [20, 40],
-            popupAnchor: [0, -40]
-        });
-    }, []);
 
     if (!isLoaded) {
         return (
@@ -174,20 +182,7 @@ export default function TrackRidePage() {
             
             <main className="flex flex-col">
                 <div className="relative w-full h-64 md:h-96 z-0">
-                    <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        {liveLocation && (
-                            <Marker position={[liveLocation.latitude, liveLocation.longitude]}>
-                                <Popup>
-                                    Driver's Location <br /> Last seen: {liveLocation.timestamp.toLocaleTimeString()}
-                                </Popup>
-                            </Marker>
-                        )}
-                        <ChangeView center={mapCenter} zoom={mapZoom} />
-                    </MapContainer>
+                    {map}
                 </div>
 
                 <div className="p-4 space-y-4">
