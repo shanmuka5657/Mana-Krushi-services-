@@ -24,6 +24,7 @@ import {
   ShoppingCart,
   MonitorPlay,
   Link,
+  MapPin,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -161,6 +162,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
+    { href: '/track', icon: MapPin, label: "Track Ride" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
