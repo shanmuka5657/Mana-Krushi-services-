@@ -128,6 +128,11 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
       variant: 'destructive'
     });
     
+    toast({
+        title: "Driver Notified (Simulated)",
+        description: `The driver has been notified of your cancellation.`
+    })
+    
     setIsCancelOpen(false);
     setSelectedBooking(null);
     setCancellationReason("");
