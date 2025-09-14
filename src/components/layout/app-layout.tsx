@@ -25,6 +25,7 @@ import {
   MonitorPlay,
   Link,
   MapPin,
+  Gamepad2,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -133,6 +134,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
+    { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
@@ -148,6 +150,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
+    { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
@@ -164,6 +167,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: '/track', icon: MapPin, label: "Track Ride" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
+    { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
