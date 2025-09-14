@@ -7,9 +7,8 @@ import { getBookings, getAllProfiles } from '@/lib/storage';
 import type { Booking, Profile } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle, MapPin, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getApp } from "firebase/app";
 import { Badge } from '@/components/ui/badge';
 
 export default function TrackRidePage() {
@@ -20,8 +19,7 @@ export default function TrackRidePage() {
     const [passengerProfile, setPassengerProfile] = useState<Profile | null>(null);
     const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [mapSrc, setMapSrc] = useState('');
-    const [apiKey, setApiKey] = useState('');
+    const [isMapLoading, setIsMapLoading] = useState(false);
 
     useEffect(() => {
         const fetchBookingAndProfiles = async () => {
@@ -38,29 +36,57 @@ export default function TrackRidePage() {
                 if(foundBooking.driverEmail) {
                     setDriverProfile(allProfiles.find(p => p.email === foundBooking.driverEmail) || null);
                 }
-
-                const [from, to] = foundBooking.destination.split(' to ');
-                
-                // Get API key from Firebase config
-                const app = getApp();
-                const key = app.options.apiKey;
-
-                if (key) {
-                    setApiKey(key);
-                    const embedMapSrc = `https://www.google.com/maps/embed/v1/directions?key=${key}&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
-                    setMapSrc(embedMapSrc);
-                } else {
-                    toast({
-                        title: "Map Error",
-                        description: "Could not load map. API key is missing.",
-                        variant: "destructive"
-                    });
-                }
             }
             setIsLoaded(true);
         };
         fetchBookingAndProfiles();
-    }, [params.id, toast]);
+    }, [params.id]);
+    
+    const handleViewOnMap = () => {
+        if (!booking) return;
+
+        setIsMapLoading(true);
+
+        if (!navigator.geolocation) {
+            toast({
+                title: "Geolocation not supported",
+                description: "Your browser doesn't support location tracking.",
+                variant: "destructive",
+            });
+            setIsMapLoading(false);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const [, to] = booking.destination.split(' to ');
+
+                // Create a Google Maps URL with the live location as the origin
+                const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${encodeURIComponent(to)}&travelmode=driving`;
+                
+                window.open(mapUrl, '_blank');
+                setIsMapLoading(false);
+            },
+            (error) => {
+                let errorMessage = "Could not get your location. Please ensure location services are enabled for your browser.";
+                if(error.code === 1) { // PERMISSION_DENIED
+                    errorMessage = "Location access denied. Please allow location access in your browser settings to use this feature.";
+                }
+                toast({
+                    title: "Location Error",
+                    description: errorMessage,
+                    variant: "destructive",
+                });
+                setIsMapLoading(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    };
 
     const handleShare = async () => {
         if (!booking) return;
@@ -120,20 +146,14 @@ export default function TrackRidePage() {
                         <CardTitle>Route: {booking.destination}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {mapSrc ? (
-                            <iframe
-                                width="100%"
-                                height="450"
-                                style={{ border: 0 }}
-                                loading="lazy"
-                                allowFullScreen
-                                src={mapSrc}>
-                            </iframe>
-                        ) : (
-                            <div className="h-96 flex items-center justify-center bg-muted rounded-lg">
-                                <p>Map could not be loaded.</p>
-                            </div>
-                        )}
+                        <Button onClick={handleViewOnMap} disabled={isMapLoading} className="w-full">
+                            {isMapLoading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <MapPin className="mr-2 h-4 w-4" />
+                            )}
+                            View Live on Map
+                        </Button>
                     </CardContent>
                 </Card>
 
@@ -221,3 +241,5 @@ export default function TrackRidePage() {
         </div>
     );
 }
+
+    
