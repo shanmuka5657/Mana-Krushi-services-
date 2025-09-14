@@ -21,6 +21,7 @@ function AdminAllBookingsPage() {
     useEffect(() => {
         const fetchBookings = async () => {
             const allBookings = await getBookings(true);
+            allBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
             setBookings(allBookings);
             setIsLoaded(true);
         };
@@ -31,6 +32,7 @@ function AdminAllBookingsPage() {
         const allBookings = await getBookings(true);
         const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
         await saveBookings(updatedAllBookings);
+        updatedAllBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
         setBookings(updatedAllBookings);
     };
 
