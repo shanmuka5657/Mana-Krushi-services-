@@ -126,7 +126,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [routeDataToSubmit, setRouteDataToSubmit] = useState<OwnerFormValues | null>(null);
+  const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean }) | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
@@ -188,7 +188,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }, [form]);
 
   async function onSubmit(data: OwnerFormValues) {
-    // Make sure vehicle info is in the profile
     const userProfile = await getProfile();
     if (!userProfile || !userProfile.vehicleType || !userProfile.vehicleNumber) {
         toast({
@@ -223,7 +222,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
 
     const routeDataWithPromotion = { ...routeDataToSubmit, isPromoted };
     setRouteDataToSubmit(routeDataWithPromotion);
-
+    
     if (isPromoted) {
       setIsPaymentDialogOpen(true);
     } else {
@@ -298,11 +297,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       setRouteDataToSubmit(null);
   }
   
-  const handlePaymentSuccess = async () => {
+  const handlePaymentSuccess = () => {
     if (routeDataToSubmit) {
-      // Logic for handling a successful ONE-TIME promotion payment
-      // For now, it just submits the route as promoted.
-      // If you wanted to, you could save the transaction ID or something similar here.
       handleRouteSubmission(routeDataToSubmit);
     }
   }
