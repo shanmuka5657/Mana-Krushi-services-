@@ -343,7 +343,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             <div className="pt-4">
               <p className="text-sm font-semibold text-foreground mb-2">This is how your ride will look to passengers:</p>
               <Image 
-                src="https://i.ibb.co/bFk0W6C/promo-example.png"
+                src="https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg"
                 alt="Promoted Ride Example"
                 width={1200}
                 height={350}
