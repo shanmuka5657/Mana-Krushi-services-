@@ -218,23 +218,23 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }
 
   const handlePromotionChoice = (isPromoted: boolean) => {
+    setShowPromotionDialog(false);
     if (!routeDataToSubmit) return;
 
     const routeDataWithPromotion = { ...routeDataToSubmit, isPromoted };
     setRouteDataToSubmit(routeDataWithPromotion);
 
-    // Check if the user has an active plan
-    const hasActivePlan = profile?.planExpiryDate && new Date(profile.planExpiryDate) > new Date();
-
-    if (hasActivePlan) {
-      // If they have a plan, add the route directly
-      handleRouteSubmission(routeDataWithPromotion);
+    if (isPromoted) {
+      const hasActivePlan = profile?.planExpiryDate && new Date(profile.planExpiryDate) > new Date();
+      if (hasActivePlan) {
+        handleRouteSubmission(routeDataWithPromotion);
+      } else {
+        setIsPaymentDialogOpen(true);
+      }
     } else {
-      // Otherwise, open the payment dialog
-      setIsPaymentDialogOpen(true);
+      handleRouteSubmission(routeDataWithPromotion);
     }
-    setShowPromotionDialog(false);
-  }
+  };
   
   const handleCalculateDistance = async () => {
       const from = form.getValues('fromLocation');
@@ -645,3 +645,5 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </>
   );
 }
+
+    
