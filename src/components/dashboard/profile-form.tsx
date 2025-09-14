@@ -63,14 +63,18 @@ export default function ProfileForm() {
   });
 
   useEffect(() => {
+    let stream: MediaStream | null = null;
     const getCameraPermission = async () => {
+      // Only run this if there's no selfie taken
+      if (selfie) return;
+
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             console.error('Camera API not available.');
             setHasCameraPermission(false);
             return;
         }
-        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        stream = await navigator.mediaDevices.getUserMedia({video: true});
         setHasCameraPermission(true);
 
         if (videoRef.current) {
@@ -85,12 +89,9 @@ export default function ProfileForm() {
 
     // Cleanup function to stop video stream
     return () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const stream = videoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach(track => track.stop());
-        }
+        stream?.getTracks().forEach(track => track.stop());
     }
-  }, []);
+  }, [selfie]);
 
   useEffect(() => {
     const loadProfile = async () => {
