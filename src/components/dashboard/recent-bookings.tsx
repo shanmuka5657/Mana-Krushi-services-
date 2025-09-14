@@ -81,10 +81,10 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   }
   
   const handleReportSubmit = async () => {
-    if (!selectedBooking || reportText.trim().length < 10) {
+    if (!selectedBooking || !reportText.trim()) {
       toast({
-        title: "Report too short",
-        description: "Please provide at least 10 characters in your report.",
+        title: "Report cannot be empty",
+        description: "Please provide some feedback in your report.",
         variant: "destructive",
       });
       return;
