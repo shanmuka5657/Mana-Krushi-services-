@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 
@@ -42,10 +42,15 @@ function GamesPageContent() {
         fetchLatestBooking();
     }, []);
 
-    const handlePlayGame = () => {
-        // For now, redirect to the entertainment page as a placeholder
-        router.push('/entertainment');
+    const handleCallDriver = () => {
+        if (latestBooking?.driverMobile) {
+            window.location.href = `tel:${latestBooking.driverMobile}`;
+        }
     };
+    
+    const handleMoreInfo = () => {
+        router.push('/bookings?role=passenger');
+    }
 
     if (isLoading) {
         return (
@@ -66,7 +71,7 @@ function GamesPageContent() {
                         Ride & Play
                     </CardTitle>
                     <CardDescription>
-                        While you wait for your ride, why not play a game?
+                        While you wait for your ride, you can check details or contact your driver.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -74,29 +79,36 @@ function GamesPageContent() {
                         <Card className="bg-muted/50">
                             <CardHeader>
                                 <CardTitle>Your Next Ride</CardTitle>
-                                <CardDescription>This is your upcoming confirmed ride.</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="font-bold text-lg text-primary">{latestBooking.destination}</div>
-                                <div className="flex items-center text-sm text-muted-foreground gap-4">
+                            <CardContent className="space-y-3">
+                                <div className="font-semibold text-md text-primary">{latestBooking.destination}</div>
+                                <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4" />
-                                        <span>{format(new Date(latestBooking.departureDate), 'PPP')}</span>
+                                        <span>{format(new Date(latestBooking.departureDate), 'dd MMM, yyyy')}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Clock className="h-4 w-4" />
                                         <span>{format(new Date(latestBooking.departureDate), 'p')}</span>
                                     </div>
-                                </div>
-                                 <div className="flex items-center text-sm text-muted-foreground gap-2">
-                                    <User className="h-4 w-4" />
-                                    <span>Driver: {latestBooking.driverName}</span>
+                                     <div className="flex items-center gap-2">
+                                        <User className="h-4 w-4" />
+                                        <span>{latestBooking.driverName}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="h-4 w-4" />
+                                        <span>{latestBooking.driverMobile}</span>
+                                    </div>
                                 </div>
                             </CardContent>
-                            <CardFooter>
-                                <Button onClick={handlePlayGame} className="w-full">
-                                    <Play className="mr-2 h-4 w-4" />
-                                    Play Now
+                            <CardFooter className="grid grid-cols-2 gap-2">
+                                <Button onClick={handleCallDriver} className="w-full">
+                                    <Phone className="mr-2 h-4 w-4" />
+                                    Call Driver
+                                </Button>
+                                 <Button onClick={handleMoreInfo} className="w-full" variant="outline">
+                                    <Info className="mr-2 h-4 w-4" />
+                                    More Info
                                 </Button>
                             </CardFooter>
                         </Card>
