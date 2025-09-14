@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Booking, Route } from "@/lib/types";
+import type { Booking, Route, Profile } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +24,11 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { getBookings, saveBookings, getRoutes } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, getAllProfiles } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
@@ -54,21 +54,28 @@ interface RecentBookingsProps {
 const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [routes, setRoutes] = useState<Route[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [reportText, setReportText] = useState("");
   const { toast } = useToast();
   const [dialogAction, setDialogAction] = useState<'view' | 'report' | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchRoutes = async () => {
-        setRoutes(await getRoutes(true)); // Admin/Owner can see all
+    const fetchData = async () => {
+        setRoutes(await getRoutes(true));
+        setAllProfiles(await getAllProfiles());
     }
-    fetchRoutes();
+    fetchData();
   }, []);
   
   const isRideComplete = (booking: Booking) => {
     const rideEndTime = new Date(booking.departureDate); // This should ideally be arrival time if available
     return rideEndTime < new Date();
+  }
+
+  const getProfileForUser = (email?: string): Profile | undefined => {
+    if (!email) return undefined;
+    return allProfiles.find(p => p.email === email);
   }
   
   const handleReportSubmit = async () => {
@@ -227,11 +234,18 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                     <span className="font-medium">{selectedBooking.client}</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
+                             <div className="flex items-center gap-4">
                                 <Phone className="h-5 w-5 text-muted-foreground" />
                                 <div className="flex flex-col">
                                     <span className="text-sm text-muted-foreground">Passenger Mobile</span>
-                                    <span className="font-medium">{selectedBooking.mobile}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">{selectedBooking.mobile}</span>
+                                        {getProfileForUser(selectedBooking.clientEmail)?.mobileVerified && (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <hr />
@@ -262,14 +276,17 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             </div>
                             <div className="flex items-center gap-4">
                             <Phone className="h-5 w-5 text-muted-foreground" />
-                            <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">
-                                Driver Mobile
-                                </span>
-                                <span className="font-medium">
-                                {selectedBooking.driverMobile || 'N/A'}
-                                </span>
-                            </div>
+                             <div className="flex flex-col">
+                                    <span className="text-sm text-muted-foreground">Driver Mobile</span>
+                                     <div className="flex items-center gap-2">
+                                        <span className="font-medium">{selectedBooking.driverMobile || 'N/A'}</span>
+                                        {getProfileForUser(selectedBooking.driverEmail)?.mobileVerified && (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex items-center gap-4">
                             <Car className="h-5 w-5 text-muted-foreground" />
@@ -357,4 +374,3 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 
 export default RecentBookings;
 
-    

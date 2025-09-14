@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRoutes, getBookings, getAllProfiles } from '@/lib/storage';
 import type { Route, Booking, Profile } from '@/lib/types';
-import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield } from 'lucide-react';
+import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -203,7 +203,14 @@ function FindRideResultsPage() {
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <div className="font-semibold text-sm">{route.driverName}</div>
+                                            <div className="font-semibold text-sm flex items-center gap-2">
+                                                {route.driverName}
+                                                {driverProfile?.mobileVerified && (
+                                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 p-1 h-4">
+                                                        <CheckCircle className="h-3 w-3" />
+                                                    </Badge>
+                                                )}
+                                            </div>
                                             <div className="flex items-center gap-1">
                                                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                                 <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>

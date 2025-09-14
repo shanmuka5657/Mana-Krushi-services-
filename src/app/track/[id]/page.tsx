@@ -3,31 +3,42 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getBookings } from '@/lib/storage';
-import type { Booking } from '@/lib/types';
+import { getBookings, getAllProfiles } from '@/lib/storage';
+import type { Booking, Profile } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Phone, Car, Shield, Share2 } from 'lucide-react';
+import { ArrowLeft, User, Phone, Car, Shield, Share2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getApp } from "firebase/app";
+import { Badge } from '@/components/ui/badge';
 
 export default function TrackRidePage() {
     const router = useRouter();
     const params = useParams();
     const { toast } = useToast();
     const [booking, setBooking] = useState<Booking | null>(null);
+    const [passengerProfile, setPassengerProfile] = useState<Profile | null>(null);
+    const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [mapSrc, setMapSrc] = useState('');
     const [apiKey, setApiKey] = useState('');
 
     useEffect(() => {
-        const fetchBooking = async () => {
+        const fetchBookingAndProfiles = async () => {
             const bookingId = typeof params.id === 'string' ? params.id : '';
             const allBookings = await getBookings(true);
             const foundBooking = allBookings.find(b => b.id === bookingId);
 
             if (foundBooking) {
                 setBooking(foundBooking);
+                const allProfiles = await getAllProfiles();
+                if(foundBooking.clientEmail) {
+                    setPassengerProfile(allProfiles.find(p => p.email === foundBooking.clientEmail) || null);
+                }
+                if(foundBooking.driverEmail) {
+                    setDriverProfile(allProfiles.find(p => p.email === foundBooking.driverEmail) || null);
+                }
+
                 const [from, to] = foundBooking.destination.split(' to ');
                 
                 // Get API key from Firebase config
@@ -48,7 +59,7 @@ export default function TrackRidePage() {
             }
             setIsLoaded(true);
         };
-        fetchBooking();
+        fetchBookingAndProfiles();
     }, [params.id, toast]);
 
     const handleShare = async () => {
@@ -150,7 +161,14 @@ export default function TrackRidePage() {
                                 <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Passenger Mobile</p>
-                                    <p className="font-semibold">{booking.mobile}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold">{booking.mobile}</p>
+                                        {passengerProfile?.mobileVerified && (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 p-3 border rounded-lg">
@@ -164,7 +182,14 @@ export default function TrackRidePage() {
                                 <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Driver Mobile</p>
-                                    <p className="font-semibold">{booking.driverMobile}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold">{booking.driverMobile}</p>
+                                         {driverProfile?.mobileVerified && (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -196,4 +221,3 @@ export default function TrackRidePage() {
         </div>
     );
 }
-

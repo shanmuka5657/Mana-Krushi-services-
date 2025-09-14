@@ -5,19 +5,22 @@ import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getBookings, getCurrentUserName } from '@/lib/storage';
-import type { Booking } from '@/lib/types';
+import { getBookings, getCurrentUserName, getAllProfiles } from '@/lib/storage';
+import type { Booking, Profile } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Calendar, Download } from 'lucide-react';
+import { User, Phone, Calendar, Download, CheckCircle } from 'lucide-react';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type Passenger = {
     name: string;
     mobile: string;
+    email?: string;
     lastBookingDate: Date;
     totalBookings: number;
+    isVerified?: boolean;
 }
 
 function PassengersPageContent() {
@@ -27,7 +30,10 @@ function PassengersPageContent() {
     useEffect(() => {
         const fetchPassengers = async () => {
             const ownerName = getCurrentUserName();
-            const allBookings = await getBookings();
+            const [allBookings, allProfiles] = await Promise.all([
+                getBookings(),
+                getAllProfiles()
+            ]);
             
             // Filter bookings where the owner is the driver
             const ownerBookings = allBookings.filter(b => b.driverName === ownerName);
@@ -38,11 +44,14 @@ function PassengersPageContent() {
                 if (!booking.mobile) return; // Skip if no mobile number
 
                 if (!passengerMap[booking.mobile]) {
+                    const profile = allProfiles.find(p => p.email === booking.clientEmail);
                     passengerMap[booking.mobile] = {
                         name: booking.client,
                         mobile: booking.mobile,
+                        email: booking.clientEmail,
                         lastBookingDate: new Date(booking.departureDate),
                         totalBookings: 0,
+                        isVerified: profile?.mobileVerified
                     };
                 }
                 passengerMap[booking.mobile].totalBookings += 1;
@@ -63,6 +72,7 @@ function PassengersPageContent() {
         const dataToExport = passengers.map(p => ({
             'Name': p.name,
             'Mobile': p.mobile,
+            'Verified': p.isVerified ? 'Yes' : 'No',
             'Total Bookings': p.totalBookings,
             'Last Booking': format(p.lastBookingDate, 'PPP'),
         }));
@@ -100,7 +110,17 @@ function PassengersPageContent() {
                             {passengers.length > 0 ? passengers.map(passenger => (
                                 <TableRow key={passenger.mobile}>
                                     <TableCell className="font-medium flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {passenger.name}</TableCell>
-                                    <TableCell><Phone className="h-4 w-4 mr-2 inline text-muted-foreground" />{passenger.mobile}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <Phone className="h-4 w-4 mr-2 inline text-muted-foreground" />
+                                            {passenger.mobile}
+                                            {passenger.isVerified && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{passenger.totalBookings}</TableCell>
                                     <TableCell><Calendar className="h-4 w-4 mr-2 inline text-muted-foreground" />{format(passenger.lastBookingDate, 'PPP')}</TableCell>
                                 </TableRow>

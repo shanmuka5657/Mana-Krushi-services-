@@ -25,7 +25,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2 } from "lucide-react";
-import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes } from "@/lib/storage";
+import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -36,6 +36,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
+import { Badge } from "../ui/badge";
 
 interface MyRoutesProps {
   routes: Route[];
@@ -63,6 +64,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -95,6 +97,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   useEffect(() => {
     const fetchBookingsAndProfile = async () => {
         setAllBookings(await getBookings(true)); // Admin/Owner can see all
+        setAllProfiles(await getAllProfiles());
     }
     fetchBookingsAndProfile();
   }, []);
@@ -115,6 +118,11 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
             b.status !== "Cancelled"
         );
     }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+  }
+
+  const getProfileForUser = (email?: string): Profile | undefined => {
+    if (!email) return undefined;
+    return allProfiles.find(p => p.email === email);
   }
 
   const filteredRoutes = useMemo(() => {
@@ -324,6 +332,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                     const StatusIcon = getStatusInfo(booking.status).icon;
                     const statusColor = getStatusInfo(booking.status).color;
                     const isComplete = new Date(booking.departureDate) < new Date();
+                    const passengerProfile = getProfileForUser(booking.clientEmail);
                     return (
                     <div key={booking.id} className="border p-4 rounded-md space-y-4">
                        <div className="flex items-start gap-4">
@@ -335,9 +344,16 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                       </div>
                        <div className="flex items-start gap-4">
                           <Phone className="h-5 w-5 text-muted-foreground mt-1" />
-                          <div className="flex flex-col">
+                           <div className="flex flex-col">
                               <span className="text-sm text-muted-foreground">Mobile Number</span>
-                              <span className="font-medium">{booking.mobile}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{booking.mobile}</span>
+                                {passengerProfile?.mobileVerified && (
+                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                        <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                    </Badge>
+                                )}
+                              </div>
                           </div>
                       </div>
                        <div className="flex items-start gap-4">

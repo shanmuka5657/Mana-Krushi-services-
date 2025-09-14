@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAllProfiles } from '@/lib/storage';
 import type { Profile } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Mail, Shield, Download } from 'lucide-react';
+import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert } from 'lucide-react';
 import { Badge as UiBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/utils';
@@ -55,6 +55,7 @@ function AdminUsersPage() {
             Name: p.name,
             Email: p.email,
             Mobile: p.mobile,
+            'Mobile Verified': p.mobileVerified ? 'Yes' : 'No',
             Role: p.role,
             'Plan Expiry': p.planExpiryDate ? format(new Date(p.planExpiryDate), 'PPP') : 'N/A'
         }));
@@ -102,18 +103,39 @@ function AdminUsersPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Mobile</TableHead>
+                                <TableHead>Contact</TableHead>
                                 <TableHead>Role</TableHead>
-                                <TableHead>Plan Expiry</TableHead>
+                                <TableHead>Plan</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredProfiles.length > 0 ? filteredProfiles.map(profile => (
                                 <TableRow key={profile.email}>
-                                    <TableCell className="font-medium flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {profile.name}</TableCell>
-                                    <TableCell><Mail className="h-4 w-4 mr-2 inline text-muted-foreground" />{profile.email}</TableCell>
-                                    <TableCell><Phone className="h-4 w-4 mr-2 inline text-muted-foreground" />{profile.mobile}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <User className="h-4 w-4 text-muted-foreground" /> {profile.name}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />{profile.email}
+                                            </div>
+                                             <div className="flex items-center gap-2">
+                                                <Phone className="h-4 w-4 text-muted-foreground" />
+                                                <span>{profile.mobile}</span>
+                                                {profile.mobileVerified ? (
+                                                    <UiBadge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                        <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                                    </UiBadge>
+                                                ) : (
+                                                    <UiBadge variant="destructive" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                                                        <ShieldAlert className="h-3 w-3 mr-1" /> Unverified
+                                                    </UiBadge>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </TableCell>
                                     <TableCell>
                                         <UiBadge variant={profile.role === 'owner' ? 'secondary' : 'outline'}>
                                             {profile.role}

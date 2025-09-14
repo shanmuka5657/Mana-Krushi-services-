@@ -3,14 +3,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users, AlertCircle } from "lucide-react";
+import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users, AlertCircle, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { getFirestore, addDoc, collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
 
 
 import { getRoutes, getProfile, getCurrentUser, getBookings, saveBookings } from "@/lib/storage";
-import type { Route, Booking } from "@/lib/types";
+import type { Route, Booking, Profile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,12 +28,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 export default function BookRidePage() {
   const router = useRouter();
   const params = useParams();
   const { toast } = useToast();
   const [route, setRoute] = useState<Route | null>(null);
+  const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [isBooking, setIsBooking] = useState(false);
@@ -51,6 +53,9 @@ export default function BookRidePage() {
         
         if (foundRoute) {
             setRoute(foundRoute);
+            const profile = await getProfile(foundRoute.ownerEmail);
+            if(profile) setDriverProfile(profile);
+
             setMessage(`Hello, I've just booked your ride! I'd be glad to travel with you. Can I get more information?`);
             
             const [depHours, depMinutes] = foundRoute.departureTime.split(':').map(Number);
@@ -160,6 +165,7 @@ export default function BookRidePage() {
         travelers: String(numberOfSeats),
         mobile: passengerProfile.mobile,
         driverName: route.driverName,
+        driverEmail: route.ownerEmail,
         driverMobile: route.driverMobile,
         vehicleType: route.vehicleType,
         vehicleNumber: route.vehicleNumber,
@@ -265,7 +271,14 @@ export default function BookRidePage() {
             )}
             <Card>
                 <CardHeader>
-                    <CardTitle>{format(new Date(route.travelDate), 'EEE dd MMM')}</CardTitle>
+                    <div className="flex justify-between items-center">
+                        <CardTitle>{format(new Date(route.travelDate), 'EEE dd MMM')}</CardTitle>
+                         {driverProfile?.mobileVerified && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                <CheckCircle className="h-3 w-3 mr-1" /> Verified Driver
+                            </Badge>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent>
                      <div className="flex gap-4">
@@ -429,5 +442,3 @@ export default function BookRidePage() {
     </>
   );
 }
-
-    

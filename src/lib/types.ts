@@ -13,6 +13,7 @@ export type Booking = {
   travelers: string;
   mobile: string;
   driverName?: string;
+  driverEmail?: string;
   driverMobile?: string;
   vehicleType?: string;
   vehicleNumber?: string;
