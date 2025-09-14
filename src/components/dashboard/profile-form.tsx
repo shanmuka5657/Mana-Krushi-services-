@@ -141,6 +141,11 @@ export default function ProfileForm() {
       }
   }
 
+  const handleRetakeSelfie = () => {
+    setSelfie(null);
+    form.setValue('selfieDataUrl', '');
+  };
+
   async function onSubmit(data: ProfileFormValues) {
     const currentProfile = await getProfile();
     const profileToSave: Profile = { ...currentProfile, ...data };
@@ -206,7 +211,10 @@ export default function ProfileForm() {
                         <AvatarImage src={selfie || profile?.selfieDataUrl} alt={profile?.name} />
                         <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
                     </Avatar>
-                     <Button onClick={handleTakeSelfie} disabled={!hasCameraPermission}>
+                     <Button 
+                        onClick={selfie ? handleRetakeSelfie : handleTakeSelfie}
+                        disabled={!hasCameraPermission}
+                    >
                         <Camera className="mr-2 h-4 w-4" />
                         {selfie ? 'Retake Selfie' : 'Take Selfie'}
                     </Button>
