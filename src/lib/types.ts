@@ -48,6 +48,7 @@ export type Route = {
 export type Profile = {
     name: string;
     mobile: string;
+    mobileVerified?: boolean;
     email: string;
     address?: string;
     vehicleType?: string;

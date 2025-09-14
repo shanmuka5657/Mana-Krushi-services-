@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 
 
 const profileFormSchema = z.object({
@@ -49,6 +50,7 @@ const profileFormSchema = z.object({
   vehicleNumber: z.string().optional(),
   mileage: z.coerce.number().optional(),
   selfieDataUrl: z.string().optional(),
+  mobileVerified: z.boolean().default(false),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -62,6 +64,8 @@ export default function ProfileForm() {
   const [selfie, setSelfie] = useState<string | null>(null);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [showPlanPrompt, setShowPlanPrompt] = useState(false);
+  const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -74,6 +78,7 @@ export default function ProfileForm() {
       vehicleNumber: "",
       mileage: 0,
       selfieDataUrl: "",
+      mobileVerified: false,
     },
   });
 
@@ -127,6 +132,7 @@ export default function ProfileForm() {
             vehicleNumber: '',
             mileage: 0,
             selfieDataUrl: '',
+            mobileVerified: false,
         };
         
         const combinedValues = { ...defaultValues, ...userProfile };
@@ -191,6 +197,44 @@ export default function ProfileForm() {
     setShowPlanPrompt(false);
     setIsPaymentDialogOpen(true);
   }
+  
+  const handleVerifyClick = () => {
+    const mobile = form.getValues('mobile');
+    if (!/^\d{10}$/.test(mobile)) {
+      form.setError('mobile', { message: 'Please enter a valid 10-digit mobile number to verify.' });
+      return;
+    }
+    // In a real app, this would trigger an API call to send an OTP
+    toast({
+      title: 'OTP Sent (Simulated)',
+      description: 'An OTP has been sent to your mobile. Please enter 123456 to verify.',
+    });
+    setIsOtpDialogOpen(true);
+  };
+
+  const handleOtpSubmit = async () => {
+    // In a real app, you'd verify the OTP against your backend
+    if (otpValue === '123456') {
+      form.setValue('mobileVerified', true);
+      const updatedProfile: Profile = { ...profile!, mobileVerified: true };
+      await saveProfile(updatedProfile);
+      setProfile(updatedProfile);
+
+      toast({
+        title: 'Mobile Verified!',
+        description: 'Your mobile number has been successfully verified.',
+        action: <CheckCircle className="text-green-500" />,
+      });
+      setIsOtpDialogOpen(false);
+      setOtpValue('');
+    } else {
+      toast({
+        title: 'Invalid OTP',
+        description: 'The OTP you entered is incorrect. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handlePaymentSuccess = async () => {
     const newExpiryDate = addMonths(new Date(), 3);
@@ -220,6 +264,31 @@ export default function ProfileForm() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+       <Dialog open={isOtpDialogOpen} onOpenChange={setIsOtpDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter Verification Code</DialogTitle>
+            <DialogDescription>
+              A 6-digit code was sent to your mobile number. Please enter it below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={otpValue}
+              onChange={(e) => setOtpValue(e.target.value)}
+              placeholder="123456"
+              maxLength={6}
+            />
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+                <Button type="button" variant="ghost">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleOtpSubmit}>Verify Code</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <PaymentDialog 
         isOpen={isPaymentDialogOpen}
@@ -321,12 +390,34 @@ export default function ProfileForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Mobile Number</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input type="tel" placeholder="Enter your mobile number" {...field} className="pl-10" />
+                     <div className="flex items-center gap-2">
+                        <FormControl>
+                          <div className="relative flex-grow">
+                            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                              type="tel"
+                              placeholder="Enter your mobile number"
+                              {...field}
+                              className="pl-10"
+                              disabled={form.getValues('mobileVerified')}
+                            />
+                          </div>
+                        </FormControl>
+                        {form.getValues('mobileVerified') ? (
+                          <div className="flex items-center gap-1 text-sm text-green-600 font-medium px-3 py-2 rounded-md bg-green-50 border border-green-200">
+                             <CheckCircle className="h-4 w-4" /> Verified
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleVerifyClick}
+                          >
+                            <MessageSquareWarning className="mr-2 h-4 w-4" />
+                            Verify
+                          </Button>
+                        )}
                       </div>
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
