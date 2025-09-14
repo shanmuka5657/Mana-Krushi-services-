@@ -73,7 +73,7 @@ function SampleInsuranceCertificate() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div>
                             <p className="font-semibold">Insured Passenger</p>
-                            <p className="text-muted-foreground">Priya Sharma</p>
+                            <p className="text-muted-foreground">Priya Sharma (populated upon booking)</p>
                         </div>
                          <div>
                             <p className="font-semibold">Covered Ride</p>
@@ -108,7 +108,7 @@ function SampleInsuranceCertificate() {
                             </li>
                         </ul>
                     </div>
-                    <p className="text-xs text-muted-foreground pt-4">This is a sample certificate for illustrative purposes only. Actual terms, conditions, and coverage amounts are subject to the policy issued by the insurance partner.</p>
+                    <p className="text-xs text-muted-foreground pt-4">This is a sample certificate for illustrative purposes only. The group policy covers the driver and all booked passengers for the specific ride. Actual terms, conditions, and coverage amounts are subject to the policy issued by the insurance partner.</p>
                 </div>
             </CardContent>
         </Card>
