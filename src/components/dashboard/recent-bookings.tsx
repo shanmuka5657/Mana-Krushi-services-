@@ -24,7 +24,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map, CheckCircle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map, CheckCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -57,7 +58,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [reportText, setReportText] = useState("");
   const { toast } = useToast();
-  const [dialogAction, setDialogAction] = useState<'view' | 'report' | null>(null);
+  const [dialogAction, setDialogAction] = useState<'view' | 'report' | 'cancel' | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -109,10 +110,32 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
     setSelectedBooking(null);
   };
   
-  const handleOpenDialog = (booking: Booking, action: 'view' | 'report') => {
+  const handleOpenDialog = (booking: Booking, action: 'view' | 'report' | 'cancel') => {
       setSelectedBooking(booking);
       setDialogAction(action);
   }
+
+  const handleCancelBooking = async () => {
+    if (!selectedBooking) return;
+    
+    const updatedBooking: Booking = { ...selectedBooking, status: "Cancelled" };
+    
+    const allBookings = await getBookings();
+    const updatedBookings = allBookings.map((b) => b.id === updatedBooking.id ? updatedBooking : b);
+    await saveBookings(updatedBookings);
+
+    onUpdateBooking(updatedBooking);
+
+    toast({
+      title: "Booking Cancelled",
+      description: `Your booking ${selectedBooking.bookingCode || selectedBooking.id} has been cancelled.`,
+      variant: 'destructive'
+    });
+    
+    setDialogAction(null);
+    setSelectedBooking(null);
+  };
+
 
   const getBookingStatus = (booking: Booking): Booking['status'] => {
     if (booking.status === 'Cancelled' || booking.status === 'Completed') {
@@ -164,6 +187,8 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                 {bookings.length > 0 ? (
                   bookings.map((booking) => {
                     const status = getBookingStatus(booking);
+                    const canCancel = !isRideComplete(booking) && (status === 'Confirmed' || status === 'Pending');
+
                     return (
                     <TableRow key={booking.id}>
                       <TableCell className="font-medium font-mono text-xs">{booking.bookingCode || booking.id}</TableCell>
@@ -201,6 +226,13 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                   </Button>
                               </DialogTrigger>
                           )}
+                          {canCancel && (
+                             <DialogTrigger asChild>
+                                <Button variant="destructive" size="sm" onClick={() => handleOpenDialog(booking, 'cancel')}>
+                                  <Trash2 className="h-4 w-4 mr-2" /> Cancel
+                                </Button>
+                             </DialogTrigger>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -227,7 +259,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4 overflow-y-auto pr-2">
-                           <div className="grid grid-cols-2 gap-4">
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex items-start gap-3">
                                     <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                     <div>
@@ -251,7 +283,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 </div>
                            </div>
                            <hr/>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex items-start gap-3">
                                     <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                     <div>
@@ -263,12 +295,12 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                     <Milestone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                     <div>
                                         <p className="text-sm text-muted-foreground">Distance</p>
-                                        <p className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : 'N/A'}</p>
+                                        <p className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : (getDistanceForBooking(selectedBooking) ? `${getDistanceForBooking(selectedBooking)?.toFixed(0)} km` : 'N/A')}</p>
                                     </div>
                                 </div>
                             </div>
                             <hr />
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex items-start gap-3">
                                     <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                     <div>
@@ -306,7 +338,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                                 </div>
                             </div>
                              <hr />
-                             <div className="grid grid-cols-2 gap-4">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex items-start gap-3">
                                     <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                     <div>
@@ -329,7 +361,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             </DialogClose>
                         </DialogFooter>
                     </>
-                ) : (
+                ) : dialogAction === 'report' ? (
                     <>
                          <DialogHeader>
                             <DialogTitle>Report an issue for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
@@ -351,6 +383,21 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
                             <Button onClick={handleReportSubmit}>Submit Report</Button>
                         </DialogFooter>
                     </>
+                ) : (
+                   <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                        This action cannot be undone. This will permanently cancel your booking.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <DialogClose asChild>
+                            <AlertDialogCancel>Back</AlertDialogCancel>
+                        </DialogClose>
+                        <AlertDialogAction onClick={handleCancelBooking}>Yes, Cancel Booking</AlertDialogAction>
+                    </AlertDialogFooter>
+                   </AlertDialogContent>
                 )}
             </DialogContent>
           )}
@@ -361,3 +408,5 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
+
+    
