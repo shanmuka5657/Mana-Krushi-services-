@@ -19,7 +19,7 @@ export default function TrackRidePage() {
     const [passengerProfile, setPassengerProfile] = useState<Profile | null>(null);
     const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [isMapLoading, setIsMapLoading] = useState(false);
+    const [mapUrl, setMapUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchBookingAndProfiles = async () => {
@@ -36,57 +36,17 @@ export default function TrackRidePage() {
                 if(foundBooking.driverEmail) {
                     setDriverProfile(allProfiles.find(p => p.email === foundBooking.driverEmail) || null);
                 }
+                
+                // Construct Google Maps Embed URL
+                const [from, to] = foundBooking.destination.split(' to ');
+                const embedMapUrl = `https://www.google.com/maps/embed/v1/directions?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
+                setMapUrl(embedMapUrl);
+
             }
             setIsLoaded(true);
         };
         fetchBookingAndProfiles();
     }, [params.id]);
-    
-    const handleViewOnMap = () => {
-        if (!booking) return;
-
-        setIsMapLoading(true);
-
-        if (!navigator.geolocation) {
-            toast({
-                title: "Geolocation not supported",
-                description: "Your browser doesn't support location tracking.",
-                variant: "destructive",
-            });
-            setIsMapLoading(false);
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                const [, to] = booking.destination.split(' to ');
-
-                // Create a Google Maps URL with the live location as the origin
-                const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${encodeURIComponent(to)}&travelmode=driving`;
-                
-                window.open(mapUrl, '_blank');
-                setIsMapLoading(false);
-            },
-            (error) => {
-                let errorMessage = "Could not get your location. Please ensure location services are enabled for your browser.";
-                if(error.code === 1) { // PERMISSION_DENIED
-                    errorMessage = "Location access denied. Please allow location access in your browser settings to use this feature.";
-                }
-                toast({
-                    title: "Location Error",
-                    description: errorMessage,
-                    variant: "destructive",
-                });
-                setIsMapLoading(false);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
-        );
-    };
 
     const handleShare = async () => {
         if (!booking) return;
@@ -118,7 +78,7 @@ export default function TrackRidePage() {
     if (!isLoaded) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                Loading ride details...
+                <Loader2 className="h-8 w-8 animate-spin" />
             </div>
         );
     }
@@ -133,113 +93,115 @@ export default function TrackRidePage() {
 
     return (
         <div className="min-h-screen bg-muted/20">
-            <header className="bg-background shadow-sm p-4 flex items-center gap-4">
+            <header className="bg-background shadow-sm p-4 flex items-center gap-4 sticky top-0 z-10">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft />
                 </Button>
                 <h1 className="text-xl font-bold">Live Ride Status</h1>
             </header>
             
-            <main className="p-4 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Route: {booking.destination}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Button onClick={handleViewOnMap} disabled={isMapLoading} className="w-full">
-                            {isMapLoading ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <MapPin className="mr-2 h-4 w-4" />
-                            )}
-                            View Live on Map
-                        </Button>
-                    </CardContent>
-                </Card>
+            <main className="flex flex-col">
+                <div className="relative w-full h-64 md:h-96">
+                    {mapUrl ? (
+                         <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            src={mapUrl}>
+                        </iframe>
+                    ) : (
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                            <p>Loading map...</p>
+                        </div>
+                    )}
+                </div>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                         <div>
-                            <CardTitle>Ride Details</CardTitle>
-                            <CardDescription>Key information for your trip.</CardDescription>
-                         </div>
-                         <Button onClick={handleShare} variant="outline">
-                             <Share2 className="mr-2 h-4 w-4" />
-                             Share
-                         </Button>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="flex items-center gap-4 p-3 border rounded-lg">
-                                <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Passenger</p>
-                                    <p className="font-semibold">{booking.client}</p>
+                <div className="p-4 space-y-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                             <div>
+                                <CardTitle>Ride Details</CardTitle>
+                                <CardDescription>Key information for your trip.</CardDescription>
+                             </div>
+                             <Button onClick={handleShare} variant="outline">
+                                 <Share2 className="mr-2 h-4 w-4" />
+                                 Share
+                             </Button>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                    <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Passenger</p>
+                                        <p className="font-semibold">{booking.client}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-4 p-3 border rounded-lg">
-                                <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Passenger Mobile</p>
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold">{booking.mobile}</p>
-                                        {passengerProfile?.mobileVerified && (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                            </Badge>
-                                        )}
+                                <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                    <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Passenger Mobile</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold">{booking.mobile}</p>
+                                            {passengerProfile?.mobileVerified && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                    <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Driver</p>
+                                        <p className="font-semibold">{booking.driverName}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                    <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Driver Mobile</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold">{booking.driverMobile}</p>
+                                             {driverProfile?.mobileVerified && (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                                </Badge>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4 p-3 border rounded-lg">
-                                <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Driver</p>
-                                    <p className="font-semibold">{booking.driverName}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4 p-3 border rounded-lg">
-                                <Phone className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Driver Mobile</p>
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold">{booking.driverMobile}</p>
-                                         {driverProfile?.mobileVerified && (
-                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Vehicle Information</CardTitle>
-                    </CardHeader>
-                     <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <div className="flex items-center gap-4 p-3 border rounded-lg">
-                            <Car className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Vehicle Type</p>
-                                <p className="font-semibold">{booking.vehicleType}</p>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Vehicle Information</CardTitle>
+                        </CardHeader>
+                         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                <Car className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Vehicle Type</p>
+                                    <p className="font-semibold">{booking.vehicleType}</p>
+                                </div>
                             </div>
-                        </div>
-                         <div className="flex items-center gap-4 p-3 border rounded-lg">
-                            <Shield className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Vehicle Number</p>
-                                <p className="font-semibold">{booking.vehicleNumber}</p>
+                             <div className="flex items-center gap-4 p-3 border rounded-lg">
+                                <Shield className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Vehicle Number</p>
+                                    <p className="font-semibold">{booking.vehicleNumber}</p>
+                                </div>
                             </div>
-                        </div>
-                     </CardContent>
-                </Card>
+                         </CardContent>
+                    </Card>
+                </div>
             </main>
         </div>
     );
 }
-
     
