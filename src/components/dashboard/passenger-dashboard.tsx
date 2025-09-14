@@ -397,7 +397,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     defaultValues: {
       fromLocation: "",
       toLocation: "",
-      travelDate: new Date(),
     },
   });
   
