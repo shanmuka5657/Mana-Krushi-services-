@@ -147,6 +147,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
         format(bookingDate, "HH:mm") === route.departureTime
       }
     );
+    routeBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
     setSelectedRoute(route);
     setBookingsForRoute(routeBookings);
     setIsViewDialogOpen(true);
