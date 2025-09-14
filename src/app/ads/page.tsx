@@ -8,6 +8,7 @@ import Script from 'next/script';
 import { MonitorPlay, Link as LinkIcon, ChevronRight, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import Image from 'next/image';
 
 const newSmartLinks = [
     { name: "Smartlink_1", href: "https://markswaitingrouge.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" },
@@ -248,6 +249,14 @@ function AdsPageContent() {
                 </Card>
                 
                 <AutoAdRotator />
+
+                <Card>
+                    <CardContent className="p-4">
+                        <a href="https://markswaitingrouge.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac" target="_blank" rel="noopener noreferrer">
+                            <Image src="https://picsum.photos/seed/adbanner1/728/90" alt="Click here" width={728} height={90} className="w-full h-auto rounded-md" data-ai-hint="advertisement banner" />
+                        </a>
+                    </CardContent>
+                </Card>
                 
                  {/* New Smartlinks Card */}
                 <Card>
@@ -330,3 +339,5 @@ export default function AdsPage() {
         </Suspense>
     );
 }
+
+    
