@@ -24,7 +24,6 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map, CheckCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Textarea } from "../ui/textarea";
@@ -57,6 +56,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [reportText, setReportText] = useState("");
+  const [cancellationReason, setCancellationReason] = useState("");
   const { toast } = useToast();
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -114,7 +114,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
   const handleCancelBooking = async () => {
     if (!selectedBooking) return;
     
-    const updatedBooking: Booking = { ...selectedBooking, status: "Cancelled" };
+    const updatedBooking: Booking = { ...selectedBooking, status: "Cancelled", cancellationReason: cancellationReason || undefined };
     
     const allBookings = await getBookings();
     const updatedBookings = allBookings.map((b) => b.id === updatedBooking.id ? updatedBooking : b);
@@ -130,6 +130,7 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
     
     setIsCancelOpen(false);
     setSelectedBooking(null);
+    setCancellationReason("");
   };
 
 
@@ -384,21 +385,34 @@ const RecentBookings = ({ bookings, onUpdateBooking }: RecentBookingsProps) => {
         )}
      </Dialog>
 
-    {/* Cancel AlertDialog */}
-    <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                This action cannot be undone. This will permanently cancel your booking.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Back</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancelBooking}>Yes, Cancel Booking</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
+    {/* Cancel Dialog */}
+    <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        {selectedBooking && (
+             <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to cancel?</DialogTitle>
+                    <DialogDescription>
+                       This action cannot be undone. Please let us know why you're cancelling.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                    <Textarea 
+                        placeholder="Optional: What is the reason for cancellation?"
+                        value={cancellationReason}
+                        onChange={(e) => setCancellationReason(e.target.value)}
+                        rows={3}
+                    />
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="ghost" onClick={() => setCancellationReason('')}>Back</Button>
+                    </DialogClose>
+                    <Button variant="destructive" onClick={handleCancelBooking}>Yes, Cancel Booking</Button>
+                </DialogFooter>
+            </DialogContent>
+        )}
+     </Dialog>
+
     </>
   );
 };

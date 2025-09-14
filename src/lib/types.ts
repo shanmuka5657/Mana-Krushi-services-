@@ -20,6 +20,7 @@ export type Booking = {
   paymentMethod?: "Cash" | "UPI" | "Pending";
   paymentStatus?: "Paid" | "Unpaid";
   report?: string;
+  cancellationReason?: string;
   distance?: number;
   toll?: number;
 };
