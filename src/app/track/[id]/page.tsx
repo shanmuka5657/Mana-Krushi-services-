@@ -26,11 +26,13 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
 
-// This component will auto-adjust the map view
+// This component will auto-adjust the map view without re-rendering the whole map
 function ChangeView({ center, zoom }: { center: L.LatLngExpression, zoom: number }) {
   const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
-  const map = useMap();
-  map.setView(center, zoom);
+  if (useMap) {
+    const map = useMap();
+    map.setView(center, zoom);
+  }
   return null;
 }
 
