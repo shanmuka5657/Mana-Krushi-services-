@@ -153,7 +153,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         }
     }
     checkProfile();
-  }, [onSwitchTab]);
+  }, [onSwitchTab, toast]);
 
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
