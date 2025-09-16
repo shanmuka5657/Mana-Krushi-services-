@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole, saveBookings } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee, MessageSquare } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee, MessageSquare, Car } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -102,11 +102,13 @@ function GamesPageContent() {
     }, []);
     
     useEffect(() => {
-        if (!latestBooking) return;
+        if (!latestBooking && !driverRide) return;
+        const bookingOrRide = latestBooking || driverRide;
+        if (!bookingOrRide) return;
 
         const intervalId = setInterval(() => {
             const now = new Date();
-            const departure = new Date(latestBooking.departureDate);
+            const departure = new Date(bookingOrRide.departureDate);
             const diff = differenceInSeconds(departure, now);
 
             if (diff <= 0) {
@@ -125,7 +127,7 @@ function GamesPageContent() {
         }, 1000);
 
         return () => clearInterval(intervalId);
-    }, [latestBooking]);
+    }, [latestBooking, driverRide]);
 
     const handleCallDriver = () => {
         if (latestBooking?.driverMobile) {
@@ -171,7 +173,7 @@ function GamesPageContent() {
                 }
             } catch (error: any) {
                 // Check if the error is due to the user canceling the share dialog
-                if (error.name === 'AbortError' || (error.message && error.message.includes('Share canceled'))) {
+                if (error.name === 'AbortError' || error.name === 'NotAllowedError' || (error.message && error.message.includes('Share canceled'))) {
                     // Do nothing, user intentionally closed the dialog
                 } else {
                     console.error('Error sharing:', error);
@@ -346,3 +348,5 @@ export default function GamesPage() {
         </Suspense>
     )
 }
+
+    
