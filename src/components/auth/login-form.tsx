@@ -175,7 +175,7 @@ export function LoginForm() {
                 )}
               />
               <Button type="submit" className="w-full">
-                Login
+                {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : 'Login'}
               </Button>
             </form>
           </Form>
@@ -212,7 +212,7 @@ export function LoginForm() {
         )}
       </Card>
       <Dialog open={showQrDialog} onOpenChange={setShowQrDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-sm">
             <DialogHeader>
                 <DialogTitle>Install on Your Phone</DialogTitle>
                 <DialogDescription>
@@ -220,8 +220,10 @@ export function LoginForm() {
                 </DialogDescription>
             </DialogHeader>
             <div className="py-4 flex flex-col items-center gap-4">
-                {appUrl ? <QRCode value={appUrl} size={256} level="H" /> : <Loader2 className="h-16 w-16 animate-spin" />}
-                <p className="text-sm text-muted-foreground font-mono">{appUrl}</p>
+                <div className="p-4 bg-white rounded-lg">
+                  {appUrl ? <QRCode value={appUrl} size={200} level="H" /> : <Loader2 className="h-16 w-16 animate-spin" />}
+                </div>
+                <p className="text-sm text-muted-foreground font-mono text-center break-all px-4">{appUrl}</p>
             </div>
         </DialogContent>
       </Dialog>
