@@ -1,13 +1,19 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getBookings, getRoutes, getProfile, getCurrentUser } from '@/lib/storage';
 import type { Booking, Route, Profile } from '@/lib/types';
 import { Suspense } from 'react';
-import { IndianRupee, TrendingUp, TrendingDown, Wallet, Loader2 } from 'lucide-react';
+import { IndianRupee, TrendingUp, TrendingDown, Wallet, Loader2, Calendar as CalendarIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { DateRange } from 'react-day-picker';
+import { format, isWithinInterval } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const FUEL_PRICE_PER_LITER = 105; // Average fuel price in INR
 
@@ -34,9 +40,11 @@ function ProfitLossPageContent() {
     const [totalPromotionCost, setTotalPromotionCost] = useState(0);
     const [netProfit, setNetProfit] = useState(0);
     const [totalExpenses, setTotalExpenses] = useState(0);
+    const [date, setDate] = useState<DateRange | undefined>(undefined);
 
     useEffect(() => {
         const calculateProfitLoss = async () => {
+            setIsLoading(true);
             const userEmail = getCurrentUser();
             if (!userEmail) {
                 setIsLoading(false);
@@ -49,8 +57,17 @@ function ProfitLossPageContent() {
                 getRoutes(true),
             ]);
 
-            const ownerBookings = allBookings.filter(b => b.driverEmail === userEmail && b.status === 'Completed' && b.paymentStatus === 'Paid');
-            const ownerRoutes = allRoutes.filter(r => r.ownerEmail === userEmail);
+            const dateInterval = date?.from && date?.to ? { start: date.from, end: date.to } : null;
+
+            const ownerBookings = allBookings.filter(b => {
+                const bookingInDateRange = dateInterval ? isWithinInterval(new Date(b.departureDate), dateInterval) : true;
+                return b.driverEmail === userEmail && b.status === 'Completed' && b.paymentStatus === 'Paid' && bookingInDateRange;
+            });
+            
+            const ownerRoutes = allRoutes.filter(r => {
+                const routeInDateRange = dateInterval ? isWithinInterval(new Date(r.travelDate), dateInterval) : true;
+                return r.ownerEmail === userEmail && routeInDateRange;
+            });
             
             // 1. Calculate Revenue
             const revenue = ownerBookings.reduce((acc, booking) => acc + booking.amount, 0);
@@ -60,9 +77,14 @@ function ProfitLossPageContent() {
             // 2a. Fuel Cost
             let fuelCost = 0;
             if (profile?.mileage && profile.mileage > 0) {
-                const totalDistance = ownerRoutes
-                    .filter(route => ownerBookings.some(b => `${route.fromLocation} to ${route.toLocation}` === b.destination && new Date(route.travelDate).getTime() === new Date(b.departureDate).getTime() ))
-                    .reduce((acc, route) => acc + (route.distance || 0), 0);
+                const completedRoutesForFuelCalc = allRoutes.filter(route => 
+                    ownerBookings.some(b => 
+                        `${route.fromLocation} to ${route.toLocation}` === b.destination && 
+                        new Date(route.travelDate).getTime() === new Date(b.departureDate).getTime()
+                    )
+                );
+                
+                const totalDistance = completedRoutesForFuelCalc.reduce((acc, route) => acc + (route.distance || 0), 0);
                 
                 fuelCost = (totalDistance / profile.mileage) * FUEL_PRICE_PER_LITER;
                 setTotalFuelCost(fuelCost);
@@ -82,7 +104,7 @@ function ProfitLossPageContent() {
         };
 
         calculateProfitLoss();
-    }, []);
+    }, [date]);
 
 
     if (isLoading) {
@@ -99,8 +121,51 @@ function ProfitLossPageContent() {
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>Profit &amp; Loss Statement</CardTitle>
-                    <CardDescription>A financial overview of your ride-sharing business.</CardDescription>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <CardTitle>Profit &amp; Loss Statement</CardTitle>
+                            <CardDescription>A financial overview of your ride-sharing business.</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    id="date"
+                                    variant={"outline"}
+                                    className={cn(
+                                    "w-[300px] justify-start text-left font-normal",
+                                    !date && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {date?.from ? (
+                                    date.to ? (
+                                        <>
+                                        {format(date.from, "LLL dd, y")} -{" "}
+                                        {format(date.to, "LLL dd, y")}
+                                        </>
+                                    ) : (
+                                        format(date.from, "LLL dd, y")
+                                    )
+                                    ) : (
+                                    <span>Pick a date range</span>
+                                    )}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="end">
+                                <Calendar
+                                    initialFocus
+                                    mode="range"
+                                    defaultMonth={date?.from}
+                                    selected={date}
+                                    onSelect={setDate}
+                                    numberOfMonths={2}
+                                />
+                                </PopoverContent>
+                            </Popover>
+                             {date && <Button variant="ghost" onClick={() => setDate(undefined)}>Reset</Button>}
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -132,9 +197,9 @@ function ProfitLossPageContent() {
                         </CardHeader>
                         <CardContent>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                                <li><strong>Revenue</strong> is calculated from all your rides marked as 'Completed' and 'Paid'.</li>
-                                <li><strong>Fuel Cost</strong> is an estimate based on the total distance of your completed routes and the mileage entered in your profile (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L).</li>
-                                <li><strong>Promotion Cost</strong> is calculated at ₹100 for each route you have marked as 'Promoted'.</li>
+                                <li><strong>Revenue</strong> is calculated from all your rides marked as 'Completed' and 'Paid' within the selected date range.</li>
+                                <li><strong>Fuel Cost</strong> is an estimate based on the total distance of completed routes and your profile mileage (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L).</li>
+                                <li><strong>Promotion Cost</strong> is calculated at ₹100 for each route created within the selected date range that was marked as 'Promoted'.</li>
                                 <li>This is an estimate. Actual profit may vary based on maintenance, insurance, and other operational costs.</li>
                             </ul>
                         </CardContent>
