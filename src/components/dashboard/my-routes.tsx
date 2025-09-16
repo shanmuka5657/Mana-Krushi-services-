@@ -233,14 +233,16 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     navigator.geolocation.getCurrentPosition(success, error);
   };
   
-  const handleWhatsAppToPassenger = (booking: Booking) => {
+  const handleWhatsAppToPassenger = (booking: Booking, type: 'confirmation' | 'payment') => {
     if (!booking.mobile) return;
 
+    let message = '';
     const bookingDate = new Date(booking.departureDate);
     const formattedDate = format(bookingDate, 'dd MMM, yyyy');
     const formattedTime = format(bookingDate, 'p');
 
-    const message = `
+    if (type === 'confirmation') {
+       message = `
 Hello ${booking.client},
 
 This is ${booking.driverName} from Mana Krushi Services, confirming your ride.
@@ -255,7 +257,26 @@ Looking forward to having you on board.
 
 Thank you,
 ${booking.driverName}
-    `.trim();
+    `.trim().replace(/^\s+/gm, '');
+    } else if (type === 'payment') {
+        const upiId = "7569114679@ybl";
+        const upiUrl = `upi://pay?pa=${upiId}&pn=Mana%20Krushi%20Services&am=${booking.amount.toFixed(2)}&tn=RidePayment${booking.id}`;
+        
+        message = `
+Hello ${booking.client},
+
+Thank you for travelling with Mana Krushi Services!
+
+This is a reminder for your payment of *₹${booking.amount.toFixed(2)}*.
+
+You can pay via UPI using this link: ${upiUrl}
+
+Alternatively, you can pay in cash. Let me know what you prefer.
+
+Thanks,
+${booking.driverName}
+    `.trim().replace(/^\s+/gm, '');
+    }
     
     const whatsappUrl = `https://wa.me/${booking.mobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -447,15 +468,17 @@ ${booking.driverName}
                                 </div>
                             ) : null}
                             
-                            {booking.status !== 'Cancelled' && booking.status !== 'Completed' && (
+                            {booking.status !== 'Cancelled' && (
                                 <>
-                                <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
-                                    <Share2 className="mr-2 h-4 w-4" />
-                                    Share My Location
-                                </Button>
-                                 <Button size="sm" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking)}>
+                                {booking.status !== 'Completed' &&
+                                    <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
+                                        <Share2 className="mr-2 h-4 w-4" />
+                                        Share My Location
+                                    </Button>
+                                }
+                                 <Button size="sm" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking, booking.status === 'Completed' ? 'payment' : 'confirmation')}>
                                     <MessageSquare className="mr-2 h-4 w-4" />
-                                    WhatsApp
+                                    {booking.status === 'Completed' ? 'Send Payment Link' : 'WhatsApp'}
                                 </Button>
                                 </>
                             )}

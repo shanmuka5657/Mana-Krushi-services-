@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowLeft, Zap, MapPin, Milestone, Minus, Plus, Users, AlertCircle, CheckCircle, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { getFirestore, addDoc, collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getApp } from "firebase/app";
@@ -49,6 +49,7 @@ export default function BookRidePage() {
   const [availableSeats, setAvailableSeats] = useState(0);
   const [isPast, setIsPast] = useState(false);
   const [existingBooking, setExistingBooking] = useState<Booking | null>(null);
+  const [newlyBooked, setNewlyBooked] = useState<Booking | null>(null);
 
   useEffect(() => {
     const fetchRouteAndBookings = async () => {
@@ -191,8 +192,10 @@ export default function BookRidePage() {
         title: "Booking Confirmed!",
         description: `Your ride for ${numberOfSeats} seat(s) has been successfully booked.`,
     });
+    
+    setNewlyBooked(newBooking as Booking);
 
-    router.push(`/games`);
+    // router.push(`/games`); // We'll handle navigation in the dialog.
     setIsBooking(false);
   };
   
@@ -243,11 +246,44 @@ export default function BookRidePage() {
         title: "Booking Updated!",
         description: `Your booking now has ${totalSeats} seat(s).`,
     });
+    
+    setNewlyBooked(updatedBooking);
 
-    router.push(`/games`);
+    // router.push(`/games`); // We'll handle navigation in the dialog.
     setIsBooking(false);
     setExistingBooking(null);
   };
+  
+  const handleNotifyDriver = () => {
+    if (!newlyBooked || !newlyBooked.driverMobile) return;
+        
+    const bookingDate = new Date(newlyBooked.departureDate);
+    const formattedDate = format(bookingDate, 'dd MMM, yyyy');
+    const formattedTime = format(bookingDate, 'p');
+
+    const message = `
+Hello ${newlyBooked.driverName},
+
+This is a notification for a new booking.
+
+*Booking Details:*
+- *Passenger:* ${newlyBooked.client}
+- *Route:* ${newlyBooked.destination}
+- *Date:* ${formattedDate}
+- *Time:* ${formattedTime}
+- *Seats:* ${newlyBooked.travelers}
+- *Amount:* ₹${newlyBooked.amount.toFixed(2)}
+
+Please confirm you have received this.
+
+Thank you,
+${newlyBooked.client}
+    `.trim().replace(/^\s+/gm, '');
+    
+    const whatsappUrl = `https://wa.me/${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    router.push('/games');
+  }
 
 
   if (!isLoaded) {
@@ -445,6 +481,24 @@ export default function BookRidePage() {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+       <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Booking Successful!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your ride is confirmed. You can now notify the driver.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Notify Driver via WhatsApp
+            </AlertDialogAction>
+             <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

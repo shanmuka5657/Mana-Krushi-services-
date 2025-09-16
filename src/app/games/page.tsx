@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee, MessageSquare } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -198,7 +198,7 @@ Looking forward to the trip.
 
 Thank you,
 ${latestBooking.client}
-        `.trim();
+        `.trim().replace(/^\s+/gm, '');
         
         const whatsappUrl = `https://wa.me/${latestBooking.driverMobile}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
@@ -278,7 +278,7 @@ ${latestBooking.client}
                                         <Phone className="h-4 w-4" />
                                     </Button>
                                     <Button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600" size="icon" aria-label="WhatsApp Driver">
-                                        <Smartphone className="h-4 w-4" />
+                                        <MessageSquare className="h-4 w-4" />
                                     </Button>
                                     <Button onClick={handleShareLocation} className="w-full" variant="outline" size="icon" aria-label="Share Location">
                                         <Share2 className="h-4 w-4" />
