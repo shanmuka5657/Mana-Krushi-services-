@@ -153,33 +153,7 @@ function GamesPageContent() {
             );
             await saveBookings(updatedBookings);
 
-            toast({ title: "Location Saved!", description: "Your location has been shared with the driver." });
-
-            // Share via WhatsApp/Native Share
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-            const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride.`;
-
-            try {
-                if (navigator.share) {
-                    await navigator.share({
-                        title: 'My Ride Location',
-                        text: shareText,
-                        url: mapsUrl
-                    });
-                } else {
-                     // Fallback for desktop browsers that don't support navigator.share
-                    const whatsappUrl = `https://wa.me/${latestBooking?.driverMobile}?text=${encodeURIComponent(shareText + " " + mapsUrl)}`;
-                    window.open(whatsappUrl, '_blank');
-                }
-            } catch (error: any) {
-                // Check if the error is due to the user canceling the share dialog
-                if (error.name === 'AbortError' || error.name === 'NotAllowedError' || (error.message && error.message.includes('Share canceled'))) {
-                    // Do nothing, user intentionally closed the dialog
-                } else {
-                    console.error('Error sharing:', error);
-                    toast({ title: "Could not share location", description: "An unexpected error occurred during sharing.", variant: "destructive" });
-                }
-            }
+            toast({ title: "Location Shared!", description: "Your location has been shared with the driver." });
         };
 
         const error = () => {
