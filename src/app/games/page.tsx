@@ -5,12 +5,14 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { getBookings, getCurrentUser } from '@/lib/storage';
+import { getBookings, getCurrentUser, getCurrentUserRole } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import DriverRideCard from '@/components/dashboard/driver-ride-card';
+
 
 const games = [
     { name: '2048', icon: <Hash className="h-10 w-10 text-orange-500" />, href: 'https://play2048.co/', color: 'bg-orange-50' },
@@ -41,27 +43,56 @@ function GamesPageContent() {
     const router = useRouter();
     const { toast } = useToast();
     const [latestBooking, setLatestBooking] = useState<Booking | null>(null);
+    const [driverRide, setDriverRide] = useState<Booking | null>(null);
+    const [passengerCount, setPassengerCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState('');
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchLatestBooking = async () => {
+            const role = getCurrentUserRole();
+            setUserRole(role);
             const userEmail = getCurrentUser();
+
             if (!userEmail) {
                 setIsLoading(false);
                 return;
             }
 
-            const allBookings = await getBookings();
-            const userBookings = allBookings.filter(b => b.clientEmail === userEmail && b.status === 'Confirmed');
-            
+            const allBookings = await getBookings(true); // Fetch all as we might be a driver
             const now = new Date();
-            const upcomingBookings = userBookings
-                .filter(b => new Date(b.departureDate) > now)
-                .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
 
-            if (upcomingBookings.length > 0) {
-                setLatestBooking(upcomingBookings[0]);
+            if (role === 'owner') {
+                const driverBookings = allBookings.filter(b => 
+                    b.driverEmail === userEmail && 
+                    b.status === 'Confirmed' && 
+                    new Date(b.departureDate) > now
+                );
+                driverBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+                
+                if (driverBookings.length > 0) {
+                    const nextDrive = driverBookings[0];
+                    setDriverRide(nextDrive);
+
+                    const passengersForRide = allBookings.filter(b => 
+                        b.destination === nextDrive.destination &&
+                        new Date(b.departureDate).getTime() === new Date(nextDrive.departureDate).getTime() &&
+                        b.status === 'Confirmed'
+                    );
+                    setPassengerCount(passengersForRide.reduce((sum, b) => sum + (Number(b.travelers) || 1), 0));
+                }
+
+            } else { // Passenger
+                const userBookings = allBookings.filter(b => b.clientEmail === userEmail && b.status === 'Confirmed');
+                
+                const upcomingBookings = userBookings
+                    .filter(b => new Date(b.departureDate) > now)
+                    .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+
+                if (upcomingBookings.length > 0) {
+                    setLatestBooking(upcomingBookings[0]);
+                }
             }
 
             setIsLoading(false);
@@ -102,7 +133,7 @@ function GamesPageContent() {
         }
     };
     
-    const handleShareLocation = () => {
+    const handleShareLocation = async () => {
         if (!navigator.geolocation) {
             toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
             return;
@@ -113,25 +144,26 @@ function GamesPageContent() {
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
             const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride.`;
 
-            if (navigator.share) {
-                try {
+            try {
+                if (navigator.share) {
                     await navigator.share({
                         title: 'My Ride Location',
                         text: shareText,
                         url: mapsUrl
                     });
-                } catch (error: any) {
-                    if (error.name === 'AbortError' || (error.message && error.message.includes('Share canceled'))) {
-                        // User cancelled the share action, do nothing.
-                    } else {
-                         console.error('Error sharing:', error);
-                         toast({ title: "Could not share location", description: "An unexpected error occurred during sharing.", variant: "destructive" });
-                    }
+                } else {
+                     // Fallback for desktop browsers that don't support navigator.share
+                    const whatsappUrl = `https://wa.me/${latestBooking?.driverMobile}?text=${encodeURIComponent(shareText + " " + mapsUrl)}`;
+                    window.open(whatsappUrl, '_blank');
                 }
-            } else {
-                 // Fallback for desktop browsers that don't support navigator.share
-                const whatsappUrl = `https://wa.me/${latestBooking?.driverMobile}?text=${encodeURIComponent(shareText + " " + mapsUrl)}`;
-                window.open(whatsappUrl, '_blank');
+            } catch (error: any) {
+                // Check if the error is due to the user canceling the share dialog
+                if (error.name === 'AbortError' || (error.message && error.message.includes('Share canceled'))) {
+                    // Do nothing, user intentionally closed the dialog
+                } else {
+                    console.error('Error sharing:', error);
+                    toast({ title: "Could not share location", description: "An unexpected error occurred during sharing.", variant: "destructive" });
+                }
             }
         };
 
@@ -142,6 +174,13 @@ function GamesPageContent() {
         toast({ title: "Getting your location..." });
         navigator.geolocation.getCurrentPosition(success, error);
     };
+
+    const handleWhatsApp = () => {
+        if (!latestBooking?.driverMobile) return;
+        const message = `Hello ${latestBooking.driverName}, this is about my booking for ${latestBooking.destination}.`;
+        const whatsappUrl = `https://wa.me/${latestBooking.driverMobile}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
     
     const handleMoreInfo = () => {
         router.push('/bookings?role=passenger');
@@ -174,11 +213,13 @@ function GamesPageContent() {
                             Ride & Play
                         </CardTitle>
                         <CardDescription>
-                            While you wait for your ride, you can check details or contact your driver.
+                            While you wait, you can play a game or manage your upcoming trip.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {latestBooking ? (
+                        {userRole === 'owner' && driverRide ? (
+                             <DriverRideCard ride={driverRide} passengers={passengerCount} />
+                        ) : userRole === 'passenger' && latestBooking ? (
                             <Card className="bg-muted/50">
                                 <CardHeader>
                                     <CardTitle>Your Next Ride</CardTitle>
@@ -214,6 +255,9 @@ function GamesPageContent() {
                                     <Button onClick={handleCallDriver} className="w-full" size="icon" aria-label="Call Driver">
                                         <Phone className="h-4 w-4" />
                                     </Button>
+                                    <Button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600" size="icon" aria-label="WhatsApp Driver">
+                                        <Smartphone className="h-4 w-4" />
+                                    </Button>
                                     <Button onClick={handleShareLocation} className="w-full" variant="outline" size="icon" aria-label="Share Location">
                                         <Share2 className="h-4 w-4" />
                                     </Button>
@@ -232,7 +276,7 @@ function GamesPageContent() {
                                 <Gamepad2 className="mx-auto h-12 w-12 text-muted-foreground" />
                                 <h3 className="mt-4 text-lg font-medium">No Upcoming Rides</h3>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    Book a ride to unlock games and entertainment.
+                                    Book a ride to unlock more features.
                                 </p>
                                 <Button className="mt-4" onClick={() => router.push('/dashboard?role=passenger')}>
                                     Find a Ride
@@ -259,7 +303,6 @@ function GamesPageContent() {
         </AppLayout>
     );
 }
-
 
 export default function GamesPage() {
     return (
