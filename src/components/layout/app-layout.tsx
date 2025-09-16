@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -29,6 +28,7 @@ import {
   Timer,
   AlertCircle,
   PanelLeft,
+  Wallet,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -171,6 +171,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
+    { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
