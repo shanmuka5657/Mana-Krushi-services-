@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2 } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -68,7 +68,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
-  const form = useForm<z.infer<typeof editRouteSchema,>>({
+  const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
   });
 
@@ -232,6 +232,34 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     toast({ title: "Getting your location..." });
     navigator.geolocation.getCurrentPosition(success, error);
   };
+  
+  const handleWhatsAppToPassenger = (booking: Booking) => {
+    if (!booking.mobile) return;
+
+    const bookingDate = new Date(booking.departureDate);
+    const formattedDate = format(bookingDate, 'dd MMM, yyyy');
+    const formattedTime = format(bookingDate, 'p');
+
+    const message = `
+Hello ${booking.client},
+
+This is ${booking.driverName} from Mana Krushi Services, confirming your ride.
+
+*Booking Details:*
+- *Route:* ${booking.destination}
+- *Date:* ${formattedDate}
+- *Time:* ${formattedTime}
+
+Looking forward to having you on board.
+
+Thank you,
+${booking.driverName}
+    `.trim();
+    
+    const whatsappUrl = `https://wa.me/${booking.mobile}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
 
   const getStatusInfo = (status: Booking['status']) => {
     switch(status) {
@@ -358,7 +386,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                   bookingsForRoute.map(booking => {
                     const StatusIcon = getStatusInfo(booking.status).icon;
                     const statusColor = getStatusInfo(booking.status).color;
-                    const isComplete = new Date(booking.departureDate) < new Date();
                     const passengerProfile = getProfileForUser(booking.clientEmail);
                     return (
                     <div key={booking.id} className="border p-4 rounded-md space-y-4">
@@ -420,10 +447,16 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                             ) : null}
                             
                             {booking.status !== 'Cancelled' && booking.status !== 'Completed' && (
+                                <>
                                 <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
                                     <Share2 className="mr-2 h-4 w-4" />
                                     Share My Location
                                 </Button>
+                                 <Button size="sm" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking)}>
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    WhatsApp
+                                </Button>
+                                </>
                             )}
                         </div>
                     </div>
