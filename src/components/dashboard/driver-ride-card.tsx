@@ -125,6 +125,7 @@ This is ${booking.driverName} from Mana Krushi Services, confirming your ride.
 - *Route:* ${booking.destination}
 - *Date:* ${formattedDate}
 - *Time:* ${formattedTime}
+- *Amount:* ₹${booking.amount.toFixed(2)}
 
 Looking forward to having you on board.
 
@@ -175,27 +176,29 @@ ${booking.driverName}
                     </div>
                 </div>
             </CardContent>
-            <CardFooter className="grid grid-cols-2 gap-2">
-                 <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Contact Passengers
-                 </Button>
-                 <Button onClick={handleShareLocation} className="w-full" variant="outline" disabled={isSharing}>
-                    {isSharing ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Sharing...
-                        </>
-                    ) : (
-                         <>
-                            <Share2 className="mr-2 h-4 w-4" />
-                            Share Location
-                        </>
-                    )}
-                </Button>
-                <Button onClick={handleMoreInfo} className="w-full col-span-2" variant="secondary">
+            <CardFooter className="flex flex-col gap-2">
+                <div className="flex gap-2 w-full">
+                    <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
+                        <Phone className="mr-2 h-4 w-4" />
+                        Contact
+                    </Button>
+                    <Button onClick={handleShareLocation} className="w-full" variant="outline" disabled={isSharing}>
+                        {isSharing ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Sharing...
+                            </>
+                        ) : (
+                            <>
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share Location
+                            </>
+                        )}
+                    </Button>
+                </div>
+                <Button onClick={handleMoreInfo} className="w-full" variant="secondary">
                     <Info className="mr-2 h-4 w-4" />
-                    View Details
+                    View Ride Details
                 </Button>
             </CardFooter>
         </Card>
