@@ -8,11 +8,12 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole, saveBookings } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee, MessageSquare, Car } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import DriverRideCard from '@/components/dashboard/driver-ride-card';
+import { MessageSquare } from 'lucide-react';
 
 
 const games = [
