@@ -111,22 +111,28 @@ function GamesPageContent() {
         const success = async (position: GeolocationPosition) => {
             const { latitude, longitude } = position.coords;
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-            const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride: ${mapsUrl}`;
+            const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride.`;
 
             if (navigator.share) {
                 try {
                     await navigator.share({
                         title: 'My Ride Location',
                         text: shareText,
+                        url: mapsUrl
                     });
                     toast({title: "Location shared successfully!"});
-                } catch (error) {
-                    console.error('Error sharing:', error);
-                    toast({ title: "Could not share location", description: "The share action was cancelled or failed.", variant: "destructive" });
+                } catch (error: any) {
+                    // This error is expected if the user cancels the share.
+                    if (error.name === 'AbortError' || error.message.includes('Share canceled')) {
+                        console.log('Share action was cancelled by the user.');
+                    } else {
+                         console.error('Error sharing:', error);
+                         toast({ title: "Could not share location", description: "The share action failed.", variant: "destructive" });
+                    }
                 }
             } else {
                  // Fallback for desktop browsers that don't support navigator.share
-                const whatsappUrl = `https://wa.me/${latestBooking?.driverMobile}?text=${encodeURIComponent(shareText)}`;
+                const whatsappUrl = `https://wa.me/${latestBooking?.driverMobile}?text=${encodeURIComponent(shareText + " " + mapsUrl)}`;
                 window.open(whatsappUrl, '_blank');
             }
         };
