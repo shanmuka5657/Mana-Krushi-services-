@@ -249,6 +249,7 @@ This is ${booking.driverName} from Mana Krushi Services, confirming your ride.
 - *Route:* ${booking.destination}
 - *Date:* ${formattedDate}
 - *Time:* ${formattedTime}
+- *Amount:* ₹${booking.amount.toFixed(2)}
 
 Looking forward to having you on board.
 

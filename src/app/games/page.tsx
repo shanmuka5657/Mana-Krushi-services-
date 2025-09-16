@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -192,6 +192,7 @@ This message is regarding my upcoming ride booking.
 - *Route:* ${latestBooking.destination}
 - *Date:* ${formattedDate}
 - *Time:* ${formattedTime}
+- *Amount:* ₹${latestBooking.amount.toFixed(2)}
 
 Looking forward to the trip.
 
