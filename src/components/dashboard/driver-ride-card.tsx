@@ -166,10 +166,10 @@ ${booking.driverName}
                         <Clock className="h-4 w-4" />
                         <span>{format(new Date(ride.departureDate), 'p')}</span>
                     </div>
-                     <div className="flex items-center gap-2">
+                     <button onClick={() => setIsContactDialogOpen(true)} className="flex items-center gap-2 text-left hover:text-primary transition-colors">
                         <Users className="h-4 w-4" />
                         <span>{passengers} passenger(s)</span>
-                    </div>
+                    </button>
                     <div className="flex items-center gap-2">
                         <Car className="h-4 w-4" />
                         <span>{ride.vehicleNumber}</span>
@@ -177,7 +177,7 @@ ${booking.driverName}
                 </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-                <div className="flex gap-2 w-full">
+                <div className="grid grid-cols-2 gap-2 w-full">
                     <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
                         <Phone className="mr-2 h-4 w-4" />
                         Contact
