@@ -10,12 +10,21 @@ import type { Booking } from '@/lib/types';
 import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const games = [
     { name: '2048', icon: <Hash className="h-10 w-10 text-orange-500" />, href: 'https://play2048.co/', color: 'bg-orange-50' },
     { name: 'Pac-Man', icon: <Ghost className="h-10 w-10 text-yellow-400" />, href: 'https://www.google.com/search?q=pacman', color: 'bg-yellow-50' },
     { name: 'Snake', icon: <Shell className="h-10 w-10 text-green-500" />, href: 'https://playsnake.org/', color: 'bg-green-50' },
 ];
+
+function WhatsAppIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+    )
+}
 
 
 function GameCard({ name, icon, href, color }: { name: string, icon: React.ReactNode, href: string, color: string }) {
@@ -39,6 +48,7 @@ function GameCard({ name, icon, href, color }: { name: string, icon: React.React
 
 function GamesPageContent() {
     const router = useRouter();
+    const { toast } = useToast();
     const [latestBooking, setLatestBooking] = useState<Booking | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState('');
@@ -99,6 +109,38 @@ function GamesPageContent() {
         if (latestBooking?.driverMobile) {
             window.location.href = `tel:${latestBooking.driverMobile}`;
         }
+    };
+    
+    const handleShareLocation = () => {
+        if (!latestBooking?.driverMobile) {
+            toast({ title: "Driver contact not available.", variant: 'destructive' });
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
+            return;
+        }
+
+        const success = (position: GeolocationPosition) => {
+            const { latitude, longitude } = position.coords;
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+            const message = `Hello, this is ${latestBooking.client}. I am sharing my current location for our ride: ${mapsUrl}`;
+            
+            // Format number for international use (assuming Indian numbers)
+            const whatsappNumber = `91${latestBooking.driverMobile}`;
+            
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            
+            window.open(whatsappUrl, '_blank');
+        };
+
+        const error = () => {
+            toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
+        };
+        
+        toast({ title: "Getting your location..." });
+        navigator.geolocation.getCurrentPosition(success, error);
     };
     
     const handleMoreInfo = () => {
@@ -166,7 +208,11 @@ function GamesPageContent() {
                                         <Phone className="mr-2 h-4 w-4" />
                                         Call Driver
                                     </Button>
-                                     <Button onClick={handleMoreInfo} className="w-full" variant="outline">
+                                     <Button onClick={handleShareLocation} className="w-full" variant="outline">
+                                        <WhatsAppIcon />
+                                        <span className="ml-2">Share Location</span>
+                                    </Button>
+                                     <Button onClick={handleMoreInfo} className="w-full col-span-2" variant="ghost">
                                         <Info className="mr-2 h-4 w-4" />
                                         More Info
                                     </Button>
