@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,8 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
+import QRCode from "qrcode.react";
+
 
 interface MyRoutesProps {
   routes: Route[];
@@ -66,7 +68,9 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [bookingUrl, setBookingUrl] = useState("");
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -155,6 +159,21 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const handleEditClick = (route: Route) => {
     setSelectedRoute(route);
     setIsEditDialogOpen(true);
+  };
+  
+  const handleShareClick = (route: Route) => {
+    const url = `${window.location.origin}/book/${route.id}`;
+    setBookingUrl(url);
+    setSelectedRoute(route);
+    setIsShareDialogOpen(true);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(bookingUrl).then(() => {
+      toast({ title: "Copied!", description: "Booking link copied to clipboard." });
+    }, () => {
+      toast({ title: "Failed to copy", variant: "destructive" });
+    });
   };
 
   const handleEditSubmit = async (data: z.infer<typeof editRouteSchema,>) => {
@@ -380,6 +399,13 @@ ${booking.driverName}
                           >
                             <Edit className="mr-2 h-4 w-4" /> Edit
                           </Button>
+                           <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleShareClick(route)}
+                          >
+                            <QrCode className="h-4 w-4" />
+                          </Button>
                       </TableCell>
                     </TableRow>
                   )
@@ -490,6 +516,32 @@ ${booking.driverName}
                 )}
               </div>
             </DialogContent>
+        </Dialog>
+        
+        {/* Share Route Dialog */}
+        <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Share Route</DialogTitle>
+              <DialogDescription>
+                Share this QR code or link to allow passengers to book this ride directly.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 flex flex-col items-center gap-4">
+              <QRCode value={bookingUrl} size={256} level="H" />
+              <div className="w-full flex gap-2">
+                <Input value={bookingUrl} readOnly className="flex-grow" />
+                <Button variant="outline" size="icon" onClick={copyToClipboard}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
         
         {/* Edit Route Dialog */}
