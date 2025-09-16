@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -48,6 +48,7 @@ function GamesPageContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState('');
     const [userRole, setUserRole] = useState<string | null>(null);
+    const locationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const fetchLatestBooking = async () => {
@@ -99,6 +100,12 @@ function GamesPageContent() {
         };
 
         fetchLatestBooking();
+        
+        return () => {
+            if (locationIntervalRef.current) {
+                clearInterval(locationIntervalRef.current);
+            }
+        }
     }, []);
     
     useEffect(() => {
@@ -114,6 +121,9 @@ function GamesPageContent() {
             if (diff <= 0) {
                 setTimeLeft("Your ride is departing now!");
                 clearInterval(intervalId);
+                 if (locationIntervalRef.current) {
+                    clearInterval(locationIntervalRef.current);
+                }
                 return;
             }
 
@@ -168,9 +178,13 @@ function GamesPageContent() {
         if (latestBooking) {
             // Share location immediately and then every minute
             handleShareLocation(true);
-            const locationInterval = setInterval(() => handleShareLocation(false), 60000); // 60 seconds
+            locationIntervalRef.current = setInterval(() => handleShareLocation(false), 60000); // 60 seconds
 
-            return () => clearInterval(locationInterval);
+            return () => {
+                if (locationIntervalRef.current) {
+                    clearInterval(locationIntervalRef.current);
+                }
+            }
         }
     }, [latestBooking]);
 

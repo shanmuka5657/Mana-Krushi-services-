@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle, Car, MapPin } from 'lucide-react';
@@ -28,6 +28,8 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
     const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
     const [passengersForRide, setPassengersForRide] = useState<Booking[]>([]);
     const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+    const locationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
 
     useEffect(() => {
         const fetchRideDetails = async () => {
@@ -45,6 +47,11 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
             setPassengersForRide(relatedPassengers);
         }
         fetchRideDetails();
+         return () => {
+            if (locationIntervalRef.current) {
+                clearInterval(locationIntervalRef.current);
+            }
+        }
     }, [ride]);
 
     useEffect(() => {
@@ -56,6 +63,9 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
             if (diff <= 0) {
                 setTimeLeft("Your ride is departing now!");
                 clearInterval(intervalId);
+                if (locationIntervalRef.current) {
+                    clearInterval(locationIntervalRef.current);
+                }
                 return;
             }
 
@@ -110,9 +120,13 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
     useEffect(() => {
         // Share location immediately and then every minute
         handleShareLocation(true);
-        const locationInterval = setInterval(() => handleShareLocation(false), 60000); // 60 seconds
+        locationIntervalRef.current = setInterval(() => handleShareLocation(false), 60000); // 60 seconds
 
-        return () => clearInterval(locationInterval);
+        return () => {
+            if (locationIntervalRef.current) {
+                clearInterval(locationIntervalRef.current);
+            }
+        };
     }, [ride.id]);
 
     const handleMoreInfo = () => {
