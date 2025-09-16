@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, Suspense, useRef } from 'react';
@@ -118,22 +119,28 @@ function GamesPageContent() {
             const departure = new Date(bookingOrRide.departureDate);
             const diff = differenceInSeconds(departure, now);
 
-            if (diff <= 0) {
-                setTimeLeft("Your ride is departing now!");
+            // Stop sharing 1 hour after departure
+            if (diff < -3600) { 
+                setTimeLeft("Ride complete.");
                 clearInterval(intervalId);
-                 if (locationIntervalRef.current) {
+                if (locationIntervalRef.current) {
                     clearInterval(locationIntervalRef.current);
+                    locationIntervalRef.current = null;
                 }
                 return;
             }
 
-            const hours = Math.floor(diff / 3600);
-            const minutes = Math.floor((diff % 3600) / 60);
-            const seconds = diff % 60;
+            if (diff <= 0) {
+                setTimeLeft("Your ride is on the way!");
+            } else {
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
 
-            setTimeLeft(
-                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-            );
+                setTimeLeft(
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+                );
+            }
         }, 1000);
 
         return () => clearInterval(intervalId);
