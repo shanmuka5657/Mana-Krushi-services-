@@ -71,9 +71,9 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
         return () => clearInterval(intervalId);
     }, [ride]);
     
-    const handleShareLocation = () => {
+     const handleShareLocation = (isFirstShare: boolean = false) => {
         if (!navigator.geolocation) {
-         toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
+         if(isFirstShare) toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
          return;
        }
    
@@ -91,19 +91,29 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
            
            await saveBookings(updatedBookings);
            
-           toast({ title: 'Location Shared!', description: 'Your current location has been shared with all passengers on this ride.' });
+           if(isFirstShare) toast({ title: 'Location Sharing Active!', description: 'Your current location will be shared with passengers periodically.' });
            setIsSharing(false);
        };
    
        const error = () => {
-           toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
+           if(isFirstShare) toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
            setIsSharing(false);
        };
        
-       setIsSharing(true);
-       toast({ title: "Getting your location..." });
+       if(isFirstShare) {
+           setIsSharing(true);
+           toast({ title: "Sharing your location..." });
+       }
        navigator.geolocation.getCurrentPosition(success, error);
     };
+
+    useEffect(() => {
+        // Share location immediately and then every minute
+        handleShareLocation(true);
+        const locationInterval = setInterval(() => handleShareLocation(false), 60000); // 60 seconds
+
+        return () => clearInterval(locationInterval);
+    }, [ride.id]);
 
     const handleMoreInfo = () => {
         router.push('/my-routes?role=owner');
@@ -189,7 +199,7 @@ ${booking.driverName}
                         <Phone className="mr-2 h-4 w-4" />
                         Contact
                     </Button>
-                    <Button onClick={handleShareLocation} className="w-full" variant="outline" disabled={isSharing}>
+                    <Button onClick={() => handleShareLocation(true)} className="w-full" variant="outline" disabled={isSharing}>
                         {isSharing ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -259,5 +269,3 @@ ${booking.driverName}
         </>
     );
 }
-
-    

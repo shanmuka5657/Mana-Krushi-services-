@@ -135,9 +135,9 @@ function GamesPageContent() {
         }
     };
     
-    const handleShareLocation = async () => {
+    const handleShareLocation = async (isFirstShare: boolean = false) => {
         if (!navigator.geolocation || !latestBooking) {
-            toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
+            if(isFirstShare) toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
             return;
         }
 
@@ -153,16 +153,27 @@ function GamesPageContent() {
             );
             await saveBookings(updatedBookings);
 
-            toast({ title: "Location Shared!", description: "Your location has been shared with the driver." });
+            if(isFirstShare) toast({ title: "Location Sharing Active!", description: "Your location will now be shared with the driver periodically." });
         };
 
         const error = () => {
-            toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
+            if(isFirstShare) toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
         };
         
-        toast({ title: "Getting your location..." });
+        if(isFirstShare) toast({ title: "Sharing your location..." });
         navigator.geolocation.getCurrentPosition(success, error);
     };
+
+    useEffect(() => {
+        if (latestBooking) {
+            // Share location immediately and then every minute
+            handleShareLocation(true);
+            const locationInterval = setInterval(() => handleShareLocation(false), 60000); // 60 seconds
+
+            return () => clearInterval(locationInterval);
+        }
+    }, [latestBooking]);
+
 
     const handleWhatsApp = () => {
         if (!latestBooking || !latestBooking.driverMobile) return;
@@ -269,7 +280,7 @@ ${latestBooking.client}
                                     <Button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600" size="icon" aria-label="WhatsApp Driver">
                                         <MessageSquare className="h-4 w-4" />
                                     </Button>
-                                    <Button onClick={handleShareLocation} className="w-full" variant="outline" size="icon" aria-label="Share Location">
+                                    <Button onClick={() => handleShareLocation(true)} className="w-full" variant="outline" size="icon" aria-label="Share Location">
                                         <Share2 className="h-4 w-4" />
                                     </Button>
                                     {latestBooking.driverLatitude && latestBooking.driverLongitude && (
@@ -322,5 +333,3 @@ export default function GamesPage() {
         </Suspense>
     )
 }
-
-    
