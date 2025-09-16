@@ -64,7 +64,7 @@ function ProfitLossPageContent() {
                 return b.driverEmail === userEmail && b.status === 'Completed' && b.paymentStatus === 'Paid' && bookingInDateRange;
             });
             
-            const ownerRoutes = allRoutes.filter(r => {
+            const ownerRoutesInDateRange = allRoutes.filter(r => {
                 const routeInDateRange = dateInterval ? isWithinInterval(new Date(r.travelDate), dateInterval) : true;
                 return r.ownerEmail === userEmail && routeInDateRange;
             });
@@ -74,16 +74,18 @@ function ProfitLossPageContent() {
             setTotalRevenue(revenue);
 
             // 2. Calculate Expenses
-            // 2a. Fuel Cost
+            // 2a. Fuel Cost (based on completed, paid routes)
             let fuelCost = 0;
             if (profile?.mileage && profile.mileage > 0) {
-                const completedRoutesForFuelCalc = allRoutes.filter(route => 
-                    ownerBookings.some(b => 
-                        `${route.fromLocation} to ${route.toLocation}` === b.destination && 
-                        new Date(route.travelDate).getTime() === new Date(b.departureDate).getTime()
-                    )
+                 const completedRouteIdentifiers = new Set(
+                    ownerBookings.map(b => `${format(new Date(b.departureDate), 'yyyy-MM-dd')}-${b.destination}`)
                 );
                 
+                const completedRoutesForFuelCalc = allRoutes.filter(route => {
+                    const routeIdentifier = `${format(new Date(route.travelDate), 'yyyy-MM-dd')}-${route.fromLocation} to ${route.toLocation}`;
+                    return completedRouteIdentifiers.has(routeIdentifier);
+                });
+
                 const totalDistance = completedRoutesForFuelCalc.reduce((acc, route) => acc + (route.distance || 0), 0);
                 
                 fuelCost = (totalDistance / profile.mileage) * FUEL_PRICE_PER_LITER;
@@ -91,7 +93,7 @@ function ProfitLossPageContent() {
             }
 
             // 2b. Promotion Cost
-            const promotionCost = ownerRoutes.filter(r => r.isPromoted).length * 100;
+            const promotionCost = ownerRoutesInDateRange.filter(r => r.isPromoted).length * 100;
             setTotalPromotionCost(promotionCost);
 
             const expenses = fuelCost + promotionCost;
@@ -198,7 +200,7 @@ function ProfitLossPageContent() {
                         <CardContent>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
                                 <li><strong>Revenue</strong> is calculated from all your rides marked as 'Completed' and 'Paid' within the selected date range.</li>
-                                <li><strong>Fuel Cost</strong> is an estimate based on the total distance of completed routes and your profile mileage (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L).</li>
+                                <li><strong>Fuel Cost</strong> is an estimate based on the total distance of completed routes (with paid bookings) and your profile's mileage (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L).</li>
                                 <li><strong>Promotion Cost</strong> is calculated at ₹100 for each route created within the selected date range that was marked as 'Promoted'.</li>
                                 <li>This is an estimate. Actual profit may vary based on maintenance, insurance, and other operational costs.</li>
                             </ul>
