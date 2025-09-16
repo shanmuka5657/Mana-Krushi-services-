@@ -20,7 +20,7 @@ const games = [
 
 function WhatsAppIcon() {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
     )
@@ -203,16 +203,15 @@ function GamesPageContent() {
                                         </div>
                                     </div>
                                 </CardContent>
-                                <CardFooter className="grid grid-cols-2 gap-2">
+                                <CardFooter className="grid grid-cols-3 gap-2">
                                     <Button onClick={handleCallDriver} className="w-full">
                                         <Phone className="mr-2 h-4 w-4" />
                                         Call Driver
                                     </Button>
                                      <Button onClick={handleShareLocation} className="w-full" variant="outline">
                                         <WhatsAppIcon />
-                                        <span className="ml-2">Share Location</span>
                                     </Button>
-                                     <Button onClick={handleMoreInfo} className="w-full col-span-2" variant="ghost">
+                                     <Button onClick={handleMoreInfo} className="w-full col-span-3 sm:col-span-1" variant="ghost">
                                         <Info className="mr-2 h-4 w-4" />
                                         More Info
                                     </Button>
