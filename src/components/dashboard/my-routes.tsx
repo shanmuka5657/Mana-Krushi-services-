@@ -71,6 +71,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [bookingUrl, setBookingUrl] = useState("");
+  const [shareImageUrl, setShareImageUrl] = useState<string | undefined>(undefined);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -164,6 +165,8 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const handleShareClick = (route: Route) => {
     const url = `${window.location.origin}/book/${route.id}`;
     setBookingUrl(url);
+    const driverProfile = getProfileForUser(route.ownerEmail);
+    setShareImageUrl(driverProfile?.selfieDataUrl);
     setSelectedRoute(route);
     setIsShareDialogOpen(true);
   };
@@ -528,7 +531,23 @@ ${booking.driverName}
               </DialogDescription>
             </DialogHeader>
             <div className="py-4 flex flex-col items-center gap-4">
-              <QRCode value={bookingUrl} size={256} level="H" />
+              <div className="p-4 bg-white rounded-lg">
+                <QRCode
+                  value={bookingUrl}
+                  size={256}
+                  level="H"
+                  imageSettings={
+                    shareImageUrl
+                      ? {
+                          src: shareImageUrl,
+                          height: 40,
+                          width: 40,
+                          excavate: true,
+                        }
+                      : undefined
+                  }
+                />
+              </div>
               <div className="w-full flex gap-2">
                 <Input value={bookingUrl} readOnly className="flex-grow" />
                 <Button variant="outline" size="icon" onClick={copyToClipboard}>
