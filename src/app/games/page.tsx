@@ -5,7 +5,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { getBookings, getCurrentUser, getCurrentUserRole } from '@/lib/storage';
+import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
@@ -176,8 +176,29 @@ function GamesPageContent() {
     };
 
     const handleWhatsApp = () => {
-        if (!latestBooking?.driverMobile) return;
-        const message = `Hello ${latestBooking.driverName}, this is about my booking for ${latestBooking.destination}.`;
+        if (!latestBooking || !latestBooking.driverMobile) return;
+        
+        const bookingDate = new Date(latestBooking.departureDate);
+        const formattedDate = format(bookingDate, 'dd MMM, yyyy');
+        const formattedTime = format(bookingDate, 'p');
+
+        const message = `
+Hello ${latestBooking.driverName},
+
+This message is regarding my upcoming ride booking.
+
+*Booking Details:*
+- *Passenger:* ${latestBooking.client}
+- *Route:* ${latestBooking.destination}
+- *Date:* ${formattedDate}
+- *Time:* ${formattedTime}
+
+Looking forward to the trip.
+
+Thank you,
+${latestBooking.client}
+        `.trim();
+        
         const whatsappUrl = `https://wa.me/${latestBooking.driverMobile}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     }
@@ -251,7 +272,7 @@ function GamesPageContent() {
                                         </div>
                                     </div>
                                 </CardContent>
-                                <CardFooter className="grid grid-cols-4 gap-2">
+                                <CardFooter className="grid grid-cols-5 gap-2">
                                     <Button onClick={handleCallDriver} className="w-full" size="icon" aria-label="Call Driver">
                                         <Phone className="h-4 w-4" />
                                     </Button>
