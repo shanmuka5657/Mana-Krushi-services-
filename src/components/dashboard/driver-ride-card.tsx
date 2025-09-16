@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle } from 'lucide-react';
+import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle, Car } from 'lucide-react';
 import type { Booking, Profile } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getBookings, saveBookings, getAllProfiles } from '@/lib/storage';
@@ -170,7 +170,7 @@ ${booking.driverName}
                         <span>{passengers} passenger(s)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Route className="h-4 w-4" />
+                        <Car className="h-4 w-4" />
                         <span>{ride.vehicleNumber}</span>
                     </div>
                 </div>
