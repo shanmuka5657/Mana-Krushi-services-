@@ -26,6 +26,8 @@ export type Booking = {
   toll?: number;
   driverLatitude?: number;
   driverLongitude?: number;
+  passengerLatitude?: number;
+  passengerLongitude?: number;
 };
 
 export type Route = {

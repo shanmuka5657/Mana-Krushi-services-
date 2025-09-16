@@ -5,7 +5,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole } from '@/lib/storage';
+import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole, saveBookings } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin, CheckCircle, Smartphone, IndianRupee, MessageSquare } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
@@ -134,13 +134,26 @@ function GamesPageContent() {
     };
     
     const handleShareLocation = async () => {
-        if (!navigator.geolocation) {
+        if (!navigator.geolocation || !latestBooking) {
             toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
             return;
         }
 
         const success = async (position: GeolocationPosition) => {
             const { latitude, longitude } = position.coords;
+
+            // Save location to booking
+            const allBookings = await getBookings(true);
+            const updatedBookings = allBookings.map(b => 
+                b.id === latestBooking.id 
+                ? { ...b, passengerLatitude: latitude, passengerLongitude: longitude } 
+                : b
+            );
+            await saveBookings(updatedBookings);
+
+            toast({ title: "Location Saved!", description: "Your location has been shared with the driver." });
+
+            // Share via WhatsApp/Native Share
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
             const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride.`;
 
@@ -333,5 +346,3 @@ export default function GamesPage() {
         </Suspense>
     )
 }
-
-    

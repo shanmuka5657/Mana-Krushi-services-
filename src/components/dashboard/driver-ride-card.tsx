@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle, Car } from 'lucide-react';
+import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle, Car, MapPin } from 'lucide-react';
 import type { Booking, Profile } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getBookings, saveBookings, getAllProfiles } from '@/lib/storage';
@@ -142,6 +142,13 @@ ${booking.driverName}
         return allProfiles.find(p => p.email === email);
     }
 
+    const handleViewOnMap = (booking: Booking) => {
+        if (booking.passengerLatitude && booking.passengerLongitude) {
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${booking.passengerLatitude},${booking.passengerLongitude}`;
+            window.open(mapsUrl, '_blank');
+        }
+    }
+
 
     return (
         <>
@@ -238,6 +245,11 @@ ${booking.driverName}
                                 <Button size="icon" variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(passenger)}>
                                     <MessageSquare className="h-4 w-4" />
                                 </Button>
+                                {passenger.passengerLatitude && passenger.passengerLongitude && (
+                                    <Button size="icon" variant="outline" onClick={() => handleViewOnMap(passenger)}>
+                                        <MapPin className="h-4 w-4" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )})}
