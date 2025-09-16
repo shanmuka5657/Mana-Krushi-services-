@@ -20,8 +20,10 @@ import { useRouter } from 'next/navigation';
 import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, QrCode } from 'lucide-react';
 import Image from 'next/image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import QRCode from 'qrcode.react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -43,9 +45,12 @@ export function LoginForm() {
   const { toast } = useToast();
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
+  const [showQrDialog, setShowQrDialog] = React.useState(false);
+  const [appUrl, setAppUrl] = React.useState('');
 
   React.useEffect(() => {
     // This will only run on the client
+    setAppUrl(window.location.origin);
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
     }
@@ -184,18 +189,42 @@ export function LoginForm() {
         {!isStandalone && (
             <CardFooter className="flex-col gap-2">
                 <div className="w-full h-px bg-border" />
-                <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    onClick={handleInstallClick}
-                    disabled={!installPrompt}
-                >
-                    <Download className="mr-2 h-4 w-4" />
-                    Install App
-                </Button>
+                <div className="w-full grid grid-cols-2 gap-2">
+                    <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        onClick={handleInstallClick}
+                        disabled={!installPrompt}
+                    >
+                        <Download className="mr-2 h-4 w-4" />
+                        Install App
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        onClick={() => setShowQrDialog(true)}
+                    >
+                        <QrCode className="mr-2 h-4 w-4" />
+                        Scan to Install
+                    </Button>
+                </div>
             </CardFooter>
         )}
       </Card>
+      <Dialog open={showQrDialog} onOpenChange={setShowQrDialog}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Install on Your Phone</DialogTitle>
+                <DialogDescription>
+                    Scan this QR code with your phone's camera to open the app and install it.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 flex flex-col items-center gap-4">
+                {appUrl ? <QRCode value={appUrl} size={256} level="H" /> : <Loader2 className="h-16 w-16 animate-spin" />}
+                <p className="text-sm text-muted-foreground font-mono">{appUrl}</p>
+            </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
