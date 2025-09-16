@@ -200,17 +200,14 @@ function GamesPageContent() {
                                     </div>
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-3 gap-2">
-                                    <Button onClick={handleCallDriver} className="w-full">
-                                        <Phone className="mr-2 h-4 w-4" />
-                                        Call Driver
+                                    <Button onClick={handleCallDriver} className="w-full" size="icon" aria-label="Call Driver">
+                                        <Phone className="h-4 w-4" />
                                     </Button>
-                                     <Button onClick={handleShareLocation} className="w-full" variant="outline">
-                                        <Share2 className="mr-2 h-4 w-4" />
-                                        Share
+                                    <Button onClick={handleShareLocation} className="w-full" variant="outline" size="icon" aria-label="Share Location">
+                                        <Share2 className="h-4 w-4" />
                                     </Button>
-                                     <Button onClick={handleMoreInfo} className="w-full" variant="ghost">
-                                        <Info className="mr-2 h-4 w-4" />
-                                        More Info
+                                    <Button onClick={handleMoreInfo} className="w-full" variant="ghost" size="icon" aria-label="More Info">
+                                        <Info className="h-4 w-4" />
                                     </Button>
                                 </CardFooter>
                             </Card>
