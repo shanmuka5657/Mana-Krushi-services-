@@ -111,14 +111,13 @@ function GamesPageContent() {
         const success = async (position: GeolocationPosition) => {
             const { latitude, longitude } = position.coords;
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-            const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride.`;
+            const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride: ${mapsUrl}`;
 
             if (navigator.share) {
                 try {
                     await navigator.share({
                         title: 'My Ride Location',
                         text: shareText,
-                        url: mapsUrl,
                     });
                     toast({title: "Location shared successfully!"});
                 } catch (error) {
@@ -126,8 +125,8 @@ function GamesPageContent() {
                     toast({ title: "Could not share location", description: "The share action was cancelled or failed.", variant: "destructive" });
                 }
             } else {
-                // Fallback for browsers that don't support navigator.share
-                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + mapsUrl)}`;
+                 // Fallback for desktop browsers that don't support navigator.share
+                const whatsappUrl = `https://wa.me/${latestBooking?.driverMobile}?text=${encodeURIComponent(shareText)}`;
                 window.open(whatsappUrl, '_blank');
             }
         };
@@ -206,9 +205,10 @@ function GamesPageContent() {
                                         Call Driver
                                     </Button>
                                      <Button onClick={handleShareLocation} className="w-full" variant="outline">
-                                        <Share2 className="h-5 w-5" />
+                                        <Share2 className="mr-2 h-4 w-4" />
+                                        Share
                                     </Button>
-                                     <Button onClick={handleMoreInfo} className="w-full col-span-3 sm:col-span-1" variant="ghost">
+                                     <Button onClick={handleMoreInfo} className="w-full" variant="ghost">
                                         <Info className="mr-2 h-4 w-4" />
                                         More Info
                                     </Button>
@@ -255,5 +255,3 @@ export default function GamesPage() {
         </Suspense>
     )
 }
-
-    
