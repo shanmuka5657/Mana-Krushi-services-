@@ -28,6 +28,7 @@ import {
   Gamepad2,
   Timer,
   AlertCircle,
+  PanelLeft,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -45,6 +46,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -83,6 +85,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
+  
+  // We need to wrap the trigger in a component to use the useSidebar hook.
+  const ToggleSidebarButton = () => {
+    const { toggleSidebar } = useSidebar()
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="size-7"
+        onClick={() => toggleSidebar()}
+        aria-label="Toggle Sidebar"
+      >
+        <PanelLeft />
+      </Button>
+    )
+  }
+
 
   React.useEffect(() => {
     // This will only run on the client
@@ -232,7 +251,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Briefcase className="size-8 text-accent" />
@@ -281,9 +300,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <SidebarTrigger className="md:hidden" />
-            <h2 className="hidden text-2xl font-semibold md:block">
-              {role === 'admin' ? 'Admin Panel' : (role === 'owner' ? 'Owner Dashboard' : 'Passenger Dashboard')}
-            </h2>
+            <div className="hidden items-center gap-2 md:flex">
+              <ToggleSidebarButton />
+              <h2 className="text-2xl font-semibold">
+                {role === 'admin' ? 'Admin Panel' : (role === 'owner' ? 'Owner Dashboard' : 'Passenger Dashboard')}
+              </h2>
+            </div>
           </div>
           <div className="flex flex-1 items-center justify-end gap-4">
             <div className="relative w-full max-w-xs sm:max-w-sm">
@@ -339,5 +361,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
