@@ -68,7 +68,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
-  const form = useForm<z.infer<typeof editRouteSchema>>({
+  const form = useForm<z.infer<typeof editRouteSchema,>>({
     resolver: zodResolver(editRouteSchema),
   });
 
@@ -400,7 +400,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                       </div>
 
                         <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-2">
-                            {isComplete && booking.paymentStatus !== 'Paid' ? (
+                            {booking.status === 'Completed' && booking.paymentStatus !== 'Paid' ? (
                                 <>
                                   <p className="text-sm text-muted-foreground mb-2 sm:mb-0">Payment:</p>
                                   <div className="flex gap-2">
@@ -412,14 +412,14 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                                       </Button>
                                   </div>
                                 </>
-                            ) : isComplete && booking.paymentStatus === 'Paid' ? (
+                            ) : booking.paymentStatus === 'Paid' ? (
                                 <div className="flex items-center gap-2">
                                     <IndianRupee className="h-5 w-5 text-green-500" />
                                     <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
                                 </div>
                             ) : null}
                             
-                            {!isComplete && (
+                            {booking.status !== 'Cancelled' && booking.status !== 'Completed' && (
                                 <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
                                     <Share2 className="mr-2 h-4 w-4" />
                                     Share My Location
