@@ -40,9 +40,9 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, getRoutes } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
-import type { Profile } from "@/lib/types";
+import type { Profile, Route } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -104,10 +104,16 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean }) | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [locations, setLocations] = useState<string[]>([]);
 
   useEffect(() => {
-    const checkProfile = async () => {
-        const userProfile = await getProfile();
+    const checkProfileAndFetchLocations = async () => {
+        const [userProfile, allRoutes] = await Promise.all([
+          getProfile(),
+          getRoutes(true)
+        ]);
+
+        // Check Profile
         setProfile(userProfile);
         if (!userProfile || !userProfile.mobile || userProfile.mobile === '0000000000') {
           setShowProfilePrompt(true);
@@ -126,8 +132,18 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             });
             onSwitchTab('profile');
         }
+
+        // Fetch Locations
+        const allLocations = new Set<string>();
+        allRoutes.forEach(route => {
+            allLocations.add(route.fromLocation);
+            allLocations.add(route.toLocation);
+            route.pickupPoints?.forEach(p => allLocations.add(p));
+            route.dropOffPoints?.forEach(d => allLocations.add(d));
+        });
+        setLocations(Array.from(allLocations));
     }
-    checkProfile();
+    checkProfileAndFetchLocations();
   }, [onSwitchTab, toast]);
 
   const form = useForm<OwnerFormValues>({
@@ -477,7 +493,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Starting city" {...field} className="pl-10" />
+                          <Input placeholder="Starting city" {...field} className="pl-10" list="locations-list" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -493,7 +509,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Destination city" {...field} className="pl-10" />
+                          <Input placeholder="Destination city" {...field} className="pl-10" list="locations-list" />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -501,6 +517,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                 />
               </div>
+              <datalist id="locations-list">
+                {locations.map(loc => <option key={loc} value={loc} />)}
+              </datalist>
 
                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
                    <FormField
