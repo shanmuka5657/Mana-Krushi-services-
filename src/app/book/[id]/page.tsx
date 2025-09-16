@@ -195,7 +195,6 @@ export default function BookRidePage() {
     
     setNewlyBooked(newBooking as Booking);
 
-    // router.push(`/games`); // We'll handle navigation in the dialog.
     setIsBooking(false);
   };
   
@@ -249,7 +248,6 @@ export default function BookRidePage() {
     
     setNewlyBooked(updatedBooking);
 
-    // router.push(`/games`); // We'll handle navigation in the dialog.
     setIsBooking(false);
     setExistingBooking(null);
   };
@@ -494,14 +492,16 @@ ${newlyBooked.client}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+             <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
             <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Notify Driver via WhatsApp
             </AlertDialogAction>
-             <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
   );
 }
+
+    
