@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2 } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -17,15 +17,6 @@ const games = [
     { name: 'Pac-Man', icon: <Ghost className="h-10 w-10 text-yellow-400" />, href: 'https://www.google.com/search?q=pacman', color: 'bg-yellow-50' },
     { name: 'Snake', icon: <Shell className="h-10 w-10 text-green-500" />, href: 'https://playsnake.org/', color: 'bg-green-50' },
 ];
-
-function WhatsAppIcon() {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-        </svg>
-    )
-}
-
 
 function GameCard({ name, icon, href, color }: { name: string, icon: React.ReactNode, href: string, color: string }) {
     return (
@@ -112,27 +103,33 @@ function GamesPageContent() {
     };
     
     const handleShareLocation = () => {
-        if (!latestBooking?.driverMobile) {
-            toast({ title: "Driver contact not available.", variant: 'destructive' });
-            return;
-        }
-
         if (!navigator.geolocation) {
             toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
             return;
         }
 
-        const success = (position: GeolocationPosition) => {
+        const success = async (position: GeolocationPosition) => {
             const { latitude, longitude } = position.coords;
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-            const message = `Hello, this is ${latestBooking.client}. I am sharing my current location for our ride: ${mapsUrl}`;
-            
-            // Format number for international use (assuming Indian numbers)
-            const whatsappNumber = `91${latestBooking.driverMobile}`;
-            
-            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-            
-            window.open(whatsappUrl, '_blank');
+            const shareText = `Hello, this is ${latestBooking?.client}. I am sharing my current location for our ride.`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'My Ride Location',
+                        text: shareText,
+                        url: mapsUrl,
+                    });
+                    toast({title: "Location shared successfully!"});
+                } catch (error) {
+                    console.error('Error sharing:', error);
+                    toast({ title: "Could not share location", description: "The share action was cancelled or failed.", variant: "destructive" });
+                }
+            } else {
+                // Fallback for browsers that don't support navigator.share
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + mapsUrl)}`;
+                window.open(whatsappUrl, '_blank');
+            }
         };
 
         const error = () => {
@@ -209,7 +206,7 @@ function GamesPageContent() {
                                         Call Driver
                                     </Button>
                                      <Button onClick={handleShareLocation} className="w-full" variant="outline">
-                                        <WhatsAppIcon />
+                                        <Share2 className="h-5 w-5" />
                                     </Button>
                                      <Button onClick={handleMoreInfo} className="w-full col-span-3 sm:col-span-1" variant="ghost">
                                         <Info className="mr-2 h-4 w-4" />
@@ -258,3 +255,5 @@ export default function GamesPage() {
         </Suspense>
     )
 }
+
+    
