@@ -20,11 +20,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2 } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2 } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -158,7 +157,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     setIsEditDialogOpen(true);
   };
 
-  const handleEditSubmit = async (data: z.infer<typeof editRouteSchema>) => {
+  const handleEditSubmit = async (data: z.infer<typeof editRouteSchema,>) => {
     if (!selectedRoute) return;
 
     const allRoutes = await getRoutes(true);
@@ -206,6 +205,33 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
       description: `Payment for booking ${bookingId} has been recorded as ${method}.`,
     });
   }
+
+  const handleShareLocation = (bookingId: string) => {
+     if (!navigator.geolocation) {
+      toast({ title: "Geolocation is not supported by your browser.", variant: 'destructive' });
+      return;
+    }
+
+    const success = async (position: GeolocationPosition) => {
+        const { latitude, longitude } = position.coords;
+        const bookingsToUpdate = await getBookings(true);
+        const updatedBookings = bookingsToUpdate.map(b => 
+            b.id === bookingId ? { ...b, driverLatitude: latitude, driverLongitude: longitude } : b
+        );
+        await saveBookings(updatedBookings);
+        setAllBookings(updatedBookings);
+        setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, driverLatitude: latitude, driverLongitude: longitude} : b))
+        
+        toast({ title: 'Location Shared!', description: 'Your current location has been shared with the passenger.' });
+    };
+
+    const error = () => {
+        toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
+    };
+
+    toast({ title: "Getting your location..." });
+    navigator.geolocation.getCurrentPosition(success, error);
+  };
 
   const getStatusInfo = (status: Booking['status']) => {
     switch(status) {
@@ -373,26 +399,33 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
                           </div>
                       </div>
 
-                        {isComplete && (
-                            <div className="mt-4 pt-4 border-t">
-                               <p className="text-sm text-muted-foreground mb-2">Payment</p>
-                               {booking.paymentStatus === 'Paid' ? (
-                                    <div className="flex items-center gap-2">
-                                        <IndianRupee className="h-5 w-5 text-green-500" />
-                                        <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
-                                    </div>
-                               ) : (
-                                <div className="flex gap-2">
-                                    <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'Cash')}>
-                                        <IndianRupee className="mr-2 h-4 w-4" /> Cash
-                                    </Button>
-                                    <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'UPI')}>
-                                       <Sparkles className="mr-2 h-4 w-4" /> UPI
-                                    </Button>
+                        <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-2">
+                            {isComplete && booking.paymentStatus !== 'Paid' ? (
+                                <>
+                                  <p className="text-sm text-muted-foreground mb-2 sm:mb-0">Payment:</p>
+                                  <div className="flex gap-2">
+                                      <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'Cash')}>
+                                          <IndianRupee className="mr-2 h-4 w-4" /> Cash
+                                      </Button>
+                                      <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'UPI')}>
+                                         <Sparkles className="mr-2 h-4 w-4" /> UPI
+                                      </Button>
+                                  </div>
+                                </>
+                            ) : isComplete && booking.paymentStatus === 'Paid' ? (
+                                <div className="flex items-center gap-2">
+                                    <IndianRupee className="h-5 w-5 text-green-500" />
+                                    <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
                                 </div>
-                               )}
-                            </div>
-                        )}
+                            ) : null}
+                            
+                            {!isComplete && (
+                                <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
+                                    <Share2 className="mr-2 h-4 w-4" />
+                                    Share My Location
+                                </Button>
+                            )}
+                        </div>
                     </div>
                   )})
                 ) : (

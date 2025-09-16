@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { getBookings, getCurrentUser } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
-import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2 } from 'lucide-react';
+import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -120,14 +120,12 @@ function GamesPageContent() {
                         text: shareText,
                         url: mapsUrl
                     });
-                    toast({title: "Location shared successfully!"});
                 } catch (error: any) {
-                    // This error is expected if the user cancels the share.
-                    if (error.name === 'AbortError' || error.message.includes('Share canceled')) {
-                        console.log('Share action was cancelled by the user.');
+                    if (error.name === 'AbortError' || (error.message && error.message.includes('Share canceled'))) {
+                        // User cancelled the share action, do nothing.
                     } else {
                          console.error('Error sharing:', error);
-                         toast({ title: "Could not share location", description: "The share action failed.", variant: "destructive" });
+                         toast({ title: "Could not share location", description: "An unexpected error occurred during sharing.", variant: "destructive" });
                     }
                 }
             } else {
@@ -147,6 +145,13 @@ function GamesPageContent() {
     
     const handleMoreInfo = () => {
         router.push('/bookings?role=passenger');
+    }
+
+    const handleViewOnMap = () => {
+        if (latestBooking?.driverLatitude && latestBooking?.driverLongitude) {
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latestBooking.driverLatitude},${latestBooking.driverLongitude}`;
+            window.open(mapsUrl, '_blank');
+        }
     }
 
     if (isLoading) {
@@ -205,13 +210,18 @@ function GamesPageContent() {
                                         </div>
                                     </div>
                                 </CardContent>
-                                <CardFooter className="grid grid-cols-3 gap-2">
+                                <CardFooter className="grid grid-cols-4 gap-2">
                                     <Button onClick={handleCallDriver} className="w-full" size="icon" aria-label="Call Driver">
                                         <Phone className="h-4 w-4" />
                                     </Button>
                                     <Button onClick={handleShareLocation} className="w-full" variant="outline" size="icon" aria-label="Share Location">
                                         <Share2 className="h-4 w-4" />
                                     </Button>
+                                    {latestBooking.driverLatitude && latestBooking.driverLongitude && (
+                                        <Button onClick={handleViewOnMap} className="w-full" variant="outline" size="icon" aria-label="View on Map">
+                                            <MapPin className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                     <Button onClick={handleMoreInfo} className="w-full" variant="ghost" size="icon" aria-label="More Info">
                                         <Info className="h-4 w-4" />
                                     </Button>

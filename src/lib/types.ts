@@ -24,6 +24,8 @@ export type Booking = {
   cancellationReason?: string;
   distance?: number;
   toll?: number;
+  driverLatitude?: number;
+  driverLongitude?: number;
 };
 
 export type Route = {
