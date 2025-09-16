@@ -3,7 +3,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, Sparkles, Star, X } from "lucide-react";
 import { format, addMonths } from "date-fns";
@@ -105,6 +105,71 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [locations, setLocations] = useState<string[]>([]);
+  
+  const form = useForm<OwnerFormValues>({
+    resolver: zodResolver(ownerFormSchema),
+    defaultValues: {
+        ownerName: "",
+        ownerEmail: "",
+        driverName: "",
+        driverMobile: "",
+        fromLocation: "",
+        toLocation: "",
+        distance: 0,
+        pickupPoints: "",
+        dropOffPoints: "",
+        departureTime: "09:00",
+        arrivalTime: "18:00",
+        availableSeats: 1,
+        price: 500,
+        rating: 4.5,
+        vehicleType: "",
+        vehicleNumber: "",
+    },
+  });
+
+  const fromLocation = useWatch({ control: form.control, name: 'fromLocation' });
+  const toLocation = useWatch({ control: form.control, name: 'toLocation' });
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  
+  const handleCalculateDistance = async (from: string, to: string) => {
+      if(!from || !to || from.length < 2 || to.length < 2) {
+          return;
+      }
+      
+      setIsCalculating(true);
+      const result = await calculateDistance({from, to});
+      setIsCalculating(false);
+
+      if (result.error) {
+          toast({
+              title: "Error Calculating Distance",
+              description: result.error,
+              variant: "destructive"
+          });
+      } else if (result.distance) {
+          form.setValue('distance', result.distance);
+           toast({
+              title: "Distance Calculated",
+              description: `The distance is approximately ${result.distance} km.`,
+          });
+      }
+  }
+
+  useEffect(() => {
+    if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+    }
+    if (fromLocation && toLocation) {
+        debounceTimeout.current = setTimeout(() => {
+            handleCalculateDistance(fromLocation, toLocation);
+        }, 1000); // 1 second debounce
+    }
+    return () => {
+        if(debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    }
+  }, [fromLocation, toLocation]);
+
 
   useEffect(() => {
     const checkProfileAndFetchLocations = async () => {
@@ -145,28 +210,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     }
     checkProfileAndFetchLocations();
   }, [onSwitchTab, toast]);
-
-  const form = useForm<OwnerFormValues>({
-    resolver: zodResolver(ownerFormSchema),
-    defaultValues: {
-        ownerName: "",
-        ownerEmail: "",
-        driverName: "",
-        driverMobile: "",
-        fromLocation: "",
-        toLocation: "",
-        distance: 0,
-        pickupPoints: "",
-        dropOffPoints: "",
-        departureTime: "09:00",
-        arrivalTime: "18:00",
-        availableSeats: 1,
-        price: 500,
-        rating: 4.5,
-        vehicleType: "",
-        vehicleNumber: "",
-    },
-  });
   
   useEffect(() => {
     const loadProfile = async () => {
@@ -230,37 +273,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       handleRouteSubmission(routeDataWithPromotion);
     }
   };
-  
-  const handleCalculateDistance = async () => {
-      const from = form.getValues('fromLocation');
-      const to = form.getValues('toLocation');
-
-      if(!from || !to) {
-          toast({
-              title: "Locations required",
-              description: "Please enter 'From' and 'To' locations to calculate distance.",
-              variant: "destructive"
-          });
-          return;
-      }
-      setIsCalculating(true);
-      const result = await calculateDistance({from, to});
-      setIsCalculating(false);
-
-      if (result.error) {
-          toast({
-              title: "Error Calculating Distance",
-              description: result.error,
-              variant: "destructive"
-          });
-      } else if (result.distance) {
-          form.setValue('distance', result.distance);
-           toast({
-              title: "Distance Calculated",
-              description: `The distance is approximately ${result.distance} km.`,
-          });
-      }
-  }
 
   const handleRouteSubmission = (data: OwnerFormValues & { isPromoted?: boolean }) => {
     const finalData = {
@@ -532,13 +544,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                              <FormControl>
                                 <div className="relative flex-grow">
                                   <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                  <Input type="number" placeholder="AI Calculated Distance" {...field} className="pl-10" readOnly />
+                                  <Input type="number" placeholder="Auto-calculated" {...field} className="pl-10" readOnly />
+                                   {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
                                 </div>
                               </FormControl>
-                             <Button type="button" variant="outline" onClick={handleCalculateDistance} disabled={isCalculating}>
-                                {isCalculating ? <Loader2 className="animate-spin" /> : <Wand2 />}
-                                <span className="ml-2">Calculate</span>
-                             </Button>
                           </div>
                           <FormMessage />
                         </FormItem>
