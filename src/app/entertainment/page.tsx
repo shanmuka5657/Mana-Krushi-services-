@@ -86,7 +86,7 @@ function EntertainmentPageContent() {
                     <CardContent className="p-0 overflow-hidden rounded-lg">
                         <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer">
                             <Image
-                                src="https://i.ibb.co/v4pB1k3/amazon-prime-music.png"
+                                src="https://i.ibb.co/Nc8G4GY/Screenshot-2025-09-17-16-05-37-387-com-mi-android-global-Fileexplorer.jpg"
                                 alt="Amazon Prime Music Ad"
                                 width={1200}
                                 height={628}
