@@ -28,6 +28,13 @@ export default function RootLayout({
             }
           `}
         </Script>
+        <Script 
+          src="https://fpyf8.com/88/tag.min.js" 
+          data-zone="171777" 
+          async 
+          data-cfasync="false"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
