@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -39,12 +39,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   mobile: z.string().regex(/^\d{10}$/, { message: "Enter a valid 10-digit mobile number." }),
   email: z.string().email({ message: "Invalid email address." }),
+  country: z.string().optional(),
   address: z.string().optional(),
   vehicleType: z.string().optional(),
   vehicleNumber: z.string().optional(),
@@ -54,6 +56,14 @@ const profileFormSchema = z.object({
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
+const countries = [
+    { code: 'IN', name: 'India' },
+    { code: 'US', name: 'United States' },
+    { code: 'CA', name: 'Canada' },
+    { code: 'GB', name: 'United Kingdom' },
+    { code: 'AU', name: 'Australia' },
+];
 
 export default function ProfileForm() {
   const { toast } = useToast();
@@ -73,6 +83,7 @@ export default function ProfileForm() {
       name: "",
       mobile: "",
       email: "",
+      country: "IN",
       address: "",
       vehicleType: "",
       vehicleNumber: "",
@@ -127,6 +138,7 @@ export default function ProfileForm() {
             name: userName || (userEmail ? userEmail.split('@')[0] : ''),
             email: userEmail || '',
             mobile: '',
+            country: 'IN',
             address: '',
             vehicleType: '',
             vehicleNumber: '',
@@ -435,6 +447,32 @@ export default function ProfileForm() {
                         <Input type="email" placeholder="Enter your email" {...field} className="pl-10" disabled />
                       </div>
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                           <div className="relative">
+                            <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <SelectTrigger className="pl-10">
+                                <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                           </div>
+                        </FormControl>
+                        <SelectContent>
+                            {countries.map(c => (
+                                <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

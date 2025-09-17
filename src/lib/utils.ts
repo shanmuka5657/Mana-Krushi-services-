@@ -1,8 +1,27 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+const CURRENCY_MAP: { [key: string]: string } = {
+  IN: 'INR',
+  US: 'USD',
+  GB: 'GBP',
+  CA: 'CAD',
+  AU: 'AUD',
+};
+const DEFAULT_CURRENCY = 'INR';
+
+export function formatCurrency(amount: number, countryCode?: string) {
+    const currency = CURRENCY_MAP[countryCode || 'IN'] || DEFAULT_CURRENCY;
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+    }).format(amount);
 }
 
 export function exportToCsv(filename: string, rows: object[], headers?: string[]) {

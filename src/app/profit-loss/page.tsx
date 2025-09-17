@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { format, isWithinInterval } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 const FUEL_PRICE_PER_LITER = 105; // Average fuel price in INR
 
@@ -35,6 +35,7 @@ function StatCard({ title, value, icon, color, description }: { title: string, v
 
 function ProfitLossPageContent() {
     const [isLoading, setIsLoading] = useState(true);
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [totalRevenue, setTotalRevenue] = useState(0);
     const [totalFuelCost, setTotalFuelCost] = useState(0);
     const [totalPromotionCost, setTotalPromotionCost] = useState(0);
@@ -51,11 +52,12 @@ function ProfitLossPageContent() {
                 return;
             }
             
-            const [profile, allBookings, allRoutes] = await Promise.all([
+            const [userProfile, allBookings, allRoutes] = await Promise.all([
                 getProfile(userEmail),
                 getBookings(true),
                 getRoutes(true),
             ]);
+            setProfile(userProfile);
 
             const dateInterval = date?.from && date?.to ? { start: date.from, end: date.to } : null;
 
@@ -76,7 +78,7 @@ function ProfitLossPageContent() {
             // 2. Calculate Expenses
             // 2a. Fuel Cost (based on completed routes)
             let fuelCost = 0;
-            if (profile?.mileage && profile.mileage > 0) {
+            if (userProfile?.mileage && userProfile.mileage > 0) {
                  const completedRouteIdentifiers = new Set(
                     ownerBookings.map(b => `${format(new Date(b.departureDate), 'yyyy-MM-dd')}-${b.destination}`)
                 );
@@ -88,7 +90,7 @@ function ProfitLossPageContent() {
 
                 const totalDistance = completedRoutesForFuelCalc.reduce((acc, route) => acc + (route.distance || 0), 0);
                 
-                fuelCost = (totalDistance / profile.mileage) * FUEL_PRICE_PER_LITER;
+                fuelCost = (totalDistance / userProfile.mileage) * FUEL_PRICE_PER_LITER;
                 setTotalFuelCost(fuelCost);
             }
 
@@ -173,21 +175,21 @@ function ProfitLossPageContent() {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                          <StatCard 
                             title="Total Revenue" 
-                            value={`₹${totalRevenue.toFixed(2)}`} 
+                            value={formatCurrency(totalRevenue, profile?.country)} 
                             icon={TrendingUp} 
                             color="text-green-500"
                             description="From completed rides."
                         />
                          <StatCard 
                             title="Total Expenses" 
-                            value={`₹${totalExpenses.toFixed(2)}`} 
+                            value={formatCurrency(totalExpenses, profile?.country)} 
                             icon={TrendingDown} 
                             color="text-red-500"
-                            description={`Fuel: ₹${totalFuelCost.toFixed(2)} | Promotions: ₹${totalPromotionCost.toFixed(2)}`}
+                            description={`Fuel: ${formatCurrency(totalFuelCost, profile?.country)} | Promotions: ${formatCurrency(totalPromotionCost, profile?.country)}`}
                         />
                          <StatCard 
                             title="Net Profit" 
-                            value={`₹${netProfit.toFixed(2)}`} 
+                            value={formatCurrency(netProfit, profile?.country)} 
                             icon={Wallet} 
                             color={netProfit >= 0 ? 'text-blue-500' : 'text-red-500'}
                             description="Revenue minus all expenses."
@@ -200,7 +202,7 @@ function ProfitLossPageContent() {
                         <CardContent>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
                                 <li><strong>Revenue</strong> is calculated from all your rides marked as 'Completed' within the selected date range.</li>
-                                <li><strong>Fuel Cost</strong> is an estimate based on the total distance of completed routes and your profile's mileage (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L).</li>
+                                <li><strong>Fuel Cost</strong> is an estimate based on the total distance of completed routes and your profile's mileage (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L). Fuel cost is always in INR.</li>
                                 <li><strong>Promotion Cost</strong> is calculated at ₹100 for each route created within the selected date range that was marked as 'Promoted'.</li>
                                 <li>This is an estimate. Actual profit may vary based on maintenance, insurance, and other operational costs.</li>
                             </ul>

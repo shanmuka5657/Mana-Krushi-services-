@@ -57,6 +57,7 @@ export type Profile = {
     mobile: string;
     mobileVerified?: boolean;
     email: string;
+    country?: string;
     address?: string;
     vehicleType?: string;
     vehicleNumber?: string;
