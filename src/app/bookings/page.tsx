@@ -8,7 +8,6 @@ import { getBookings, saveBookings, getCurrentUserName, getCurrentUser } from '@
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { KotakBanner, PoonawallaBanner } from '@/components/marketing/ad-banners';
 
 function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -77,9 +76,7 @@ function BookingsPageContent() {
 
     return (
         <AppLayout>
-            <KotakBanner />
             <RecentBookings bookings={bookings} onUpdateBooking={handleUpdateBooking} />
-            <PoonawallaBanner />
         </AppLayout>
     );
 }

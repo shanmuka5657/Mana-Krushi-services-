@@ -7,7 +7,6 @@ import { Suspense, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { AxisBanner } from '@/components/marketing/ad-banners';
 
 const partners = [
     {
@@ -125,7 +124,6 @@ function EcommercePageContent() {
     return (
         <AppLayout>
             <div className="space-y-6">
-                <AxisBanner />
                 <Card>
                     <CardHeader>
                         <CardTitle>Our Partners</CardTitle>

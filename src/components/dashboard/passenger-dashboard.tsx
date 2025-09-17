@@ -43,7 +43,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
-import { IndusIndBanner, BajajBanner } from "@/components/marketing/ad-banners";
 
 
 const searchFormSchema = z.object({
@@ -398,8 +397,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialogContent>
       </AlertDialog>
 
-      <IndusIndBanner />
-
       <TopMembers />
       
       <Card className="shadow-sm">
@@ -507,8 +504,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
               </Form>
           </CardContent>
       </Card>
-
-      <BajajBanner />
     </div>
   );
 }

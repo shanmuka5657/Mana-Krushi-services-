@@ -28,15 +28,6 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
-    const adsterraBannerScript = `
-      atOptions = {
-        'key' : '6563c4ab89bf446cc6ca2af6af14fc66',
-        'format' : 'iframe',
-        'height' : 50,
-        'width' : 320,
-        'params' : {}
-      };
-    `;
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -109,19 +100,6 @@ function EntertainmentPageContent() {
                         </a>
                     </CardFooter>
                 </Card>
-                
-                {/* Banner Ad */}
-                <Card>
-                    <CardContent className="p-4 flex items-center justify-center">
-                        <div>
-                            <Script id="adsterra-banner-config" strategy="lazyOnload">
-                                {adsterraBannerScript}
-                            </Script>
-                            <Script async={true} src="//exportseats.com/6563c4ab89bf446cc6ca2af6af14fc66/invoke.js" strategy="lazyOnload" />
-                        </div>
-                    </CardContent>
-                </Card>
-
 
                 {isSearching && (
                     <div className="text-center p-10">
@@ -186,18 +164,6 @@ function EntertainmentPageContent() {
                         </div>
                     </CardContent>
                 </Card>
-                
-                {/* Native Banner Ad */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Recommended For You</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                         <Script async={true} data-cfasync="false" src="//exportseats.com/143386acea5fdd4b99b856043235c82b/invoke.js" />
-                         <div id="container-143386acea5fdd4b99b856043235c82b"></div>
-                    </CardContent>
-                </Card>
-
             </div>
         </AppLayout>
     );

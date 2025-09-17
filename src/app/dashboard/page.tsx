@@ -14,7 +14,6 @@ import { Suspense } from 'react';
 import { getBookings, saveBookings, getRoutes, addRoute, getCurrentUserName, getCurrentUser } from "@/lib/storage";
 import MyRoutes from "@/components/dashboard/my-routes";
 import ProfileForm from "@/components/dashboard/profile-form";
-import { KotakBanner, PoonawallaBanner } from "@/components/marketing/ad-banners";
 
 function DashboardPage() {
   const searchParams = useSearchParams();
@@ -103,9 +102,7 @@ function DashboardPage() {
             <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-routes">
-            <KotakBanner />
             <MyRoutes routes={routes} />
-            <PoonawallaBanner />
           </TabsContent>
           <TabsContent value="profile">
             <ProfileForm />
@@ -122,9 +119,7 @@ function DashboardPage() {
             <PassengerDashboard onSwitchTab={handleTabSwitch} />
           </TabsContent>
           <TabsContent value="my-bookings">
-            <KotakBanner />
             <RecentBookings bookings={userBookings} onUpdateBooking={handleUpdateBooking} />
-            <PoonawallaBanner />
           </TabsContent>
           <TabsContent value="profile">
             <ProfileForm />

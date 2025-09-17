@@ -7,7 +7,6 @@ import MyRoutes from '@/components/dashboard/my-routes';
 import { getRoutes, getCurrentUserName } from '@/lib/storage';
 import type { Route } from '@/lib/types';
 import { Suspense } from 'react';
-import { KotakBanner, PoonawallaBanner } from '@/components/marketing/ad-banners';
 
 function MyRoutesPageContent() {
     const [routes, setRoutes] = useState<Route[]>([]);
@@ -34,9 +33,7 @@ function MyRoutesPageContent() {
 
     return (
         <AppLayout>
-           <KotakBanner />
            <MyRoutes routes={routes} />
-           <PoonawallaBanner />
         </AppLayout>
     );
 }

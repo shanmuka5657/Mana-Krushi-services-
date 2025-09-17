@@ -6,17 +6,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cuelinksScript = `
-    var cId =  "245979";
-    (function(d, t) {
-      var s = document.createElement("script");
-      s.type = "text/javascript";
-      s.async = true;
-      s.src = (document.location.protocol == "https:" ? "https://cdn0.cuelinks.com/js/" : "http://cdn0.cuelinks.com/js/")  + "cuelinksv2.js";
-      document.getElementsByTagName("body")[0].appendChild(s);
-    }());
-  `;
-  
   const serviceWorkerRegistration = `
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -28,32 +17,15 @@ export default function RootLayout({
       });
     }
   `;
-  
-  const vignetteAdScript = `
-    (function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
-  `;
 
   return (
     <html lang="en">
       <head>
-        <script async custom-element="amp-auto-ads"
-          src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
-        </script>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4057664444308456"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ffffff" />
-        <script dangerouslySetInnerHTML={{ __html: vignetteAdScript }} />
       </head>
       <body>
-        <script type='text/javascript' src='//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js'></script>
-        <script type='text/javascript' src='//markswaitingrouge.com/18/6e/e8/186ee8d3ed422373beaa184909e3545c.js'></script>
         {children}
-        <script type="text/javascript" dangerouslySetInnerHTML={{ __html: cuelinksScript }} />
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerRegistration }} />
       </body>
     </html>

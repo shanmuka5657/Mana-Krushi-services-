@@ -45,7 +45,6 @@ import type { Profile, Route } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { IndusIndBanner, BajajBanner } from "@/components/marketing/ad-banners";
 
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
@@ -432,8 +431,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
           description="This one-time fee of ₹100 will feature your ride at the top of search results."
       />
       
-      <IndusIndBanner />
-
       <Card className="shadow-sm">
           <CardHeader>
           <CardTitle>Add a New Route</CardTitle>
@@ -712,7 +709,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
           </Form>
           </CardContent>
       </Card>
-      <BajajBanner />
     </div>
   );
 }
