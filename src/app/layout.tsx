@@ -50,7 +50,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: vignetteAdScript }} />
       </head>
       <body>
-        <script type='text/javascript' src='//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js' async></script>
+        <script type='text/javascript' src='//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js'></script>
         <script type='text/javascript' src='//markswaitingrouge.com/18/6e/e8/186ee8d3ed422373beaa184909e3545c.js'></script>
         {children}
         <script type="text/javascript" dangerouslySetInnerHTML={{ __html: cuelinksScript }} />
