@@ -15,6 +15,7 @@ import { getBookings, saveBookings, getRoutes, addRoute, getCurrentUserName, get
 import MyRoutes from "@/components/dashboard/my-routes";
 import ProfileForm from "@/components/dashboard/profile-form";
 import { KotakBanner, PoonawallaBanner } from "@/components/marketing/ad-banners";
+import { AdColumn } from "@/components/marketing/ad-column";
 
 function DashboardPage() {
   const searchParams = useSearchParams();
@@ -92,45 +93,52 @@ function DashboardPage() {
 
   return (
     <AppLayout>
-      {role === 'owner' ? (
-         <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
-          <TabsList>
-            <TabsTrigger value="add-route">Add Route</TabsTrigger>
-            <TabsTrigger value="my-routes">My Routes</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-          </TabsList>
-          <TabsContent value="add-route">
-             <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
-          </TabsContent>
-          <TabsContent value="my-routes">
-            <KotakBanner />
-            <MyRoutes routes={routes} />
-            <PoonawallaBanner />
-          </TabsContent>
-           <TabsContent value="profile">
-            <ProfileForm />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
-          <TabsList>
-            <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
-            <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-          </TabsList>
-          <TabsContent value="find-ride">
-            <PassengerDashboard onSwitchTab={handleTabSwitch} />
-          </TabsContent>
-          <TabsContent value="my-bookings">
-            <KotakBanner />
-            <RecentBookings bookings={userBookings} onUpdateBooking={handleUpdateBooking} />
-            <PoonawallaBanner />
-          </TabsContent>
-           <TabsContent value="profile">
-            <ProfileForm />
-          </TabsContent>
-        </Tabs>
-      )}
+      <div className="grid lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-2 space-y-6">
+          {role === 'owner' ? (
+            <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
+              <TabsList>
+                <TabsTrigger value="add-route">Add Route</TabsTrigger>
+                <TabsTrigger value="my-routes">My Routes</TabsTrigger>
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+              </TabsList>
+              <TabsContent value="add-route">
+                <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
+              </TabsContent>
+              <TabsContent value="my-routes">
+                <KotakBanner />
+                <MyRoutes routes={routes} />
+                <PoonawallaBanner />
+              </TabsContent>
+              <TabsContent value="profile">
+                <ProfileForm />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
+              <TabsList>
+                <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
+                <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+              </TabsList>
+              <TabsContent value="find-ride">
+                <PassengerDashboard onSwitchTab={handleTabSwitch} />
+              </TabsContent>
+              <TabsContent value="my-bookings">
+                <KotakBanner />
+                <RecentBookings bookings={userBookings} onUpdateBooking={handleUpdateBooking} />
+                <PoonawallaBanner />
+              </TabsContent>
+              <TabsContent value="profile">
+                <ProfileForm />
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
+        <div className="lg:col-span-1 hidden lg:block">
+          <AdColumn />
+        </div>
+      </div>
     </AppLayout>
   );
 }

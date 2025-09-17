@@ -44,7 +44,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
 import { IndusIndBanner, BajajBanner } from "@/components/marketing/ad-banners";
-import { AdColumn } from "../marketing/ad-column";
 
 
 const searchFormSchema = z.object({
@@ -382,139 +381,134 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   }
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8 items-start">
-      <div className="lg:col-span-2 space-y-6">
-        <AlertDialog open={showProfilePrompt}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Complete Your Profile</AlertDialogTitle>
-              <AlertDialogDescription>
-                Please complete your profile details before searching for a ride. It helps owners know who they are traveling with.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => onSwitchTab('profile')}>
-                Go to Profile
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+    <div className="space-y-6">
+      <AlertDialog open={showProfilePrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Your Profile</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please complete your profile details before searching for a ride. It helps owners know who they are traveling with.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => onSwitchTab('profile')}>
+              Go to Profile
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        <IndusIndBanner />
+      <IndusIndBanner />
 
-        <TopMembers />
-        
-        <Card className="shadow-sm mt-6">
-            <CardHeader>
-                <CardTitle>Find a Ride</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="fromLocation"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>From</FormLabel>
-                                <FormControl>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Starting location" {...field} className="pl-10" list="locations-list" />
-                                </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="toLocation"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>To</FormLabel>
-                                <FormControl>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Destination" {...field} className="pl-10" list="locations-list" />
-                                </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        <datalist id="locations-list">
-                          {locations.map(loc => <option key={loc} value={loc} />)}
-                        </datalist>
-                         <FormField
-                            control={form.control}
-                            name="travelDate"
-                            render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Date</FormLabel>
-                                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                                <PopoverTrigger asChild>
-                                    <FormControl>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                        "w-full pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                        )}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {field.value ? (
-                                        format(field.value, "PPP")
-                                        ) : (
-                                        <span>Pick a date</span>
-                                        )}
-                                    </Button>
-                                    </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={(date) => {
-                                        field.onChange(date);
-                                        setIsCalendarOpen(false);
-                                    }}
-                                    disabled={(date) =>
-                                        date < new Date(new Date().setHours(0, 0, 0, 0))
-                                    }
-                                    initialFocus
-                                    />
-                                </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                    </div>
-                     <Button type="submit" className="w-full" disabled={isSearching}>
-                        {isSearching ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Searching...
-                            </>
-                        ) : (
-                            <>
-                                <Search className="mr-2 h-4 w-4" />
-                                Search Rides
-                            </>
-                        )}
-                    </Button>
-                </form>
-                </Form>
-            </CardContent>
-        </Card>
+      <TopMembers />
+      
+      <Card className="shadow-sm">
+          <CardHeader>
+              <CardTitle>Find a Ride</CardTitle>
+          </CardHeader>
+          <CardContent>
+              <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="space-y-4">
+                      <FormField
+                          control={form.control}
+                          name="fromLocation"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>From</FormLabel>
+                              <FormControl>
+                              <div className="relative">
+                                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                  <Input placeholder="Starting location" {...field} className="pl-10" list="locations-list" />
+                              </div>
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={form.control}
+                          name="toLocation"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>To</FormLabel>
+                              <FormControl>
+                              <div className="relative">
+                                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                  <Input placeholder="Destination" {...field} className="pl-10" list="locations-list" />
+                              </div>
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <datalist id="locations-list">
+                        {locations.map(loc => <option key={loc} value={loc} />)}
+                      </datalist>
+                       <FormField
+                          control={form.control}
+                          name="travelDate"
+                          render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                              <FormLabel>Date</FormLabel>
+                              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                              <PopoverTrigger asChild>
+                                  <FormControl>
+                                  <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                      )}
+                                  >
+                                      <CalendarIcon className="mr-2 h-4 w-4" />
+                                      {field.value ? (
+                                      format(field.value, "PPP")
+                                      ) : (
+                                      <span>Pick a date</span>
+                                      )}
+                                  </Button>
+                                  </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={(date) => {
+                                      field.onChange(date);
+                                      setIsCalendarOpen(false);
+                                  }}
+                                  disabled={(date) =>
+                                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                                  }
+                                  initialFocus
+                                  />
+                              </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                  </div>
+                   <Button type="submit" className="w-full" disabled={isSearching}>
+                      {isSearching ? (
+                          <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Searching...
+                          </>
+                      ) : (
+                          <>
+                              <Search className="mr-2 h-4 w-4" />
+                              Search Rides
+                          </>
+                      )}
+                  </Button>
+              </form>
+              </Form>
+          </CardContent>
+      </Card>
 
-        <BajajBanner />
-      </div>
-      <div className="lg:col-span-1 hidden lg:block">
-        <AdColumn />
-      </div>
+      <BajajBanner />
     </div>
   );
 }
