@@ -1,7 +1,6 @@
-
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import VignetteAd from '@/components/VignetteAd';
+import Script from 'next/script';
 
 export default function RootLayout({
   children,
@@ -11,13 +10,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        <VignetteAd />
         {children}
         <Toaster />
+        <Script
+          id="monetag-vignette-script"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(s){
+                s.dataset.zone='9892027';
+                s.src='https://groleegni.net/vignette.min.js';
+              })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+            `,
+          }}
+        />
       </body>
     </html>
   );
