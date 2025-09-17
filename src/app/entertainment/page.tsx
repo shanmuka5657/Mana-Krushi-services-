@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
 import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed, Film, Clapperboard, Tv, Search, Loader2, PlayCircle, AppWindow, Music } from 'lucide-react';
 import { Input } from '@/components/ui/input';
