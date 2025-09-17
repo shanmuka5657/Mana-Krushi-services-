@@ -329,13 +329,28 @@ function AdsPageContent() {
                 {/* Direct Link Ad */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Direct Link Ad</CardTitle>
+                        <CardTitle>Adsterra Direct Link</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <a href="https://exportseats.com/m2jivq7i5?key=21be6efcb2e0598d5cc7a099cc5be61d" target="_blank" rel="noopener noreferrer">
                             <Button className="w-full">
                                 <LinkIcon className="mr-2 h-4 w-4" />
                                 Click to View Offer
+                            </Button>
+                        </a>
+                    </CardContent>
+                </Card>
+                
+                {/* PropellerAds Example Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>PropellerAds Direct Link</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <a href="https://propellerads.com/preview" target="_blank" rel="noopener noreferrer">
+                            <Button className="w-full" variant="outline">
+                                <LinkIcon className="mr-2 h-4 w-4" />
+                                View PropellerAds Offer
                             </Button>
                         </a>
                     </CardContent>
@@ -364,3 +379,5 @@ export default function AdsPage() {
         </Suspense>
     );
 }
+
+    
