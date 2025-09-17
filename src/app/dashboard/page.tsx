@@ -93,7 +93,7 @@ function DashboardPage() {
   return (
     <AppLayout>
       {role === 'owner' ? (
-         <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch}>
+         <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
           <TabsList>
             <TabsTrigger value="add-route">Add Route</TabsTrigger>
             <TabsTrigger value="my-routes">My Routes</TabsTrigger>
@@ -112,7 +112,7 @@ function DashboardPage() {
           </TabsContent>
         </Tabs>
       ) : (
-        <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch}>
+        <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
           <TabsList>
             <TabsTrigger value="find-ride">Find a Ride</TabsTrigger>
             <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>

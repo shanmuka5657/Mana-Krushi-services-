@@ -44,6 +44,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
 import { IndusIndBanner, BajajBanner } from "@/components/marketing/ad-banners";
+import { AdColumn } from "../marketing/ad-column";
 
 
 const searchFormSchema = z.object({
@@ -381,7 +382,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid lg:grid-cols-3 gap-8 items-start">
+      <div className="lg:col-span-2 space-y-6">
         <AlertDialog open={showProfilePrompt}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -509,6 +511,10 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </Card>
 
         <BajajBanner />
+      </div>
+      <div className="lg:col-span-1 hidden lg:block">
+        <AdColumn />
+      </div>
     </div>
   );
 }

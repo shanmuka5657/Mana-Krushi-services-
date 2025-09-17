@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +46,7 @@ import { calculateDistance } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { IndusIndBanner, BajajBanner } from "@/components/marketing/ad-banners";
+import { AdColumn } from "../marketing/ad-column";
 
 
 const ownerFormSchema = z.object({
@@ -321,400 +321,405 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }
 
   return (
-    <>
-      <AlertDialog open={showProfilePrompt}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Complete Your Profile</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please complete your profile details, including vehicle information, before adding a route. This helps passengers know who they are traveling with.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => onSwitchTab('profile')}>
-              Go to Profile
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+    <div className="grid lg:grid-cols-3 gap-8 items-start">
+      <div className="lg:col-span-2 space-y-6">
+        <AlertDialog open={showProfilePrompt}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Complete Your Profile</AlertDialogTitle>
+                <AlertDialogDescription>
+                Please complete your profile details, including vehicle information, before adding a route. This helps passengers know who they are traveling with.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogAction onClick={() => onSwitchTab('profile')}>
+                Go to Profile
+                </AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
 
-      <Dialog open={showPromotionDialog} onOpenChange={setShowPromotionDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="text-yellow-500" />
-              Promote Your Ride?
-            </DialogTitle>
-            <DialogDescription>
-             Promote your ride for ₹100 to highlight it in search results. Promoted rides will also include passenger insurance in the future.
-            </DialogDescription>
-          </DialogHeader>
-           <div className="pt-4 space-y-2">
-              <p className="text-sm font-semibold text-foreground">Here's how your promoted ride will look:</p>
-                <Card className="overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
-                    <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                            <div className="flex gap-4">
-                                <div>
-                                    <div className="font-semibold">{routeDataToSubmit?.departureTime}</div>
-                                    <div className="text-sm text-muted-foreground">{getTravelDuration(routeDataToSubmit?.departureTime, routeDataToSubmit?.arrivalTime)}</div>
-                                    <div className="font-semibold mt-2">{routeDataToSubmit?.arrivalTime}</div>
+        <Dialog open={showPromotionDialog} onOpenChange={setShowPromotionDialog}>
+            <DialogContent>
+            <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="text-yellow-500" />
+                Promote Your Ride?
+                </DialogTitle>
+                <DialogDescription>
+                Promote your ride for ₹100 to highlight it in search results. Promoted rides will also include passenger insurance in the future.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="pt-4 space-y-2">
+                <p className="text-sm font-semibold text-foreground">Here's how your promoted ride will look:</p>
+                    <Card className="overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10">
+                        <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex gap-4">
+                                    <div>
+                                        <div className="font-semibold">{routeDataToSubmit?.departureTime}</div>
+                                        <div className="text-sm text-muted-foreground">{getTravelDuration(routeDataToSubmit?.departureTime, routeDataToSubmit?.arrivalTime)}</div>
+                                        <div className="font-semibold mt-2">{routeDataToSubmit?.arrivalTime}</div>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                    <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                    <div className="w-px h-10 bg-border my-1"></div>
+                                    <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold">{routeDataToSubmit?.fromLocation}</div>
+                                        <div className="text-sm text-muted-foreground">{routeDataToSubmit?.distance ? routeDataToSubmit.distance.toFixed(0) : 0} km</div>
+                                        <div className="font-semibold mt-2">{routeDataToSubmit?.toLocation}</div>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-center">
-                                <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
-                                <div className="w-px h-10 bg-border my-1"></div>
-                                <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                <div className="text-right">
+                                <div className="text-lg font-bold">
+                                    ₹{routeDataToSubmit?.price.toFixed(2)}
                                 </div>
+                                <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                    <Users className="h-4 w-4" />
+                                    <span>{routeDataToSubmit?.availableSeats} seats left</span>
+                                </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                                <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
+                                    <Sparkles className="mr-1 h-3 w-3" />
+                                    Promoted
+                                </Badge>
+                                <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
+                                    <Shield className="mr-1 h-3 w-3" />
+                                    Insurance: Yes
+                                </Badge>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={profile?.selfieDataUrl} />
+                                    <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
                                 <div>
-                                    <div className="font-semibold">{routeDataToSubmit?.fromLocation}</div>
-                                     <div className="text-sm text-muted-foreground">{routeDataToSubmit?.distance ? routeDataToSubmit.distance.toFixed(0) : 0} km</div>
-                                    <div className="font-semibold mt-2">{routeDataToSubmit?.toLocation}</div>
+                                    <div className="font-semibold text-sm">{routeDataToSubmit?.driverName}</div>
+                                    <div className="flex items-center gap-1">
+                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                        <span className="text-xs text-muted-foreground">{routeDataToSubmit?.rating.toFixed(1)}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="text-right">
-                            <div className="text-lg font-bold">
-                                ₹{routeDataToSubmit?.price.toFixed(2)}
+                            <div className="text-xs font-medium">{profile?.vehicleType}</div>
+                            <Car className="text-muted-foreground h-5 w-5 ml-auto" />
                             </div>
-                            <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
-                                <Users className="h-4 w-4" />
-                                <span>{routeDataToSubmit?.availableSeats} seats left</span>
-                            </div>
-                            </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-3">
-                            <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
-                                <Sparkles className="mr-1 h-3 w-3" />
-                                Promoted
-                            </Badge>
-                            <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
-                                <Shield className="mr-1 h-3 w-3" />
-                                Insurance: Yes
-                            </Badge>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={profile?.selfieDataUrl} />
-                                <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="font-semibold text-sm">{routeDataToSubmit?.driverName}</div>
-                                <div className="flex items-center gap-1">
-                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                    <span className="text-xs text-muted-foreground">{routeDataToSubmit?.rating.toFixed(1)}</span>
-                                </div>
-                            </div>
-                        </div>
-                         <div className="text-right">
-                           <div className="text-xs font-medium">{profile?.vehicleType}</div>
-                           <Car className="text-muted-foreground h-5 w-5 ml-auto" />
-                        </div>
-                    </CardFooter>
-                </Card>
-            </div>
-          <DialogFooter>
-            <DialogClose asChild>
-                <Button variant="ghost" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
-            </DialogClose>
-            <Button onClick={() => handlePromotionChoice(true)}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Yes, Pay ₹100 to Promote
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <PaymentDialog 
-        isOpen={isPaymentDialogOpen}
-        onOpenChange={setIsPaymentDialogOpen}
-        onPaymentSuccess={handlePaymentSuccess}
-        amount="100.00"
-        title="Promote Ride"
-        description="This one-time fee of ₹100 will feature your ride at the top of search results."
-      />
-      
-      <IndusIndBanner />
+                        </CardFooter>
+                    </Card>
+                </div>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button variant="ghost" onClick={() => handlePromotionChoice(false)}>No, Thanks</Button>
+                </DialogClose>
+                <Button onClick={() => handlePromotionChoice(true)}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Yes, Pay ₹100 to Promote
+                </Button>
+            </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        
+        <PaymentDialog 
+            isOpen={isPaymentDialogOpen}
+            onOpenChange={setIsPaymentDialogOpen}
+            onPaymentSuccess={handlePaymentSuccess}
+            amount="100.00"
+            title="Promote Ride"
+            description="This one-time fee of ₹100 will feature your ride at the top of search results."
+        />
+        
+        <IndusIndBanner />
 
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle>Add a New Route</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="ownerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Owner Name</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="driverName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Driver Name</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Enter driver's name" {...field} className="pl-10" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="driverMobile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Driver Mobile</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input type="tel" placeholder="Enter driver's mobile" {...field} className="pl-10" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
-                <FormField
-                  control={form.control}
-                  name="fromLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>From</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Starting city" {...field} className="pl-10" list="locations-list" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="toLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>To</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Destination city" {...field} className="pl-10" list="locations-list" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <datalist id="locations-list">
-                {locations.map(loc => <option key={loc} value={loc} />)}
-              </datalist>
-
-               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
-                   <FormField
-                      control={form.control}
-                      name="distance"
-                      render={({ field }) => (
+        <Card className="shadow-sm">
+            <CardHeader>
+            <CardTitle>Add a New Route</CardTitle>
+            </CardHeader>
+            <CardContent>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                    control={form.control}
+                    name="ownerName"
+                    render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Distance (km)</FormLabel>
-                          <div className="flex gap-2">
-                             <FormControl>
-                                <div className="relative flex-grow">
-                                  <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                  <Input type="number" placeholder="Auto-calculated" {...field} className="pl-10" readOnly />
-                                   {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
-                                </div>
-                              </FormControl>
-                          </div>
-                          <FormMessage />
+                        <FormLabel>Owner Name</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
                         </FormItem>
-                      )}
+                    )}
                     />
-               </div>
-
-
-               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                 <FormField
+                    <FormField
                     control={form.control}
-                    name="pickupPoints"
+                    name="driverName"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Pickup Points</FormLabel>
+                        <FormItem>
+                        <FormLabel>Driver Name</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Enter each pickup point on a new line" 
-                            className="h-24"
-                            {...field}
-                          />
+                            <div className="relative">
+                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="Enter driver's name" {...field} className="pl-10" />
+                            </div>
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                        </FormItem>
                     )}
-                  />
-                  <FormField
+                    />
+                </div>
+
+                <FormField
                     control={form.control}
-                    name="dropOffPoints"
+                    name="driverMobile"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Drop-off Points</FormLabel>
+                    <FormItem>
+                        <FormLabel>Driver Mobile</FormLabel>
                         <FormControl>
-                           <Textarea 
-                              placeholder="Enter each drop-off point on a new line" 
-                              className="h-24"
-                              {...field}
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="tel" placeholder="Enter driver's mobile" {...field} className="pl-10" />
+                        </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
+                    <FormField
+                    control={form.control}
+                    name="fromLocation"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>From</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="Starting city" {...field} className="pl-10" list="locations-list" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="toLocation"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>To</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="Destination city" {...field} className="pl-10" list="locations-list" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <datalist id="locations-list">
+                    {locations.map(loc => <option key={loc} value={loc} />)}
+                </datalist>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                    <FormField
+                        control={form.control}
+                        name="distance"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Distance (km)</FormLabel>
+                            <div className="flex gap-2">
+                                <FormControl>
+                                    <div className="relative flex-grow">
+                                    <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input type="number" placeholder="Auto-calculated" {...field} className="pl-10" readOnly />
+                                    {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
+                                    </div>
+                                </FormControl>
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                </div>
+
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                        control={form.control}
+                        name="pickupPoints"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Pickup Points</FormLabel>
+                            <FormControl>
+                            <Textarea 
+                                placeholder="Enter each pickup point on a new line" 
+                                className="h-24"
+                                {...field}
                             />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="dropOffPoints"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Drop-off Points</FormLabel>
+                            <FormControl>
+                            <Textarea 
+                                placeholder="Enter each drop-off point on a new line" 
+                                className="h-24"
+                                {...field}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </div>
+
+                <FormField
+                    control={form.control}
+                    name="travelDate"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                        <FormLabel>Travel Date</FormLabel>
+                        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                                >
+                                {field.value ? (
+                                    format(field.value, "PPP")
+                                ) : (
+                                    <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={(date) => {
+                                    field.onChange(date)
+                                    setIsCalendarOpen(false)
+                                }}
+                                disabled={(date) =>
+                                date < new Date(new Date().setHours(0, 0, 0, 0))
+                                }
+                                initialFocus
+                            />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                    control={form.control}
+                    name="departureTime"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Departure Time</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="time" className="pl-10" {...field} />
+                            </div>
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
+                        </FormItem>
                     )}
-                  />
-               </div>
+                    />
+                    <FormField
+                    control={form.control}
+                    name="arrivalTime"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Arrival Time</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="time" className="pl-10" {...field} />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                    control={form.control}
+                    name="availableSeats"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Available Seats</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="number" placeholder="Number of seats" {...field} className="pl-10" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Price per Seat (₹)</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="number" placeholder="e.g., 500" {...field} className="pl-10" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
 
-              <FormField
-                  control={form.control}
-                  name="travelDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Travel Date</FormLabel>
-                      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={(date) => {
-                                field.onChange(date)
-                                setIsCalendarOpen(false)
-                            }}
-                            disabled={(date) =>
-                              date < new Date(new Date().setHours(0, 0, 0, 0))
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="departureTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Departure Time</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="time" className="pl-10" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="arrivalTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Arrival Time</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="time" className="pl-10" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="availableSeats"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Available Seats</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="number" placeholder="Number of seats" {...field} className="pl-10" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price per Seat (₹)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="number" placeholder="e.g., 500" {...field} className="pl-10" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit" className="w-full">
-                Add Route
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      <BajajBanner />
-    </>
+                <Button type="submit" className="w-full">
+                    Add Route
+                </Button>
+                </form>
+            </Form>
+            </CardContent>
+        </Card>
+        <BajajBanner />
+      </div>
+      <div className="lg:col-span-1 hidden lg:block">
+        <AdColumn />
+      </div>
+    </div>
   );
 }
