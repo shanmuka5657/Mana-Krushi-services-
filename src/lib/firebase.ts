@@ -2,17 +2,14 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc } from "firebase/firestore";
 import type { Booking, Route, Profile } from "./types";
+import { devFirebaseConfig } from "./firebase-config.dev";
+import { prodFirebaseConfig } from "./firebase-config.prod";
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
-  "projectId": "globetrotterhq-xx8l8",
-  "appId": "1:691006742493:web:f1f5f88fda35370e8de034",
-  "storageBucket": "globetrotterhq-xx8l8.firebasestorage.app",
-  "apiKey": "AIzaSyDaVPZmSQXIhH-8fMtw5iEQ2ylngPS6KqU",
-  "authDomain": "globetrotterhq-xx8l8.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "691006742493"
-};
+const firebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_ENV === 'production' 
+  ? prodFirebaseConfig 
+  : devFirebaseConfig;
+
 
 // Initialize Firebase
 let app;
