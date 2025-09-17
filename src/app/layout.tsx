@@ -13,8 +13,6 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        {children}
-        <Toaster />
         <script
           data-cfasync="false"
           type="text/javascript"
@@ -22,6 +20,8 @@ export default function RootLayout({
             __html: `(s=>{s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
           }}
         ></script>
+        {children}
+        <Toaster />
       </body>
     </html>
   );
