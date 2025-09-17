@@ -1,7 +1,6 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import Script from 'next/script';
-import PopunderAd from '@/components/ads/popunder-ad';
 
 export default function RootLayout({
   children,
@@ -14,7 +13,13 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        <PopunderAd />
+        <script
+          data-cfasync="false"
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `(s=>{s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
+          }}
+        ></script>
         {children}
         <Toaster />
       </body>
