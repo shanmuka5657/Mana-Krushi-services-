@@ -311,6 +311,21 @@ function AdsPageContent() {
                     </CardContent>
                 </Card>
                 
+                 {/* New "Click Here" button card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Special Promotion</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Button 
+                            className="w-full"
+                            onClick={() => window.open('https://markswaitingrouge.com/hyartub4x?key=d892b1670480ffb487d89b3817e5e7ac', '_blank')}
+                        >
+                            Click Here
+                        </Button>
+                    </CardContent>
+                </Card>
+
                 {/* Direct Link Ad */}
                 <Card>
                     <CardHeader>
