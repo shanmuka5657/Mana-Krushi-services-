@@ -160,8 +160,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
-    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
-    { href: `/watch`, icon: Link, label: "Offers" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -178,8 +176,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/reports?role=owner`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
-    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
-    { href: `/watch`, icon: Link, label: "Offers" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
   ];
@@ -194,8 +190,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/loans`, icon: IndianRupee, label: "Apply for Loan" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
-    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
-    { href: `/watch`, icon: Link, label: "Offers" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
   ];

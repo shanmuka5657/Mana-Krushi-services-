@@ -73,34 +73,6 @@ function EntertainmentPageContent() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="p-0 overflow-hidden rounded-lg">
-                        <a href="http://amazon.in/music/prime?tag=1757177149700-21" target="_blank" rel="noopener noreferrer">
-                            <Image
-                                src="https://i.ibb.co/Nc8G4GY/Screenshot-2025-09-17-16-05-37-387-com-mi-android-global-Fileexplorer.jpg"
-                                alt="Amazon Prime Music Ad"
-                                width={1200}
-                                height={628}
-                                className="w-full h-auto"
-                            />
-                        </a>
-                    </CardContent>
-                    <CardFooter className="p-4 bg-muted/50 grid grid-cols-2 gap-4">
-                        <a href="http://amazon.in/music/prime?tag=1757177149700-21" target="_blank" rel="noopener noreferrer" className="w-full">
-                            <Button className="w-full">
-                                <AppWindow className="mr-2 h-4 w-4" />
-                                Listen on Web
-                            </Button>
-                        </a>
-                        <a href="http://amazon.in/music/prime?tag=1757177149700-21" target="_blank" rel="noopener noreferrer" className="w-full">
-                             <Button className="w-full" variant="secondary">
-                                <Music className="mr-2 h-4 w-4" />
-                                Open in App
-                            </Button>
-                        </a>
-                    </CardFooter>
-                </Card>
-
                 {isSearching && (
                     <div className="text-center p-10">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
