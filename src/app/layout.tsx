@@ -28,6 +28,12 @@ export default function RootLayout({
       <body>
         {children}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerRegistration }} />
+        <Script
+          id="vignette-ad-script"
+          strategy="lazyOnload"
+        >
+          {`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+        </Script>
       </body>
     </html>
   );
