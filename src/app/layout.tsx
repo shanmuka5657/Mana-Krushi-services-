@@ -28,6 +28,10 @@ export default function RootLayout({
       });
     }
   `;
+  
+  const vignetteAdScript = `
+    (function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+  `;
 
   return (
     <html lang="en">
@@ -45,6 +49,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <script type='text/javascript' src='//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js' async></script>
         <script type='text/javascript' src='//markswaitingrouge.com/18/6e/e8/186ee8d3ed422373beaa184909e3545c.js'></script>
+        <script dangerouslySetInnerHTML={{ __html: vignetteAdScript }} />
       </head>
       <body>
         {children}
