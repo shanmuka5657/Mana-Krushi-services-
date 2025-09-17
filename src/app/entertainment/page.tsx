@@ -5,13 +5,14 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed, Film, Clapperboard, Tv, Search, Loader2, PlayCircle } from 'lucide-react';
+import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed, Film, Clapperboard, Tv, Search, Loader2, PlayCircle, AppWindow, Music } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
 import Script from 'next/script';
+import Image from 'next/image';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com/movies', color: 'bg-red-50' },
@@ -79,6 +80,34 @@ function EntertainmentPageContent() {
                              </Button>
                         </div>
                     </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-0 overflow-hidden rounded-lg">
+                        <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer">
+                            <Image
+                                src="https://i.ibb.co/v4pB1k3/amazon-prime-music.png"
+                                alt="Amazon Prime Music Ad"
+                                width={1200}
+                                height={628}
+                                className="w-full h-auto"
+                            />
+                        </a>
+                    </CardContent>
+                    <CardFooter className="p-4 bg-muted/50 grid grid-cols-2 gap-4">
+                        <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer" className="w-full">
+                            <Button className="w-full">
+                                <AppWindow className="mr-2 h-4 w-4" />
+                                Listen on Web
+                            </Button>
+                        </a>
+                        <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer" className="w-full">
+                             <Button className="w-full" variant="secondary">
+                                <Music className="mr-2 h-4 w-4" />
+                                Open in App
+                            </Button>
+                        </a>
+                    </CardFooter>
                 </Card>
                 
                 {/* Banner Ad */}
