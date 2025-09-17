@@ -19,6 +19,7 @@ export default function WelcomePage() {
           width={logo.width}
           height={logo.height}
           data-ai-hint={logo.hint}
+          priority
         />
         <div>
           <h1 className="text-4xl font-bold tracking-tight">

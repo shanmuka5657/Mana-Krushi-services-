@@ -26,7 +26,6 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        <script>{`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}</script>
         {children}
         <script dangerouslySetInnerHTML={{ __html: serviceWorkerRegistration }} />
       </body>
