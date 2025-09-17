@@ -1,6 +1,7 @@
 
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import VignetteAd from '@/components/VignetteAd';
 
 export default function RootLayout({
   children,
@@ -14,6 +15,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
+        <VignetteAd />
         {children}
         <Toaster />
       </body>
