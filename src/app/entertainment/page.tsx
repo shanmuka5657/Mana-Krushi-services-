@@ -84,7 +84,7 @@ function EntertainmentPageContent() {
 
                 <Card>
                     <CardContent className="p-0 overflow-hidden rounded-lg">
-                        <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer">
+                        <a href="http://amazon.in/music/prime?tag=1757177149700-21" target="_blank" rel="noopener noreferrer">
                             <Image
                                 src="https://i.ibb.co/Nc8G4GY/Screenshot-2025-09-17-16-05-37-387-com-mi-android-global-Fileexplorer.jpg"
                                 alt="Amazon Prime Music Ad"
@@ -95,13 +95,13 @@ function EntertainmentPageContent() {
                         </a>
                     </CardContent>
                     <CardFooter className="p-4 bg-muted/50 grid grid-cols-2 gap-4">
-                        <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer" className="w-full">
+                        <a href="http://amazon.in/music/prime?tag=1757177149700-21" target="_blank" rel="noopener noreferrer" className="w-full">
                             <Button className="w-full">
                                 <AppWindow className="mr-2 h-4 w-4" />
                                 Listen on Web
                             </Button>
                         </a>
-                        <a href="http://amazon.in/music/prime?tag=1757177149716-21" target="_blank" rel="noopener noreferrer" className="w-full">
+                        <a href="http://amazon.in/music/prime?tag=1757177149700-21" target="_blank" rel="noopener noreferrer" className="w-full">
                              <Button className="w-full" variant="secondary">
                                 <Music className="mr-2 h-4 w-4" />
                                 Open in App
