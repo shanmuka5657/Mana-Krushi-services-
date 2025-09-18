@@ -36,21 +36,22 @@ function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href:
                         <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
                     </Card>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl h-[80vh] flex flex-col p-2 sm:p-4">
-                    <DialogHeader className="p-4 pb-0">
-                        <DialogTitle>YouTube</DialogTitle>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                           <Youtube className="text-red-600" /> YouTube
+                        </DialogTitle>
                         <DialogDescription>
-                            Browse YouTube within the app.
+                            YouTube does not allow being opened inside other apps. Click the button below to open it in the YouTube app or a new tab.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex-grow rounded-md overflow-hidden">
-                       <iframe
-                            className="w-full h-full"
-                            src={site.href}
-                            title="YouTube"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        ></iframe>
+                    <div className="py-4">
+                        <a href={site.href} target="_blank" rel="noopener noreferrer" className="w-full">
+                             <Button className="w-full">
+                                <AppWindow className="mr-2 h-4 w-4" />
+                                Open YouTube
+                            </Button>
+                        </a>
                     </div>
                 </DialogContent>
             </Dialog>
