@@ -25,6 +25,38 @@ const freeSites = [
 ];
 
 function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href: string, color: string } }) {
+    if (site.name === 'YouTube') {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 ${site.color} cursor-pointer`}>
+                        <div className="mb-4">
+                            {site.icon}
+                        </div>
+                        <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
+                    </Card>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl h-[80vh] flex flex-col p-2 sm:p-4">
+                    <DialogHeader className="p-4 pb-0">
+                        <DialogTitle>YouTube</DialogTitle>
+                        <DialogDescription>
+                            Browse YouTube within the app.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex-grow rounded-md overflow-hidden">
+                       <iframe
+                            className="w-full h-full"
+                            src={site.href}
+                            title="YouTube"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+    
     return (
         <a
             key={site.name}
