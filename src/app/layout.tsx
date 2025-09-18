@@ -8,7 +8,7 @@ import { onVideoPlayerStateChange, getVideoPlayerState, incrementVisitorCount, g
 import type { VideoPlayerState } from '@/lib/types';
 import YouTube from 'react-youtube';
 
-const getYouTubeVideoId = (url: string) => {
+const getYouTubeVideoId = (url: string): string | null => {
     if (!url) return null;
     let videoId = null;
     try {
@@ -58,7 +58,7 @@ const SynchronizedVideoPlayer = () => {
 
     React.useEffect(() => {
         const player = playerRef.current;
-        if (!player || !playerState || isAdmin) return;
+        if (!player || !playerState || isAdmin || typeof player.getPlayerState !== 'function') return;
 
         // Sync playing state
         const currentPlayerState = player.getPlayerState();
