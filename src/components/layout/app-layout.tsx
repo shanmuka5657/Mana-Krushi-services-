@@ -350,7 +350,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <footer className="h-32 flex-shrink-0 border-t bg-background">
               <iframe
                   className="w-full h-full border-none"
-                  src="https://www.youtube.com/embed?listType=search&list=lofi+hip+hop+radio"
+                  src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1&loop=1&playlist=jfKfPfyJRdk"
                   title="YouTube video player"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
