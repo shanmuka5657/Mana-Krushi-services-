@@ -73,18 +73,6 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
-const YouTubePlayer = React.memo(function YouTubePlayer({ videoId }: { videoId: string }) {
-  return (
-    <iframe
-        className="w-full h-full border-none"
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}`}
-        title="YouTube video player"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-    ></iframe>
-  )
-});
-
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -98,7 +86,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [youtubeVideoId, setYoutubeVideoId] = React.useState('jfKfPfyJRdk');
   
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -161,26 +148,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       }
     };
     loadData();
-    
-    // Load video from session storage
-    const storedVideoId = sessionStorage.getItem('youtubeVideoId');
-    if (storedVideoId) {
-        setYoutubeVideoId(storedVideoId);
-    }
-    
-    // Listen for changes
-    const handleVideoChange = () => {
-      const newVideoId = sessionStorage.getItem('youtubeVideoId');
-      if (newVideoId) {
-        setYoutubeVideoId(newVideoId);
-      }
-    };
-    window.addEventListener('youtubeVideoChange', handleVideoChange);
-
-    return () => {
-      window.removeEventListener('youtubeVideoChange', handleVideoChange);
-    };
-
   }, []);
 
   const adminNavItems = [
@@ -317,7 +284,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
 
       <SidebarInset>
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col flex-1 h-full">
           <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="md:hidden" />
@@ -377,12 +344,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenu>
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-8 overflow-y-auto" style={{ height: 'calc(100vh - 8rem)' }}>
+          <main className="flex-1 p-4 md:p-8 overflow-y-auto">
             {children}
           </main>
-          <footer className="h-32 flex-shrink-0 border-t bg-background">
-              <YouTubePlayer videoId={youtubeVideoId} />
-          </footer>
         </div>
       </SidebarInset>
     </SidebarProvider>
