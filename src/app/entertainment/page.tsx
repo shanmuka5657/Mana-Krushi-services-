@@ -68,29 +68,26 @@ function EntertainmentPageContent() {
     
     const handleSetVideo = () => {
         try {
+            if(!videoUrl) {
+                throw new Error("URL cannot be empty.");
+            }
             const url = new URL(videoUrl);
-            let videoId = '';
-            if (url.hostname === 'youtu.be') {
-                videoId = url.pathname.slice(1);
-            } else if (url.hostname.includes('youtube.com')) {
-                videoId = url.searchParams.get('v') || '';
+            // Basic validation for embed URLs
+            if (url.protocol !== "https:" || !url.pathname.includes('/embed/')) {
+                throw new Error("Please use a valid embed URL from a service like YouTube, Hotstar, etc.");
             }
 
-            if (videoId) {
-                sessionStorage.setItem('youtubeVideoId', videoId);
-                toast({
-                    title: 'Video Set!',
-                    description: 'The background video has been updated.',
-                });
-                // Optionally, dispatch a custom event to notify the layout
-                window.dispatchEvent(new CustomEvent('youtubeVideoChange'));
-            } else {
-                throw new Error("Could not find a video ID in the URL.");
-            }
-        } catch (error) {
+            sessionStorage.setItem('backgroundVideoUrl', videoUrl);
+            toast({
+                title: 'Video Set!',
+                description: 'The background video has been updated.',
+            });
+            window.dispatchEvent(new CustomEvent('backgroundVideoChange'));
+            
+        } catch (error: any) {
             toast({
                 title: 'Invalid URL',
-                description: 'Please enter a valid YouTube video URL.',
+                description: error.message || 'Please enter a valid video embed URL.',
                 variant: 'destructive',
             });
         }
@@ -104,18 +101,18 @@ function EntertainmentPageContent() {
                     <CardHeader>
                         <CardTitle>Set Background Video</CardTitle>
                         <CardDescription>
-                            Paste a YouTube video URL here to change the video playing at the bottom of the app.
+                            Paste any video embed URL here (e.g., from YouTube, Hotstar) to change the video playing at the bottom of the app.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex gap-2">
                              <Input 
-                                placeholder="https://www.youtube.com/watch?v=..."
+                                placeholder="https://www.youtube.com/embed/..."
                                 value={videoUrl}
                                 onChange={(e) => setVideoUrl(e.target.value)}
                              />
                              <Button onClick={handleSetVideo}>
-                                <Youtube className="h-4 w-4" />
+                                <PlayCircle className="h-4 w-4" />
                                 <span className="ml-2 hidden sm:inline">Set Video</span>
                              </Button>
                         </div>
