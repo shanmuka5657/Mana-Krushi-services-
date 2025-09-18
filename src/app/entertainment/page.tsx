@@ -5,15 +5,12 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Youtube, Facebook, Instagram, MessageSquare, UtensilsCrossed, Film, Clapperboard, Tv, Search, Loader2, PlayCircle, AppWindow, Music } from 'lucide-react';
+import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
-import Script from 'next/script';
-import Image from 'next/image';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
@@ -48,6 +45,7 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
+    const [videoUrl, setVideoUrl] = useState('');
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -67,11 +65,63 @@ function EntertainmentPageContent() {
             toast({ title: 'No free streams found', description: `We couldn't find any free (and legal) streams for "${searchQuery}".` });
         }
     }
+    
+    const handleSetVideo = () => {
+        try {
+            const url = new URL(videoUrl);
+            let videoId = '';
+            if (url.hostname === 'youtu.be') {
+                videoId = url.pathname.slice(1);
+            } else if (url.hostname.includes('youtube.com')) {
+                videoId = url.searchParams.get('v') || '';
+            }
+
+            if (videoId) {
+                sessionStorage.setItem('youtubeVideoId', videoId);
+                toast({
+                    title: 'Video Set!',
+                    description: 'The background video has been updated.',
+                });
+                // Optionally, dispatch a custom event to notify the layout
+                window.dispatchEvent(new CustomEvent('youtubeVideoChange'));
+            } else {
+                throw new Error("Could not find a video ID in the URL.");
+            }
+        } catch (error) {
+            toast({
+                title: 'Invalid URL',
+                description: 'Please enter a valid YouTube video URL.',
+                variant: 'destructive',
+            });
+        }
+    };
 
 
     return (
         <AppLayout>
             <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Set Background Video</CardTitle>
+                        <CardDescription>
+                            Paste a YouTube video URL here to change the video playing at the bottom of the app.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex gap-2">
+                             <Input 
+                                placeholder="https://www.youtube.com/watch?v=..."
+                                value={videoUrl}
+                                onChange={(e) => setVideoUrl(e.target.value)}
+                             />
+                             <Button onClick={handleSetVideo}>
+                                <Youtube className="h-4 w-4" />
+                                <span className="ml-2 hidden sm:inline">Set Video</span>
+                             </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
                  <Card>
                     <CardHeader>
                         <CardTitle>Find a Movie</CardTitle>

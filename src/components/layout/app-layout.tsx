@@ -86,6 +86,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [youtubeVideoId, setYoutubeVideoId] = React.useState('jfKfPfyJRdk');
   
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -148,6 +149,26 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       }
     };
     loadData();
+    
+    // Load video from session storage
+    const storedVideoId = sessionStorage.getItem('youtubeVideoId');
+    if (storedVideoId) {
+        setYoutubeVideoId(storedVideoId);
+    }
+    
+    // Listen for changes
+    const handleVideoChange = () => {
+      const newVideoId = sessionStorage.getItem('youtubeVideoId');
+      if (newVideoId) {
+        setYoutubeVideoId(newVideoId);
+      }
+    };
+    window.addEventListener('youtubeVideoChange', handleVideoChange);
+
+    return () => {
+      window.removeEventListener('youtubeVideoChange', handleVideoChange);
+    };
+
   }, []);
 
   const adminNavItems = [
@@ -349,8 +370,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </main>
           <footer className="h-32 flex-shrink-0 border-t bg-background">
               <iframe
+                  key={youtubeVideoId}
                   className="w-full h-full border-none"
-                  src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=0&loop=1&playlist=jfKfPfyJRdk"
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&loop=1&playlist=${youtubeVideoId}`}
                   title="YouTube video player"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
