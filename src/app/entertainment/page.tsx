@@ -36,7 +36,7 @@ function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href:
                         <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
                     </Card>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-2">
+                <DialogContent className="w-[95vw] max-w-4xl h-[80vh] flex flex-col p-2">
                     <DialogHeader className="p-4 pb-0">
                         <DialogTitle>YouTube Movies</DialogTitle>
                         <DialogDescription>Watch free movies directly from YouTube.</DialogDescription>
@@ -46,7 +46,7 @@ function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href:
                             src={site.href}
                             title="YouTube"
                             className="w-full h-full border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
                         ></iframe>
                     </div>
