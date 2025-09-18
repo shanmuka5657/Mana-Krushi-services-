@@ -23,7 +23,7 @@ import {
   Film,
   ShoppingCart,
   MonitorPlay,
-  Link,
+  Link as LinkIcon,
   MapPin,
   Gamepad2,
   Timer,
@@ -159,6 +159,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
+    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
+    { href: `/watch`, icon: LinkIcon, label: "Watch" },
+    { href: `/loans`, icon: IndianRupee, label: "Loans" },
+    { href: `/insurance`, icon: Shield, label: "Insurance" },
+    { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -171,6 +176,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
+    { href: `/ads?role=owner`, icon: MonitorPlay, label: "Ads" },
+    { href: `/watch?role=owner`, icon: LinkIcon, label: "Watch" },
+    { href: `/loans?role=owner`, icon: IndianRupee, label: "Loans" },
+    { href: `/insurance?role=owner`, icon: Shield, label: "Insurance" },
+    { href: `/ecommerce?role=owner`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
   ];
@@ -182,6 +192,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
+    { href: `/ads?role=passenger`, icon: MonitorPlay, label: "Ads" },
+    { href: `/watch?role=passenger`, icon: LinkIcon, label: "Watch" },
+    { href: `/loans?role=passenger`, icon: IndianRupee, label: "Loans" },
+    { href: `/insurance?role=passenger`, icon: Shield, label: "Insurance" },
+    { href: `/ecommerce?role=passenger`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
   ];
@@ -299,7 +314,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="relative w-full max-w-xs sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder={pathname === '/ecommerce' ? "Search for partners..." : "Search by driver, vehicle..."}
+                  placeholder="Search by driver..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

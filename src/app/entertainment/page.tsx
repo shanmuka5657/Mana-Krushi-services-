@@ -47,7 +47,7 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
-    const [videoUrl, setVideoUrl] = useState('');
+    const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/live/v2AeTuwPn');
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
