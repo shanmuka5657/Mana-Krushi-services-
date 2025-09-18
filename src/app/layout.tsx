@@ -97,17 +97,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
+         <script async src="https://groleegni.net/p/9892027/400" type="text/javascript"></script>
+        <script async src="https://groleegni.net/p/9892027/401" type="text/javascript"></script>
+        <script>{`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}</script>
       </head>
       <body>
-         <Script id="ad-script-1" strategy="afterInteractive">
-          {`(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('groleegni.net',9892027,document.createElement('script'))`}
-        </Script>
-        <Script id="ad-script-2" strategy="afterInteractive">
-          {`(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('groleegni.net',9892028,document.createElement('script'))`}
-        </Script>
-        <Script id="ad-script-3" strategy="afterInteractive">
-            {`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
-        </Script>
         <div className="flex flex-col h-screen">
             {children}
             <footer className="h-32 flex-shrink-0 border-t bg-background">

@@ -3,13 +3,40 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Suspense } from 'react';
-import { MonitorPlay } from 'lucide-react';
+import { Suspense, useEffect, useState } from 'react';
+import { MonitorPlay, ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 import placeholderImages from '@/lib/placeholder-images.json';
+import { getCurrentUserRole } from '@/lib/storage';
 
 function AdsPageContent() {
     const { adBanner1 } = placeholderImages;
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const role = getCurrentUserRole();
+        setIsAdmin(role === 'admin');
+    }, []);
+
+    if (isAdmin) {
+        return (
+            <AppLayout>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <ShieldAlert /> Ads Disabled for Admin
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">
+                            Advertisements are hidden for administrators to provide a clean user experience.
+                        </p>
+                    </CardContent>
+                </Card>
+            </AppLayout>
+        );
+    }
+
 
     return (
         <AppLayout>
