@@ -16,7 +16,7 @@ import Image from 'next/image';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const freeSites = [
-    { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com/embed/videoseries?list=PLHPTxTxtC0ibkGbuW0-u7P5qrE_tE-i-G', color: 'bg-red-50' },
+    { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
     { name: 'MX Player', icon: <PlayCircle className="h-10 w-10 text-blue-500" />, href: 'https://www.mxplayer.in/', color: 'bg-blue-50' },
     { name: 'Plex', icon: <Tv className="h-10 w-10 text-green-500" />, href: 'https://www.plex.tv/watch-free', color: 'bg-green-50' },
     { name: 'Hotstar', icon: <Tv className="h-10 w-10 text-blue-800" />, href: 'https://www.hotstar.com/in/explore', color: 'bg-blue-50' },
@@ -25,36 +25,6 @@ const freeSites = [
 ];
 
 function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href: string, color: string } }) {
-    if (site.name === 'YouTube') {
-        return (
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer ${site.color}`}>
-                        <div className="mb-4">
-                            {site.icon}
-                        </div>
-                        <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
-                    </Card>
-                </DialogTrigger>
-                <DialogContent className="w-[95vw] max-w-4xl h-[80vh] flex flex-col p-2">
-                    <DialogHeader className="p-4 pb-0">
-                        <DialogTitle>YouTube Movies</DialogTitle>
-                        <DialogDescription>Watch free movies directly from YouTube.</DialogDescription>
-                    </DialogHeader>
-                    <div className="flex-grow rounded-md overflow-hidden">
-                        <iframe
-                            src={site.href}
-                            title="YouTube video player"
-                            className="w-full h-full border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                        ></iframe>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        );
-    }
-
     return (
         <a
             key={site.name}
