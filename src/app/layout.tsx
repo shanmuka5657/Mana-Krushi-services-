@@ -4,93 +4,114 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import * as React from 'react';
-import { onGlobalVideoUrlChange, getGlobalVideoUrl, incrementVisitorCount } from '@/lib/storage';
-import Script from 'next/script';
+import { onVideoPlayerStateChange, getVideoPlayerState, incrementVisitorCount, getCurrentUserRole } from '@/lib/storage';
+import type { VideoPlayerState } from '@/lib/types';
+import YouTube from 'react-youtube';
 
-
-const VideoPlayer = React.memo(function VideoPlayer({ embedUrl }: { embedUrl: string }) {
-  if (!embedUrl) return null;
-
-  const getYouTubeVideoId = (url: string) => {
+const getYouTubeVideoId = (url: string) => {
+    if (!url) return null;
     let videoId = null;
     try {
-      const urlObj = new URL(url);
-      const hostname = urlObj.hostname;
-      if (hostname.includes('youtube.com')) {
-        if (urlObj.pathname.includes('/embed/')) {
-          videoId = urlObj.pathname.split('/embed/')[1];
-        } else if (urlObj.pathname.includes('/watch')) {
-          videoId = urlObj.searchParams.get('v');
-        } else if (urlObj.pathname.includes('/live/')) {
-          videoId = urlObj.pathname.split('/live/')[1];
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname;
+        if (hostname.includes('youtube.com')) {
+            if (urlObj.pathname.includes('/embed/')) {
+                videoId = urlObj.pathname.split('/embed/')[1];
+            } else if (urlObj.pathname.includes('/watch')) {
+                videoId = urlObj.searchParams.get('v');
+            } else if (urlObj.pathname.includes('/live/')) {
+                videoId = urlObj.pathname.split('/live/')[1];
+            }
+        } else if (hostname.includes('youtu.be')) {
+            videoId = urlObj.pathname.substring(1);
         }
-      } else if (hostname.includes('youtu.be')) {
-        videoId = urlObj.pathname.substring(1);
-      }
     } catch (e) {
-      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
-      const match = url.match(regex);
-      if (match) {
-        videoId = match[1];
-      }
+        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+        const match = url.match(regex);
+        if (match) videoId = match[1];
     }
-    
-    if (videoId) {
-      return videoId.split('?')[0].split('&')[0];
-    }
-    return null;
-  };
+    return videoId ? videoId.split('?')[0].split('&')[0] : null;
+};
 
-  const videoId = getYouTubeVideoId(embedUrl);
 
-  if (!videoId) {
-    console.error("Could not extract YouTube video ID from URL:", embedUrl);
-    return null;
-  }
-
-  const playerUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`;
-
-  return (
-    <iframe
-      className="w-full h-full border-none"
-      src={playerUrl}
-      title="Background video player"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen
-    ></iframe>
-  );
-});
-
-const ClientOnlyVideoPlayer = () => {
-    const [videoUrl, setVideoUrl] = React.useState('');
+const SynchronizedVideoPlayer = () => {
+    const [playerState, setPlayerState] = React.useState<VideoPlayerState | null>(null);
     const [isClient, setIsClient] = React.useState(false);
-    
+    const playerRef = React.useRef<any>(null);
+    const role = getCurrentUserRole();
+    const isAdmin = role === 'admin';
+
     React.useEffect(() => {
         setIsClient(true);
-        
-        const setInitialUrl = async () => {
-            const url = await getGlobalVideoUrl();
-            if (url) {
-                setVideoUrl(url);
-            }
-        }
-        setInitialUrl();
+        const fetchInitialState = async () => {
+            const initialState = await getVideoPlayerState();
+            setPlayerState(initialState);
+        };
+        fetchInitialState();
 
-        const unsubscribe = onGlobalVideoUrlChange((newUrl: string) => {
-            if (newUrl && newUrl !== videoUrl) {
-                setVideoUrl(newUrl);
-            }
+        const unsubscribe = onVideoPlayerStateChange((newState) => {
+            setPlayerState(newState);
         });
 
         return () => unsubscribe();
     }, []);
 
-    if (!isClient) {
-        return null; // Don't render on the server
+    React.useEffect(() => {
+        if (!playerRef.current || !playerState || isAdmin) return;
+
+        const player = playerRef.current.getInternalPlayer();
+        if (!player) return;
+
+        // Sync playing state
+        const currentPlayerState = player.getPlayerState();
+        if (playerState.isPlaying && currentPlayerState !== 1) {
+            player.playVideo();
+        } else if (!playerState.isPlaying && currentPlayerState === 1) {
+            player.pauseVideo();
+        }
+
+        // Sync timestamp
+        const timeDifference = Math.abs(player.getCurrentTime() - playerState.timestamp);
+        if (timeDifference > 2) { // Only seek if difference is more than 2 seconds
+            player.seekTo(playerState.timestamp, true);
+        }
+
+    }, [playerState, isAdmin]);
+
+    if (!isClient || !playerState?.videoId) {
+        return null;
     }
 
-    return <VideoPlayer embedUrl={videoUrl || 'https://www.youtube.com/watch?v=jfKfPfyJRdk'} />;
-}
+    const videoId = getYouTubeVideoId(playerState.videoId);
+    if (!videoId) return null;
+
+    const opts = {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+            autoplay: 1,
+            controls: 0,
+            showinfo: 0,
+            rel: 0,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            loop: 1,
+            playlist: videoId, // Required for loop to work
+            mute: 1, // Must be muted to autoplay
+        },
+    };
+
+    return (
+        <div className="w-full h-full pointer-events-none">
+            <YouTube
+                videoId={videoId}
+                opts={opts}
+                onReady={(event) => { playerRef.current = event.target; }}
+                className="w-full h-full"
+            />
+        </div>
+    );
+};
 
 
 export default function RootLayout({
@@ -119,7 +140,7 @@ export default function RootLayout({
         <div className="flex flex-col h-screen">
             {children}
             <footer className="h-32 flex-shrink-0 border-t bg-background">
-                <ClientOnlyVideoPlayer />
+                <SynchronizedVideoPlayer />
             </footer>
         </div>
         <Toaster />

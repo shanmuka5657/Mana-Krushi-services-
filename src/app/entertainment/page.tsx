@@ -1,18 +1,19 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube } from 'lucide-react';
+import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube, PauseCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import type { MovieSite } from '@/lib/types';
-import { getCurrentUserRole, saveGlobalVideoUrl } from '@/lib/storage';
-
+import type { MovieSite, VideoPlayerState } from '@/lib/types';
+import { getCurrentUserRole, saveVideoPlayerState, getVideoPlayerState } from '@/lib/storage';
+import YouTube from 'react-youtube';
+import type { YouTubePlayer } from 'react-youtube';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
@@ -42,19 +43,111 @@ function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href:
     );
 }
 
+const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    let videoId = null;
+    try {
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname;
+        if (hostname.includes('youtube.com')) {
+            if (urlObj.pathname.includes('/embed/')) {
+                videoId = urlObj.pathname.split('/embed/')[1];
+            } else if (urlObj.pathname.includes('/watch')) {
+                videoId = urlObj.searchParams.get('v');
+            } else if (urlObj.pathname.includes('/live/')) {
+                videoId = urlObj.pathname.split('/live/')[1];
+            }
+        } else if (hostname.includes('youtu.be')) {
+            videoId = urlObj.pathname.substring(1);
+        }
+    } catch (e) {
+        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+        const match = url.match(regex);
+        if (match) videoId = match[1];
+    }
+    return videoId ? videoId.split('?')[0].split('&')[0] : null;
+};
+
 function EntertainmentPageContent() {
     const { toast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
-    const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=jfKfPfyJRdk');
+    
+    const [videoUrl, setVideoUrl] = useState('');
+    const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const playerRef = useRef<YouTubePlayer | null>(null);
+    const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const role = getCurrentUserRole();
-        setIsAdmin(role === 'admin');
+        const isAdminUser = role === 'admin';
+        setIsAdmin(isAdminUser);
+
+        if (isAdminUser) {
+            const fetchInitialState = async () => {
+                const state = await getVideoPlayerState();
+                if (state?.videoId) {
+                    setVideoUrl(state.videoId);
+                    setCurrentVideoId(getYouTubeVideoId(state.videoId));
+                }
+            };
+            fetchInitialState();
+        }
+
+        return () => {
+            if (syncIntervalRef.current) {
+                clearInterval(syncIntervalRef.current);
+            }
+        }
     }, []);
 
+    const handleSetVideo = async () => {
+        try {
+            const videoId = getYouTubeVideoId(videoUrl);
+            if (!videoId) {
+                throw new Error("Please use a valid YouTube URL.");
+            }
+            setCurrentVideoId(videoId);
+            await saveVideoPlayerState({ videoId: videoUrl, isPlaying: true, timestamp: 0 });
+            toast({
+                title: 'Video Set!',
+                description: 'The background video has been updated for all users.',
+            });
+        } catch (error: any) {
+            toast({
+                title: 'Invalid URL',
+                description: error.message || 'Please enter a valid YouTube URL.',
+                variant: 'destructive',
+            });
+        }
+    };
+    
+    const onPlayerReady = (event: { target: YouTubePlayer }) => {
+        playerRef.current = event.target;
+    };
+    
+    const onPlayerStateChange = (event: { data: number }) => {
+        if (!playerRef.current) return;
+        const isPlaying = event.data === 1;
+        const timestamp = playerRef.current.getCurrentTime();
+        saveVideoPlayerState({ isPlaying, timestamp });
+
+        if (isPlaying) {
+            if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
+            syncIntervalRef.current = setInterval(() => {
+                if(playerRef.current?.getPlayerState() === 1) { // only update if playing
+                    saveVideoPlayerState({ timestamp: playerRef.current.getCurrentTime() });
+                }
+            }, 5000); // Sync time every 5 seconds
+        } else {
+            if (syncIntervalRef.current) {
+                clearInterval(syncIntervalRef.current);
+            }
+        }
+    };
+    
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
             toast({ title: 'Please enter a movie name.', variant: 'destructive' });
@@ -73,38 +166,6 @@ function EntertainmentPageContent() {
             toast({ title: 'No free streams found', description: `We couldn't find any free (and legal) streams for "${searchQuery}".` });
         }
     }
-    
-     const isValidYouTubeUrl = (url: string) => {
-        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
-        return youtubeRegex.test(url);
-    };
-
-    const handleSetVideo = async () => {
-        try {
-            if(!videoUrl) {
-                throw new Error("URL cannot be empty.");
-            }
-           
-            if (!isValidYouTubeUrl(videoUrl)) {
-                 throw new Error("Please use a valid YouTube URL.");
-            }
-
-            await saveGlobalVideoUrl(videoUrl);
-            
-            toast({
-                title: 'Video Set!',
-                description: 'The background video has been updated for all users.',
-            });
-            
-        } catch (error: any) {
-            toast({
-                title: 'Invalid URL',
-                description: error.message || 'Please enter a valid YouTube URL.',
-                variant: 'destructive',
-            });
-        }
-    };
-
 
     return (
         <AppLayout>
@@ -112,15 +173,15 @@ function EntertainmentPageContent() {
                 {isAdmin && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Set Synchronized Background Video</CardTitle>
+                            <CardTitle>Master Video Control</CardTitle>
                             <CardDescription>
-                                To synchronize video for all users, use a YouTube <strong>Live Stream</strong> URL. This ensures everyone watches the same moment at the same time.
+                                Set a YouTube video and control its playback for all users in real-time. Use the player below to play, pause, and seek.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 mb-4">
                                 <Input 
-                                    placeholder="https://www.youtube.com/live/..."
+                                    placeholder="Enter any YouTube video URL"
                                     value={videoUrl}
                                     onChange={(e) => setVideoUrl(e.target.value)}
                                 />
@@ -129,6 +190,16 @@ function EntertainmentPageContent() {
                                     <span className="ml-2 hidden sm:inline">Set Video</span>
                                 </Button>
                             </div>
+                            {currentVideoId && (
+                                <div className="aspect-video">
+                                     <YouTube
+                                        videoId={currentVideoId}
+                                        opts={{ width: '100%', height: '100%', playerVars: { autoplay: 1 } }}
+                                        onReady={onPlayerReady}
+                                        onStateChange={onPlayerStateChange}
+                                    />
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}

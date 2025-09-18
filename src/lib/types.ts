@@ -73,6 +73,13 @@ export type MovieSite = {
     link: string;
 }
 
+export type VideoPlayerState = {
+  videoId: string;
+  isPlaying: boolean;
+  timestamp: number;
+  lastUpdated: Date;
+}
+
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({

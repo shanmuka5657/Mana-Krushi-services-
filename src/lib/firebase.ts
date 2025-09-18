@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc } from "firebase/firestore";
-import type { Booking, Route, Profile } from "./types";
+import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import type { Booking, Route, Profile, VideoPlayerState } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
 
@@ -72,6 +72,43 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
     });
     return unsubscribe;
 };
+
+// --- Real-time Video Player State ---
+export const saveVideoPlayerState = async (state: Partial<VideoPlayerState>) => {
+    if (!settingsCollection || !db) return;
+    const docRef = doc(db, "settings", "videoPlayerState");
+    await setDoc(docRef, { ...state, lastUpdated: serverTimestamp() }, { merge: true });
+};
+
+export const onVideoPlayerStateChange = (callback: (state: VideoPlayerState) => void) => {
+    if (!settingsCollection || !db) return () => {};
+    const docRef = doc(db, "settings", "videoPlayerState");
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            const data = doc.data();
+            // Convert Firestore timestamp to JS Date
+            if (data.lastUpdated) {
+                data.lastUpdated = data.lastUpdated.toDate();
+            }
+            callback(data as VideoPlayerState);
+        }
+    });
+    return unsubscribe;
+};
+
+export const getVideoPlayerState = async (): Promise<VideoPlayerState | null> => {
+    if (!settingsCollection || !db) return null;
+    const docRef = doc(db, "settings", "videoPlayerState");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.lastUpdated) {
+            data.lastUpdated = data.lastUpdated.toDate();
+        }
+        return data as VideoPlayerState;
+    }
+    return null;
+}
 
 
 // --- Bookings ---

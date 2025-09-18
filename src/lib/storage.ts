@@ -1,8 +1,8 @@
 
 
-import type { Booking, Route, Profile } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, saveVideoPlayerState, getVideoPlayerState, onVideoPlayerStateChange } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 
@@ -36,6 +36,9 @@ export const incrementVisitorCount = async () => {
     const currentCount = await getVisitorCount();
     await saveSetting('visitorCount', currentCount + 1);
 };
+
+// --- Real-time Video Player ---
+export { saveVideoPlayerState, getVideoPlayerState, onVideoPlayerStateChange };
 
 
 // --- Bookings ---
