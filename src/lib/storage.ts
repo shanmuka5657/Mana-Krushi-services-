@@ -2,12 +2,28 @@
 
 import type { Booking, Route, Profile } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 
 
 const isBrowser = typeof window !== "undefined";
+
+// --- Settings ---
+export const saveGlobalVideoUrl = async (url: string) => {
+    if (!isBrowser) return;
+    await saveSetting('backgroundVideoUrl', url);
+}
+
+export const getGlobalVideoUrl = async (): Promise<string | null> => {
+    if (!isBrowser) return null;
+    return await getSetting('backgroundVideoUrl');
+}
+
+export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
+    if (!isBrowser) return () => {};
+    return onSettingChange('backgroundVideoUrl', callback);
+}
 
 // --- Bookings ---
 export const getBookings = async (isAdmin = false): Promise<Booking[]> => {
@@ -109,4 +125,4 @@ export const clearCurrentUser = () => {
     window.sessionStorage.removeItem('currentUserEmail');
     window.sessionStorage.removeItem('currentUserName');
     window.sessionStorage.removeItem('currentUserRole');
-}
+};

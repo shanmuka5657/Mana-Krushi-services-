@@ -1,6 +1,6 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc } from "firebase/firestore";
 import type { Booking, Route, Profile } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
@@ -37,6 +37,42 @@ try {
 const bookingsCollection = db ? collection(db, "bookings") : null;
 const routesCollection = db ? collection(db, "routes") : null;
 const profilesCollection = db ? collection(db, "profiles") : null;
+const settingsCollection = db ? collection(db, "settings") : null;
+
+
+// --- Settings ---
+export const saveSetting = async (key: string, value: any) => {
+    if (!settingsCollection || !db) return;
+    const docRef = doc(db, "settings", key);
+    await setDoc(docRef, { value });
+};
+
+export const getSetting = async (key: string): Promise<any | null> => {
+    if (!settingsCollection || !db) return null;
+    try {
+        const docRef = doc(db, "settings", key);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data().value;
+        }
+        return null;
+    } catch(e) {
+        console.error("Error getting setting", e);
+        return null;
+    }
+}
+
+export const onSettingChange = (key: string, callback: (value: any) => void) => {
+    if (!settingsCollection || !db) return () => {};
+    const docRef = doc(db, "settings", key);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            callback(doc.data().value);
+        }
+    });
+    return unsubscribe;
+};
+
 
 // --- Bookings ---
 export const getBookingsFromFirestore = async (): Promise<Booking[]> => {
@@ -161,6 +197,8 @@ export const saveProfileToFirestore = async (profile: Profile) => {
     if (!profilesCollection || !db) return;
     const docRef = doc(db, "profiles", profile.email);
     // Remove undefined values before saving to Firestore
-    const profileToSave = Object.fromEntries(Object.entries(profile).filter(([_, v]) => v !== undefined));
+    const profileToSave = Object.fromEntries(
+        Object.entries(profile).filter(([, value]) => value !== undefined)
+    );
     await setDoc(docRef, profileToSave, { merge: true });
-}
+};
