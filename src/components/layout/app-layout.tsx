@@ -344,13 +344,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenu>
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-8 overflow-y-auto" style={{ height: 'calc(100vh - 16rem)' /* 16rem is header + footer height */ }}>
+          <main className="flex-1 p-4 md:p-8 overflow-y-auto" style={{ height: 'calc(100vh - 8rem)' }}>
             {children}
           </main>
-          <footer className="h-64 flex-shrink-0 border-t bg-background">
+          <footer className="h-32 flex-shrink-0 border-t bg-background">
               <iframe
                   className="w-full h-full border-none"
-                  src="https://www.youtube.com/embed/jfKfPfyJRdk"
+                  src="https://www.youtube.com/embed?listType=search&list=lofi+hip+hop+radio"
                   title="YouTube video player"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
