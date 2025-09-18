@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, User, Calendar, Shield } from "lucide-react";
-import { getRoutes, getBookings, getAllProfiles } from "@/lib/storage";
+import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye } from "lucide-react";
+import { getRoutes, getBookings, getAllProfiles, getVisitorCount } from "@/lib/storage";
 import type { Booking, Route as RouteType, Profile } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,7 @@ function AdminDashboardPage() {
     totalRoutes: 0,
     totalBookings: 0,
     totalRevenue: 0,
+    totalVisitors: 0,
   });
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
   const [newUsers, setNewUsers] = useState<Profile[]>([]);
@@ -77,10 +78,11 @@ function AdminDashboardPage() {
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      const [profiles, routes, bookings] = await Promise.all([
+      const [profiles, routes, bookings, visitors] = await Promise.all([
         getAllProfiles(),
         getRoutes(true),
         getBookings(true),
+        getVisitorCount(),
       ]);
       setAllProfiles(profiles);
 
@@ -105,6 +107,7 @@ function AdminDashboardPage() {
         totalRoutes: routes.length,
         totalBookings: bookings.length,
         totalRevenue: totalRevenue,
+        totalVisitors: visitors,
       });
 
       setIsLoaded(true);
@@ -123,7 +126,8 @@ function AdminDashboardPage() {
   return (
     <AppLayout>
         <div className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} href="#" />
                 <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />

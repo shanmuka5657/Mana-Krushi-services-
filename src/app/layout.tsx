@@ -4,7 +4,8 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import * as React from 'react';
-import { onGlobalVideoUrlChange, getGlobalVideoUrl } from '@/lib/storage';
+import { onGlobalVideoUrlChange, getGlobalVideoUrl, incrementVisitorCount } from '@/lib/storage';
+import Script from 'next/script';
 
 
 const VideoPlayer = React.memo(function VideoPlayer({ embedUrl }: { embedUrl: string }) {
@@ -97,18 +98,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  React.useEffect(() => {
+    const trackVisitor = async () => {
+        // Use sessionStorage to only count the visitor once per session
+        if (!sessionStorage.getItem('visitor_tracked')) {
+            await incrementVisitorCount();
+            sessionStorage.setItem('visitor_tracked', 'true');
+        }
+    };
+    trackVisitor();
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
-        <script async src="https://groleegni.net/p/9892027/400" type="text/javascript"></script>
-        <script async src="https://groleegni.net/p/9892027/401" type="text/javascript"></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
-        }} />
-         <script dangerouslySetInnerHTML={{
-          __html: `(s=>{s.dataset.zone='9896290',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
-        }} />
       </head>
       <body>
         <div className="flex flex-col h-screen">

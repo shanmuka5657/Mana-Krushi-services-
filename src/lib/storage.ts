@@ -23,7 +23,20 @@ export const getGlobalVideoUrl = async (): Promise<string | null> => {
 export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
     if (!isBrowser) return () => {};
     return onSettingChange('backgroundVideoUrl', callback);
-}
+};
+
+export const getVisitorCount = async (): Promise<number> => {
+    if (!isBrowser) return 0;
+    const count = await getSetting('visitorCount');
+    return typeof count === 'number' ? count : 0;
+};
+
+export const incrementVisitorCount = async () => {
+    if (!isBrowser) return;
+    const currentCount = await getVisitorCount();
+    await saveSetting('visitorCount', currentCount + 1);
+};
+
 
 // --- Bookings ---
 export const getBookings = async (isAdmin = false): Promise<Booking[]> => {

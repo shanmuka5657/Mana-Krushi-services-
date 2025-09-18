@@ -30,6 +30,7 @@ import {
   AlertCircle,
   PanelLeft,
   Wallet,
+  Eye,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
