@@ -57,6 +57,36 @@ function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href:
             </Dialog>
         );
     }
+
+    if (site.name === 'Plex') {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 ${site.color} cursor-pointer`}>
+                        <div className="mb-4">
+                            {site.icon}
+                        </div>
+                        <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
+                    </Card>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
+                    <DialogHeader className="p-4 border-b">
+                        <DialogTitle className="flex items-center gap-2">
+                           <Tv className="text-green-500" /> {site.name}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1">
+                       <iframe 
+                            src={site.href} 
+                            className="w-full h-full border-0"
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
     
     return (
         <a
