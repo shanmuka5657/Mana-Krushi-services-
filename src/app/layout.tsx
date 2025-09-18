@@ -14,25 +14,25 @@ const VideoPlayer = React.memo(function VideoPlayer({ embedUrl }: { embedUrl: st
   const getYouTubeVideoId = (url: string) => {
     let videoId = null;
     try {
-        const urlObj = new URL(url);
-        const hostname = urlObj.hostname;
-        if (hostname.includes('youtube.com')) {
-            if (urlObj.pathname.includes('/embed/')) {
-                videoId = urlObj.pathname.split('/embed/')[1];
-            } else if (urlObj.pathname.includes('/watch')) {
-                videoId = urlObj.searchParams.get('v');
-            } else if (urlObj.pathname.includes('/live/')) {
-                videoId = urlObj.pathname.split('/live/')[1];
-            }
-        } else if (hostname.includes('youtu.be')) {
-            videoId = urlObj.pathname.substring(1);
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname;
+      if (hostname.includes('youtube.com')) {
+        if (urlObj.pathname.includes('/embed/')) {
+          videoId = urlObj.pathname.split('/embed/')[1];
+        } else if (urlObj.pathname.includes('/watch')) {
+          videoId = urlObj.searchParams.get('v');
+        } else if (urlObj.pathname.includes('/live/')) {
+          videoId = urlObj.pathname.split('/live/')[1];
         }
-    } catch(e) {
-        const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
-        const match = url.match(regex);
-        if (match) {
-            videoId = match[1];
-        }
+      } else if (hostname.includes('youtu.be')) {
+        videoId = urlObj.pathname.substring(1);
+      }
+    } catch (e) {
+      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+      const match = url.match(regex);
+      if (match) {
+        videoId = match[1];
+      }
     }
     
     if (videoId) {
@@ -48,7 +48,7 @@ const VideoPlayer = React.memo(function VideoPlayer({ embedUrl }: { embedUrl: st
     return null;
   }
 
-  const playerUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`;
+  const playerUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`;
 
   return (
     <iframe

@@ -47,7 +47,7 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
-    const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/live/v2AeTuwPn');
+    const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=jfKfPfyJRdk');
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
@@ -112,15 +112,15 @@ function EntertainmentPageContent() {
                 {isAdmin && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Set Background Video</CardTitle>
+                            <CardTitle>Set Synchronized Background Video</CardTitle>
                             <CardDescription>
-                                Paste a YouTube video URL here to change the video playing at the bottom of the app for all users.
+                                To synchronize video for all users, use a YouTube <strong>Live Stream</strong> URL. This ensures everyone watches the same moment at the same time.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="flex gap-2">
                                 <Input 
-                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    placeholder="https://www.youtube.com/live/..."
                                     value={videoUrl}
                                     onChange={(e) => setVideoUrl(e.target.value)}
                                 />
