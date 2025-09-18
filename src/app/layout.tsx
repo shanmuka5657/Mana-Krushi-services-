@@ -97,9 +97,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
-         <script async src="https://groleegni.net/p/9892027/400" type="text/javascript"></script>
-        <script async src="https://groleegni.net/p/9892027/401" type="text/javascript"></script>
-        <script>{`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}</script>
+        <Script async src="https://groleegni.net/p/9892027/400" type="text/javascript"></Script>
+        <Script async src="https://groleegni.net/p/9892027/401" type="text/javascript"></Script>
+        <Script id="vignette-script">
+          {`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+        </Script>
       </head>
       <body>
         <div className="flex flex-col h-screen">
