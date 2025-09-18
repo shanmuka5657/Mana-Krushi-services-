@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -283,66 +284,79 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
 
       <SidebarInset>
-        <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger className="md:hidden" />
-            <div className="hidden items-center gap-2 md:flex">
-              <ToggleSidebarButton />
-              <h2 className="text-2xl font-semibold">
-                {role === 'admin' ? 'Admin Panel' : (role === 'owner' ? 'Owner Dashboard' : 'Passenger Dashboard')}
-              </h2>
+        <div className="flex flex-col h-screen">
+          <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden" />
+              <div className="hidden items-center gap-2 md:flex">
+                <ToggleSidebarButton />
+                <h2 className="text-2xl font-semibold">
+                  {role === 'admin' ? 'Admin Panel' : (role === 'owner' ? 'Owner Dashboard' : 'Passenger Dashboard')}
+                </h2>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-1 items-center justify-end gap-4">
-            <div className="relative w-full max-w-xs sm:max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={pathname === '/ecommerce' ? "Search for partners..." : "Search by driver, vehicle..."}
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-              />
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-3 cursor-pointer">
-                  <Avatar className="h-10 w-10 border">
-                    <AvatarImage
-                      src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
-                      alt={userName}
-                    />
-                    <AvatarFallback>{userInitial}</AvatarFallback>
-                  </Avatar>
-                  <div className="hidden text-sm md:block">
-                    <div className="font-semibold">{userName}</div>
-                    <div className="text-muted-foreground">{userRole}</div>
+            <div className="flex flex-1 items-center justify-end gap-4">
+              <div className="relative w-full max-w-xs sm:max-w-sm">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder={pathname === '/ecommerce' ? "Search for partners..." : "Search by driver, vehicle..."}
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center gap-3 cursor-pointer">
+                    <Avatar className="h-10 w-10 border">
+                      <AvatarImage
+                        src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
+                        alt={userName}
+                      />
+                      <AvatarFallback>{userInitial}</AvatarFallback>
+                    </Avatar>
+                    <div className="hidden text-sm md:block">
+                      <div className="font-semibold">{userName}</div>
+                      <div className="text-muted-foreground">{userRole}</div>
+                    </div>
                   </div>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                 {role !== 'admin' && (
-                  <DropdownMenuItem onClick={() => router.push(`/profile?role=${role}`)}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {role !== 'admin' && (
+                    <DropdownMenuItem onClick={() => router.push(`/profile?role=${role}`)}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
                   </DropdownMenuItem>
-                 )}
-                <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+          <main className="flex-1 p-4 md:p-8 overflow-y-auto" style={{ height: 'calc(100vh - 16rem)' /* 16rem is header + footer height */ }}>
+            {children}
+          </main>
+          <footer className="h-64 flex-shrink-0 border-t bg-background">
+              <iframe
+                  className="w-full h-full border-none"
+                  src="https://www.youtube.com/embed/jfKfPfyJRdk"
+                  title="YouTube video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+              ></iframe>
+          </footer>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
