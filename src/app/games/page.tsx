@@ -285,11 +285,10 @@ ${latestBooking.client}
                                             <Clock className="h-4 w-4" />
                                             <span>{format(new Date(latestBooking.departureDate), 'p')}</span>
                                         </div>
-                                         <div className="flex items-center gap-2">
+                                         <div className="flex items-center gap-2 col-span-2">
                                             <User className="h-4 w-4" />
                                             <span>{latestBooking.driverName}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-400">•</span>
                                             <Phone className="h-4 w-4" />
                                             <span>{latestBooking.driverMobile}</span>
                                         </div>
