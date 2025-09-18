@@ -48,49 +48,50 @@ const SynchronizedVideoPlayer = () => {
             setPlayerState(initialState);
         };
         fetchInitialState();
-
-        const unsubscribe = onVideoPlayerStateChange((newState) => {
-            setPlayerState(newState);
-        });
-
-        return () => unsubscribe();
     }, []);
 
-    React.useEffect(() => {
-        const player = playerRef.current;
-        if (!player || !playerState || isAdmin || typeof player.getPlayerState !== 'function') return;
+    const onPlayerReady = (event: { target: any }) => {
+        playerRef.current = event.target;
+        // Now that the player is ready, set up the real-time listener.
+        const unsubscribe = onVideoPlayerStateChange((newState) => {
+            setPlayerState(newState); // Update state to trigger re-render if needed
+            const player = playerRef.current;
+            if (!player || !newState || isAdmin || typeof player.getPlayerState !== 'function') return;
 
-        // Sync playing state
-        const currentPlayerState = player.getPlayerState();
-        if (playerState.isPlaying && currentPlayerState !== 1) {
-            player.playVideo();
-        } else if (!playerState.isPlaying && currentPlayerState === 1) {
-            player.pauseVideo();
-        }
-
-        // Sync timestamp
-        if (playerState.lastUpdated && playerState.timestamp !== undefined) {
-            const serverTime = playerState.lastUpdated.getTime();
-            const clientTime = new Date().getTime();
-            const timeDiff = (clientTime - serverTime) / 1000;
-            
-            let expectedTimestamp = playerState.timestamp;
-            if (playerState.isPlaying) {
-                expectedTimestamp += timeDiff;
+            // Sync playing state
+            const currentPlayerState = player.getPlayerState();
+            if (newState.isPlaying && currentPlayerState !== 1) {
+                player.playVideo();
+            } else if (!newState.isPlaying && currentPlayerState === 1) {
+                player.pauseVideo();
             }
 
-            const playerTime = player.getCurrentTime();
-            const drift = Math.abs(playerTime - expectedTimestamp);
+            // Sync timestamp
+            if (newState.lastUpdated && newState.timestamp !== undefined) {
+                const serverTime = newState.lastUpdated.getTime();
+                const clientTime = new Date().getTime();
+                const timeDiff = (clientTime - serverTime) / 1000;
+                
+                let expectedTimestamp = newState.timestamp;
+                if (newState.isPlaying) {
+                    expectedTimestamp += timeDiff;
+                }
 
-            if (drift > 2) { // Only seek if difference is more than 2 seconds
-                player.seekTo(expectedTimestamp, true);
+                const playerTime = player.getCurrentTime();
+                const drift = Math.abs(playerTime - expectedTimestamp);
+
+                if (drift > 2) { // Only seek if difference is more than 2 seconds
+                    player.seekTo(expectedTimestamp, true);
+                }
             }
-        }
+        });
 
+        // The returned function from useEffect will be called on component unmount.
+        // We return the unsubscribe function here to clean up the listener.
+        return () => unsubscribe();
+    };
 
-    }, [playerState, isAdmin]);
-
-    if (!isClient || !playerState?.videoId || isAdmin) { // Don't render player for admin in footer
+    if (!isClient || !playerState?.videoId || isAdmin) {
         return null;
     }
 
@@ -108,8 +109,8 @@ const SynchronizedVideoPlayer = () => {
             iv_load_policy: 3,
             modestbranding: 1,
             loop: 1,
-            playlist: videoId, // Required for loop to work
-            mute: 0, // Try to play with sound
+            playlist: videoId,
+            mute: 0, 
         },
     };
 
@@ -118,7 +119,7 @@ const SynchronizedVideoPlayer = () => {
             <YouTube
                 videoId={videoId}
                 opts={opts}
-                onReady={(event) => { playerRef.current = event.target; }}
+                onReady={onPlayerReady}
                 className="w-full h-full"
             />
         </div>
@@ -134,7 +135,6 @@ export default function RootLayout({
 
   React.useEffect(() => {
     const trackVisitor = async () => {
-        // Use sessionStorage to only count the visitor once per session
         if (!sessionStorage.getItem('visitor_tracked')) {
             await incrementVisitorCount();
             sessionStorage.setItem('visitor_tracked', 'true');
