@@ -72,9 +72,9 @@ function EntertainmentPageContent() {
                 throw new Error("URL cannot be empty.");
             }
             const url = new URL(videoUrl);
-            // Basic validation for embed URLs
-            if (url.protocol !== "https:" || !url.pathname.includes('/embed/')) {
-                throw new Error("Please use a valid embed URL from a service like YouTube, Hotstar, etc.");
+            // Basic validation for YouTube embed URLs
+            if (!url.hostname.includes('youtube.com') || !url.pathname.includes('/embed/')) {
+                throw new Error("Please use a valid YouTube embed URL.");
             }
 
             sessionStorage.setItem('backgroundVideoUrl', videoUrl);
@@ -87,7 +87,7 @@ function EntertainmentPageContent() {
         } catch (error: any) {
             toast({
                 title: 'Invalid URL',
-                description: error.message || 'Please enter a valid video embed URL.',
+                description: error.message || 'Please enter a valid YouTube embed URL.',
                 variant: 'destructive',
             });
         }
@@ -101,7 +101,7 @@ function EntertainmentPageContent() {
                     <CardHeader>
                         <CardTitle>Set Background Video</CardTitle>
                         <CardDescription>
-                            Paste any video embed URL here (e.g., from YouTube, Hotstar) to change the video playing at the bottom of the app.
+                            Paste a YouTube video embed URL here to change the video playing at the bottom of the app.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
