@@ -69,14 +69,28 @@ const SynchronizedVideoPlayer = () => {
         }
 
         // Sync timestamp
-        const timeDifference = Math.abs(player.getCurrentTime() - playerState.timestamp);
-        if (timeDifference > 2) { // Only seek if difference is more than 2 seconds
-            player.seekTo(playerState.timestamp, true);
+        if (playerState.lastUpdated && playerState.timestamp !== undefined) {
+            const serverTime = playerState.lastUpdated.getTime();
+            const clientTime = new Date().getTime();
+            const timeDiff = (clientTime - serverTime) / 1000;
+            
+            let expectedTimestamp = playerState.timestamp;
+            if (playerState.isPlaying) {
+                expectedTimestamp += timeDiff;
+            }
+
+            const playerTime = player.getCurrentTime();
+            const drift = Math.abs(playerTime - expectedTimestamp);
+
+            if (drift > 2) { // Only seek if difference is more than 2 seconds
+                player.seekTo(expectedTimestamp, true);
+            }
         }
+
 
     }, [playerState, isAdmin]);
 
-    if (!isClient || !playerState?.videoId) {
+    if (!isClient || !playerState?.videoId || isAdmin) { // Don't render player for admin in footer
         return null;
     }
 
@@ -95,7 +109,7 @@ const SynchronizedVideoPlayer = () => {
             modestbranding: 1,
             loop: 1,
             playlist: videoId, // Required for loop to work
-            mute: 1, // Must be muted to autoplay
+            mute: 0, // Try to play with sound
         },
     };
 

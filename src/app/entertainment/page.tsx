@@ -130,17 +130,19 @@ function EntertainmentPageContent() {
     
     const onPlayerStateChange = (event: { data: number }) => {
         if (!playerRef.current) return;
-        const isPlaying = event.data === 1;
+        const isPlaying = event.data === 1; // 1 means playing
         const timestamp = playerRef.current.getCurrentTime();
+        
         saveVideoPlayerState({ isPlaying, timestamp });
 
         if (isPlaying) {
             if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
+            // Sync time every 5 seconds while playing
             syncIntervalRef.current = setInterval(() => {
-                if(playerRef.current?.getPlayerState() === 1) { // only update if playing
+                if(playerRef.current?.getPlayerState() === 1) { 
                     saveVideoPlayerState({ timestamp: playerRef.current.getCurrentTime() });
                 }
-            }, 5000); // Sync time every 5 seconds
+            }, 5000); 
         } else {
             if (syncIntervalRef.current) {
                 clearInterval(syncIntervalRef.current);
