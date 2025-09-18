@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
 import Script from 'next/script';
 import Image from 'next/image';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com/movies', color: 'bg-red-50' },
@@ -22,6 +23,55 @@ const freeSites = [
     { name: 'Zee5', icon: <Tv className="h-10 w-10 text-purple-600" />, href: 'https://www.zee5.com/watch/movies/free-to-watch', color: 'bg-purple-50' },
     { name: 'SonyLIV', icon: <Tv className="h-10 w-10 text-gray-700" />, href: 'https://www.sonyliv.com/', color: 'bg-gray-100' },
 ];
+
+function SiteCard({ site }: { site: { name: string, icon: React.ReactNode, href: string, color: string } }) {
+    if (site.name === 'YouTube') {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer ${site.color}`}>
+                        <div className="mb-4">
+                            {site.icon}
+                        </div>
+                        <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
+                    </Card>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-2">
+                    <DialogHeader className="p-4 pb-0">
+                        <DialogTitle>YouTube Movies</DialogTitle>
+                        <DialogDescription>Watch free movies directly from YouTube.</DialogDescription>
+                    </DialogHeader>
+                    <div className="flex-grow rounded-md overflow-hidden">
+                        <iframe
+                            src={site.href}
+                            title="YouTube"
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    return (
+        <a
+            key={site.name}
+            href={site.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group"
+        >
+            <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 ${site.color}`}>
+                <div className="mb-4">
+                    {site.icon}
+                </div>
+                <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
+            </Card>
+        </a>
+    );
+}
 
 function EntertainmentPageContent() {
     const { toast } = useToast();
@@ -118,20 +168,7 @@ function EntertainmentPageContent() {
                     <CardContent>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             {freeSites.map((site) => (
-                                <a
-                                    key={site.name}
-                                    href={site.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="group"
-                                >
-                                    <Card className={`h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 ${site.color}`}>
-                                        <div className="mb-4">
-                                            {site.icon}
-                                        </div>
-                                        <h3 className="font-semibold text-lg text-foreground">{site.name}</h3>
-                                    </Card>
-                                </a>
+                                <SiteCard key={site.name} site={site} />
                             ))}
                         </div>
                     </CardContent>
