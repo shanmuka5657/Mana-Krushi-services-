@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
+import { getCurrentUserRole, saveGlobalVideoUrl } from '@/lib/storage';
+
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
@@ -46,6 +48,12 @@ function EntertainmentPageContent() {
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
     const [videoUrl, setVideoUrl] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const role = getCurrentUserRole();
+        setIsAdmin(role === 'admin');
+    }, []);
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -66,28 +74,32 @@ function EntertainmentPageContent() {
         }
     }
     
-    const handleSetVideo = () => {
+     const isValidYouTubeUrl = (url: string) => {
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+        return youtubeRegex.test(url);
+    };
+
+    const handleSetVideo = async () => {
         try {
             if(!videoUrl) {
                 throw new Error("URL cannot be empty.");
             }
-            const url = new URL(videoUrl);
-            // Basic validation for YouTube embed URLs
-            if (!url.hostname.includes('youtube.com') || !url.pathname.includes('/embed/')) {
-                throw new Error("Please use a valid YouTube embed URL.");
+           
+            if (!isValidYouTubeUrl(videoUrl)) {
+                 throw new Error("Please use a valid YouTube URL.");
             }
 
-            sessionStorage.setItem('backgroundVideoUrl', videoUrl);
+            await saveGlobalVideoUrl(videoUrl);
+            
             toast({
                 title: 'Video Set!',
-                description: 'The background video has been updated.',
+                description: 'The background video has been updated for all users.',
             });
-            window.dispatchEvent(new CustomEvent('backgroundVideoChange'));
             
         } catch (error: any) {
             toast({
                 title: 'Invalid URL',
-                description: error.message || 'Please enter a valid YouTube embed URL.',
+                description: error.message || 'Please enter a valid YouTube URL.',
                 variant: 'destructive',
             });
         }
@@ -97,27 +109,29 @@ function EntertainmentPageContent() {
     return (
         <AppLayout>
             <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Set Background Video</CardTitle>
-                        <CardDescription>
-                            Paste a YouTube video embed URL here to change the video playing at the bottom of the app.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex gap-2">
-                             <Input 
-                                placeholder="https://www.youtube.com/embed/..."
-                                value={videoUrl}
-                                onChange={(e) => setVideoUrl(e.target.value)}
-                             />
-                             <Button onClick={handleSetVideo}>
-                                <PlayCircle className="h-4 w-4" />
-                                <span className="ml-2 hidden sm:inline">Set Video</span>
-                             </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                {isAdmin && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Set Background Video</CardTitle>
+                            <CardDescription>
+                                Paste a YouTube video URL here to change the video playing at the bottom of the app for all users.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex gap-2">
+                                <Input 
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                />
+                                <Button onClick={handleSetVideo}>
+                                    <PlayCircle className="h-4 w-4" />
+                                    <span className="ml-2 hidden sm:inline">Set Video</span>
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                  <Card>
                     <CardHeader>
