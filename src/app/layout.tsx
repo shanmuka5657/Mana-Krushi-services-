@@ -57,10 +57,8 @@ const SynchronizedVideoPlayer = () => {
     }, []);
 
     React.useEffect(() => {
-        if (!playerRef.current || !playerState || isAdmin) return;
-
-        const player = playerRef.current.getInternalPlayer();
-        if (!player) return;
+        const player = playerRef.current;
+        if (!player || !playerState || isAdmin) return;
 
         // Sync playing state
         const currentPlayerState = player.getPlayerState();
