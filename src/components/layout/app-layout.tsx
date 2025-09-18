@@ -73,6 +73,18 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+const YouTubePlayer = React.memo(function YouTubePlayer({ videoId }: { videoId: string }) {
+  return (
+    <iframe
+        className="w-full h-full border-none"
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}`}
+        title="YouTube video player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+    ></iframe>
+  )
+});
+
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -369,14 +381,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {children}
           </main>
           <footer className="h-32 flex-shrink-0 border-t bg-background">
-              <iframe
-                  key={youtubeVideoId}
-                  className="w-full h-full border-none"
-                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&loop=1&playlist=${youtubeVideoId}`}
-                  title="YouTube video player"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-              ></iframe>
+              <YouTubePlayer videoId={youtubeVideoId} />
           </footer>
         </div>
       </SidebarInset>
