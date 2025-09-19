@@ -35,28 +35,49 @@ export const getVideoEvents = async (): Promise<VideoEvent[]> => {
 // --- Visits ---
 export const logVisit = async (path: string) => {
     if (!isBrowser) return;
+
+    // For anonymous users, just increment the total visitor count once per session
+    if (!getCurrentUser()) {
+        if (!sessionStorage.getItem('visitor_tracked')) {
+            await incrementVisitorCount();
+            sessionStorage.setItem('visitor_tracked', 'true');
+        }
+        return;
+    }
+
+    // For logged-in users, manage session-based activity tracking
     const userEmail = getCurrentUser();
     const userName = getCurrentUserName();
     const role = getCurrentUserRole();
+    
+    if (!userEmail || !userName || !role) return;
 
-    // Log anonymous visitor count only once per session
-    if (!sessionStorage.getItem('visitor_tracked')) {
-        await incrementVisitorCount();
-        sessionStorage.setItem('visitor_tracked', 'true');
+    let sessionId = sessionStorage.getItem('session_id');
+    const now = new Date().getTime();
+
+    // Check for session expiry (e.g., 30 minutes of inactivity)
+    const lastActivity = sessionStorage.getItem('last_activity');
+    if (lastActivity && now - parseInt(lastActivity, 10) > 30 * 60 * 1000) {
+        sessionId = null; // Expire session
+    }
+
+    if (!sessionId) {
+        sessionId = `${userEmail}-${now}`;
+        sessionStorage.setItem('session_id', sessionId);
     }
     
-    // Log visit for logged-in users only once per session
-    if (userEmail && userName && role && !sessionStorage.getItem('visit_logged')) {
-        await addVisitToFirestore({
-            userEmail,
-            userName,
-            role,
-            path,
-            // timestamp will be added by Firestore
-        } as Omit<Visit, 'id' | 'timestamp'>);
-        sessionStorage.setItem('visit_logged', 'true');
-    }
-}
+    sessionStorage.setItem('last_activity', String(now));
+
+    await addVisitToFirestore({
+        sessionId,
+        userEmail,
+        userName,
+        role,
+        path,
+        // timestamp will be added by Firestore
+    } as Omit<Visit, 'id' | 'timestamp'>);
+};
+
 
 export const getVisits = async (): Promise<Visit[]> => {
     if (!isBrowser) return [];
@@ -166,6 +187,8 @@ export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'pa
         window.sessionStorage.setItem('currentUserEmail', email);
         window.sessionStorage.setItem('currentUserName', name);
         window.sessionStorage.setItem('currentUserRole', role);
+        window.sessionStorage.removeItem('session_id'); // Clear session on new login
+        window.sessionStorage.removeItem('last_activity');
     } catch (error) {
         console.error("Failed to save current user to sessionStorage", error);
     }
@@ -191,4 +214,6 @@ export const clearCurrentUser = () => {
     window.sessionStorage.removeItem('currentUserEmail');
     window.sessionStorage.removeItem('currentUserName');
     window.sessionStorage.removeItem('currentUserRole');
+    window.sessionStorage.removeItem('session_id');
+    window.sessionStorage.removeItem('last_activity');
 };

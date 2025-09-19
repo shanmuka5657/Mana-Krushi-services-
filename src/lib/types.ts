@@ -82,12 +82,13 @@ export type VideoPlayerState = {
 
 export type Visit = {
   id: string;
+  sessionId: string;
   userEmail: string;
   userName: string;
   role: string;
-  timestamp: Date;
   path: string;
-}
+  timestamp: Date;
+};
 
 export type VideoEvent = {
   id: string;

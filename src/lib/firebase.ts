@@ -69,7 +69,7 @@ export const getVideoEventsFromFirestore = async (): Promise<VideoEvent[]> => {
 
 
 // --- Visits ---
-export const addVisitToFirestore = async (visit: Omit<Visit, 'id'>) => {
+export const addVisitToFirestore = async (visit: Omit<Visit, 'id' | 'timestamp'>) => {
     if (!visitsCollection) return;
     await addDoc(visitsCollection, { ...visit, timestamp: serverTimestamp() });
 }
