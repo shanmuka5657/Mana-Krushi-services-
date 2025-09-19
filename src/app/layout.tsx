@@ -55,9 +55,10 @@ const SynchronizedVideoPlayer = () => {
         playerRef.current = event.target;
         // Now that the player is ready, set up the real-time listener.
         const unsubscribe = onVideoPlayerStateChange((newState) => {
-            setPlayerState(newState); // Update state to trigger re-render if needed
             const player = playerRef.current;
             if (!player || !newState || isAdmin || typeof player.getPlayerState !== 'function') return;
+
+            setPlayerState(newState); // Update state to trigger re-render if needed
 
             // Sync playing state
             const currentPlayerState = player.getPlayerState();
@@ -81,7 +82,8 @@ const SynchronizedVideoPlayer = () => {
                 const playerTime = player.getCurrentTime();
                 const drift = Math.abs(playerTime - expectedTimestamp);
 
-                if (drift > 2) { // Only seek if difference is more than 2 seconds
+                // Increased drift tolerance to 5 seconds to reduce buffering
+                if (drift > 5) { 
                     player.seekTo(expectedTimestamp, true);
                 }
             }

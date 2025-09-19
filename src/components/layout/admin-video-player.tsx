@@ -86,12 +86,12 @@ export default function AdminVideoPlayer() {
 
         if (isPlaying) {
             if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-            // Sync time every 5 seconds while playing
+            // Sync time every 15 seconds while playing to reduce buffering
             syncIntervalRef.current = setInterval(() => {
                 if(playerRef.current?.getPlayerState() === 1) { 
                     saveVideoPlayerState({ timestamp: playerRef.current.getCurrentTime() });
                 }
-            }, 5000); 
+            }, 15000); 
         } else {
             if (syncIntervalRef.current) {
                 clearInterval(syncIntervalRef.current);
