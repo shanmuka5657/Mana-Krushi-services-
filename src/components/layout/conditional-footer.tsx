@@ -1,7 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { usePathname } from 'next/navigation';
+import ClientVideoPlayer from '@/components/layout/client-video-player';
 
 export default function ConditionalFooter() {
   const pathname = usePathname();
@@ -19,7 +21,7 @@ export default function ConditionalFooter() {
 
   return (
     <footer className="h-32 flex-shrink-0 border-t bg-background">
-      {/* Video players removed */}
+      <ClientVideoPlayer />
     </footer>
   );
 }

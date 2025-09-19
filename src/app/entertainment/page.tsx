@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
-import { getCurrentUserRole } from '@/lib/storage';
+import { getCurrentUserRole, saveGlobalVideoUrl } from '@/lib/storage';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
@@ -46,6 +46,13 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [videoUrl, setVideoUrl] = useState('');
+
+    useEffect(() => {
+        const role = getCurrentUserRole();
+        setUserRole(role);
+    }, []);
     
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -66,9 +73,37 @@ function EntertainmentPageContent() {
         }
     }
 
+    const handleSetVideoUrl = async () => {
+        if (!videoUrl.trim()) {
+            toast({ title: 'Please enter a YouTube URL.', variant: 'destructive' });
+            return;
+        }
+        await saveGlobalVideoUrl(videoUrl);
+        toast({ title: 'Video URL Updated!', description: 'The background video has been updated for all users.' });
+    };
+
     return (
         <AppLayout>
             <div className="space-y-6">
+                {userRole === 'admin' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Master Video Control</CardTitle>
+                            <CardDescription>Set the YouTube video that plays in the background for all users.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex gap-2">
+                                <Input 
+                                    placeholder="Enter YouTube URL"
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                />
+                                <Button onClick={handleSetVideoUrl}>Set Video</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                  <Card>
                     <CardHeader>
                         <CardTitle>Find a Movie</CardTitle>
