@@ -166,6 +166,13 @@ export function SignupForm() {
               </Button>
             </form>
           </Form>
+           <div className="mt-4 text-center text-xs text-muted-foreground">
+            By creating an account, you agree to our{' '}
+            <Link href="/disclaimer" className="underline hover:text-primary">
+              Terms & Disclaimer
+            </Link>
+            .
+          </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="underline">
