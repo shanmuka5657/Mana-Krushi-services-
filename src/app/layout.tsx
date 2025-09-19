@@ -8,6 +8,7 @@ import { onVideoPlayerStateChange, getVideoPlayerState, incrementVisitorCount, g
 import type { VideoPlayerState } from '@/lib/types';
 import YouTube from 'react-youtube';
 import AdminVideoPlayer from '@/components/layout/admin-video-player';
+import { usePathname } from 'next/navigation';
 
 const getYouTubeVideoId = (url: string): string | null => {
     if (!url) return null;
@@ -135,6 +136,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isAuthPage = pathname === '/login' || pathname === '/signup';
 
   React.useEffect(() => {
     const trackVisitor = async () => {
@@ -154,10 +157,12 @@ export default function RootLayout({
       <body>
         <div className="flex flex-col h-screen">
             {children}
-            <footer className="h-32 flex-shrink-0 border-t bg-background">
-                <AdminVideoPlayer />
-                <SynchronizedVideoPlayer />
-            </footer>
+            {!isAuthPage && (
+              <footer className="h-32 flex-shrink-0 border-t bg-background">
+                  <AdminVideoPlayer />
+                  <SynchronizedVideoPlayer />
+              </footer>
+            )}
         </div>
         <Toaster />
       </body>
