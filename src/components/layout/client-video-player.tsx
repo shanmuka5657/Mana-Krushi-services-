@@ -6,7 +6,6 @@ import YouTube, { type YouTubePlayer } from 'react-youtube';
 import { onGlobalVideoUrlChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
 const ClientVideoPlayer = () => {
