@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import * as React from 'react';
 import { incrementVisitorCount } from '@/lib/storage';
 import dynamic from 'next/dynamic';
+import Script from 'next/script';
 
 const ConditionalFooter = dynamic(
   () => import('@/components/layout/conditional-footer'),
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
+        <script async src="https://al5sm.com/tag.min.js" data-zone="9892058"></script>
       </head>
       <body>
         <div className="flex flex-col h-screen">
