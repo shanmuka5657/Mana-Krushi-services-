@@ -80,6 +80,15 @@ export type VideoPlayerState = {
   lastUpdated: Date;
 }
 
+export type Visit = {
+  id: string;
+  userEmail: string;
+  userName: string;
+  role: string;
+  timestamp: Date;
+  path: string;
+}
+
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({

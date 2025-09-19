@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import type { Booking, Route, Profile, VideoPlayerState } from "./types";
+import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc, serverTimestamp, addDoc, orderBy } from "firebase/firestore";
+import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
 
@@ -38,6 +38,33 @@ const bookingsCollection = db ? collection(db, "bookings") : null;
 const routesCollection = db ? collection(db, "routes") : null;
 const profilesCollection = db ? collection(db, "profiles") : null;
 const settingsCollection = db ? collection(db, "settings") : null;
+const visitsCollection = db ? collection(db, "visits") : null;
+
+
+// --- Visits ---
+export const addVisitToFirestore = async (visit: Omit<Visit, 'id'>) => {
+    if (!visitsCollection) return;
+    await addDoc(visitsCollection, { ...visit, timestamp: serverTimestamp() });
+}
+
+export const getVisitsFromFirestore = async (): Promise<Visit[]> => {
+    if (!visitsCollection) return [];
+    try {
+        const q = query(visitsCollection, orderBy("timestamp", "desc"));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(),
+            } as Visit;
+        });
+    } catch(e) {
+        console.error("Error getting visits from Firestore", e);
+        return [];
+    }
+}
 
 
 // --- Settings ---

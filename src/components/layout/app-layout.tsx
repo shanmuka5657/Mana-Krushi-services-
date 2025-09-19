@@ -154,6 +154,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
     { href: `/admin/users`, icon: Users, label: "Users" },
+    { href: `/admin/visitors`, icon: Eye, label: "Visitors" },
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },

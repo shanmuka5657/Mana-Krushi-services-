@@ -1,13 +1,43 @@
 
-
-import type { Booking, Route, Profile, VideoPlayerState } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 
 
 const isBrowser = typeof window !== "undefined";
+
+// --- Visits ---
+export const logVisit = async (path: string) => {
+    if (!isBrowser) return;
+    const userEmail = getCurrentUser();
+    const userName = getCurrentUserName();
+    const role = getCurrentUserRole();
+
+    // Log anonymous visitor count
+    if (!sessionStorage.getItem('visitor_tracked')) {
+        await incrementVisitorCount();
+        sessionStorage.setItem('visitor_tracked', 'true');
+    }
+    
+    // Log visit for logged-in users
+    if (userEmail && userName && role && !sessionStorage.getItem('visit_logged')) {
+        await addVisitToFirestore({
+            userEmail,
+            userName,
+            role,
+            path,
+            // timestamp will be added by Firestore
+        } as Omit<Visit, 'id' | 'timestamp'>);
+        sessionStorage.setItem('visit_logged', 'true');
+    }
+}
+
+export const getVisits = async (): Promise<Visit[]> => {
+    if (!isBrowser) return [];
+    return await getVisitsFromFirestore();
+}
 
 // --- Settings ---
 export const saveGlobalVideoUrl = async (url: string) => {

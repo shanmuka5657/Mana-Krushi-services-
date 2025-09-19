@@ -129,7 +129,7 @@ function AdminDashboardPage() {
     <AppLayout>
         <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} />
+                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} href="/admin/visitors" />
                 <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
