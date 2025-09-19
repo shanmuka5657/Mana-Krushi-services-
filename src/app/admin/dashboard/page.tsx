@@ -12,9 +12,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href: string }) => (
-    <Link href={href}>
-        <Card className="hover:bg-muted/50 transition-colors">
+const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href?: string }) => {
+    const cardContent = (
+        <Card className={href ? "hover:bg-muted/50 transition-colors" : ""}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 <Icon className="h-4 w-4 text-muted-foreground" />
@@ -23,8 +23,10 @@ const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: st
                 <div className="text-2xl font-bold">{value}</div>
             </CardContent>
         </Card>
-    </Link>
-);
+    );
+
+    return href ? <Link href={href}>{cardContent}</Link> : <div>{cardContent}</div>;
+};
 
 const RecentBookingItem = ({ booking, profile }: { booking: Booking, profile?: Profile }) => (
     <div className="flex items-center">
@@ -127,7 +129,7 @@ function AdminDashboardPage() {
     <AppLayout>
         <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} href="#" />
+                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} />
                 <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
