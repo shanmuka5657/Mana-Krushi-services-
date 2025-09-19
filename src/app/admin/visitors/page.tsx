@@ -120,7 +120,7 @@ function AdminVisitorsPage() {
                                     </TableCell>
                                 </TableRow>
                             )) : (
-                                <TableRow>
+                                <TableRow key="no-sessions">
                                     <TableCell colSpan={4} className="h-24 text-center">
                                         No session data found.
                                     </TableCell>
