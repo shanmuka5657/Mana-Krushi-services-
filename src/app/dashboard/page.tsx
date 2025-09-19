@@ -49,6 +49,15 @@ function DashboardPage() {
     };
     fetchData();
   }, [role]);
+  
+  const fetchOwnerRoutes = async () => {
+    const ownerName = getCurrentUserName();
+    if (ownerName) {
+      const allRoutes = await getRoutes();
+      const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName);
+      setRoutes(ownerRoutes);
+    }
+  };
 
   const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[] }) => {
     const ownerName = getCurrentUserName();
@@ -62,8 +71,8 @@ function DashboardPage() {
         ownerName: ownerName,
     };
 
-    const newRoute = await addRoute(routeWithOwner);
-    setRoutes((prevRoutes) => [newRoute, ...prevRoutes]);
+    await addRoute(routeWithOwner);
+    await fetchOwnerRoutes(); // Refetch routes after adding a new one
   };
   
   const handleTabSwitch = (tab: string) => {
