@@ -40,19 +40,19 @@ function AdminVisitorsPage() {
             });
 
             const processedSessions: UserSession[] = Object.values(sessionsMap).map(visitsInSession => {
-                visitsInSession.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+                visitsInSession.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
                 const firstVisit = visitsInSession[0];
                 const lastVisit = visitsInSession[visitsInSession.length - 1];
                 
-                const duration = formatDistance(lastVisit.timestamp, firstVisit.timestamp, { includeSeconds: true });
+                const duration = formatDistance(new Date(lastVisit.timestamp), new Date(firstVisit.timestamp), { includeSeconds: true });
 
                 return {
                     sessionId: firstVisit.sessionId,
                     userName: firstVisit.userName,
                     userEmail: firstVisit.userEmail,
                     role: firstVisit.role,
-                    startTime: firstVisit.timestamp,
-                    endTime: lastVisit.timestamp,
+                    startTime: new Date(firstVisit.timestamp),
+                    endTime: new Date(lastVisit.timestamp),
                     pageCount: visitsInSession.length,
                     duration: duration,
                 };
