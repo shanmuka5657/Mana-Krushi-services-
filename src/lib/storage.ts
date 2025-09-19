@@ -39,13 +39,13 @@ export const logVisit = async (path: string) => {
     const userName = getCurrentUserName();
     const role = getCurrentUserRole();
 
-    // Log anonymous visitor count
+    // Log anonymous visitor count only once per session
     if (!sessionStorage.getItem('visitor_tracked')) {
         await incrementVisitorCount();
         sessionStorage.setItem('visitor_tracked', 'true');
     }
     
-    // Log visit for logged-in users
+    // Log visit for logged-in users only once per session
     if (userEmail && userName && role && !sessionStorage.getItem('visit_logged')) {
         await addVisitToFirestore({
             userEmail,
