@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import YouTube, { YouTubePlayer } from 'react-youtube';
+import YouTube, { type YouTubePlayer } from 'react-youtube';
 import { onGlobalVideoUrlChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle } from 'lucide-react';
@@ -78,7 +78,7 @@ const ClientVideoPlayer = () => {
     
     if (!videoId) {
         return (
-            <div className="h-full w-full bg-black flex items-center justify-center text-muted-foreground p-2">
+            <div className="h-full w-full bg-black flex items-center justify-center text-muted-foreground p-2 relative">
                 <p>No video set by admin.</p>
                  <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-6 w-6" onClick={() => setIsPlayerVisible(false)}>
                     <X className="h-4 w-4" />
@@ -95,7 +95,7 @@ const ClientVideoPlayer = () => {
             controls: 0,
             rel: 0,
             showinfo: 0,
-            mute: 1, // Start muted, control with state
+            mute: 1, // Let our state control mute after player is ready
             loop: 1,
             playlist: videoId, // Required for loop to work
         },
