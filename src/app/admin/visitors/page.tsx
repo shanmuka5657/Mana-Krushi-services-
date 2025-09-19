@@ -67,7 +67,7 @@ function AdminVisitorsPage() {
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                                            {format(new Date(visit.timestamp), 'PPP p')}
+                                            {format(new Date(visit.timestamp), 'PPP pp')}
                                         </div>
                                     </TableCell>
                                 </TableRow>
