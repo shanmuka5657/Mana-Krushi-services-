@@ -73,44 +73,6 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
     return unsubscribe;
 };
 
-// --- Real-time Video Player State ---
-export const saveVideoPlayerState = async (state: Partial<VideoPlayerState>) => {
-    if (!settingsCollection || !db) return;
-    const docRef = doc(db, "settings", "videoPlayerState");
-    await setDoc(docRef, { ...state, lastUpdated: serverTimestamp() }, { merge: true });
-};
-
-export const onVideoPlayerStateChange = (callback: (state: VideoPlayerState) => void) => {
-    if (!settingsCollection || !db) return () => {};
-    const docRef = doc(db, "settings", "videoPlayerState");
-    const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-            const data = doc.data();
-            // Convert Firestore timestamp to JS Date
-            if (data.lastUpdated) {
-                data.lastUpdated = data.lastUpdated.toDate();
-            }
-            callback(data as VideoPlayerState);
-        }
-    });
-    return unsubscribe;
-};
-
-export const getVideoPlayerState = async (): Promise<VideoPlayerState | null> => {
-    if (!settingsCollection || !db) return null;
-    const docRef = doc(db, "settings", "videoPlayerState");
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.lastUpdated) {
-            data.lastUpdated = data.lastUpdated.toDate();
-        }
-        return data as VideoPlayerState;
-    }
-    return null;
-}
-
-
 // --- Bookings ---
 export const getBookingsFromFirestore = async (): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
