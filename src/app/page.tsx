@@ -1,13 +1,12 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import placeholderImages from "@/lib/placeholder-images.json";
 
 export default function WelcomePage() {
-  const router = useRouter();
   const { logo } = placeholderImages;
 
   return (
@@ -30,20 +29,11 @@ export default function WelcomePage() {
           </p>
         </div>
         <div className="flex w-full max-w-xs flex-col gap-4 sm:flex-row">
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={() => router.push('/login')}
-          >
-            Login
+          <Button size="lg" className="w-full" asChild>
+            <Link href="/login">Login</Link>
           </Button>
-          <Button
-            size="lg"
-            variant="secondary"
-            className="w-full"
-            onClick={() => router.push('/signup')}
-          >
-            Sign Up
+          <Button size="lg" variant="secondary" className="w-full" asChild>
+            <Link href="/signup">Sign Up</Link>
           </Button>
         </div>
       </div>
