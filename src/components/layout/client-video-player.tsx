@@ -99,7 +99,6 @@ const ClientVideoPlayer = () => {
             autoplay: 1,
             controls: 1,
             rel: 0,
-            showinfo: 0,
             mute: 1, 
             loop: 1,
             playlist: videoId,
