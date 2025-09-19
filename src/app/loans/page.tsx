@@ -2,9 +2,11 @@
 "use client";
 
 import { AppLayout } from '@/components/layout/app-layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { IndianRupee } from 'lucide-react';
+import { IndianRupee, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 
 function LoansPageContent() {
@@ -13,10 +15,22 @@ function LoansPageContent() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><IndianRupee />Apply for a Loan</CardTitle>
-                    <CardDescription>This page is where loan options would be displayed.</CardDescription>
+                    <CardDescription>Explore personal loan options from our partners.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground">Loan provider content has been removed.</p>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Abhi Loans</CardTitle>
+                            <CardDescription>Get instant personal loans with a quick and easy application process. Click below to get started.</CardDescription>
+                        </CardHeader>
+                        <CardFooter>
+                            <Button asChild>
+                                <a href="https://clnk.in/w89P" target="_blank" rel="noopener noreferrer">
+                                    Apply Now <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                            </Button>
+                        </CardFooter>
+                    </Card>
                 </CardContent>
             </Card>
         </AppLayout>
