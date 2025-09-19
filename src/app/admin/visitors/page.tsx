@@ -7,10 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getVisits } from '@/lib/storage';
 import type { Visit } from '@/lib/types';
-import { format, formatDistance } from 'date-fns';
-import { User, Mail, Shield, Clock, Timer } from 'lucide-react';
+import { format } from 'date-fns';
+import { User, Mail, Shield, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 
 type UserSession = {
     sessionId: string;
@@ -19,8 +18,6 @@ type UserSession = {
     role: string;
     startTime: Date;
     endTime: Date;
-    pageCount: number;
-    duration: string;
 }
 
 function AdminVisitorsPage() {
@@ -43,8 +40,6 @@ function AdminVisitorsPage() {
                 visitsInSession.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
                 const firstVisit = visitsInSession[0];
                 const lastVisit = visitsInSession[visitsInSession.length - 1];
-                
-                const duration = formatDistance(new Date(lastVisit.timestamp), new Date(firstVisit.timestamp), { includeSeconds: true });
 
                 return {
                     sessionId: firstVisit.sessionId,
@@ -53,8 +48,6 @@ function AdminVisitorsPage() {
                     role: firstVisit.role,
                     startTime: new Date(firstVisit.timestamp),
                     endTime: new Date(lastVisit.timestamp),
-                    pageCount: visitsInSession.length,
-                    duration: duration,
                 };
             }).sort((a,b) => b.startTime.getTime() - a.startTime.getTime());
 
@@ -73,17 +66,16 @@ function AdminVisitorsPage() {
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>User Sessions</CardTitle>
-                    <CardDescription>A list of recent sessions from registered users.</CardDescription>
+                    <CardTitle>User Login/Logout Times</CardTitle>
+                    <CardDescription>A list of user sessions showing their start and end times.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>User</TableHead>
-                                <TableHead>Session Start</TableHead>
-                                <TableHead>Duration</TableHead>
-                                <TableHead>Actions</TableHead>
+                                <TableHead>Login Time</TableHead>
+                                <TableHead>Logout Time</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -112,18 +104,15 @@ function AdminVisitorsPage() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            <Timer className="h-4 w-4 text-muted-foreground" />
-                                           {session.duration} ({session.pageCount} pages)
+                                            <Clock className="h-4 w-4 text-muted-foreground" />
+                                           {format(new Date(session.endTime), 'PPP pp')}
                                         </div>
-                                    </TableCell>
-                                     <TableCell>
-                                        <Button variant="outline" size="sm" disabled>View Details</Button>
                                     </TableCell>
                                 </TableRow>
                                 ))
                              ) : (
                                 <TableRow key="no-sessions">
-                                    <TableCell colSpan={4} className="h-24 text-center">
+                                    <TableCell colSpan={3} className="h-24 text-center">
                                         No session data found.
                                     </TableCell>
                                 </TableRow>
