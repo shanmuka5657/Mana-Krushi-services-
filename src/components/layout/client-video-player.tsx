@@ -96,7 +96,7 @@ const ClientVideoPlayer = () => {
         width: '100%',
         playerVars: {
             autoplay: 1,
-            controls: 1,
+            controls: 1, // Changed from 0 to 1 to show all controls
             rel: 0,
             mute: 1, 
             loop: 1,
