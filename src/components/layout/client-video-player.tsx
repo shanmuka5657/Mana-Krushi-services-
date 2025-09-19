@@ -14,8 +14,12 @@ const ClientVideoPlayer = () => {
     const [isMuted, setIsMuted] = useState(true);
     const playerRef = useRef<YouTubePlayer | null>(null);
     const { toast } = useToast();
+    const [origin, setOrigin] = useState<string>('');
 
     useEffect(() => {
+        // This ensures the origin is only set on the client side
+        setOrigin(window.location.origin);
+
         const unsub = onGlobalVideoUrlChange((url) => {
             setVideoUrl(url);
             if (url) {
@@ -130,6 +134,7 @@ const ClientVideoPlayer = () => {
             mute: 1, 
             loop: 1,
             playlist: videoId,
+            origin: origin,
         },
     };
 
