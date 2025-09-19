@@ -33,6 +33,7 @@ import {
   Eye,
   Youtube,
   Signal,
+  Tv,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -162,6 +163,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
+    { href: `/live`, icon: Tv, label: "Live Broadcasts" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
     { href: `/watch`, icon: LinkIcon, label: "Watch" },
@@ -179,6 +181,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
     { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
+    { href: `/live`, icon: Tv, label: "Live Broadcasts" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
     { href: `/watch?role=owner`, icon: LinkIcon, label: "Watch" },
@@ -194,6 +197,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
+    { href: `/live`, icon: Tv, label: "Live Broadcasts" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
