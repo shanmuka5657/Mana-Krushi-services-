@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
 import { onGlobalVideoUrlChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
-import { Volume2, VolumeX, X, PlayCircle } from 'lucide-react';
+import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ClientVideoPlayer = () => {
@@ -68,6 +68,32 @@ const ClientVideoPlayer = () => {
             setIsMuted(!isMuted);
         }
     };
+    
+    const handleLike = () => {
+        if(videoUrl) {
+            window.open(videoUrl, '_blank');
+        }
+    }
+
+    const handleShare = async () => {
+        if (navigator.share && videoUrl) {
+            try {
+                await navigator.share({
+                    title: 'Mana Krushi Services',
+                    text: 'Check out this video!',
+                    url: videoUrl,
+                });
+            } catch (error) {
+                console.error('Error sharing:', error);
+            }
+        } else if (videoUrl) {
+            // Fallback for browsers that don't support Web Share API
+            navigator.clipboard.writeText(videoUrl).then(() => {
+                toast({ title: 'Link Copied!', description: 'Video link copied to clipboard.' });
+            });
+        }
+    };
+
 
     if (!isPlayerVisible) {
         return (
@@ -96,7 +122,7 @@ const ClientVideoPlayer = () => {
         width: '100%',
         playerVars: {
             autoplay: 1,
-            controls: 1, // Changed from 0 to 1 to show all controls
+            controls: 1,
             rel: 0,
             mute: 1, 
             loop: 1,
@@ -105,7 +131,7 @@ const ClientVideoPlayer = () => {
     };
 
     return (
-         <div className="w-full h-full relative">
+         <div className="w-full h-full relative group">
             <YouTube
                 videoId={videoId}
                 opts={opts}
@@ -114,6 +140,12 @@ const ClientVideoPlayer = () => {
                 onReady={onPlayerReady}
             />
             <div className="absolute top-2 right-2 flex gap-2">
+                <Button variant="secondary" size="icon" className="h-8 w-8" onClick={handleLike}>
+                    <ThumbsUp className="h-4 w-4" />
+                </Button>
+                <Button variant="secondary" size="icon" className="h-8 w-8" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" />
+                </Button>
                 <Button variant="secondary" size="icon" className="h-8 w-8" onClick={toggleMute}>
                     {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
