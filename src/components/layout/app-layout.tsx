@@ -32,6 +32,7 @@ import {
   Wallet,
   Eye,
   Youtube,
+  Signal,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";

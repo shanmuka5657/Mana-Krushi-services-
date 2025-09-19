@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye } from "lucide-react";
-import { getRoutes, getBookings, getAllProfiles, getVisitorCount } from "@/lib/storage";
+import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye, Signal } from "lucide-react";
+import { getRoutes, getBookings, getAllProfiles, getVisitorCount, getLiveVisitorsCount } from "@/lib/storage";
 import type { Booking, Route as RouteType, Profile } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +72,7 @@ function AdminDashboardPage() {
     totalBookings: 0,
     totalRevenue: 0,
     totalVisitors: 0,
+    liveVisitors: 0,
   });
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
   const [newUsers, setNewUsers] = useState<Profile[]>([]);
@@ -80,11 +81,12 @@ function AdminDashboardPage() {
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      const [profiles, routes, bookings, visitors] = await Promise.all([
+      const [profiles, routes, bookings, visitors, liveVisitors] = await Promise.all([
         getAllProfiles(),
         getRoutes(true),
         getBookings(true),
         getVisitorCount(),
+        getLiveVisitorsCount(),
       ]);
       setAllProfiles(profiles);
 
@@ -92,7 +94,6 @@ function AdminDashboardPage() {
         .filter(b => b.paymentStatus === 'Paid')
         .reduce((sum, b) => sum + (b.amount || 0), 0);
       
-      // Calculate subscription revenue (₹50 per owner with a plan)
       const subscriptionRevenue = profiles.filter(p => p.role === 'owner' && p.planExpiryDate).length * 50;
 
       const totalRevenue = bookingRevenue + subscriptionRevenue;
@@ -100,8 +101,7 @@ function AdminDashboardPage() {
       const sortedBookings = [...bookings].sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
       setRecentBookings(sortedBookings.slice(0, 5));
 
-      // Assuming profiles don't have a creation date, we'll just take the first few as "new"
-      setNewUsers(profiles.slice(0, 5));
+      setNewUsers(profiles.sort((a,b) => (b.planExpiryDate ? 1 : -1) - (a.planExpiryDate ? 1 : -1)).slice(0, 5));
 
 
       setStats({
@@ -110,11 +110,21 @@ function AdminDashboardPage() {
         totalBookings: bookings.length,
         totalRevenue: totalRevenue,
         totalVisitors: visitors,
+        liveVisitors: liveVisitors,
       });
 
       setIsLoaded(true);
     };
     fetchAdminData();
+    
+    // Auto-refresh live visitors every 30 seconds
+    const intervalId = setInterval(async () => {
+        const liveVisitors = await getLiveVisitorsCount();
+        setStats(prevStats => ({ ...prevStats, liveVisitors }));
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+
   }, []);
   
   const getProfileForBooking = (booking: Booking): Profile | undefined => {
@@ -128,8 +138,9 @@ function AdminDashboardPage() {
   return (
     <AppLayout>
         <div className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} href="/admin/visitors" />
+                <StatCard title="Live Visitors" value={stats.liveVisitors} icon={Signal} />
                 <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
                 <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
                 <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
@@ -148,8 +159,8 @@ function AdminDashboardPage() {
                 </Card>
                  <Card>
                     <CardHeader>
-                        <CardTitle>New Users</CardTitle>
-                        <CardDescription>The most recently registered users.</CardDescription>
+                        <CardTitle>Recent Users</CardTitle>
+                        <CardDescription>The most recently registered or subscribed users.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                        {newUsers.length > 0 ? newUsers.map(p => <NewUserItem key={p.email} profile={p} />) : <p className="text-sm text-muted-foreground">No users yet.</p>}

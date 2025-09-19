@@ -1,4 +1,5 @@
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore } from './firebase';
@@ -82,6 +83,23 @@ export const logVisit = async (path: string) => {
 export const getVisits = async (): Promise<Visit[]> => {
     if (!isBrowser) return [];
     return await getVisitsFromFirestore();
+}
+
+export const getLiveVisitorsCount = async (minutes = 5): Promise<number> => {
+    if (!isBrowser) return 0;
+    const allVisits = await getVisitsFromFirestore();
+    const now = new Date();
+    const activeSince = new Date(now.getTime() - minutes * 60 * 1000);
+
+    const activeSessions = new Set<string>();
+
+    for (const visit of allVisits) {
+        if (visit.timestamp >= activeSince) {
+            activeSessions.add(visit.sessionId);
+        }
+    }
+
+    return activeSessions.size;
 }
 
 // --- Settings ---
