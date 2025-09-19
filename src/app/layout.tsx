@@ -137,10 +137,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
-  const isBookingPage = pathname.startsWith('/book/');
+  const [showFooter, setShowFooter] = React.useState(false);
 
   React.useEffect(() => {
+    const isAuthPage = pathname === '/login' || pathname === '/signup';
+    const isBookingPage = pathname.startsWith('/book/');
+    setShowFooter(!isAuthPage && !isBookingPage);
+
     const trackVisitor = async () => {
         if (!sessionStorage.getItem('visitor_tracked')) {
             await incrementVisitorCount();
@@ -148,7 +151,7 @@ export default function RootLayout({
         }
     };
     trackVisitor();
-  }, []);
+  }, [pathname]);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -158,7 +161,7 @@ export default function RootLayout({
       <body>
         <div className="flex flex-col h-screen">
             {children}
-            {!isAuthPage && !isBookingPage && (
+            {showFooter && (
               <footer className="h-32 flex-shrink-0 border-t bg-background">
                   <AdminVideoPlayer />
                   <SynchronizedVideoPlayer />
