@@ -138,6 +138,7 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isBookingPage = pathname.startsWith('/book/');
 
   React.useEffect(() => {
     const trackVisitor = async () => {
@@ -157,7 +158,7 @@ export default function RootLayout({
       <body>
         <div className="flex flex-col h-screen">
             {children}
-            {!isAuthPage && (
+            {!isAuthPage && !isBookingPage && (
               <footer className="h-32 flex-shrink-0 border-t bg-background">
                   <AdminVideoPlayer />
                   <SynchronizedVideoPlayer />
