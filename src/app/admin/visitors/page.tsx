@@ -87,7 +87,8 @@ function AdminVisitorsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sessions.length > 0 ? sessions.map((session) => (
+                            {sessions.length > 0 ? (
+                                sessions.map((session) => (
                                 <TableRow key={session.sessionId}>
                                     <TableCell>
                                         <div className="flex flex-col">
@@ -119,7 +120,8 @@ function AdminVisitorsPage() {
                                         <Button variant="outline" size="sm" disabled>View Details</Button>
                                     </TableCell>
                                 </TableRow>
-                            )) : (
+                                ))
+                             ) : (
                                 <TableRow key="no-sessions">
                                     <TableCell colSpan={4} className="h-24 text-center">
                                         No session data found.
