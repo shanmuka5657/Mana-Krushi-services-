@@ -147,17 +147,17 @@ const ClientVideoPlayer = () => {
                 iframeClassName="w-full h-full"
                 onReady={onPlayerReady}
             />
-            <div className="absolute top-2 right-2 flex gap-2">
-                <Button variant="secondary" size="icon" className="h-8 w-8" onClick={handleLike}>
+             <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={handleLike}>
                     <ThumbsUp className="h-4 w-4" />
                 </Button>
-                <Button variant="secondary" size="icon" className="h-8 w-8" onClick={handleShare}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={handleShare}>
                     <Share2 className="h-4 w-4" />
                 </Button>
-                <Button variant="secondary" size="icon" className="h-8 w-8" onClick={toggleMute}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={toggleMute}>
                     {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
-                 <Button variant="secondary" size="icon" className="h-8 w-8" onClick={() => setIsPlayerVisible(false)}>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => setIsPlayerVisible(false)}>
                     <X className="h-4 w-4" />
                 </Button>
             </div>
