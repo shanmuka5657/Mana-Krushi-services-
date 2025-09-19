@@ -19,7 +19,7 @@ function AdsPageContent() {
                     </CardHeader>
                      <CardContent>
                         <div id="ad-container" className="flex justify-center items-center bg-muted rounded-md min-h-[100px]">
-                           {/* The ad script in the head will populate this or other areas. */}
+                           {/* The ad script will populate this or other areas. */}
                            <p className="text-muted-foreground">Ad content will be displayed here.</p>
                         </div>
                     </CardContent>
