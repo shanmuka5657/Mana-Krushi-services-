@@ -32,9 +32,6 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-       <Script id="monetag-ad-script" strategy="beforeInteractive">
-          {`(function(s){s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
-        </Script>
         <div className="flex flex-col h-screen">
             <div className="flex-1 overflow-y-auto">
               {children}
