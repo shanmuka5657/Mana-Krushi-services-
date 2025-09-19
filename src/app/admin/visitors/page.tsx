@@ -87,7 +87,7 @@ function AdminVisitorsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sessions.length > 0 ? sessions.map(session => (
+                            {sessions.length > 0 ? sessions.map((session) => (
                                 <TableRow key={session.sessionId}>
                                     <TableCell>
                                         <div className="flex flex-col">
