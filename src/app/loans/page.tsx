@@ -17,7 +17,7 @@ function LoansPageContent() {
                     <CardTitle className="flex items-center gap-2"><IndianRupee />Apply for a Loan</CardTitle>
                     <CardDescription>Explore personal loan options from our partners.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="grid gap-6 md:grid-cols-2">
                     <Card>
                         <CardHeader>
                             <CardTitle>Abhi Loans</CardTitle>
@@ -26,6 +26,19 @@ function LoansPageContent() {
                         <CardFooter>
                             <Button asChild>
                                 <a href="https://clnk.in/w89P" target="_blank" rel="noopener noreferrer">
+                                    Apply Now <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Nexa Loan</CardTitle>
+                            <CardDescription>Flexible personal loans for your every need. Explore competitive rates and simple repayment options.</CardDescription>
+                        </CardHeader>
+                        <CardFooter>
+                            <Button asChild>
+                                <a href="https://clnk.in/w9ah" target="_blank" rel="noopener noreferrer">
                                     Apply Now <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
                             </Button>
