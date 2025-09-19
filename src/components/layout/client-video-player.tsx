@@ -97,7 +97,7 @@ const ClientVideoPlayer = () => {
         width: '100%',
         playerVars: {
             autoplay: 1,
-            controls: 0,
+            controls: 1,
             rel: 0,
             showinfo: 0,
             mute: 1, 
@@ -107,7 +107,7 @@ const ClientVideoPlayer = () => {
     };
 
     return (
-         <div className="w-full h-full relative group">
+         <div className="w-full h-full relative">
             <YouTube
                 videoId={videoId}
                 opts={opts}
