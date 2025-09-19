@@ -7,17 +7,18 @@ import { onGlobalVideoUrlChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 const ClientVideoPlayer = () => {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [isPlayerVisible, setIsPlayerVisible] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
     const playerRef = useRef<YouTubePlayer | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         const unsub = onGlobalVideoUrlChange((url) => {
             setVideoUrl(url);
-            // If a new URL is set, make the player visible and muted by default
             if (url) {
                 setIsPlayerVisible(true);
                 setIsMuted(true);
@@ -58,6 +59,10 @@ const ClientVideoPlayer = () => {
         if (playerRef.current) {
             if (isMuted) {
                 playerRef.current.unMute();
+                 toast({
+                    title: "How to Unmute",
+                    description: "Due to browser policies, you may need to click the video directly to enable audio.",
+                });
             } else {
                 playerRef.current.mute();
             }
@@ -95,9 +100,9 @@ const ClientVideoPlayer = () => {
             controls: 0,
             rel: 0,
             showinfo: 0,
-            mute: 1, // Let our state control mute after player is ready
+            mute: 1, 
             loop: 1,
-            playlist: videoId, // Required for loop to work
+            playlist: videoId,
         },
     };
 
@@ -110,7 +115,7 @@ const ClientVideoPlayer = () => {
                 iframeClassName="w-full h-full"
                 onReady={onPlayerReady}
             />
-            <div className="absolute top-2 right-2 flex gap-2 transition-opacity">
+            <div className="absolute top-2 right-2 flex gap-2">
                 <Button variant="secondary" size="icon" className="h-8 w-8" onClick={toggleMute}>
                     {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
