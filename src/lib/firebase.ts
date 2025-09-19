@@ -1,7 +1,7 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc, serverTimestamp, addDoc, orderBy } from "firebase/firestore";
-import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
 
@@ -39,6 +39,33 @@ const routesCollection = db ? collection(db, "routes") : null;
 const profilesCollection = db ? collection(db, "profiles") : null;
 const settingsCollection = db ? collection(db, "settings") : null;
 const visitsCollection = db ? collection(db, "visits") : null;
+const videoEventsCollection = db ? collection(db, "video_events") : null;
+
+
+// --- Video Events ---
+export const addVideoEventToFirestore = async (event: Omit<VideoEvent, 'id'>) => {
+    if (!videoEventsCollection) return;
+    await addDoc(videoEventsCollection, { ...event, timestamp: serverTimestamp() });
+};
+
+export const getVideoEventsFromFirestore = async (): Promise<VideoEvent[]> => {
+    if (!videoEventsCollection) return [];
+    try {
+        const q = query(videoEventsCollection, orderBy("timestamp", "desc"));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(),
+            } as VideoEvent;
+        });
+    } catch(e) {
+        console.error("Error getting video events from Firestore", e);
+        return [];
+    }
+};
 
 
 // --- Visits ---

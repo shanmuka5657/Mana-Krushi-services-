@@ -1,12 +1,36 @@
 
-import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 
 
 const isBrowser = typeof window !== "undefined";
+
+// --- Video Events ---
+export const logVideoUnmute = async (videoUrl: string) => {
+    if (!isBrowser) return;
+    const userEmail = getCurrentUser();
+    const userName = getCurrentUserName();
+    const role = getCurrentUserRole();
+    
+    if (userEmail && userName && role) {
+        await addVideoEventToFirestore({
+            userEmail,
+            userName,
+            role,
+            eventType: 'unmute',
+            videoUrl,
+            // timestamp will be added by Firestore
+        } as Omit<VideoEvent, 'id' | 'timestamp'>);
+    }
+};
+
+export const getVideoEvents = async (): Promise<VideoEvent[]> => {
+    if (!isBrowser) return [];
+    return await getVideoEventsFromFirestore();
+}
 
 // --- Visits ---
 export const logVisit = async (path: string) => {

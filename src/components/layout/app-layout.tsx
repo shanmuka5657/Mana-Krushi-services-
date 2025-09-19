@@ -31,6 +31,7 @@ import {
   PanelLeft,
   Wallet,
   Eye,
+  Youtube,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -155,6 +156,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
     { href: `/admin/users`, icon: Users, label: "Users" },
     { href: `/admin/visitors`, icon: Eye, label: "Visitors" },
+    { href: `/admin/video-views`, icon: Youtube, label: "Video Views" },
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
