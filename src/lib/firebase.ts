@@ -1,6 +1,25 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, enableIndexedDbPersistence, terminate, onSnapshot, deleteDoc, getDoc, serverTimestamp, addDoc, orderBy } from "firebase/firestore";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    doc, 
+    setDoc, 
+    query, 
+    where, 
+    writeBatch, 
+    documentId, 
+    terminate, 
+    onSnapshot, 
+    deleteDoc, 
+    getDoc, 
+    serverTimestamp, 
+    addDoc, 
+    orderBy,
+    initializeFirestore,
+    persistentLocalCache
+} from "firebase/firestore";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
@@ -17,17 +36,8 @@ let db;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    db = getFirestore(app);
-    enableIndexedDbPersistence(db).catch((err) => {
-        if (err.code == 'failed-precondition') {
-            // Multiple tabs open, persistence can only be enabled
-            // in one tab at a time.
-            console.warn('Firebase persistence failed: multiple tabs open.');
-        } else if (err.code == 'unimplemented') {
-            // The current browser does not support all of the
-            // features required to enable persistence
-             console.warn('Firebase persistence not available in this browser.');
-        }
+    db = initializeFirestore(app, {
+        localCache: persistentLocalCache({})
     });
 } catch(e) {
     console.error("Firebase initialization failed", e);
@@ -157,7 +167,7 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
         const docRef = isNew ? doc(bookingsCollection) : doc(db, "bookings", booking.id);
         
         // Firestore cannot store undefined values.
-        const bookingToSave = Object.fromEntries(Object.entries(booking).filter(([_, v]) => v !== undefined));
+        const bookingToSave = Object.fromEntries(Object.entries(booking).filter(([, v]) => v !== undefined));
 
         batch.set(docRef, bookingToSave, { merge: true });
     });
