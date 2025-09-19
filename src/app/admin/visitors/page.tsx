@@ -1,130 +1,49 @@
 
 "use client";
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getVisits } from '@/lib/storage';
-import type { Visit } from '@/lib/types';
-import { format } from 'date-fns';
-import { User, Mail, Shield, Clock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-
-type UserSession = {
-    sessionId: string;
-    userName: string;
-    userEmail: string;
-    role: string;
-    startTime: Date;
-    endTime: Date;
-}
+import { getVisitorCount } from '@/lib/storage';
+import { Eye, Loader2 } from 'lucide-react';
 
 function AdminVisitorsPage() {
-    const [sessions, setSessions] = useState<UserSession[]>([]);
+    const [visitorCount, setVisitorCount] = useState<number | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const fetchAndProcessVisits = async () => {
-            const allVisits = await getVisits();
-
-            const sessionsMap: Record<string, Visit[]> = {};
-            allVisits.forEach(visit => {
-                if (!sessionsMap[visit.sessionId]) {
-                    sessionsMap[visit.sessionId] = [];
-                }
-                sessionsMap[visit.sessionId].push(visit);
-            });
-
-            const processedSessions: UserSession[] = Object.values(sessionsMap).map(visitsInSession => {
-                visitsInSession.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-                const firstVisit = visitsInSession[0];
-                const lastVisit = visitsInSession[visitsInSession.length - 1];
-
-                return {
-                    sessionId: firstVisit.sessionId,
-                    userName: firstVisit.userName,
-                    userEmail: firstVisit.userEmail,
-                    role: firstVisit.role,
-                    startTime: new Date(firstVisit.timestamp),
-                    endTime: new Date(lastVisit.timestamp),
-                };
-            }).sort((a,b) => b.startTime.getTime() - a.startTime.getTime());
-
-
-            setSessions(processedSessions);
+        const fetchCount = async () => {
+            const count = await getVisitorCount();
+            setVisitorCount(count);
             setIsLoaded(true);
         };
-        fetchAndProcessVisits();
+        fetchCount();
     }, []);
-
-    if (!isLoaded) {
-        return <AppLayout><div>Loading visitor data...</div></AppLayout>;
-    }
 
     return (
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>User Login/Logout Times</CardTitle>
-                    <CardDescription>A list of user sessions showing their start and end times.</CardDescription>
+                    <CardTitle>Total Visitors</CardTitle>
+                    <CardDescription>The total number of unique visits to the application.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>User</TableHead>
-                                <TableHead>Login Time</TableHead>
-                                <TableHead>Logout Time</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {sessions.length > 0 ? (
-                                sessions.map((session) => (
-                                <TableRow key={session.sessionId}>
-                                    <TableCell>
-                                        <div className="flex flex-col">
-                                            <div className="font-medium flex items-center gap-2">
-                                                <User className="h-4 w-4 text-muted-foreground" /> {session.userName}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                                <Mail className="h-4 w-4" /> {session.userEmail}
-                                            </div>
-                                            <Badge variant={session.role === 'owner' ? 'secondary' : (session.role === 'admin' ? 'default' : 'outline')} className="mt-1 w-fit">
-                                                <Shield className="h-3 w-3 mr-1" />
-                                                {session.role}
-                                            </Badge>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-muted-foreground" />
-                                            {format(new Date(session.startTime), 'PPP pp')}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-muted-foreground" />
-                                           {format(new Date(session.endTime), 'PPP pp')}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                                ))
-                             ) : (
-                                <TableRow key="no-sessions">
-                                    <TableCell colSpan={3} className="h-24 text-center">
-                                        No session data found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                <CardContent className="flex items-center justify-center py-20">
+                    {isLoaded ? (
+                        <div className="text-center">
+                            <Eye className="h-16 w-16 mx-auto text-muted-foreground" />
+                            <div className="mt-4 text-6xl font-bold">
+                                {visitorCount !== null ? visitorCount.toLocaleString() : '0'}
+                            </div>
+                            <p className="text-muted-foreground">Total Visitors</p>
+                        </div>
+                    ) : (
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                    )}
                 </CardContent>
             </Card>
         </AppLayout>
     );
 }
-
 
 export default function VisitorsPage() {
     return (
