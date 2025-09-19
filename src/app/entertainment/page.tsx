@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
-import { getCurrentUserRole, saveGlobalVideoUrl } from '@/lib/storage';
+import { getCurrentUserRole, saveGlobalVideoUrl, getGlobalVideoUrl } from '@/lib/storage';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
@@ -52,6 +52,17 @@ function EntertainmentPageContent() {
     useEffect(() => {
         const role = getCurrentUserRole();
         setUserRole(role);
+        
+        const fetchCurrentVideoUrl = async () => {
+            if (role === 'admin') {
+                const currentUrl = await getGlobalVideoUrl();
+                if (currentUrl) {
+                    setVideoUrl(currentUrl);
+                }
+            }
+        };
+
+        fetchCurrentVideoUrl();
     }, []);
     
     const handleSearch = async () => {
