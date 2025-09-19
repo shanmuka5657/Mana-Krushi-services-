@@ -5,13 +5,15 @@ import { useState, useEffect, useRef } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube, PauseCircle } from 'lucide-react';
+import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube, PauseCircle, Power, PowerOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
-import { getCurrentUserRole, saveGlobalVideoUrl, getGlobalVideoUrl } from '@/lib/storage';
+import { getCurrentUserRole, saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility } from '@/lib/storage';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const freeSites = [
     { name: 'YouTube', icon: <Clapperboard className="h-10 w-10 text-red-600" />, href: 'https://www.youtube.com', color: 'bg-red-50' },
@@ -48,21 +50,24 @@ function EntertainmentPageContent() {
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [videoUrl, setVideoUrl] = useState('');
+    const [isPlayerVisible, setIsPlayerVisible] = useState(true);
 
     useEffect(() => {
         const role = getCurrentUserRole();
         setUserRole(role);
         
-        const fetchCurrentVideoUrl = async () => {
+        const fetchAdminSettings = async () => {
             if (role === 'admin') {
-                const currentUrl = await getGlobalVideoUrl();
-                if (currentUrl) {
-                    setVideoUrl(currentUrl);
-                }
+                const [currentUrl, currentVisibility] = await Promise.all([
+                    getGlobalVideoUrl(),
+                    getGlobalVideoVisibility()
+                ]);
+                setVideoUrl(currentUrl || '');
+                setIsPlayerVisible(currentVisibility);
             }
         };
 
-        fetchCurrentVideoUrl();
+        fetchAdminSettings();
     }, []);
     
     const handleSearch = async () => {
@@ -93,6 +98,16 @@ function EntertainmentPageContent() {
         toast({ title: 'Video URL Updated!', description: 'The background video has been updated for all users.' });
     };
 
+    const handleVisibilityToggle = async () => {
+        const newVisibility = !isPlayerVisible;
+        await saveGlobalVideoVisibility(newVisibility);
+        setIsPlayerVisible(newVisibility);
+        toast({
+            title: `Video Player ${newVisibility ? 'Enabled' : 'Disabled'}`,
+            description: `All users will ${newVisibility ? 'now see' : 'no longer see'} the video player.`
+        });
+    };
+
     return (
         <AppLayout>
             <div className="space-y-6">
@@ -100,9 +115,9 @@ function EntertainmentPageContent() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Master Video Control</CardTitle>
-                            <CardDescription>Set the YouTube video that plays in the background for all users.</CardDescription>
+                            <CardDescription>Set the YouTube video and visibility for all users.</CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-4">
                             <div className="flex gap-2">
                                 <Input 
                                     placeholder="Enter YouTube URL"
@@ -110,6 +125,29 @@ function EntertainmentPageContent() {
                                     onChange={(e) => setVideoUrl(e.target.value)}
                                 />
                                 <Button onClick={handleSetVideoUrl}>Set Video</Button>
+                            </div>
+                             <div className="flex items-center justify-between p-4 border rounded-md">
+                                <Label htmlFor="visibility-toggle" className="font-medium">
+                                    {isPlayerVisible ? "Player is Visible to All Users" : "Player is Hidden for All Users"}
+                                </Label>
+                                <Button
+                                    id="visibility-toggle"
+                                    size="sm"
+                                    variant={isPlayerVisible ? "destructive" : "outline"}
+                                    onClick={handleVisibilityToggle}
+                                >
+                                    {isPlayerVisible ? (
+                                        <>
+                                            <PowerOff className="mr-2 h-4 w-4" />
+                                            Stop for All
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Power className="mr-2 h-4 w-4" />
+                                            Show to All
+                                        </>
+                                    )}
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>

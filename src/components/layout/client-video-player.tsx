@@ -3,32 +3,38 @@
 
 import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
-import { onGlobalVideoUrlChange, logVideoUnmute } from '@/lib/storage';
+import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
-import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2 } from 'lucide-react';
+import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ClientVideoPlayer = () => {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
-    const [isPlayerVisible, setIsPlayerVisible] = useState(true);
+    const [isPlayerGloballyVisible, setIsPlayerGloballyVisible] = useState(true);
+    const [isPlayerLocallyVisible, setIsPlayerLocallyVisible] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
     const playerRef = useRef<YouTubePlayer | null>(null);
     const { toast } = useToast();
     const [origin, setOrigin] = useState<string>('');
 
     useEffect(() => {
-        // This ensures the origin is only set on the client side
         setOrigin(window.location.origin);
 
-        const unsub = onGlobalVideoUrlChange((url) => {
+        const unsubUrl = onGlobalVideoUrlChange((url) => {
             setVideoUrl(url);
             if (url) {
-                setIsPlayerVisible(true);
-                setIsMuted(true);
+                setIsPlayerLocallyVisible(true); // Show player when URL changes
             }
         });
 
-        return () => unsub();
+        const unsubVisibility = onGlobalVideoVisibilityChange((isVisible) => {
+            setIsPlayerGloballyVisible(isVisible);
+        });
+
+        return () => {
+            unsubUrl();
+            unsubVisibility();
+        };
     }, []);
 
     const extractVideoId = (url: string | null): string | null => {
@@ -94,21 +100,28 @@ const ClientVideoPlayer = () => {
                 console.error('Error sharing:', error);
             }
         } else if (videoUrl) {
-            // Fallback for browsers that don't support Web Share API
             navigator.clipboard.writeText(videoUrl).then(() => {
                 toast({ title: 'Link Copied!', description: 'Video link copied to clipboard.' });
             });
         }
     };
 
+    const isPlayerVisible = isPlayerGloballyVisible && isPlayerLocallyVisible;
 
     if (!isPlayerVisible) {
         return (
             <div className="h-full w-full bg-black flex items-center justify-center text-muted-foreground p-2">
-                <Button variant="ghost" onClick={() => setIsPlayerVisible(true)}>
-                    <PlayCircle className="mr-2 h-4 w-4" />
-                    Open Media
-                </Button>
+                {!isPlayerGloballyVisible ? (
+                    <div className="flex items-center gap-2">
+                        <EyeOff className="h-4 w-4" />
+                        <span>Admin has disabled the video player.</span>
+                    </div>
+                ) : (
+                    <Button variant="ghost" onClick={() => setIsPlayerLocallyVisible(true)}>
+                        <PlayCircle className="mr-2 h-4 w-4" />
+                        Show Media
+                    </Button>
+                )}
             </div>
         );
     }
@@ -117,7 +130,7 @@ const ClientVideoPlayer = () => {
         return (
             <div className="h-full w-full bg-black flex items-center justify-center text-muted-foreground p-2 relative">
                 <p>No video set by admin.</p>
-                 <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-6 w-6" onClick={() => setIsPlayerVisible(false)}>
+                 <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-6 w-6" onClick={() => setIsPlayerLocallyVisible(false)}>
                     <X className="h-4 w-4" />
                 </Button>
             </div>
@@ -157,7 +170,7 @@ const ClientVideoPlayer = () => {
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={toggleMute}>
                     {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </Button>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => setIsPlayerVisible(false)}>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => setIsPlayerLocallyVisible(false)}>
                     <X className="h-4 w-4" />
                 </Button>
             </div>

@@ -130,8 +130,11 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
     if (!settingsCollection || !db) return () => {};
     const docRef = doc(db, "settings", key);
     const unsubscribe = onSnapshot(docRef, (doc) => {
+        // Don't trigger callback on initial load if doc doesn't exist
         if (doc.exists()) {
             callback(doc.data().value);
+        } else {
+            callback(null); // Or a default value
         }
     });
     return unsubscribe;

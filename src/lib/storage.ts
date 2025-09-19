@@ -118,6 +118,26 @@ export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
     return onSettingChange('backgroundVideoUrl', callback);
 };
 
+export const saveGlobalVideoVisibility = async (isVisible: boolean) => {
+    if (!isBrowser) return;
+    await saveSetting('isGlobalVideoPlayerVisible', isVisible);
+};
+
+export const getGlobalVideoVisibility = async (): Promise<boolean> => {
+    if (!isBrowser) return true; // Default to visible
+    const isVisible = await getSetting('isGlobalVideoPlayerVisible');
+    return isVisible === null ? true : isVisible; // Default to true if not set
+};
+
+export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
+    if (!isBrowser) return () => {};
+    return onSettingChange('isGlobalVideoPlayerVisible', (value) => {
+        // If the value is null (not set in Firestore), default to true
+        callback(value === null ? true : value);
+    });
+};
+
+
 export const getVisitorCount = async (): Promise<number> => {
     if (!isBrowser) return 0;
     const count = await getSetting('visitorCount');
