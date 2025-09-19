@@ -343,7 +343,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
               Promote Your Ride?
               </DialogTitle>
               <DialogDescription>
-              Promote your ride for ₹100 to highlight it in search results. Promoted rides will also include passenger insurance in the future.
+              Promote your ride for ₹100. Promoted rides are highlighted and include trip insurance for all passengers, increasing trust and bookings.
               </DialogDescription>
           </DialogHeader>
           <div className="pt-4 space-y-2">
@@ -428,7 +428,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
           onPaymentSuccess={handlePaymentSuccess}
           amount="100.00"
           title="Promote Ride"
-          description="This one-time fee of ₹100 will feature your ride at the top of search results."
+          description="This one-time fee of ₹100 will feature your ride at the top of search results and includes trip insurance for all passengers."
       />
       
       <Card className="shadow-sm">
