@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 
 const ClientVideoPlayer = () => {
@@ -19,6 +21,7 @@ const ClientVideoPlayer = () => {
     const playerRef = useRef<YouTubePlayer | null>(null);
     const { toast } = useToast();
     const [origin, setOrigin] = useState<string>('');
+    const { logo } = placeholderImages;
 
     useEffect(() => {
         setOrigin(window.location.origin);
@@ -170,8 +173,9 @@ const ClientVideoPlayer = () => {
                 iframeClassName="w-full h-full"
                 onReady={onPlayerReady}
             />
-            <div className="absolute top-2 left-2 text-white font-bold text-lg bg-black/50 p-2 rounded-lg pointer-events-none">
-                Mana Krushi Services
+            <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 p-2 rounded-lg pointer-events-none">
+                <Image src={logo.url} alt="Logo" width={24} height={24} className="h-6 w-6" />
+                <span className="text-white font-bold text-lg">Mana Krushi Services</span>
             </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={handleLike}>
