@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -77,6 +77,7 @@ export default function ProfileForm() {
   const [showPlanPrompt, setShowPlanPrompt] = useState(false);
   const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
   const [otpValue, setOtpValue] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -291,6 +292,41 @@ export default function ProfileForm() {
     });
   }
 
+  const handleGenerateTestData = async () => {
+    setIsGenerating(true);
+    toast({
+        title: "Generating test data...",
+        description: "This may take a moment."
+    });
+
+    try {
+        for (let i = 1; i <= 100; i++) {
+            const testProfile: Profile = {
+                email: `${i}@gmail.com`,
+                name: `Test User ${i}`,
+                role: 'passenger',
+                mobile: `90000000${i.toString().padStart(2, '0')}`,
+                mobileVerified: true,
+                status: 'active',
+            };
+            await saveProfile(testProfile);
+        }
+        toast({
+            title: "Test Data Generated!",
+            description: "100 passenger profiles have been created.",
+        });
+    } catch(e) {
+        toast({
+            title: "Error Generating Data",
+            description: "Could not create all test profiles.",
+            variant: "destructive"
+        });
+        console.error(e);
+    } finally {
+        setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <AlertDialog open={showPlanPrompt} onOpenChange={setShowPlanPrompt}>
@@ -357,6 +393,25 @@ export default function ProfileForm() {
                     <span className="font-semibold">{format(new Date(profile.planExpiryDate), 'PPP')}</span>
                 </div>
            </CardContent>
+        </Card>
+      )}
+
+      {profile?.role === 'admin' && (
+        <Card>
+            <CardHeader>
+                <CardTitle>Testing Tools</CardTitle>
+                <CardDescription>Use these tools to generate data for testing purposes.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={handleGenerateTestData} disabled={isGenerating}>
+                    {isGenerating ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <TestTube2 className="mr-2 h-4 w-4" />
+                    )}
+                    Generate 100 Test Passengers
+                </Button>
+            </CardContent>
         </Card>
       )}
 
@@ -614,3 +669,4 @@ export default function ProfileForm() {
     </div>
   );
 }
+
