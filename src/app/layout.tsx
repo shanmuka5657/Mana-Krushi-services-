@@ -30,6 +30,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
+        <Script
+          src="https://fpyf8.com/88/tag.min.js"
+          data-zone="171777"
+          data-cfasync="false"
+          async
+        />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9896290',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
