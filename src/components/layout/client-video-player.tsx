@@ -170,6 +170,9 @@ const ClientVideoPlayer = () => {
                 iframeClassName="w-full h-full"
                 onReady={onPlayerReady}
             />
+            <div className="absolute top-2 left-2 text-white font-bold text-lg bg-black/50 p-2 rounded-lg pointer-events-none">
+                Mana Krushi Services
+            </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={handleLike}>
                     <ThumbsUp className="h-4 w-4" />
