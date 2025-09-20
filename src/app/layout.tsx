@@ -24,6 +24,23 @@ export default function RootLayout({
 
   React.useEffect(() => {
     logVisit(pathname);
+    
+    // Defer ad script injection to client-side only, after hydration
+    const scripts = [
+      { dataset: { zone: '9896290' }, src: 'https://al5sm.com/tag.min.js' },
+      { dataset: { zone: '9892027' }, src: 'https://groleegni.net/vignette.min.js' },
+      { dataset: { zone: '9894293' }, src: 'https://forfrogadiertor.com/tag.min.js' }
+    ];
+
+    scripts.forEach(scriptInfo => {
+      const s = document.createElement('script');
+      s.src = scriptInfo.src;
+      Object.keys(scriptInfo.dataset).forEach(key => {
+        s.dataset[key] = scriptInfo.dataset[key as keyof typeof scriptInfo.dataset];
+      });
+      document.body.appendChild(s);
+    });
+
   }, [pathname]);
 
   return (
@@ -38,9 +55,6 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9896290',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
-        <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
-        <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9894293',s.src='https://forfrogadiertor.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
         <div className="flex flex-col h-screen">
             <div className="flex-1 overflow-y-auto">
               {children}
