@@ -37,7 +37,7 @@ export default function WelcomePage() {
           height={120}
           data-ai-hint="logo"
           priority
-          className="object-contain"
+          className="object-cover rounded-full"
         />
         <div>
           <h1 className="text-4xl font-bold tracking-tight">

@@ -5,6 +5,7 @@ import { findDestinations } from "@/ai/flows/smart-destination-finder";
 import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-calculator";
 import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
+import { cropLogo as cropLogoFlow } from "@/ai/flows/crop-logo-flow";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
@@ -97,6 +98,25 @@ export async function findMovie(input: { movieName: string }) {
     console.error(e);
     return { error: 'An unexpected error occurred while searching for the movie.' };
   }
+}
+
+const CropLogoInput = z.object({
+    photoDataUri: z.string(),
+});
+
+export async function cropLogo(input: { photoDataUri: string }): Promise<{ croppedLogoUrl?: string, error?: string }> {
+    const validatedInput = CropLogoInput.safeParse(input);
+    if (!validatedInput.success) {
+        return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+    }
+
+    try {
+        const result = await cropLogoFlow(validatedInput.data);
+        return { croppedLogoUrl: result.croppedPhotoDataUri };
+    } catch (e) {
+        console.error('Error cropping logo:', e);
+        return { error: 'An unexpected error occurred while cropping the logo.' };
+    }
 }
 
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {

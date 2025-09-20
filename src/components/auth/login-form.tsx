@@ -149,7 +149,7 @@ export function LoginForm() {
   return (
     <>
       <div className="flex flex-col items-center text-center mb-6">
-        <Image src={logoUrl} alt="logo" width={100} height={100} className="object-contain" />
+        <Image src={logoUrl} alt="logo" width={100} height={100} className="object-cover rounded-full" />
         <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
       </div>
       <Card className="w-full max-w-sm">

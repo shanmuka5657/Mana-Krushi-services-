@@ -184,7 +184,7 @@ const ClientVideoPlayer = () => {
                 onReady={onPlayerReady}
             />
             <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 p-2 rounded-lg pointer-events-none">
-                <Image src={logoUrl} alt="Logo" width={24} height={24} className="h-6 w-6 object-contain" />
+                <Image src={logoUrl} alt="Logo" width={24} height={24} className="h-6 w-6 object-cover rounded-full" />
                 <span className="text-white font-bold text-lg">MK Services</span>
             </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">

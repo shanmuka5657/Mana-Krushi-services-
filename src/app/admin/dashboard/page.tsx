@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye, Signal, Image as ImageIcon, Upload, Loader2 } from "lucide-react";
+import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2 } from "lucide-react";
 import { getRoutes, getBookings, getAllProfiles, getVisitorCount, getLiveVisitorsCount, saveGlobalLogoUrl, getGlobalLogoUrl } from "@/lib/storage";
 import type { Booking, Route as RouteType, Profile } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { cropLogo } from "@/app/actions";
 
 const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href?: string }) => {
     const cardContent = (
@@ -144,10 +145,10 @@ function AdminDashboardPage() {
   const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-        if (file.size > 1024 * 1024) { // 1MB limit
+        if (file.size > 4 * 1024 * 1024) { // 4MB limit for genAI
             toast({
                 title: "File too large",
-                description: "Please upload an image smaller than 1MB.",
+                description: "Please upload an image smaller than 4MB.",
                 variant: "destructive"
             });
             return;
@@ -157,13 +158,32 @@ function AdminDashboardPage() {
         reader.onloadstart = () => setIsUploading(true);
         reader.onloadend = async () => {
             const dataUrl = reader.result as string;
-            await saveGlobalLogoUrl(dataUrl);
-            setLogoUrl(dataUrl);
-            setIsUploading(false);
+            
             toast({
-                title: "Logo Updated!",
-                description: "The application logo has been updated for all users."
+                title: "AI is enhancing your logo...",
+                description: "This might take a moment.",
             });
+
+            const result = await cropLogo({ photoDataUri: dataUrl });
+
+            if (result.error || !result.croppedLogoUrl) {
+                await saveGlobalLogoUrl(dataUrl); // Save original if AI fails
+                setLogoUrl(dataUrl);
+                toast({
+                    title: "AI enhancement failed, using original logo.",
+                    description: result.error || "An unknown error occurred during cropping.",
+                    variant: "destructive",
+                });
+            } else {
+                await saveGlobalLogoUrl(result.croppedLogoUrl);
+                setLogoUrl(result.croppedLogoUrl);
+                toast({
+                    title: "Logo Updated!",
+                    description: "The application logo has been enhanced and updated.",
+                });
+            }
+            
+            setIsUploading(false);
         };
         reader.readAsDataURL(file);
     }
@@ -203,16 +223,16 @@ function AdminDashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-4 flex flex-col items-center">
                         {logoUrl ? (
-                            <Image src={logoUrl} alt="Current App Logo" width={96} height={96} className="rounded-md object-contain h-24 w-24 border p-1" />
+                            <Image src={logoUrl} alt="Current App Logo" width={96} height={96} className="rounded-full object-cover h-24 w-24 border p-1" />
                         ) : (
-                             <div className="h-24 w-24 bg-muted rounded-md flex items-center justify-center">
+                             <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center">
                                 <ImageIcon className="h-10 w-10 text-muted-foreground" />
                             </div>
                         )}
                         <Button asChild variant="outline">
                             <label htmlFor="logo-upload" className="cursor-pointer">
-                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                                Upload Logo
+                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                Upload & Enhance
                                 <Input id="logo-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleLogoUpload} />
                             </label>
                         </Button>
