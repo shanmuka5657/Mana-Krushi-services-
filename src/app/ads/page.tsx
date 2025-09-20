@@ -17,17 +17,14 @@ function AdsPageContent() {
         const script2 = document.createElement('script');
         script2.innerHTML = `(function(s){s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
         document.body.appendChild(script2);
+        
+        // Third ad script
+        const script3 = document.createElement('script');
+        script3.innerHTML = `(function(s){s.dataset.zone='9904124',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
+        document.body.appendChild(script3);
 
         return () => {
-            // Attempt to clean up if the component unmounts. This is best-effort.
-            const adScript1 = document.querySelector('script[src="https://groleegni.net/vignette.min.js"]');
-            if (adScript1) {
-                // The script removes itself, but we can try to clean up the container if it's identifiable.
-            }
-            const adScript2 = document.querySelector('script[src="https://al5sm.com/tag.min.js"]');
-             if (adScript2) {
-                // The script removes itself, but we can try to clean up the container if it's identifiable.
-            }
+            // Cleanup is best-effort as these scripts often self-remove or don't provide cleanup handlers.
         }
     }, []);
 
