@@ -3,16 +3,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
-import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange } from '@/lib/storage';
+import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange, getGlobalLogoUrl, onGlobalLogoUrlChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 
 const ClientVideoPlayer = () => {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    const [logoUrl, setLogoUrl] = useState<string>(placeholderImages.logo.url);
     const [isPlayerGloballyVisible, setIsPlayerGloballyVisible] = useState(true);
     const [isPlayerLocallyVisible, setIsPlayerLocallyVisible] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
@@ -35,9 +37,19 @@ const ClientVideoPlayer = () => {
             setIsPlayerGloballyVisible(isVisible);
         });
 
+        // Logo handling
+        getGlobalLogoUrl().then(url => {
+            if (url) setLogoUrl(url);
+        });
+        const unsubLogo = onGlobalLogoUrlChange(url => {
+            if (url) setLogoUrl(url);
+            else setLogoUrl(placeholderImages.logo.url);
+        });
+
         return () => {
             unsubUrl();
             unsubVisibility();
+            unsubLogo();
         };
     }, []);
 
@@ -172,7 +184,7 @@ const ClientVideoPlayer = () => {
                 onReady={onPlayerReady}
             />
             <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 p-2 rounded-lg pointer-events-none">
-                <Image src="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png" alt="Logo" width={24} height={24} className="h-6 w-6" />
+                <Image src={logoUrl} alt="Logo" width={24} height={24} className="h-6 w-6 object-contain" />
                 <span className="text-white font-bold text-lg">MK Services</span>
             </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">

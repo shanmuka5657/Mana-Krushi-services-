@@ -9,6 +9,23 @@ import { getApp } from "firebase/app";
 
 const isBrowser = typeof window !== "undefined";
 
+// --- Branding ---
+export const saveGlobalLogoUrl = async (url: string) => {
+    if (!isBrowser) return;
+    await saveSetting('globalLogoUrl', url);
+};
+
+export const getGlobalLogoUrl = async (): Promise<string | null> => {
+    if (!isBrowser) return null;
+    return await getSetting('globalLogoUrl');
+};
+
+export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) => {
+    if (!isBrowser) return () => {};
+    return onSettingChange('globalLogoUrl', callback);
+};
+
+
 // --- Video Events ---
 export const logVideoUnmute = async (videoUrl: string) => {
     if (!isBrowser) return;

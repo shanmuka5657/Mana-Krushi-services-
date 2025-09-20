@@ -5,20 +5,39 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import placeholderImages from "@/lib/placeholder-images.json";
+import { useState, useEffect } from 'react';
+import { getGlobalLogoUrl, onGlobalLogoUrlChange } from '@/lib/storage';
 
 export default function WelcomePage() {
-  const { logo } = placeholderImages;
+  const [logoUrl, setLogoUrl] = useState(placeholderImages.logo.url);
+
+  useEffect(() => {
+    // Set initial logo and subscribe to changes
+    getGlobalLogoUrl().then(url => {
+        if (url) setLogoUrl(url);
+    });
+    const unsub = onGlobalLogoUrlChange(url => {
+        if (url) {
+            setLogoUrl(url);
+        } else {
+            setLogoUrl(placeholderImages.logo.url);
+        }
+    });
+
+    return () => unsub();
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
       <div className="flex flex-col items-center gap-6">
         <Image
-          src={logo.url}
+          src={logoUrl}
           alt="Mana Krushi Services Logo"
-          width={logo.width}
-          height={logo.height}
-          data-ai-hint={logo.hint}
+          width={120}
+          height={120}
+          data-ai-hint="logo"
           priority
+          className="object-contain"
         />
         <div>
           <h1 className="text-4xl font-bold tracking-tight">

@@ -17,13 +17,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { saveCurrentUser, getProfile } from '@/lib/storage';
+import { saveCurrentUser, getProfile, onGlobalLogoUrlChange, getGlobalLogoUrl } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 import { Download, Loader2, QrCode } from 'lucide-react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import QRCode from 'qrcode.react';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -47,8 +48,18 @@ export function LoginForm() {
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [showQrDialog, setShowQrDialog] = React.useState(false);
   const [appUrl, setAppUrl] = React.useState('');
+  const [logoUrl, setLogoUrl] = React.useState(placeholderImages.logo.url);
+
 
   React.useEffect(() => {
+    // Set initial logo and subscribe to changes
+    getGlobalLogoUrl().then(url => {
+        if (url) setLogoUrl(url);
+    });
+    const unsub = onGlobalLogoUrlChange(url => {
+        if (url) setLogoUrl(url);
+    });
+
     // This will only run on the client
     setAppUrl(window.location.origin);
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -64,6 +75,7 @@ export function LoginForm() {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      unsub();
     };
   }, []);
 
@@ -137,7 +149,7 @@ export function LoginForm() {
   return (
     <>
       <div className="flex flex-col items-center text-center mb-6">
-        <Image src="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png" alt="logo" width={100} height={100} />
+        <Image src={logoUrl} alt="logo" width={100} height={100} className="object-contain" />
         <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
       </div>
       <Card className="w-full max-w-sm">

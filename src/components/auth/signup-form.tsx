@@ -33,10 +33,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCurrentUser, saveProfile } from '@/lib/storage';
+import { saveCurrentUser, saveProfile, getGlobalLogoUrl, onGlobalLogoUrlChange } from '@/lib/storage';
 import Image from 'next/image';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -50,6 +51,17 @@ export function SignupForm() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(null);
   const router = useRouter();
+  const [logoUrl, setLogoUrl] = useState(placeholderImages.logo.url);
+
+  useEffect(() => {
+    getGlobalLogoUrl().then(url => {
+      if (url) setLogoUrl(url);
+    });
+    const unsub = onGlobalLogoUrlChange(url => {
+      if (url) setLogoUrl(url);
+    });
+    return () => unsub();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,7 +99,7 @@ export function SignupForm() {
   return (
     <>
       <div className="flex flex-col items-center text-center mb-6">
-        <Image src="https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png" alt="logo" width={100} height={100} />
+        <Image src={logoUrl} alt="logo" width={100} height={100} className="object-contain"/>
         <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
       </div>
       <Card className="w-full max-w-lg">

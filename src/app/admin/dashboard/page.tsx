@@ -1,16 +1,21 @@
 
+
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye, Signal } from "lucide-react";
-import { getRoutes, getBookings, getAllProfiles, getVisitorCount, getLiveVisitorsCount } from "@/lib/storage";
+import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye, Signal, Image as ImageIcon, Upload, Loader2 } from "lucide-react";
+import { getRoutes, getBookings, getAllProfiles, getVisitorCount, getLiveVisitorsCount, saveGlobalLogoUrl, getGlobalLogoUrl } from "@/lib/storage";
 import type { Booking, Route as RouteType, Profile } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href?: string }) => {
     const cardContent = (
@@ -78,17 +83,22 @@ function AdminDashboardPage() {
   const [newUsers, setNewUsers] = useState<Profile[]>([]);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      const [profiles, routes, bookings, visitors, liveVisitors] = await Promise.all([
+      const [profiles, routes, bookings, visitors, liveVisitors, currentLogo] = await Promise.all([
         getAllProfiles(),
         getRoutes(true),
         getBookings(true),
         getVisitorCount(),
         getLiveVisitorsCount(),
+        getGlobalLogoUrl(),
       ]);
       setAllProfiles(profiles);
+      setLogoUrl(currentLogo);
 
       const bookingRevenue = bookings
         .filter(b => b.paymentStatus === 'Paid')
@@ -131,6 +141,35 @@ function AdminDashboardPage() {
     return allProfiles.find(p => p.email === booking.clientEmail);
   }
 
+  const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        if (file.size > 1024 * 1024) { // 1MB limit
+            toast({
+                title: "File too large",
+                description: "Please upload an image smaller than 1MB.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadstart = () => setIsUploading(true);
+        reader.onloadend = async () => {
+            const dataUrl = reader.result as string;
+            await saveGlobalLogoUrl(dataUrl);
+            setLogoUrl(dataUrl);
+            setIsUploading(false);
+            toast({
+                title: "Logo Updated!",
+                description: "The application logo has been updated for all users."
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
+
   if (!isLoaded) {
     return <AppLayout><div>Loading admin dashboard...</div></AppLayout>;
   }
@@ -147,8 +186,8 @@ function AdminDashboardPage() {
                 <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" />
             </div>
 
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                <Card>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="lg:col-span-5">
                     <CardHeader>
                         <CardTitle>Recent Bookings</CardTitle>
                         <CardDescription>The 5 most recent bookings from across the platform.</CardDescription>
@@ -157,16 +196,38 @@ function AdminDashboardPage() {
                         {recentBookings.length > 0 ? recentBookings.map(b => <RecentBookingItem key={b.id} booking={b} profile={getProfileForBooking(b)} />) : <p className="text-sm text-muted-foreground">No bookings yet.</p>}
                     </CardContent>
                 </Card>
-                 <Card>
+                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Recent Users</CardTitle>
-                        <CardDescription>The most recently registered or subscribed users.</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><ImageIcon /> Branding</CardTitle>
+                        <CardDescription>Set the global app logo.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                       {newUsers.length > 0 ? newUsers.map(p => <NewUserItem key={p.email} profile={p} />) : <p className="text-sm text-muted-foreground">No users yet.</p>}
+                    <CardContent className="space-y-4 flex flex-col items-center">
+                        {logoUrl ? (
+                            <Image src={logoUrl} alt="Current App Logo" width={96} height={96} className="rounded-md object-contain h-24 w-24 border p-1" />
+                        ) : (
+                             <div className="h-24 w-24 bg-muted rounded-md flex items-center justify-center">
+                                <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                            </div>
+                        )}
+                        <Button asChild variant="outline">
+                            <label htmlFor="logo-upload" className="cursor-pointer">
+                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                Upload Logo
+                                <Input id="logo-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleLogoUpload} />
+                            </label>
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recent Users</CardTitle>
+                    <CardDescription>The most recently registered or subscribed users.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {newUsers.length > 0 ? newUsers.map(p => <NewUserItem key={p.email} profile={p} />) : <p className="text-sm text-muted-foreground">No users yet.</p>}
+                </CardContent>
+            </Card>
         </div>
     </AppLayout>
   );
