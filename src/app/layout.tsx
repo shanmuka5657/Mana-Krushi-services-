@@ -29,6 +29,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body>
         <div className="flex flex-col h-screen">

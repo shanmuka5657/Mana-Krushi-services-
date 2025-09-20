@@ -1,11 +1,11 @@
-
 {
   "name": "Mana Krushi Services",
-  "short_name": "MKS",
+  "short_name": "MK Services",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#B3E5FC",
+  "theme_color": "#1E88E5",
   "icons": [
     {
       "src": "https://i.ibb.co/LdbdX3Dp/file-00000000dad0622f92ca201d38c47e43.png",
