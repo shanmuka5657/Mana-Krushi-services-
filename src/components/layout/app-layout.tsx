@@ -163,12 +163,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
-    { href: `/live`, icon: Tv, label: "Live Broadcasts" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
     { href: `/watch`, icon: LinkIcon, label: "Watch" },
     { href: `/loans`, icon: IndianRupee, label: "Loans" },
-    { href: 'https://clnk.in/w89P', icon: IndianRupee, label: "Abhi Loans" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
@@ -181,12 +179,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
     { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
-    { href: `/live`, icon: Tv, label: "Live Broadcasts" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
     { href: `/watch?role=owner`, icon: LinkIcon, label: "Watch" },
     { href: `/loans?role=owner`, icon: IndianRupee, label: "Loans" },
-    { href: 'https://clnk.in/w89P', icon: IndianRupee, label: "Abhi Loans" },
     { href: `/insurance?role=owner`, icon: Shield, label: "Insurance" },
     { href: `/ecommerce?role=owner`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
@@ -197,13 +193,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
-    { href: `/live`, icon: Tv, label: "Live Broadcasts" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
     { href: `/watch?role=passenger`, icon: LinkIcon, label: "Watch" },
     { href: `/loans?role=passenger`, icon: IndianRupee, label: "Loans" },
-    { href: 'https://clnk.in/w89P', icon: IndianRupee, label: "Abhi Loans" },
     { href: `/insurance?role=passenger`, icon: Shield, label: "Insurance" },
     { href: `/ecommerce?role=passenger`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
@@ -376,3 +370,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    
