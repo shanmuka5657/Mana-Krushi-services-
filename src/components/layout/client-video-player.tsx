@@ -5,14 +5,17 @@ import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
 import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
-import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff } from 'lucide-react';
+import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
 
 const ClientVideoPlayer = () => {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [isPlayerGloballyVisible, setIsPlayerGloballyVisible] = useState(true);
     const [isPlayerLocallyVisible, setIsPlayerLocallyVisible] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
+    const [isFullScreen, setIsFullScreen] = useState(false);
     const playerRef = useRef<YouTubePlayer | null>(null);
     const { toast } = useToast();
     const [origin, setOrigin] = useState<string>('');
@@ -82,6 +85,10 @@ const ClientVideoPlayer = () => {
         }
     };
     
+    const toggleFullScreen = () => {
+        setIsFullScreen(!isFullScreen);
+    }
+    
     const handleLike = () => {
         if(videoUrl) {
             window.open(videoUrl, '_blank');
@@ -108,7 +115,7 @@ const ClientVideoPlayer = () => {
 
     const isPlayerVisible = isPlayerGloballyVisible && isPlayerLocallyVisible;
 
-    if (!isPlayerVisible) {
+    if (!isPlayerVisible && !isFullScreen) {
         return (
             <div className="h-full w-full bg-black flex items-center justify-center text-muted-foreground p-2">
                 {!isPlayerGloballyVisible ? (
@@ -152,7 +159,10 @@ const ClientVideoPlayer = () => {
     };
 
     return (
-         <div className="w-full h-full relative group">
+         <div className={cn(
+            "w-full h-full relative group",
+            isFullScreen && "fixed inset-0 z-[100] bg-black"
+         )}>
             <YouTube
                 videoId={videoId}
                 opts={opts}
@@ -169,6 +179,9 @@ const ClientVideoPlayer = () => {
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={toggleMute}>
                     {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                </Button>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={toggleFullScreen}>
+                    {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </Button>
                  <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => setIsPlayerLocallyVisible(false)}>
                     <X className="h-4 w-4" />
