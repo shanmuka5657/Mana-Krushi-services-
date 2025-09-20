@@ -34,6 +34,7 @@ import {
   Youtube,
   Signal,
   Tv,
+  MessageSquare,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -165,6 +166,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
+    { href: `/admin/messaging`, icon: MessageSquare, label: "Bulk Messaging" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/live`, icon: Tv, label: "Live" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
