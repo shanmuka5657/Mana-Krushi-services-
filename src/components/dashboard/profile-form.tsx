@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -53,6 +53,7 @@ const profileFormSchema = z.object({
   mileage: z.coerce.number().optional(),
   selfieDataUrl: z.string().optional(),
   mobileVerified: z.boolean().default(false),
+  additionalMobiles: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -90,6 +91,7 @@ export default function ProfileForm() {
       mileage: 0,
       selfieDataUrl: "",
       mobileVerified: false,
+      additionalMobiles: "",
     },
   });
 
@@ -134,7 +136,7 @@ export default function ProfileForm() {
         const userEmail = getCurrentUser();
         const userName = getCurrentUserName();
 
-        const defaultValues: ProfileFormValues = {
+        const defaultValues: Partial<ProfileFormValues> = {
             name: userName || (userEmail ? userEmail.split('@')[0] : ''),
             email: userEmail || '',
             mobile: '',
@@ -145,13 +147,19 @@ export default function ProfileForm() {
             mileage: 0,
             selfieDataUrl: '',
             mobileVerified: false,
+            additionalMobiles: '',
         };
         
-        let combinedValues = { ...defaultValues, ...userProfile };
+        const combinedValues = { ...defaultValues, ...userProfile };
 
         // For admin, ensure the name is always 'Admin' if not set
         if (userEmail === 'admin@example.com' && (!userProfile || !userProfile.name)) {
             combinedValues.name = 'Admin';
+        }
+
+        // Format additionalMobiles array back to a string for the textarea
+        if (userProfile?.additionalMobiles) {
+            combinedValues.additionalMobiles = userProfile.additionalMobiles.join('\n');
         }
 
         form.reset(combinedValues);
@@ -190,7 +198,20 @@ export default function ProfileForm() {
 
   async function onSubmit(data: ProfileFormValues) {
     const currentProfile = await getProfile();
-    const profileToSave: Profile = { ...currentProfile, ...data };
+    const { additionalMobiles, ...restOfData } = data;
+    
+    const additionalMobilesArray = additionalMobiles
+        ?.split('\n')
+        .map(num => num.trim())
+        .filter(num => /^\d{10,15}$/.test(num)) // Basic validation for phone numbers
+        .slice(0, 100); // Limit to 100 numbers
+
+
+    const profileToSave: Profile = { 
+        ...currentProfile, 
+        ...restOfData,
+        additionalMobiles: additionalMobilesArray,
+    };
     
     // Add role if it's missing (especially for admin's first save)
     if (!profileToSave.role) {
@@ -411,14 +432,14 @@ export default function ProfileForm() {
                 name="mobile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
+                    <FormLabel>Primary Mobile Number</FormLabel>
                      <div className="flex items-center gap-2">
                         <FormControl>
                           <div className="relative flex-grow">
                             <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               type="tel"
-                              placeholder="Enter your mobile number"
+                              placeholder="Enter your primary mobile"
                               {...field}
                               className="pl-10"
                               disabled={form.getValues('mobileVerified')}
@@ -505,6 +526,29 @@ export default function ProfileForm() {
                   </FormItem>
                 )}
               />
+
+              {profile?.role === 'admin' && (
+                <FormField
+                  control={form.control}
+                  name="additionalMobiles"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Mobile Numbers</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                           <PhoneForwarded className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                           <Textarea
+                            placeholder="Enter up to 100 mobile numbers, one per line."
+                            {...field}
+                            className="pl-10 h-32"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               {profile?.role === 'owner' && (
                 <>

@@ -55,6 +55,7 @@ export type Route = {
 export type Profile = {
     name: string;
     mobile: string;
+    additionalMobiles?: string[];
     mobileVerified?: boolean;
     email: string;
     country?: string;
