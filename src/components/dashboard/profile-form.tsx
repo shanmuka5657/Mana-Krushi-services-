@@ -147,15 +147,17 @@ export default function ProfileForm() {
             mobileVerified: false,
         };
         
-        const combinedValues = { ...defaultValues, ...userProfile };
+        let combinedValues = { ...defaultValues, ...userProfile };
 
-        if (userProfile) {
-            form.reset(combinedValues);
-            if (userProfile.selfieDataUrl) {
-                setSelfie(userProfile.selfieDataUrl);
-            }
-        } else if (userEmail) {
-            form.reset(defaultValues);
+        // For admin, ensure the name is always 'Admin' if not set
+        if (userEmail === 'admin@example.com' && (!userProfile || !userProfile.name)) {
+            combinedValues.name = 'Admin';
+        }
+
+        form.reset(combinedValues);
+
+        if (userProfile?.selfieDataUrl) {
+            setSelfie(userProfile.selfieDataUrl);
         }
     };
     loadProfile();
@@ -189,6 +191,14 @@ export default function ProfileForm() {
   async function onSubmit(data: ProfileFormValues) {
     const currentProfile = await getProfile();
     const profileToSave: Profile = { ...currentProfile, ...data };
+    
+    // Add role if it's missing (especially for admin's first save)
+    if (!profileToSave.role) {
+        const userEmail = getCurrentUser();
+        if (userEmail === 'admin@example.com') {
+            profileToSave.role = 'admin';
+        }
+    }
 
     await saveProfile(profileToSave);
     

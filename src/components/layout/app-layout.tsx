@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import {
@@ -159,6 +160,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
+    { href: `/admin/profile`, icon: User, label: "Profile" },
     { href: `/admin/users`, icon: Users, label: "Users" },
     { href: `/admin/visitors`, icon: Eye, label: "Visitors" },
     { href: `/admin/video-views`, icon: Youtube, label: "Video Views" },
@@ -350,12 +352,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {role !== 'admin' && (
-                    <DropdownMenuItem onClick={() => router.push(`/profile?role=${role}`)}>
+                   <DropdownMenuItem onClick={() => router.push(role === 'admin' ? '/admin/profile' : `/profile?role=${role}`)}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                  )}
                   <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
