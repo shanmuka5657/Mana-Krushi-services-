@@ -90,6 +90,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [isMounted, setIsMounted] = React.useState(false);
   
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -127,6 +128,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
+    setIsMounted(true);
     const loadData = async () => {
       const name = getCurrentUserName();
       const email = getCurrentUser();
@@ -267,7 +269,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {navItems.map((item) => (
+            {isMounted && navItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
                   onClick={() => handleNavClick(item.href)}
@@ -370,5 +372,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
