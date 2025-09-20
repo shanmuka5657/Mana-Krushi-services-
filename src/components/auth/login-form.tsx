@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { saveCurrentUser, getProfile, onGlobalLogoUrlChange, getGlobalLogoUrl } from '@/lib/storage';
+import { saveCurrentUser, getProfile, onGlobalLogoUrlChange, getGlobalLogoUrlWithCache } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 import { Download, Loader2, QrCode } from 'lucide-react';
@@ -53,11 +54,15 @@ export function LoginForm() {
 
   React.useEffect(() => {
     // Set initial logo and subscribe to changes
-    getGlobalLogoUrl().then(url => {
+    getGlobalLogoUrlWithCache().then(url => {
         if (url) setLogoUrl(url);
     });
     const unsub = onGlobalLogoUrlChange(url => {
-        if (url) setLogoUrl(url);
+        if (url) {
+            setLogoUrl(url);
+        } else {
+            setLogoUrl(placeholderImages.logo.url);
+        }
     });
 
     // This will only run on the client

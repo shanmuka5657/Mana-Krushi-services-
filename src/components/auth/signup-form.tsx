@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,7 +36,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCurrentUser, saveProfile, getGlobalLogoUrl, onGlobalLogoUrlChange } from '@/lib/storage';
+import { saveCurrentUser, saveProfile, getGlobalLogoUrlWithCache, onGlobalLogoUrlChange } from '@/lib/storage';
 import Image from 'next/image';
 import placeholderImages from '@/lib/placeholder-images.json';
 
@@ -54,11 +55,15 @@ export function SignupForm() {
   const [logoUrl, setLogoUrl] = useState(placeholderImages.logo.url);
 
   useEffect(() => {
-    getGlobalLogoUrl().then(url => {
+    getGlobalLogoUrlWithCache().then(url => {
       if (url) setLogoUrl(url);
     });
     const unsub = onGlobalLogoUrlChange(url => {
-      if (url) setLogoUrl(url);
+      if (url) {
+          setLogoUrl(url);
+      } else {
+          setLogoUrl(placeholderImages.logo.url);
+      }
     });
     return () => unsub();
   }, []);

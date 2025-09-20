@@ -6,14 +6,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import placeholderImages from "@/lib/placeholder-images.json";
 import { useState, useEffect } from 'react';
-import { getGlobalLogoUrl, onGlobalLogoUrlChange } from '@/lib/storage';
+import { getGlobalLogoUrlWithCache, onGlobalLogoUrlChange } from '@/lib/storage';
 
 export default function WelcomePage() {
   const [logoUrl, setLogoUrl] = useState(placeholderImages.logo.url);
 
   useEffect(() => {
     // Set initial logo and subscribe to changes
-    getGlobalLogoUrl().then(url => {
+    getGlobalLogoUrlWithCache().then(url => {
         if (url) setLogoUrl(url);
     });
     const unsub = onGlobalLogoUrlChange(url => {

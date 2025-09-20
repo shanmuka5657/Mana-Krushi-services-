@@ -13,16 +13,38 @@ const isBrowser = typeof window !== "undefined";
 export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;
     await saveSetting('globalLogoUrl', url);
+    await saveSetting('logoCacheBuster', new Date().getTime()); // Add cache buster
 };
 
-export const getGlobalLogoUrl = async (): Promise<string | null> => {
+export const getGlobalLogoUrlWithCache = async (): Promise<string | null> => {
     if (!isBrowser) return null;
-    return await getSetting('globalLogoUrl');
+    const url = await getSetting('globalLogoUrl');
+    if (!url) return null;
+    const cacheBuster = await getSetting('logoCacheBuster');
+    return cacheBuster ? `${url}?v=${cacheBuster}` : url;
 };
 
 export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) => {
     if (!isBrowser) return () => {};
-    return onSettingChange('globalLogoUrl', callback);
+
+    const handleLogoUpdate = async () => {
+        const url = await getSetting('globalLogoUrl');
+        if (url) {
+            const cacheBuster = await getSetting('logoCacheBuster');
+            callback(cacheBuster ? `${url}?v=${cacheBuster}` : url);
+        } else {
+            callback(null);
+        }
+    };
+    
+    // Listen to both URL and cache buster changes
+    const unsubUrl = onSettingChange('globalLogoUrl', handleLogoUpdate);
+    const unsubCacheBuster = onSettingChange('logoCacheBuster', handleLogoUpdate);
+
+    return () => {
+        unsubUrl();
+        unsubCacheBuster();
+    };
 };
 
 
@@ -271,4 +293,10 @@ export const clearCurrentUser = () => {
     window.sessionStorage.removeItem('currentUserRole');
     window.sessionStorage.removeItem('session_id');
     window.sessionStorage.removeItem('last_activity');
+};
+
+// Deprecated branding functions, kept for compatibility, will be removed later.
+export const getGlobalLogoUrl = async (): Promise<string | null> => {
+    if (!isBrowser) return null;
+    return await getSetting('globalLogoUrl');
 };

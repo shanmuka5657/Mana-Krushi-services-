@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
-import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange, getGlobalLogoUrl, onGlobalLogoUrlChange } from '@/lib/storage';
+import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange, getGlobalLogoUrlWithCache, onGlobalLogoUrlChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +38,7 @@ const ClientVideoPlayer = () => {
         });
 
         // Logo handling
-        getGlobalLogoUrl().then(url => {
+        getGlobalLogoUrlWithCache().then(url => {
             if (url) setLogoUrl(url);
         });
         const unsubLogo = onGlobalLogoUrlChange(url => {
