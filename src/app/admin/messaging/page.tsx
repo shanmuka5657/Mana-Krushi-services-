@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,42 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
 type TargetAudience = 'all' | 'upcoming';
+type TargetUser = { name: string; mobile: string };
 
 function AdminMessagingPage() {
     const [message, setMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [audience, setAudience] = useState<TargetAudience>('all');
+    const [targetUsers, setTargetUsers] = useState<TargetUser[]>([]);
+    const [isFetchingAudience, setIsFetchingAudience] = useState(false);
     const { toast } = useToast();
+
+    useEffect(() => {
+        const fetchAudience = async () => {
+            setIsFetchingAudience(true);
+            let users: TargetUser[] = [];
+
+            if (audience === 'upcoming') {
+                const allBookings: Booking[] = await getBookings(true);
+                const now = new Date();
+                const upcomingBookings = allBookings.filter(b => 
+                    new Date(b.departureDate) > now && b.status === 'Confirmed'
+                );
+
+                const uniqueUsers = new Map<string, TargetUser>();
+                upcomingBookings.forEach(booking => {
+                    if (booking.mobile && booking.mobile !== '0000000000') {
+                        uniqueUsers.set(booking.mobile, { name: booking.client, mobile: booking.mobile });
+                    }
+                });
+                users = Array.from(uniqueUsers.values());
+            }
+            setTargetUsers(users);
+            setIsFetchingAudience(false);
+        };
+
+        fetchAudience();
+    }, [audience]);
 
     const handleSend = async () => {
         if (!message.trim()) {
@@ -32,29 +62,18 @@ function AdminMessagingPage() {
         }
 
         setIsSending(true);
-        let targetUsers: { mobile: string }[] = [];
+        let usersToMessage: TargetUser[] = [];
 
         if (audience === 'all') {
             const allProfiles: Profile[] = await getAllProfiles();
-            targetUsers = allProfiles.filter(p => p.mobile && p.mobile !== '0000000000');
+            usersToMessage = allProfiles
+                .filter(p => p.mobile && p.mobile !== '0000000000')
+                .map(p => ({ name: p.name, mobile: p.mobile }));
         } else {
-            const allBookings: Booking[] = await getBookings(true);
-            const now = new Date();
-            const upcomingBookings = allBookings.filter(b => 
-                new Date(b.departureDate) > now && b.status === 'Confirmed'
-            );
-
-            // Get unique users to avoid duplicate messages
-            const uniqueUsers = new Map<string, { mobile: string }>();
-            upcomingBookings.forEach(booking => {
-                if (booking.mobile && booking.mobile !== '0000000000') {
-                    uniqueUsers.set(booking.mobile, { mobile: booking.mobile });
-                }
-            });
-            targetUsers = Array.from(uniqueUsers.values());
+            usersToMessage = targetUsers;
         }
 
-        if (targetUsers.length === 0) {
+        if (usersToMessage.length === 0) {
             toast({
                 title: 'No Users Found',
                 description: 'There are no users to message for the selected audience.',
@@ -65,15 +84,13 @@ function AdminMessagingPage() {
         }
 
         toast({
-            title: `Preparing to send ${targetUsers.length} messages...`,
+            title: `Preparing to send ${usersToMessage.length} messages...`,
             description: 'Your browser may ask for permission to open multiple windows. Please allow it.',
         });
 
-        // Add a small delay to allow the toast to show up before potential browser blocking
         setTimeout(() => {
             let sentCount = 0;
-            targetUsers.forEach(user => {
-                // Use the +91 prefix for Indian numbers for better compatibility
+            usersToMessage.forEach(user => {
                 const whatsappUrl = `https://wa.me/91${user.mobile}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 sentCount++;
@@ -134,6 +151,26 @@ function AdminMessagingPage() {
                             </div>
                         </RadioGroup>
                     </div>
+
+                    {isFetchingAudience ? (
+                        <div className="flex items-center justify-center p-8">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : (
+                        audience === 'upcoming' && targetUsers.length > 0 && (
+                            <div className="space-y-2">
+                                <Label>Recipients ({targetUsers.length})</Label>
+                                <div className="border rounded-md max-h-48 overflow-y-auto">
+                                    {targetUsers.map((user, index) => (
+                                        <div key={index} className="flex justify-between items-center p-2 text-sm border-b last:border-b-0">
+                                            <span>{user.name}</span>
+                                            <span className="text-muted-foreground font-mono">{user.mobile}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    )}
 
                     <div>
                         <Label htmlFor="message-area" className="font-medium">2. Compose your message</Label>
