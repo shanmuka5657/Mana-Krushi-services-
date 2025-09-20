@@ -1,11 +1,11 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
+  "short_name": "MK Services",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1e88e5",
+  "theme_color": "#1E88E5",
   "icons": [
     {
       "src": "/logo.png",
@@ -16,6 +16,18 @@
       "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple-touch-icon"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "225x225",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
