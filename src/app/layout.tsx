@@ -40,6 +40,7 @@ export default function RootLayout({
       <body>
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9896290',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='9894293',s.src='https://forfrogadiertor.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
         <div className="flex flex-col h-screen">
             <div className="flex-1 overflow-y-auto">
               {children}
