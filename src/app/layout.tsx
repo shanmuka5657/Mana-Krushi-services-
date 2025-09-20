@@ -7,6 +7,7 @@ import * as React from 'react';
 import { logVisit } from '@/lib/storage';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import Script from 'next/script';
 
 const ConditionalFooter = dynamic(
   () => import('@/components/layout/conditional-footer'),
@@ -39,6 +40,15 @@ export default function RootLayout({
             <ConditionalFooter />
         </div>
         <Toaster />
+        <Script id="monetag-vignette" strategy="afterInteractive">
+          {`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+        </Script>
+        <Script id="monetag-tag1" strategy="afterInteractive">
+          {`(function(s){s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+        </Script>
+        <Script id="monetag-tag2" strategy="afterInteractive">
+          {`(function(s){s.dataset.zone='9904124',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+        </Script>
       </body>
     </html>
   );
