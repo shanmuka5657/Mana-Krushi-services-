@@ -21,10 +21,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const [loadAds, setLoadAds] = React.useState(false);
 
   React.useEffect(() => {
     logVisit(pathname);
   }, [pathname]);
+
+  React.useEffect(() => {
+    // Only load ads if the hostname is not the development site
+    if (window.location.hostname !== 'studio.firebase.google.com') {
+      setLoadAds(true);
+    }
+  }, []);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -40,15 +48,19 @@ export default function RootLayout({
             <ConditionalFooter />
         </div>
         <Toaster />
-        <Script id="monetag-vignette" strategy="afterInteractive">
-          {`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
-        </Script>
-        <Script id="monetag-tag1" strategy="afterInteractive">
-          {`(function(s){s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
-        </Script>
-        <Script id="monetag-tag2" strategy="afterInteractive">
-          {`(function(s){s.dataset.zone='9904124',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
-        </Script>
+        {loadAds && (
+          <>
+            <Script id="monetag-vignette" strategy="afterInteractive">
+              {`(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+            </Script>
+            <Script id="monetag-tag1" strategy="afterInteractive">
+              {`(function(s){s.dataset.zone='9892058',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+            </Script>
+            <Script id="monetag-tag2" strategy="afterInteractive">
+              {`(function(s){s.dataset.zone='9904124',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );
