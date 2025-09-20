@@ -3,10 +3,25 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { MonitorPlay } from 'lucide-react';
 
 function AdsPageContent() {
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.innerHTML = `(function(s){s.dataset.zone='9892027',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
+        document.body.appendChild(script);
+
+        return () => {
+            // Attempt to clean up if the component unmounts, though this specific script might not be easily removable.
+            // This is best-effort cleanup.
+            const adScript = document.querySelector('script[src="https://groleegni.net/vignette.min.js"]');
+            if (adScript) {
+                document.body.removeChild(adScript);
+            }
+        }
+    }, []);
+
     return (
         <AppLayout>
             <div className="space-y-6">
