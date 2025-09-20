@@ -181,7 +181,7 @@ const ClientVideoPlayer = () => {
                     className="rounded-full"
                     data-ai-hint={defaultLogo.hint}
                 />
-                <span className="text-white font-bold text-lg">MK Services</span>
+                <span className="text-white font-bold text-lg">Mana Krushi Services</span>
             </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={handleLike}>
