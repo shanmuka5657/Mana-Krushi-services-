@@ -1,3 +1,4 @@
+
 {
     "adBanner1": {
         "seed": "adbanner1",
@@ -16,8 +17,5 @@
         "width": 120,
         "height": 120,
         "hint": "logo"
-    },
-    "ackoLogo": {
-        "url": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg"
     }
 }
