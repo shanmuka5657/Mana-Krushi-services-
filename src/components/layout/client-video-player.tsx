@@ -3,11 +3,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
+import Image from 'next/image';
 import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const ClientVideoPlayer = () => {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -18,6 +20,7 @@ const ClientVideoPlayer = () => {
     const playerRef = useRef<YouTubePlayer | null>(null);
     const { toast } = useToast();
     const [origin, setOrigin] = useState<string>('');
+    const { defaultLogo } = placeholderImages;
 
     useEffect(() => {
         setOrigin(window.location.origin);
@@ -170,6 +173,14 @@ const ClientVideoPlayer = () => {
                 onReady={onPlayerReady}
             />
             <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 p-2 rounded-lg pointer-events-none">
+                 <Image 
+                    src={defaultLogo.url}
+                    alt="Mana Krushi Services Logo"
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                    data-ai-hint={defaultLogo.hint}
+                />
                 <span className="text-white font-bold text-lg">MK Services</span>
             </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">

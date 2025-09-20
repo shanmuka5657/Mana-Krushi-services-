@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +25,7 @@ import React from 'react';
 import { Download, Loader2, QrCode } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import QRCode from 'qrcode.react';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -47,6 +49,7 @@ export function LoginForm() {
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [showQrDialog, setShowQrDialog] = React.useState(false);
   const [appUrl, setAppUrl] = React.useState('');
+  const { defaultLogo } = placeholderImages;
 
 
   React.useEffect(() => {
@@ -138,6 +141,13 @@ export function LoginForm() {
   return (
     <>
       <div className="flex flex-col items-center text-center mb-6">
+        <Image 
+            src={defaultLogo.url}
+            alt="Mana Krushi Services Logo"
+            width={80}
+            height={80}
+            data-ai-hint={defaultLogo.hint}
+        />
         <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
       </div>
       <Card className="w-full max-w-sm">

@@ -2,13 +2,22 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import placeholderImages from "@/lib/placeholder-images.json";
 
 export default function WelcomePage() {
-
+  const { defaultLogo } = placeholderImages;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
       <div className="flex flex-col items-center gap-6">
+        <Image 
+            src={defaultLogo.url}
+            alt="Mana Krushi Services Logo"
+            width={defaultLogo.width}
+            height={defaultLogo.height}
+            data-ai-hint={defaultLogo.hint}
+        />
         <div>
           <h1 className="text-4xl font-bold tracking-tight">
             Welcome to Mana Krushi Services

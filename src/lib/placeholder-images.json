@@ -1,4 +1,10 @@
 {
+    "defaultLogo": {
+        "url": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+        "width": 120,
+        "height": 120,
+        "hint": "app logo"
+    },
     "adBanner1": {
         "seed": "adbanner1",
         "width": 728,

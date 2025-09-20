@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveCurrentUser, saveProfile } from '@/lib/storage';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -50,6 +52,7 @@ export function SignupForm() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(null);
   const router = useRouter();
+  const { defaultLogo } = placeholderImages;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,6 +90,13 @@ export function SignupForm() {
   return (
     <>
       <div className="flex flex-col items-center text-center mb-6">
+        <Image 
+            src={defaultLogo.url}
+            alt="Mana Krushi Services Logo"
+            width={80}
+            height={80}
+            data-ai-hint={defaultLogo.hint}
+        />
         <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
       </div>
       <Card className="w-full max-w-lg">
