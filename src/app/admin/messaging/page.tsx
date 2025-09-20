@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { getAllProfiles, getBookings } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSquare, Send, Loader2, Users, UserCheck } from 'lucide-react';
+import { MessageSquare, Send, Loader2, Users, UserCheck, PlusCircle } from 'lucide-react';
 import type { Profile, Booking } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 type TargetAudience = 'all' | 'upcoming';
 type TargetUser = { name: string; mobile: string };
@@ -21,6 +22,7 @@ function AdminMessagingPage() {
     const [isSending, setIsSending] = useState(false);
     const [audience, setAudience] = useState<TargetAudience>('all');
     const [targetUsers, setTargetUsers] = useState<TargetUser[]>([]);
+    const [manualNumber, setManualNumber] = useState('');
     const [isFetchingAudience, setIsFetchingAudience] = useState(false);
     const { toast } = useToast();
 
@@ -50,6 +52,29 @@ function AdminMessagingPage() {
 
         fetchAudience();
     }, [audience]);
+    
+    const handleAddManualNumber = () => {
+        if (!/^\d{10}$/.test(manualNumber)) {
+            toast({
+                title: 'Invalid Number',
+                description: 'Please enter a valid 10-digit mobile number.',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        if (targetUsers.some(u => u.mobile === manualNumber)) {
+            toast({
+                title: 'Number Already Exists',
+                description: 'This mobile number is already in the recipient list.',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        setTargetUsers(prev => [...prev, { name: `Manual Entry`, mobile: manualNumber }]);
+        setManualNumber('');
+    };
 
     const handleSend = async () => {
         if (!message.trim()) {
@@ -70,8 +95,16 @@ function AdminMessagingPage() {
                 .filter(p => p.mobile && p.mobile !== '0000000000')
                 .map(p => ({ name: p.name, mobile: p.mobile }));
         } else {
+            // For 'upcoming' or manual entries, the list is already in targetUsers
             usersToMessage = targetUsers;
         }
+        
+        // Add any manually added numbers if 'All Users' was selected
+        if (audience === 'all') {
+            const manualEntries = targetUsers.filter(u => u.name === 'Manual Entry' && !usersToMessage.some(p => p.mobile === u.mobile));
+            usersToMessage = [...usersToMessage, ...manualEntries];
+        }
+
 
         if (usersToMessage.length === 0) {
             toast({
@@ -152,12 +185,29 @@ function AdminMessagingPage() {
                         </RadioGroup>
                     </div>
 
+                    <div className="space-y-2">
+                        <Label htmlFor="manual-number" className="font-medium">Or add a number manually</Label>
+                        <div className="flex gap-2">
+                            <Input 
+                                id="manual-number"
+                                type="tel"
+                                placeholder="Enter 10-digit mobile number"
+                                value={manualNumber}
+                                onChange={e => setManualNumber(e.target.value)}
+                            />
+                            <Button variant="outline" onClick={handleAddManualNumber}>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add
+                            </Button>
+                        </div>
+                    </div>
+
                     {isFetchingAudience ? (
                         <div className="flex items-center justify-center p-8">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        audience === 'upcoming' && targetUsers.length > 0 && (
+                        targetUsers.length > 0 && (
                             <div className="space-y-2">
                                 <Label>Recipients ({targetUsers.length})</Label>
                                 <div className="border rounded-md max-h-48 overflow-y-auto">
