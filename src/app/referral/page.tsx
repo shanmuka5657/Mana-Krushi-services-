@@ -71,6 +71,15 @@ function ReferralPageContent() {
             </AppLayout>
         );
     }
+    
+    const imageSettings = profile.selfieDataUrl
+      ? {
+          src: profile.selfieDataUrl,
+          height: 40,
+          width: 40,
+          excavate: true,
+        }
+      : undefined;
 
     return (
         <AppLayout>
@@ -88,7 +97,12 @@ function ReferralPageContent() {
                         <div className="flex flex-col items-center gap-4">
                             <p className="text-sm text-muted-foreground">Scan this QR code to sign up with my referral code.</p>
                             <div className="p-4 bg-white rounded-lg border">
-                                <QRCode value={referralUrl} size={256} level="H" />
+                                <QRCode 
+                                    value={referralUrl} 
+                                    size={256} 
+                                    level="H"
+                                    imageSettings={imageSettings}
+                                />
                             </div>
                         </div>
 
