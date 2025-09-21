@@ -24,7 +24,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search } from "lucide-react";
-import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles } from "@/lib/storage";
+import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUserName } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -60,12 +60,12 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [routes, setRoutes] = useState<Route[]>(initialRoutes);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
+  const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
   const [fromFilter, setFromFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
-  const [allBookings, setAllBookings] = useState<Booking[]>([]);
-  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Map<string, Profile>>(new Map());
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
@@ -80,18 +80,42 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   });
 
    useEffect(() => {
-    const fetchInitialData = async () => {
+    const calculateBookedSeats = async () => {
+        if (initialRoutes.length === 0) {
+            setIsLoading(false);
+            return;
+        }
         setIsLoading(true);
-        const [bookings, profiles] = await Promise.all([
-            getBookings(true),
-            getAllProfiles(),
-        ]);
-        setAllBookings(bookings);
-        setAllProfiles(profiles);
+
+        const newBookedSeatsMap = new Map<string, number>();
+
+        // Fetch bookings for all displayed routes at once
+        const bookingPromises = initialRoutes.map(route => {
+            const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
+            const routeTime = route.departureTime;
+            return getBookings(true, {
+                destination: `${route.fromLocation} to ${route.toLocation}`,
+                date: routeDate,
+                time: routeTime,
+            });
+        });
+        
+        const bookingsByRoute = await Promise.all(bookingPromises);
+
+        initialRoutes.forEach((route, index) => {
+            const bookingsForThisRoute = bookingsByRoute[index];
+            const bookedSeats = bookingsForThisRoute
+                .filter(b => b.status !== 'Cancelled')
+                .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+            newBookedSeatsMap.set(route.id, bookedSeats);
+        });
+
+        setBookedSeatsMap(newBookedSeatsMap);
         setRoutes(initialRoutes);
         setIsLoading(false);
     };
-    fetchInitialData();
+
+    calculateBookedSeats();
   }, [initialRoutes]);
 
   useEffect(() => {
@@ -110,47 +134,45 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     }
   }, [selectedRoute, isEditDialogOpen, form]);
 
-  const getBookedSeats = (route: Route) => {
-     return allBookings.filter(b => {
-        const routeDate = new Date(route.travelDate);
-        const bookingDate = new Date(b.departureDate);
-        const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                          routeDate.getMonth() === bookingDate.getMonth() &&
-                          routeDate.getDate() === bookingDate.getDate();
-        const bookingTime = format(bookingDate, 'HH:mm');
-
-        return (
-            b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-            isSameDay &&
-            bookingTime === route.departureTime &&
-            b.status !== "Cancelled"
-        );
-    }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-  }
-
   const getProfileForUser = (email?: string): Profile | undefined => {
     if (!email) return undefined;
-    return allProfiles.find(p => p.email === email);
+    return allProfiles.get(email);
   }
 
 
-  const handleViewClick = (route: Route) => {
-    const routeBookings = allBookings.filter(
-      (booking) => {
-        const routeDate = new Date(route.travelDate);
-        const bookingDate = new Date(booking.departureDate);
-        
-        return booking.destination === `${route.fromLocation} to ${route.toLocation}` &&
-        routeDate.getFullYear() === bookingDate.getFullYear() &&
-        routeDate.getMonth() === bookingDate.getMonth() &&
-        routeDate.getDate() === bookingDate.getDate() &&
-        format(bookingDate, "HH:mm") === route.departureTime
-      }
-    );
-    routeBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+  const handleViewClick = async (route: Route) => {
     setSelectedRoute(route);
-    setBookingsForRoute(routeBookings);
     setIsViewDialogOpen(true);
+
+    // Fetch details on demand
+    const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
+    const routeTime = route.departureTime;
+    
+    const routeBookings = await getBookings(true, {
+      destination: `${route.fromLocation} to ${route.toLocation}`,
+      date: routeDate,
+      time: routeTime,
+    });
+    
+    routeBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+    setBookingsForRoute(routeBookings);
+    
+    // Fetch profiles for these specific bookings if not already fetched
+    const passengerEmails = routeBookings.map(b => b.clientEmail).filter(Boolean) as string[];
+    const newProfilesToFetch = passengerEmails.filter(email => !allProfiles.has(email));
+
+    if (newProfilesToFetch.length > 0) {
+        const profilePromises = newProfilesToFetch.map(email => getProfile(email));
+        const newProfiles = await Promise.all(profilePromises);
+        
+        setAllProfiles(prev => {
+            const newMap = new Map(prev);
+            newProfiles.forEach(p => {
+                if (p) newMap.set(p.email, p);
+            });
+            return newMap;
+        });
+    }
   };
   
   const handleEditClick = (route: Route) => {
@@ -158,10 +180,19 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     setIsEditDialogOpen(true);
   };
   
-  const handleShareClick = (route: Route) => {
+  const handleShareClick = async (route: Route) => {
     const url = `${window.location.origin}/book/${route.id}`;
     setBookingUrl(url);
-    const driverProfile = getProfileForUser(route.ownerEmail);
+
+    // Fetch profile only if needed
+    let driverProfile = getProfileForUser(route.ownerEmail);
+    if (!driverProfile) {
+        driverProfile = await getProfile(route.ownerEmail);
+        if (driverProfile) {
+            setAllProfiles(prev => new Map(prev).set(driverProfile!.email, driverProfile!));
+        }
+    }
+    
     setShareImageUrl(driverProfile?.selfieDataUrl);
     setSelectedRoute(route);
     setIsShareDialogOpen(true);
@@ -179,9 +210,9 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     if (!selectedRoute) return;
 
     setIsSearching(true);
-    const allRoutes = await getRoutes(true);
+    const allCurrentRoutes = await getRoutes(true);
 
-    const updatedRoutes = allRoutes.map(r => 
+    const updatedRoutes = allCurrentRoutes.map(r => 
       r.id === selectedRoute.id 
       ? { 
           ...r, 
@@ -193,7 +224,10 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     );
 
     await saveRoutes(updatedRoutes);
-    setRoutes(updatedRoutes.filter(r => initialRoutes.some(ir => ir.id === r.id)));
+    // Refresh the routes list from props after saving
+    const ownerName = getCurrentUserName();
+    const latestOwnerRoutes = updatedRoutes.filter(r => r.ownerName === ownerName);
+    setRoutes(latestOwnerRoutes);
     
     setIsSearching(false);
     toast({
@@ -206,8 +240,8 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
 
   
   const handlePayment = async (bookingId: string, method: 'Cash' | 'UPI') => {
-    const bookingsToUpdate = await getBookings(true);
-    const updatedBookings = bookingsToUpdate.map(b => {
+    const allBookings = await getBookings(true);
+    const updatedBookings = allBookings.map(b => {
       if (b.id === bookingId) {
         return {
           ...b,
@@ -219,7 +253,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
       return b;
     });
     await saveBookings(updatedBookings);
-    setAllBookings(updatedBookings);
     setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, paymentMethod: method, paymentStatus: 'Paid', status: 'Completed'} : b))
     toast({
       title: "Payment Recorded",
@@ -235,12 +268,11 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
 
     const success = async (position: GeolocationPosition) => {
         const { latitude, longitude } = position.coords;
-        const bookingsToUpdate = await getBookings(true);
-        const updatedBookings = bookingsToUpdate.map(b => 
+        const allBookings = await getBookings(true);
+        const updatedBookings = allBookings.map(b => 
             b.id === bookingId ? { ...b, driverLatitude: latitude, driverLongitude: longitude } : b
         );
         await saveBookings(updatedBookings);
-        setAllBookings(updatedBookings);
         setBookingsForRoute(prev => prev.map(b => b.id === bookingId ? {...b, driverLatitude: latitude, driverLongitude: longitude} : b))
         
         toast({ title: 'Location Shared!', description: 'Your current location has been shared with the passenger.' });
@@ -317,12 +349,20 @@ ${booking.driverName}
 
   const handleSearch = async () => {
     setIsSearching(true);
-    const searchParams: { from?: string; to?: string; date?: string } = {};
-    if (fromFilter) searchParams.from = fromFilter;
-    if (toFilter) searchParams.to = toFilter;
-    if (dateFilter) searchParams.date = format(dateFilter, 'yyyy-MM-dd');
-    
-    const filteredRoutes = await getRoutes(true, searchParams);
+    const ownerName = getCurrentUserName();
+    const allRoutes = await getRoutes(true); // Fetch all to filter locally
+    let filteredRoutes = allRoutes.filter(r => r.ownerName === ownerName);
+
+    if (fromFilter) {
+      filteredRoutes = filteredRoutes.filter(r => r.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()));
+    }
+    if (toFilter) {
+      filteredRoutes = filteredRoutes.filter(r => r.toLocation.toLowerCase().includes(toFilter.toLowerCase()));
+    }
+    if (dateFilter) {
+        const searchDate = startOfDay(dateFilter);
+        filteredRoutes = filteredRoutes.filter(r => startOfDay(new Date(r.travelDate)).getTime() === searchDate.getTime());
+    }
     
     setRoutes(filteredRoutes);
     setIsSearching(false);
@@ -410,7 +450,7 @@ ${booking.driverName}
           <TableBody>
               {routes.length > 0 ? (
               routes.map((route) => {
-                  const bookedSeats = getBookedSeats(route);
+                  const bookedSeats = bookedSeatsMap.get(route.id) || 0;
                   const availableSeats = route.availableSeats - bookedSeats;
                   return (
                       <TableRow key={route.id}>
