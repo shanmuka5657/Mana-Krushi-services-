@@ -24,7 +24,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search } from "lucide-react";
-import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUserName } from "@/lib/storage";
+import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUserName, getCurrentUser } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -93,7 +93,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
         const bookingPromises = initialRoutes.map(route => {
             const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
             const routeTime = route.departureTime;
-            return getBookings(true, {
+            return getBookings(false, { // Use false to indicate non-admin, more targeted fetch
                 destination: `${route.fromLocation} to ${route.toLocation}`,
                 date: routeDate,
                 time: routeTime,
@@ -225,9 +225,11 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
 
     await saveRoutes(updatedRoutes);
     // Refresh the routes list from props after saving
-    const ownerName = getCurrentUserName();
-    const latestOwnerRoutes = updatedRoutes.filter(r => r.ownerName === ownerName);
-    setRoutes(latestOwnerRoutes);
+    const ownerEmail = getCurrentUser();
+    if(ownerEmail) {
+        const latestOwnerRoutes = updatedRoutes.filter(r => r.ownerEmail === ownerEmail);
+        setRoutes(latestOwnerRoutes);
+    }
     
     setIsSearching(false);
     toast({
@@ -349,9 +351,15 @@ ${booking.driverName}
 
   const handleSearch = async () => {
     setIsSearching(true);
-    const ownerName = getCurrentUserName();
-    const allRoutes = await getRoutes(true); // Fetch all to filter locally
-    let filteredRoutes = allRoutes.filter(r => r.ownerName === ownerName);
+    const ownerEmail = getCurrentUser();
+    if(!ownerEmail) {
+        setIsSearching(false);
+        return;
+    }
+    
+    // Use the efficient query
+    const allOwnerRoutes = await getRoutes(false, { ownerEmail });
+    let filteredRoutes = allOwnerRoutes;
 
     if (fromFilter) {
       filteredRoutes = filteredRoutes.filter(r => r.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()));
@@ -810,5 +818,3 @@ ${booking.driverName}
 };
 
 export default MyRoutes;
-
-    

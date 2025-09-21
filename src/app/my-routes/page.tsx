@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import MyRoutes from '@/components/dashboard/my-routes';
-import { getRoutes, getCurrentUserName } from '@/lib/storage';
+import { getRoutes, getCurrentUserName, getCurrentUser } from '@/lib/storage';
 import type { Route } from '@/lib/types';
 import { Suspense } from 'react';
 import { format, addDays, startOfDay, endOfDay } from 'date-fns';
@@ -15,10 +15,10 @@ function MyRoutesPageContent() {
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            const ownerName = getCurrentUserName();
-            if (ownerName) {
-                const allRoutes = await getRoutes();
-                const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName);
+            const ownerEmail = getCurrentUser();
+            if (ownerEmail) {
+                // Fetch only the routes for the current owner
+                const ownerRoutes = await getRoutes(false, { ownerEmail });
                 
                 // Default filter: today and tomorrow
                 const today = startOfDay(new Date());
@@ -29,7 +29,7 @@ function MyRoutesPageContent() {
                     return routeDate >= today && routeDate <= tomorrow;
                 });
                 
-                setRoutes(defaultRoutes);
+                setRoutes(defaultRoutes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime()));
             }
             setIsLoaded(true);
         };

@@ -266,7 +266,7 @@ export const updateBookingInFirestore = async (bookingId: string, data: Partial<
 
 
 // --- Routes ---
-export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string }): Promise<Route[]> => {
+export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
     if (!routesCollection) return [];
     try {
         if (searchParams?.routeId) {
@@ -285,6 +285,10 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
 
         let q = query(routesCollection);
 
+        if(searchParams?.ownerEmail) {
+            q = query(q, where("ownerEmail", "==", searchParams.ownerEmail));
+        }
+        
         // Date filter is the most selective, apply it first if present.
         if (searchParams?.date) {
              const searchDate = new Date(searchParams.date);
