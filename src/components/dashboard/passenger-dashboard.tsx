@@ -174,7 +174,6 @@ function TopMembers() {
                             }
                             setIsCalendarOpen(false);
                           }}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -218,7 +217,6 @@ function TopMembers() {
                             }
                             setIsCalendarOpen(false);
                         }}
-                        initialFocus
                     />
                     </PopoverContent>
                 </Popover>
@@ -478,7 +476,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                                   disabled={(date) =>
                                       date < new Date(new Date().setHours(0, 0, 0, 0))
                                   }
-                                  initialFocus
                                   />
                               </PopoverContent>
                               </Popover>

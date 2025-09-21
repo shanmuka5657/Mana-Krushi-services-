@@ -384,7 +384,6 @@ ${booking.driverName}
                       setDateFilter(date);
                       setIsCalendarOpen(false);
                   }}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -662,7 +661,6 @@ ${booking.driverName}
                               selected={field.value}
                               onSelect={field.onChange}
                               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                              initialFocus
                             />
                           </PopoverContent>
                         </Popover>
@@ -772,5 +770,3 @@ ${booking.driverName}
 };
 
 export default MyRoutes;
-
-    

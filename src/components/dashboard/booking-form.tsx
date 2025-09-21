@@ -264,7 +264,6 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                           disabled={(date) =>
                             date < new Date(new Date().setHours(0, 0, 0, 0))
                           }
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
@@ -326,7 +325,6 @@ export default function BookingForm({ onBookingCreated }: BookingFormProps) {
                           disabled={(date) =>
                             date < (form.getValues("departureDate") || new Date(new Date().setHours(0, 0, 0, 0)))
                           }
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>

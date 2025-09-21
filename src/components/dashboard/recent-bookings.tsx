@@ -31,6 +31,8 @@ import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRol
 import { useRouter, useSearchParams } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Calendar as DayPicker } from "@/components/ui/calendar";
+
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
   switch (status) {
@@ -265,14 +267,13 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar
+                <DayPicker
                   mode="single"
                   selected={dateFilter}
                   onSelect={(date) => {
                       setDateFilter(date);
                       setIsCalendarOpen(false);
                   }}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>
