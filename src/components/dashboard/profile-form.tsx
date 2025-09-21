@@ -140,7 +140,15 @@ export default function ProfileForm() {
 
   useEffect(() => {
     const loadProfile = async () => {
-        const userProfile = await getProfile();
+        let userProfile = await getProfile();
+        
+        // Generate referral code if it doesn't exist
+        if (userProfile && !userProfile.referralCode) {
+            const newReferralCode = `${userProfile.name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
+            userProfile.referralCode = newReferralCode;
+            await saveProfile(userProfile); // Save the updated profile
+        }
+
         setProfile(userProfile);
         
         const userEmail = getCurrentUser();

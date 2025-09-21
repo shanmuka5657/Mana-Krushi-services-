@@ -7,7 +7,7 @@ import { Suspense, useState, useEffect } from 'react';
 import { Gift, Copy, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { getProfile } from '@/lib/storage';
+import { getProfile, saveProfile } from '@/lib/storage';
 import type { Profile } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import QRCode from 'qrcode.react';
@@ -20,8 +20,17 @@ function ReferralPageContent() {
 
     useEffect(() => {
         const loadProfile = async () => {
-            const userProfile = await getProfile();
+            let userProfile = await getProfile();
+            
+            // Generate referral code if it doesn't exist for an existing user
+            if (userProfile && !userProfile.referralCode) {
+                const newReferralCode = `${userProfile.name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
+                userProfile.referralCode = newReferralCode;
+                await saveProfile(userProfile); // Save the updated profile with the new code
+            }
+
             setProfile(userProfile);
+
             if (userProfile?.referralCode) {
                 setReferralUrl(`${window.location.origin}/signup?ref=${userProfile.referralCode}`);
             }
