@@ -1,20 +1,15 @@
 
 "use client";
 
-import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getVisits } from '@/lib/storage';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Visit } from '@/lib/types';
-import { Eye, Loader2, Users, File, BarChart2 } from 'lucide-react';
+import { Eye, Loader2, User, Calendar, Route as RouteIcon, Shield } from 'lucide-react';
+import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-
-type PathStats = {
-    path: string;
-    visits: number;
-    uniqueUsers: number;
-}
 
 function AdminVisitorsPage() {
     const [visits, setVisits] = useState<Visit[]>([]);
@@ -22,31 +17,13 @@ function AdminVisitorsPage() {
 
     useEffect(() => {
         const fetchVisits = async () => {
-            const allVisits = await getVisits();
+            const allVisits = await getVisits(); // This will now be limited by the logic in storage/firebase
             setVisits(allVisits);
             setIsLoaded(true);
         };
         fetchVisits();
     }, []);
 
-    const pathStats: PathStats[] = useMemo(() => {
-        const stats: Record<string, { visits: number, users: Set<string> }> = {};
-
-        visits.forEach(visit => {
-            if (!stats[visit.path]) {
-                stats[visit.path] = { visits: 0, users: new Set() };
-            }
-            stats[visit.path].visits++;
-            stats[visit.path].users.add(visit.userEmail);
-        });
-
-        return Object.entries(stats).map(([path, data]) => ({
-            path,
-            visits: data.visits,
-            uniqueUsers: data.users.size,
-        })).sort((a, b) => b.visits - a.visits);
-
-    }, [visits]);
 
     if (!isLoaded) {
         return (
@@ -62,43 +39,49 @@ function AdminVisitorsPage() {
         <AppLayout>
             <Card>
                 <CardHeader>
-                    <CardTitle>Page Analytics</CardTitle>
+                    <CardTitle>Recent Activity Log</CardTitle>
                     <CardDescription>
-                        A breakdown of which pages are being visited the most. This data can help identify where the most database reads are occurring.
+                        A list of the most recent page visits across the application.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>User</TableHead>
+                                <TableHead>Role</TableHead>
                                 <TableHead>Page Path</TableHead>
-                                <TableHead className="text-right">Total Visits</TableHead>
-                                <TableHead className="text-right">Unique Users</TableHead>
+                                <TableHead>Timestamp</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {pathStats.length > 0 ? pathStats.map(stat => (
-                                <TableRow key={stat.path}>
+                            {visits.length > 0 ? visits.map(visit => (
+                                <TableRow key={visit.id}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <User className="h-4 w-4 text-muted-foreground" />
+                                            {visit.userName}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={visit.role === 'admin' ? 'default' : (visit.role === 'owner' ? 'secondary' : 'outline')}>
+                                            {visit.role}
+                                        </Badge>
+                                    </TableCell>
                                     <TableCell className="font-mono flex items-center gap-2">
-                                        <File className="h-4 w-4 text-muted-foreground" />
-                                        {stat.path}
+                                        <RouteIcon className="h-4 w-4 text-muted-foreground" />
+                                        {visit.path}
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <Badge variant="secondary" className="text-sm">
-                                            <Eye className="mr-2 h-3.5 w-3.5" />
-                                            {stat.visits.toLocaleString()}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Badge variant="outline" className="text-sm">
-                                             <Users className="mr-2 h-3.5 w-3.5" />
-                                            {stat.uniqueUsers.toLocaleString()}
-                                        </Badge>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                                            {format(visit.timestamp, 'PPP pp')}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center">
+                                    <TableCell colSpan={4} className="h-24 text-center">
                                         No visitor data recorded yet.
                                     </TableCell>
                                 </TableRow>
