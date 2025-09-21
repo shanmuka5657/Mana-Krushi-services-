@@ -18,12 +18,21 @@ function MyRoutesPageContent() {
             const allRoutes = await getRoutes();
             const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
             
-            const now = new Date();
-            now.setHours(0, 0, 0, 0); // Start of today
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-            // Filter for upcoming routes
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const endOfTomorrow = new Date(tomorrow);
+            endOfTomorrow.setHours(23, 59, 59, 999);
+
+            // Filter for routes that are today or tomorrow
             const upcomingRoutes = ownerRoutes
-                .filter(r => new Date(r.travelDate) >= now)
+                .filter(r => {
+                    const routeDate = new Date(r.travelDate);
+                    return routeDate >= today && routeDate <= endOfTomorrow;
+                })
                 .sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
 
             setRoutes(upcomingRoutes);
