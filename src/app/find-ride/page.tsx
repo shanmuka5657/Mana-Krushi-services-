@@ -11,7 +11,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getRoutes, getBookings, getAllProfiles } from '@/lib/storage';
+import { getRoutes, getBookings, getAllProfiles, getProfile } from '@/lib/storage';
 import type { Route, Booking, Profile } from '@/lib/types';
 import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -46,7 +46,7 @@ function FindRideResultsPage() {
     
     const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
-    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+    const [driverProfiles, setDriverProfiles] = useState<Map<string, Profile>>(new Map());
     const [isLoaded, setIsLoaded] = useState(false);
     
     const from = searchParams.get('from') || '';
@@ -60,14 +60,30 @@ function FindRideResultsPage() {
                 return;
             };
 
-            const [routes, bookings, profiles] = await Promise.all([
-                getRoutes(true, { from, to, date }), // Use new optimized query
-                getBookings(true),
-                getAllProfiles(),
-            ]);
+            const routes = await getRoutes(true, { from, to, date });
 
-            setAllBookings(bookings);
-            setAllProfiles(profiles);
+            if (routes.length > 0) {
+                // Fetch bookings only for the routes found
+                const bookingsPromises = routes.map(route => getBookings(true, {
+                    destination: `${route.fromLocation} to ${route.toLocation}`,
+                    date: format(new Date(route.travelDate), 'yyyy-MM-dd'),
+                    time: route.departureTime,
+                }));
+                const bookingsByRoute = await Promise.all(bookingsPromises);
+                const allRelevantBookings = bookingsByRoute.flat();
+                setAllBookings(allRelevantBookings);
+                
+                // Fetch profiles only for the drivers found
+                const driverEmails = new Set(routes.map(r => r.ownerEmail));
+                const profilePromises = Array.from(driverEmails).map(email => getProfile(email));
+                const profiles = await Promise.all(profilePromises);
+
+                const profilesMap = new Map<string, Profile>();
+                profiles.forEach(p => {
+                    if (p) profilesMap.set(p.email, p);
+                });
+                setDriverProfiles(profilesMap);
+            }
 
             // Sort promoted rides to the top
             routes.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
@@ -98,7 +114,7 @@ function FindRideResultsPage() {
      
     const getDriverProfile = (ownerEmail?: string): Profile | undefined => {
         if (!ownerEmail) return undefined;
-        return allProfiles.find(p => p.email === ownerEmail);
+        return driverProfiles.get(ownerEmail);
     }
 
     if (!isLoaded) {
