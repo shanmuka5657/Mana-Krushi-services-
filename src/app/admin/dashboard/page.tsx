@@ -4,8 +4,8 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2 } from "lucide-react";
-import { getRoutes, getBookings, getAllProfiles, getVisitorCount, getLiveVisitorsCount, saveGlobalLogoUrl, getGlobalLogoUrlWithCache as getGlobalLogoUrl } from "@/lib/storage";
+import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2, RefreshCw } from "lucide-react";
+import { getRoutes, getBookings, getAllProfiles, getVisits, saveGlobalLogoUrl, getGlobalLogoUrlWithCache as getGlobalLogoUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -13,15 +13,26 @@ import { cropLogo } from "@/app/actions";
 import Link from "next/link";
 import Image from "next/image";
 
-const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href?: string }) => {
+const StatCard = ({ title, value, icon: Icon, href, onRefresh, isLoading }: { title: string, value: string | number, icon: React.ElementType, href?: string, onRefresh?: () => void, isLoading?: boolean }) => {
     const cardContent = (
         <Card className={href ? "hover:bg-muted/50 transition-colors" : ""}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  {onRefresh && (
+                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onRefresh} disabled={isLoading}>
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 text-muted-foreground" />}
+                    </Button>
+                  )}
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                </div>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
+                {isLoading ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                    <div className="text-2xl font-bold">{value}</div>
+                )}
             </CardContent>
         </Card>
     );
@@ -39,55 +50,101 @@ function AdminDashboardPage() {
     totalVisitors: 0,
     liveVisitors: 0,
   });
+  const [loadingStats, setLoadingStats] = useState({
+      users: false,
+      routes: false,
+      bookings: false,
+      revenue: false,
+      visitors: false,
+  });
   const [isLoaded, setIsLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchAdminData = async () => {
-      const [profiles, routes, bookings, visitors, liveVisitors, currentLogo] = await Promise.all([
-        getAllProfiles(),
-        getRoutes(true),
-        getBookings(true),
-        getVisitorCount(),
-        getLiveVisitorsCount(),
-        getGlobalLogoUrl(),
-      ]);
-      
+    const fetchInitialData = async () => {
+      const currentLogo = await getGlobalLogoUrl();
       setLogoUrl(currentLogo);
-
-      const bookingRevenue = bookings
-        .filter(b => b.paymentStatus === 'Paid')
-        .reduce((sum, b) => sum + (b.amount || 0), 0);
-      
-      const subscriptionRevenue = profiles.filter(p => p.role === 'owner' && p.planExpiryDate).length * 50;
-
-      const totalRevenue = bookingRevenue + subscriptionRevenue;
-      
-      setStats({
-        totalUsers: profiles.length,
-        totalRoutes: routes.length,
-        totalBookings: bookings.length,
-        totalRevenue: totalRevenue,
-        totalVisitors: visitors,
-        liveVisitors: liveVisitors,
-      });
-
       setIsLoaded(true);
+      
+      // Initially load only live visitors
+      fetchVisitorStats(true);
     };
-    fetchAdminData();
+    fetchInitialData();
     
     // Auto-refresh live visitors every 30 seconds
-    const intervalId = setInterval(async () => {
-        const liveVisitors = await getLiveVisitorsCount();
-        setStats(prevStats => ({ ...prevStats, liveVisitors }));
-    }, 30000);
-
+    const intervalId = setInterval(() => fetchVisitorStats(true), 30000);
     return () => clearInterval(intervalId);
 
   }, []);
   
+  const fetchAllStats = async () => {
+    await Promise.all([
+      fetchUserStats(),
+      fetchRouteStats(),
+      fetchBookingAndRevenueStats(),
+      fetchVisitorStats(),
+    ]);
+  }
+  
+  const fetchUserStats = async () => {
+      setLoadingStats(prev => ({...prev, users: true}));
+      const profiles = await getAllProfiles();
+      setStats(prev => ({...prev, totalUsers: profiles.length}));
+      setLoadingStats(prev => ({...prev, users: false}));
+  }
+  
+  const fetchRouteStats = async () => {
+      setLoadingStats(prev => ({...prev, routes: true}));
+      const routes = await getRoutes(true);
+      setStats(prev => ({...prev, totalRoutes: routes.length}));
+      setLoadingStats(prev => ({...prev, routes: false}));
+  }
+
+  const fetchBookingAndRevenueStats = async () => {
+      setLoadingStats(prev => ({...prev, bookings: true, revenue: true}));
+      const bookings = await getBookings(true);
+      const bookingRevenue = bookings
+        .filter(b => b.paymentStatus === 'Paid')
+        .reduce((sum, b) => sum + (b.amount || 0), 0);
+      
+      const profiles = await getAllProfiles();
+      const subscriptionRevenue = profiles.filter(p => p.role === 'owner' && p.planExpiryDate).length * 50;
+      const totalRevenue = bookingRevenue + subscriptionRevenue;
+
+      setStats(prev => ({
+          ...prev, 
+          totalBookings: bookings.length,
+          totalRevenue,
+      }));
+      setLoadingStats(prev => ({...prev, bookings: false, revenue: false}));
+  }
+
+  const fetchVisitorStats = async (liveOnly = false) => {
+      if (!liveOnly) setLoadingStats(prev => ({ ...prev, visitors: true }));
+      const allVisits = await getVisits();
+      const now = new Date();
+      const activeSince = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes
+      const activeSessions = new Set<string>();
+
+      for (const visit of allVisits) {
+          if (new Date(visit.timestamp) >= activeSince) {
+              activeSessions.add(visit.sessionId);
+          }
+      }
+      
+      const uniqueTotalSessions = new Set(allVisits.map(v => v.sessionId));
+
+      setStats(prev => ({
+          ...prev,
+          liveVisitors: activeSessions.size,
+          totalVisitors: liveOnly ? prev.totalVisitors : uniqueTotalSessions.size,
+      }));
+      if (!liveOnly) setLoadingStats(prev => ({ ...prev, visitors: false }));
+  }
+
+
   const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -143,13 +200,19 @@ function AdminDashboardPage() {
   return (
     <AppLayout>
         <div className="space-y-8">
+            <div className="flex justify-end">
+                <Button onClick={fetchAllStats}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Load All Stats
+                </Button>
+            </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} href="/admin/visitors" />
+                <StatCard title="Total Visitors" value={stats.totalVisitors} icon={Eye} href="/admin/visitors" onRefresh={() => fetchVisitorStats()} isLoading={loadingStats.visitors} />
                 <StatCard title="Live Visitors" value={stats.liveVisitors} icon={Signal} />
-                <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" />
-                <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" />
-                <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" />
-                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" />
+                <StatCard title="Total Users" value={stats.totalUsers} icon={Users} href="/admin/users" onRefresh={fetchUserStats} isLoading={loadingStats.users} />
+                <StatCard title="Total Routes" value={stats.totalRoutes} icon={Route} href="/admin/routes" onRefresh={fetchRouteStats} isLoading={loadingStats.routes} />
+                <StatCard title="Total Bookings" value={stats.totalBookings} icon={Book} href="/admin/bookings" onRefresh={fetchBookingAndRevenueStats} isLoading={loadingStats.bookings} />
+                <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" onRefresh={fetchBookingAndRevenueStats} isLoading={loadingStats.revenue} />
             </div>
 
             <Card className="lg:col-span-2">

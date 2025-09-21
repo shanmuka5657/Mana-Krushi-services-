@@ -90,7 +90,7 @@ export const logVideoUnmute = async (videoUrl: string) => {
 export const getVideoEvents = async (): Promise<VideoEvent[]> => {
     if (!isBrowser) return [];
     const events = await getVideoEventsFromFirestore();
-    perfTracker.increment({ reads: events.length, writes: 0 });
+    perfTracker.increment({ reads: events.length || 1, writes: 0 });
     return events;
 }
 
@@ -101,7 +101,6 @@ export const logVisit = async (path: string) => {
     // For anonymous users, just increment the total visitor count once per session
     if (!getCurrentUser()) {
         if (!sessionStorage.getItem('visitor_tracked')) {
-            await incrementVisitorCount();
             sessionStorage.setItem('visitor_tracked', 'true');
         }
         return;
@@ -145,43 +144,9 @@ export const logVisit = async (path: string) => {
 export const getVisits = async (): Promise<Visit[]> => {
     if (!isBrowser) return [];
     const visits = await getVisitsFromFirestore();
-    perfTracker.increment({ reads: visits.length, writes: 0 });
+    perfTracker.increment({ reads: visits.length || 1, writes: 0 });
     return visits;
 }
-
-export const getLiveVisitorsCount = async (minutes = 5): Promise<number> => {
-    if (!isBrowser) return 0;
-    const allVisits = await getVisitsFromFirestore();
-    perfTracker.increment({ reads: allVisits.length, writes: 0 });
-    const now = new Date();
-    const activeSince = new Date(now.getTime() - minutes * 60 * 1000);
-
-    const activeSessions = new Set<string>();
-
-    for (const visit of allVisits) {
-        if (visit.timestamp >= activeSince) {
-            activeSessions.add(visit.sessionId);
-        }
-    }
-
-    return activeSessions.size;
-}
-
-export const getTodaysVisitCountForUser = async (email: string): Promise<number> => {
-    if (!isBrowser) return 0;
-    const allVisits = await getVisitsFromFirestore();
-    perfTracker.increment({ reads: allVisits.length, writes: 0 });
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const userVisitsToday = allVisits.filter(visit => 
-        visit.userEmail === email && visit.timestamp >= today
-    );
-    
-    // Count unique paths visited today as a simple measure of "activity"
-    const uniquePaths = new Set(userVisitsToday.map(v => v.path));
-    return uniquePaths.size;
-};
 
 
 // --- Settings ---
@@ -224,19 +189,6 @@ export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => 
     });
 };
 
-
-export const getVisitorCount = async (): Promise<number> => {
-    if (!isBrowser) return 0;
-    const allVisits = await getVisits();
-    // Count unique sessions to get a more accurate visitor count
-    const uniqueSessions = new Set(allVisits.map(v => v.sessionId));
-    return uniqueSessions.size;
-};
-
-export const incrementVisitorCount = async () => {
-    // This function is now deprecated as we use a more sophisticated session-based counting.
-    // Kept for compatibility but does nothing.
-};
 
 // --- Bookings ---
 export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
@@ -326,7 +278,7 @@ export const getProfile = async (email?: string): Promise<Profile | null> => {
 export const getAllProfiles = async (): Promise<Profile[]> => {
     if (!isBrowser) return [];
     const profiles = await getAllProfilesFromFirestore();
-    perfTracker.increment({ reads: profiles.length, writes: 0 });
+    perfTracker.increment({ reads: profiles.length || 1, writes: 0 });
     return profiles;
 }
 
