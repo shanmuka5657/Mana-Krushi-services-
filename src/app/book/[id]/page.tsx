@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { AppLayout } from "@/components/layout/app-layout";
 
 const generateBookingCode = (bookingCount: number): string => {
     const nextId = (bookingCount + 1).toString().padStart(4, '0');
@@ -65,8 +66,8 @@ export default function BookRidePage() {
         }
 
         const routeId = typeof params.id === 'string' ? params.id : '';
-        const allRoutes = await getRoutes(true); // Still need to get all to find by ID
-        const foundRoute = allRoutes.find((r) => r.id === routeId);
+        const allRoutes = await getRoutes(false, { routeId });
+        const foundRoute = allRoutes.length > 0 ? allRoutes[0] : null;
         
         if (foundRoute) {
             setRoute(foundRoute);
@@ -304,20 +305,17 @@ ${newlyBooked.client}
 
 
   if (!isLoaded) {
-    return <div>Loading...</div>;
+    return <AppLayout><div>Loading...</div></AppLayout>;
   }
 
   if (!route) {
-    return <div>Route not found.</div>;
+    return <AppLayout><div>Route not found.</div></AppLayout>;
   }
 
   return (
-    <>
+    <AppLayout>
     <div className="min-h-screen bg-muted/20">
         <header className="bg-background shadow-sm p-4 flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                <ArrowLeft />
-            </Button>
             <h1 className="text-xl font-bold">Book online and secure your seat</h1>
         </header>
 
@@ -519,8 +517,6 @@ ${newlyBooked.client}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </AppLayout>
   );
 }
-
-    

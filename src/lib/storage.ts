@@ -273,7 +273,7 @@ export const updateBookingLocation = async (bookingId: string, location: { passe
 
 
 // --- Routes ---
-export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean }): Promise<Route[]> => {
+export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string }): Promise<Route[]> => {
     if (!isBrowser) return [];
     try {
         const routes = await getRoutesFromFirestore(searchParams);
