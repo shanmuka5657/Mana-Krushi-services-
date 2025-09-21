@@ -41,6 +41,7 @@ let storage;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    // Enable offline persistence
     db = initializeFirestore(app, {
         localCache: persistentLocalCache({})
     });
