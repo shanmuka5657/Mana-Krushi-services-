@@ -221,11 +221,10 @@ export const incrementVisitorCount = async () => {
 };
 
 // --- Bookings ---
-export const getBookings = async (isAdmin = false): Promise<Booking[]> => {
+export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string }): Promise<Booking[]> => {
     if (!isBrowser) return [];
     try {
-        // Fetches all if admin, otherwise Firestore rules will filter.
-        return await getBookingsFromFirestore();
+        return await getBookingsFromFirestore(searchParams);
     } catch (error) {
         console.error("Error getting bookings:", error);
         return [];
@@ -330,3 +329,5 @@ export const getGlobalLogoUrl = async (): Promise<string | null> => {
     if (!isBrowser) return null;
     return await getSetting('globalLogoUrl');
 };
+
+    

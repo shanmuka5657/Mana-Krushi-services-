@@ -144,20 +144,43 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
 };
 
 // --- Bookings ---
-export const getBookingsFromFirestore = async (): Promise<Booking[]> => {
+export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string }): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
     try {
-        const snapshot = await getDocs(bookingsCollection);
-        return snapshot.docs.map(doc => {
+        let q = query(bookingsCollection);
+
+        if (searchParams?.destination) {
+            q = query(q, where("destination", "==", searchParams.destination));
+        }
+
+        if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
+            q = query(q, where("departureDate", ">=", startOfDay), where("departureDate", "<=", endOfDay));
+        }
+
+        const snapshot = await getDocs(q);
+        
+        let bookings = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 ...data,
                 id: doc.id,
-                // Firestore timestamps need to be converted to JS Dates
                 departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
                 returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
             } as Booking;
         });
+
+        if (searchParams?.time) {
+            bookings = bookings.filter(booking => {
+                 const bookingTime = new Date(booking.departureDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                 return bookingTime === searchParams.time;
+            });
+        }
+        
+        return bookings;
+
     } catch(e) {
         console.error("Error getting bookings from Firestore", e);
         return [];
@@ -300,3 +323,5 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { storage };
+
+    
