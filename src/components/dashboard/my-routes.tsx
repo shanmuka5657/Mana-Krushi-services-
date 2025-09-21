@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -11,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Route, Booking, Profile } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -57,8 +56,8 @@ const editRouteSchema = z.object({
 });
 
 
-const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
-  const [routes, setRoutes] = useState<Route[]>(initialRoutes);
+const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
+  const [routes, setRoutes] = useState<Route[]>(allOwnerRoutes);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [fromFilter, setFromFilter] = useState("");
@@ -73,14 +72,15 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [bookingUrl, setBookingUrl] = useState("");
   const [shareImageUrl, setShareImageUrl] = useState<string | undefined>(undefined);
+  const [hasSearched, setHasSearched] = useState(false);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
   });
 
   useEffect(() => {
-    setRoutes(initialRoutes);
-  }, [initialRoutes]);
+    setRoutes(allOwnerRoutes);
+  }, [allOwnerRoutes]);
 
   useEffect(() => {
     if (selectedRoute && isEditDialogOpen) {
@@ -131,13 +131,16 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   }
 
   const filteredRoutes = useMemo(() => {
+    if (!hasSearched && !dateFilter && !fromFilter && !toFilter) {
+      return [];
+    }
     return routes.filter(route => {
       const fromMatch = fromFilter ? route.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()) : true;
       const toMatch = toFilter ? route.toLocation.toLowerCase().includes(toFilter.toLowerCase()) : true;
       const dateMatch = dateFilter ? format(new Date(route.travelDate), 'yyyy-MM-dd') === format(dateFilter, 'yyyy-MM-dd') : true;
       return fromMatch && toMatch && dateMatch;
     });
-  }, [routes, fromFilter, toFilter, dateFilter]);
+  }, [routes, fromFilter, toFilter, dateFilter, hasSearched]);
 
   const handleViewClick = (route: Route) => {
     const routeBookings = allBookings.filter(
@@ -316,11 +319,31 @@ ${booking.driverName}
         return { icon: AlertCircle, color: 'text-muted-foreground', label: status };
     }
   }
+
+  const handleSearch = () => {
+    if (!dateFilter && !fromFilter && !toFilter) {
+      toast({
+        title: 'Please select a filter',
+        description: 'You must apply at least one filter to search for routes.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setHasSearched(true);
+  };
+
+  const clearFilters = () => {
+    setFromFilter('');
+    setToFilter('');
+    setDateFilter(undefined);
+    setHasSearched(false);
+  }
   
   return (
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Routes</CardTitle>
+        <CardDescription>Filter your routes to view bookings and details.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -341,7 +364,7 @@ ${booking.driverName}
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-[280px] justify-start text-left font-normal",
+                    "w-full md:w-[280px] justify-start text-left font-normal",
                     !dateFilter && "text-muted-foreground"
                   )}
                 >
@@ -361,68 +384,78 @@ ${booking.driverName}
                 />
               </PopoverContent>
             </Popover>
+            <Button onClick={handleSearch}><Search className="mr-2 h-4 w-4" /> Search</Button>
             {(fromFilter || toFilter || dateFilter) && (
-                 <Button variant="ghost" onClick={() => { setFromFilter(''); setToFilter(''); setDateFilter(undefined); }}>Clear</Button>
+                 <Button variant="ghost" onClick={clearFilters}>Clear</Button>
             )}
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
-              <TableHead className="rounded-l-lg">From</TableHead>
-              <TableHead>To</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Departure</TableHead>
-              <TableHead>Seats Left</TableHead>
-              <TableHead className="rounded-r-lg text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRoutes.length > 0 ? (
-              filteredRoutes.map((route) => {
-                  const bookedSeats = getBookedSeats(route);
-                  const availableSeats = route.availableSeats - bookedSeats;
-                  return (
-                    <TableRow key={route.id}>
-                      <TableCell className="font-medium">{route.fromLocation}</TableCell>
-                      <TableCell>{route.toLocation}</TableCell>
-                      <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
-                      <TableCell>{route.departureTime}</TableCell>
-                      <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
-                      <TableCell className="flex gap-2 justify-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewClick(route)}
-                          >
-                            View Bookings
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleEditClick(route)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                          </Button>
-                           <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleShareClick(route)}
-                          >
-                            <QrCode className="h-4 w-4" />
-                          </Button>
-                      </TableCell>
-                    </TableRow>
-                  )
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No routes found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+
+        {hasSearched ? (
+            <Table>
+            <TableHeader>
+                <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
+                <TableHead className="rounded-l-lg">From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Departure</TableHead>
+                <TableHead>Seats Left</TableHead>
+                <TableHead className="rounded-r-lg text-center">Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {filteredRoutes.length > 0 ? (
+                filteredRoutes.map((route) => {
+                    const bookedSeats = getBookedSeats(route);
+                    const availableSeats = route.availableSeats - bookedSeats;
+                    return (
+                        <TableRow key={route.id}>
+                        <TableCell className="font-medium">{route.fromLocation}</TableCell>
+                        <TableCell>{route.toLocation}</TableCell>
+                        <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
+                        <TableCell>{route.departureTime}</TableCell>
+                        <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
+                        <TableCell className="flex gap-2 justify-center">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewClick(route)}
+                            >
+                                View Bookings
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => handleEditClick(route)}
+                            >
+                                <Edit className="mr-2 h-4 w-4" /> Edit
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleShareClick(route)}
+                            >
+                                <QrCode className="h-4 w-4" />
+                            </Button>
+                        </TableCell>
+                        </TableRow>
+                    )
+                })
+                ) : (
+                <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                    No routes found for the selected filters.
+                    </TableCell>
+                </TableRow>
+                )}
+            </TableBody>
+            </Table>
+        ) : (
+             <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                <Search className="mx-auto h-12 w-12" />
+                <h3 className="mt-4 text-lg font-medium">Search for Your Routes</h3>
+                <p className="mt-1 text-sm">Use the filters above to find and manage your routes.</p>
+            </div>
+        )}
 
         {/* View Bookings Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

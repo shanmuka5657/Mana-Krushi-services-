@@ -13,32 +13,23 @@ function MyRoutesPageContent() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const fetchRoutes = async () => {
+        // We will now fetch routes inside the MyRoutes component based on filters.
+        // This initial fetch is no longer needed.
+        const fetchInitialData = async () => {
             const ownerName = getCurrentUserName();
-            const allRoutes = await getRoutes();
-            const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
-            
-            const now = new Date();
-            now.setHours(0, 0, 0, 0); // Start of today
-
-            // Filter for routes that are today or in the future
-            const upcomingRoutes = ownerRoutes
-                .filter(r => {
-                    const routeDate = new Date(r.travelDate);
-                    routeDate.setHours(0, 0, 0, 0);
-                    return routeDate >= now;
-                })
-                .sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
-
-            setRoutes(upcomingRoutes);
+            if (ownerName) {
+                const allRoutes = await getRoutes();
+                const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName);
+                setRoutes(ownerRoutes);
+            }
             setIsLoaded(true);
         };
-        fetchRoutes();
+        fetchInitialData();
     }, []);
 
 
     if (!isLoaded) {
-        return <AppLayout><div>Loading routes...</div></AppLayout>;
+        return <AppLayout><div>Loading...</div></AppLayout>;
     }
 
     return (
