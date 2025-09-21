@@ -210,19 +210,13 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
     try {
         let q = query(routesCollection);
 
+        // Date filter is the most selective, apply it first if present.
         if (searchParams && searchParams.date) {
              const searchDate = new Date(searchParams.date);
              const startOfDay = new Date(searchDate.setHours(0,0,0,0));
              const endOfDay = new Date(searchDate.setHours(23,59,59,999));
             q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
         }
-
-        if (searchParams && searchParams.to) {
-            q = query(q, where("toLocation", "==", searchParams.to));
-        }
-        
-        // "from" is more complex due to pickup points, so we'll fetch based on other params and filter "from" client-side for now.
-        // This is still a major improvement. A more advanced solution could involve a more complex data structure or a search service.
 
         const snapshot = await getDocs(q);
         let routes = snapshot.docs.map(doc => {
@@ -234,7 +228,11 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
             } as Route;
         });
 
-        // Client-side filter for 'from' location and intermediate points
+        // Client-side filtering for other params
+        if (searchParams && searchParams.to) {
+             routes = routes.filter(route => route.toLocation.trim().toLowerCase() === searchParams.to?.trim().toLowerCase());
+        }
+
         if (searchParams && searchParams.from) {
             const searchFromLower = searchParams.from.trim().toLowerCase();
             routes = routes.filter(route => 
@@ -323,5 +321,3 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { storage };
-
-    
