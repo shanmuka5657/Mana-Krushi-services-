@@ -70,21 +70,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
     checkProfile();
   }, []);
   
-  useEffect(() => {
-    const fetchLocations = async () => {
-      const allRoutes = await getRoutes(true);
-      const allLocations = new Set<string>();
-      allRoutes.forEach(route => {
-        allLocations.add(route.fromLocation);
-        allLocations.add(route.toLocation);
-        route.pickupPoints?.forEach(p => allLocations.add(p));
-        route.dropOffPoints?.forEach(d => allLocations.add(d));
-      });
-      setLocations(Array.from(allLocations));
-    };
-    fetchLocations();
-  }, []);
-  
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
     defaultValues: {
