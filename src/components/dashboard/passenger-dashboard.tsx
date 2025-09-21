@@ -5,11 +5,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, isSameDay } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Search, Loader2, User, Star, Users, Zap, Car, Sparkles, Milestone, Shield, CheckCircle } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, MapPin, Search, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Autoplay from "embla-carousel-autoplay";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -29,8 +28,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile, getRoutes, getBookings, getAllProfiles } from "@/lib/storage";
-import type { Route, Booking, Profile } from "@/lib/types";
+import { getProfile, getRoutes } from "@/lib/storage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,9 +38,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
 
 
 const searchFormSchema = z.object({
@@ -59,273 +54,6 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
 
-const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
-    try {
-        const departure = new Date(`1970-01-01T${departureTime}:00`);
-        const arrival = new Date(`1970-01-01T${arrivalTime}:00`);
-        const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
-        if (diffMinutes < 0) return "";
-
-        const hours = Math.floor(diffMinutes / 60);
-        const minutes = diffMinutes % 60;
-        
-        return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
-
-    } catch (e) {
-        return "";
-    }
-}
-
-function TopMembers() {
-    const [topRoutes, setTopRoutes] = useState<Route[]>([]);
-    const [allBookings, setAllBookings] = useState<Booking[]>([]);
-    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
-    const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const router = useRouter();
-    const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
-    
-    useEffect(() => {
-        const fetchTopRoutes = async () => {
-            const [allRoutes, bookings, profiles] = await Promise.all([
-                getRoutes(true),
-                getBookings(true),
-                getAllProfiles(),
-            ]);
-            setAllBookings(bookings);
-            setAllProfiles(profiles);
-            
-            const today = new Date(currentDate);
-            today.setHours(0, 0, 0, 0);
-
-            const filteredRoutes = allRoutes.filter(route => {
-                const routeDate = new Date(route.travelDate);
-                routeDate.setHours(0, 0, 0, 0);
-                
-                if (routeDate.getTime() !== today.getTime()) {
-                    return false;
-                }
-
-                const [hours, minutes] = route.departureTime.split(':').map(Number);
-                const departureDateTime = new Date(route.travelDate);
-                departureDateTime.setHours(hours, minutes);
-
-                return departureDateTime > new Date();
-            });
-
-            const sortedRoutes = [...filteredRoutes].sort((a, b) => {
-                if (a.isPromoted && !b.isPromoted) return -1;
-                if (!a.isPromoted && b.isPromoted) return 1;
-                return (b.rating || 0) - (a.rating || 0);
-            });
-            setTopRoutes(sortedRoutes.slice(0, 5));
-        }
-        fetchTopRoutes();
-    }, [currentDate]);
-    
-    const getBookedSeats = (route: Route) => {
-        return allBookings.filter(b => {
-           const routeDate = new Date(route.travelDate);
-           const bookingDate = new Date(b.departureDate);
-           const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                             routeDate.getMonth() === bookingDate.getMonth() &&
-                             routeDate.getDate() === bookingDate.getDate();
-           const bookingTime = format(bookingDate, 'HH:mm');
-   
-           return (
-               b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-               isSameDay &&
-               bookingTime === route.departureTime &&
-               b.status !== "Cancelled"
-           );
-       }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-     }
-     
-    const getDriverProfile = (ownerEmail: string): Profile | undefined => {
-        return allProfiles.find(p => p.email === ownerEmail);
-    }
-
-
-    if (topRoutes.length === 0) {
-        return (
-             <Card className="mb-6">
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Top Members</CardTitle>
-                    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-[180px] justify-start text-left font-normal",
-                            !currentDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {currentDate ? format(currentDate, "dd MMM") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={currentDate}
-                          onSelect={(date) => {
-                            if (date) {
-                                setCurrentDate(date);
-                            }
-                            setIsCalendarOpen(false);
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center py-4 text-muted-foreground">
-                        <p>No upcoming rides found for today.</p>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    return (
-        <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Top Members</CardTitle>
-                    <CardDescription>Highest rated rides for today.</CardDescription>
-                </div>
-                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                    <PopoverTrigger asChild>
-                    <Button
-                        variant={"outline"}
-                        className={cn(
-                        "w-[180px] justify-start text-left font-normal",
-                        !currentDate && "text-muted-foreground"
-                        )}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {currentDate ? format(currentDate, "dd MMM") : <span>Pick a date</span>}
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                    <Calendar
-                        mode="single"
-                        selected={currentDate}
-                        onSelect={(date) => {
-                            if (date) {
-                                setCurrentDate(date);
-                            }
-                            setIsCalendarOpen(false);
-                        }}
-                    />
-                    </PopoverContent>
-                </Popover>
-            </CardHeader>
-            <CardContent>
-                <Carousel
-                    plugins={[plugin.current]}
-                    className="w-full"
-                    onMouseEnter={plugin.current.stop}
-                    onMouseLeave={plugin.current.reset}
-                >
-                 <CarouselContent>
-                 {topRoutes.map(route => {
-                    const bookedSeats = getBookedSeats(route);
-                    const availableSeats = route.availableSeats - bookedSeats;
-                    const driverProfile = getDriverProfile(route.ownerEmail);
-                    return (
-                        <CarouselItem key={route.id}>
-                            <Card className={cn("overflow-hidden transition-all", route.isPromoted && "border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10")}>
-                                <CardContent className="p-4">
-                                     <div className="flex justify-between items-start">
-                                        <div className="flex gap-4">
-                                            <div>
-                                                <div className="font-semibold">{route.departureTime}</div>
-                                                <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
-                                                <div className="font-semibold mt-2">{route.arrivalTime}</div>
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                            <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
-                                            <div className="w-px h-10 bg-border my-1"></div>
-                                            <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold">{route.fromLocation}</div>
-                                                {route.distance && (
-                                                <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
-                                                    <Milestone className="h-3 w-3" />
-                                                    <span>{route.distance.toFixed(0)} km</span>
-                                                </div>
-                                                )}
-                                                <div className="font-semibold mt-2">{route.toLocation}</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-lg font-bold">
-                                                ₹{(route.price || 0).toFixed(2)}
-                                            </div>
-                                            <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
-                                                <Users className="h-4 w-4" />
-                                                <span>{availableSeats > 0 ? `${availableSeats} seats left` : 'Sold out'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 mt-3">
-                                        {route.isPromoted && (
-                                            <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
-                                                <Sparkles className="mr-1 h-3 w-3" />
-                                                Promoted
-                                            </Badge>
-                                        )}
-                                        {route.isPromoted && (
-                                            <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
-                                                <Shield className="mr-1 h-3 w-3" />
-                                                Insurance: Yes
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </CardContent>
-                                 <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                        <Avatar className="h-10 w-10">
-                                            <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-grow">
-                                            <div className="font-semibold text-sm flex items-center gap-2">
-                                                {route.driverName}
-                                                {driverProfile?.mobileVerified && (
-                                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 p-1 h-4">
-                                                        <CheckCircle className="h-3 w-3" />
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                                <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-center ml-4">
-                                            {route.vehicleType && <p className="text-xs font-medium text-muted-foreground">{route.vehicleType}</p>}
-                                            <Car className="text-muted-foreground" />
-                                        </div>
-                                    </div>
-                                    {availableSeats > 0 && (
-                                    <Button size="sm" onClick={() => router.push(`/book/${route.id}`)}>
-                                        Book
-                                    </Button>
-                                    )}
-                                </CardFooter>
-                            </Card>
-                        </CarouselItem>
-                    )
-                })}
-                </CarouselContent>
-                </Carousel>
-            </CardContent>
-        </Card>
-    );
-}
 
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
@@ -395,8 +123,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialogContent>
       </AlertDialog>
 
-      <TopMembers />
-      
       <Card className="shadow-sm">
           <CardHeader>
               <CardTitle>Find a Ride</CardTitle>
