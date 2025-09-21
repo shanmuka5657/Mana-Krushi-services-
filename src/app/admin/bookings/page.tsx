@@ -68,7 +68,7 @@ function AdminAllBookingsPage() {
                     </Button>
                 </CardHeader>
            </Card>
-            <RecentBookings bookings={bookings} onUpdateBooking={handleUpdateBooking} />
+            <RecentBookings initialBookings={bookings} onUpdateBooking={handleUpdateBooking} />
         </AppLayout>
     );
 }
