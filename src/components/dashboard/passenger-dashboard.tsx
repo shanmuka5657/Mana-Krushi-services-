@@ -235,6 +235,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         </AlertDialogContent>
       </AlertDialog>
 
+      <TopMembersCarousel />
+
       <Card className="shadow-sm">
           <CardHeader>
               <CardTitle>Find a Ride</CardTitle>
@@ -339,8 +341,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
               </Form>
           </CardContent>
       </Card>
-      
-      <TopMembersCarousel />
 
     </div>
   );
