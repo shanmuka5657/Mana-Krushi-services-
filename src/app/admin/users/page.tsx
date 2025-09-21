@@ -6,8 +6,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getAllProfiles, getTodaysVisitCountForUser } from '@/lib/storage';
-import type { Profile } from '@/lib/types';
+import { getAllProfiles, getVisits } from '@/lib/storage';
+import type { Profile, Visit } from '@/lib/types';
 import { format } from 'date-fns';
 import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert, Gift, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge as UiBadge } from '@/components/ui/badge';
@@ -30,18 +30,36 @@ function AdminUsersPage() {
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-        const fetchProfiles = async () => {
-            const profiles = await getAllProfiles();
-            const profilesWithActivity = await Promise.all(
-                profiles.map(async (p) => ({
-                    ...p,
-                    activity: await getTodaysVisitCountForUser(p.email),
-                }))
-            );
+        const fetchProfilesAndActivity = async () => {
+            const [profiles, visits] = await Promise.all([
+                getAllProfiles(),
+                getVisits()
+            ]);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Create a map to store activity counts
+            const activityMap = new Map<string, Set<string>>();
+
+            visits.forEach(visit => {
+                if (new Date(visit.timestamp) >= today) {
+                    if (!activityMap.has(visit.userEmail)) {
+                        activityMap.set(visit.userEmail, new Set());
+                    }
+                    activityMap.get(visit.userEmail)!.add(visit.path);
+                }
+            });
+
+            const profilesWithActivity = profiles.map(p => ({
+                ...p,
+                activity: activityMap.get(p.email)?.size || 0,
+            }));
+            
             setAllProfiles(profilesWithActivity);
             setIsLoaded(true);
         };
-        fetchProfiles();
+        fetchProfilesAndActivity();
     }, []);
     
     const handleFilterChange = (newFilter: FilterRole) => {
@@ -255,3 +273,5 @@ export default function UsersPage() {
         </Suspense>
     );
 }
+
+    
