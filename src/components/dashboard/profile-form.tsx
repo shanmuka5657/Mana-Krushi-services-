@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
 import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,8 @@ const countries = [
 
 export default function ProfileForm() {
   const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -265,7 +268,10 @@ export default function ProfileForm() {
       description: "Your profile has been successfully updated.",
     });
 
-    if (profileToSave.role === 'owner' && !profileToSave.planExpiryDate) {
+    const redirectUrl = searchParams.get('redirect');
+    if (redirectUrl) {
+      router.push(redirectUrl);
+    } else if (profileToSave.role === 'owner' && !profileToSave.planExpiryDate) {
       setShowPlanPrompt(true);
     }
   }
@@ -729,3 +735,5 @@ export default function ProfileForm() {
     </div>
   );
 }
+
+    

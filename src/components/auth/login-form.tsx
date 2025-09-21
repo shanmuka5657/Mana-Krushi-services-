@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
@@ -44,6 +44,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
@@ -135,7 +136,8 @@ export function LoginForm() {
     const name = userProfile.name || values.email.split('@')[0];
     saveCurrentUser(userProfile.email, name, userProfile.role);
     
-    router.push(`/dashboard?role=${userProfile.role}`);
+    const redirectUrl = searchParams.get('redirect');
+    router.push(redirectUrl || `/dashboard?role=${userProfile.role}`);
   }
 
   return (
@@ -240,3 +242,5 @@ export function LoginForm() {
     </>
   );
 }
+
+    

@@ -111,16 +111,28 @@ export default function BookRidePage() {
     if (!route || isBooking || isPast) return;
     setIsBooking(true);
 
-    const passengerProfile = await getProfile();
     const passengerEmail = getCurrentUser();
+    
+    if (!passengerEmail) {
+        toast({
+            title: "Please Login",
+            description: "You need to be logged in to book a ride.",
+            variant: "destructive",
+        });
+        router.push(`/login?redirect=/book/${params.id}`);
+        setIsBooking(false);
+        return;
+    }
+    
+    const passengerProfile = await getProfile(passengerEmail);
 
-    if (!passengerProfile || !passengerEmail) {
+    if (!passengerProfile || !passengerProfile.mobile || passengerProfile.mobile === '0000000000') {
         toast({
             title: "Profile Incomplete",
             description: "Please complete your profile before booking.",
             variant: "destructive",
         });
-        router.push('/profile?role=passenger');
+        router.push(`/profile?role=passenger&redirect=/book/${params.id}`);
         setIsBooking(false);
         return;
     }
@@ -504,4 +516,5 @@ ${newlyBooked.client}
   );
 }
 
+    
     
