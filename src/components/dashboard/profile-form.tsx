@@ -9,6 +9,8 @@ import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, 
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
+import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { storage } from "@/lib/firebase";
 
 
 const profileFormSchema = z.object({
@@ -79,6 +82,7 @@ export default function ProfileForm() {
   const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
   const [otpValue, setOtpValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -190,7 +194,7 @@ export default function ProfileForm() {
               context.drawImage(video, 0, 0, canvas.width, canvas.height);
               const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG and quality 0.8
               setSelfie(dataUrl);
-              form.setValue('selfieDataUrl', dataUrl);
+              form.setValue('selfieDataUrl', dataUrl, { shouldDirty: true });
           }
       }
   }
@@ -201,9 +205,33 @@ export default function ProfileForm() {
   };
 
   async function onSubmit(data: ProfileFormValues) {
+    setIsUploading(true);
     const currentProfile = await getProfile();
-    const { additionalMobiles, ...restOfData } = data;
+    const { additionalMobiles, selfieDataUrl, ...restOfData } = data;
     
+    let publicSelfieUrl = currentProfile?.selfieDataUrl || '';
+
+    // Check if a new selfie was taken (it will be a base64 data URL)
+    if (selfieDataUrl && selfieDataUrl.startsWith('data:image')) {
+        toast({ title: 'Uploading Selfie...', description: 'Please wait while your new profile picture is uploaded.' });
+        try {
+            const userEmail = getCurrentUser();
+            if (!userEmail) throw new Error("User not logged in");
+            
+            const imageRef = storageRef(storage, `selfies/${userEmail}.jpg`);
+            await uploadString(imageRef, selfieDataUrl, 'data_url');
+            publicSelfieUrl = await getDownloadURL(imageRef);
+            
+            toast({ title: 'Selfie Uploaded!', description: 'Your new profile picture is saved.' });
+        } catch (error) {
+            console.error("Error uploading selfie:", error);
+            toast({ title: 'Upload Failed', description: 'Could not upload your selfie. Please try again.', variant: 'destructive' });
+            setIsUploading(false);
+            return;
+        }
+    }
+
+
     const additionalMobilesArray = additionalMobiles
         ?.split('\n')
         .map(num => num.trim())
@@ -214,6 +242,7 @@ export default function ProfileForm() {
     const profileToSave: Profile = { 
         ...currentProfile, 
         ...restOfData,
+        selfieDataUrl: publicSelfieUrl, // Save the public URL
         additionalMobiles: additionalMobilesArray,
     };
     
@@ -229,6 +258,7 @@ export default function ProfileForm() {
     
     // Update local state to reflect changes immediately
     setProfile(profileToSave);
+    setIsUploading(false);
 
     toast({
       title: "Profile Updated!",
@@ -688,7 +718,8 @@ export default function ProfileForm() {
               )}
 
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isUploading}>
+                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save Changes
               </Button>
             </form>

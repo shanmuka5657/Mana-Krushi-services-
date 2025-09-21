@@ -20,6 +20,7 @@ import {
     initializeFirestore,
     persistentLocalCache
 } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
@@ -33,12 +34,14 @@ const firebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_ENV === 'production'
 // Initialize Firebase
 let app;
 let db;
+let storage;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     db = initializeFirestore(app, {
         localCache: persistentLocalCache({})
     });
+    storage = getStorage(app);
 } catch(e) {
     console.error("Firebase initialization failed", e);
 }
@@ -268,3 +271,5 @@ export const saveProfileToFirestore = async (profile: Profile) => {
     );
     await setDoc(docRef, profileToSave, { merge: true });
 };
+
+export { storage };
