@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search, MapPin as MapIcon, Milestone, Shield } from "lucide-react";
 import { format, isSameDay, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
