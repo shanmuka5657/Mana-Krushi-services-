@@ -182,11 +182,27 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
 
 
 // --- Routes ---
-export const getRoutesFromFirestore = async (): Promise<Route[]> => {
+export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string }): Promise<Route[]> => {
     if (!routesCollection) return [];
-     try {
-        const snapshot = await getDocs(routesCollection);
-        return snapshot.docs.map(doc => {
+    try {
+        let q = query(routesCollection);
+
+        if (searchParams && searchParams.date) {
+             const searchDate = new Date(searchParams.date);
+             const startOfDay = new Date(searchDate.setHours(0,0,0,0));
+             const endOfDay = new Date(searchDate.setHours(23,59,59,999));
+            q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
+        }
+
+        if (searchParams && searchParams.to) {
+            q = query(q, where("toLocation", "==", searchParams.to));
+        }
+        
+        // "from" is more complex due to pickup points, so we'll fetch based on other params and filter "from" client-side for now.
+        // This is still a major improvement. A more advanced solution could involve a more complex data structure or a search service.
+
+        const snapshot = await getDocs(q);
+        let routes = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 ...data,
@@ -194,6 +210,17 @@ export const getRoutesFromFirestore = async (): Promise<Route[]> => {
                 travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
             } as Route;
         });
+
+        // Client-side filter for 'from' location and intermediate points
+        if (searchParams && searchParams.from) {
+            const searchFromLower = searchParams.from.trim().toLowerCase();
+            routes = routes.filter(route => 
+                route.fromLocation.trim().toLowerCase() === searchFromLower ||
+                route.pickupPoints?.some(p => p.trim().toLowerCase() === searchFromLower)
+            );
+        }
+
+        return routes;
     } catch(e) {
         console.error("Error getting routes from Firestore", e);
         return [];

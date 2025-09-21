@@ -1,5 +1,4 @@
 
-
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore } from './firebase';
@@ -222,11 +221,10 @@ export const saveBookings = async (bookings: Booking[]) => {
 };
 
 // --- Routes ---
-export const getRoutes = async (isAdmin = false): Promise<Route[]> => {
+export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string }): Promise<Route[]> => {
     if (!isBrowser) return [];
     try {
-       // Fetches all if admin, otherwise Firestore rules will filter.
-        return await getRoutesFromFirestore();
+        return await getRoutesFromFirestore(searchParams);
     } catch(e) {
         console.error("Error getting routes:", e);
         return [];

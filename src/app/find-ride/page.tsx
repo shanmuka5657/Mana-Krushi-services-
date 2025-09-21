@@ -61,7 +61,7 @@ function FindRideResultsPage() {
             };
 
             const [routes, bookings, profiles] = await Promise.all([
-                getRoutes(true),
+                getRoutes(true, { from, to, date }), // Use new optimized query
                 getBookings(true),
                 getAllProfiles(),
             ]);
@@ -69,44 +69,10 @@ function FindRideResultsPage() {
             setAllBookings(bookings);
             setAllProfiles(profiles);
 
-            const searchDate = new Date(date);
-            const searchFromLower = from.trim().toLowerCase();
-            const searchToLower = to.trim().toLowerCase();
-            
-            const matchedRoutes: Route[] = [];
-
-            for (const route of routes) {
-                const routeDate = new Date(route.travelDate);
-                const dateMatch = isSameDay(searchDate, routeDate);
-                if (!dateMatch) continue;
-
-                const toMatch = route.toLocation.trim().toLowerCase() === searchToLower;
-                if (!toMatch) continue;
-
-                // Case 1: Exact match
-                const fromMatch = route.fromLocation.trim().toLowerCase() === searchFromLower;
-                if (fromMatch) {
-                    matchedRoutes.push(route);
-                    continue;
-                }
-
-                // Case 2: Intermediate pickup
-                const pickupPoints = route.pickupPoints?.map(p => p.toLowerCase()) || [];
-                const isIntermediatePickup = pickupPoints.includes(searchFromLower);
-
-                if (isIntermediatePickup) {
-                    const distanceResult = await calculateDistance({ from: route.fromLocation, to: from });
-                    
-                    if (distanceResult.distance && distanceResult.distance <= 60) {
-                        matchedRoutes.push(route);
-                    }
-                }
-            }
-
             // Sort promoted rides to the top
-            matchedRoutes.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
+            routes.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
 
-            setAvailableOwners(matchedRoutes);
+            setAvailableOwners(routes);
             setIsLoaded(true);
         }
         fetchAndFilterRoutes();
