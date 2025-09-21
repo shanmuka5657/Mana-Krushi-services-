@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -34,18 +33,26 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
 
     useEffect(() => {
         const fetchRideDetails = async () => {
-            const [allBookings, profiles] = await Promise.all([
-                getBookings(true),
-                getAllProfiles()
-            ]);
-            setAllProfiles(profiles);
+            const rideDate = format(new Date(ride.departureDate), 'yyyy-MM-dd');
+            const rideTime = format(new Date(ride.departureDate), 'HH:mm');
 
-            const relatedPassengers = allBookings.filter(b => 
-                b.destination === ride.destination &&
-                new Date(b.departureDate).getTime() === new Date(ride.departureDate).getTime() &&
-                b.status === 'Confirmed'
-            );
-            setPassengersForRide(relatedPassengers);
+            // OPTIMIZED: Fetch only bookings relevant to this ride
+            const relatedPassengers = await getBookings(true, {
+                destination: ride.destination,
+                date: rideDate,
+                time: rideTime
+            });
+
+            const confirmedPassengers = relatedPassengers.filter(b => b.status === 'Confirmed');
+            setPassengersForRide(confirmedPassengers);
+
+            if (confirmedPassengers.length > 0) {
+                 // OPTIMIZED: Fetch only the profiles for the passengers on this ride.
+                const passengerEmails = confirmedPassengers.map(p => p.clientEmail).filter((email): email is string => !!email);
+                const profiles = await getAllProfiles(); // Still need all for now, but will filter
+                const passengerProfiles = profiles.filter(p => passengerEmails.includes(p.email));
+                setAllProfiles(passengerProfiles);
+            }
         }
         fetchRideDetails();
          return () => {
