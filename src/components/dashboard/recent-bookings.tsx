@@ -216,20 +216,8 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     } else if (role === 'owner' && currentUserName) {
         userBookings = allBookings.filter(b => b.driverName === currentUserName);
     }
-
-    const now = new Date();
-    const filtered = userBookings.filter(b => {
-      const departureDate = new Date(b.departureDate);
-      if (mode === 'upcoming') {
-        return departureDate >= now && b.status !== 'Cancelled';
-      }
-      if (mode === 'past') {
-        return departureDate < now || b.status === 'Cancelled' || b.status === 'Completed';
-      }
-      return true;
-    });
-
-    setBookings(filtered.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()));
+    
+    setBookings(userBookings.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()));
     setIsSearching(false);
   };
   
@@ -535,3 +523,5 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
+
+    
