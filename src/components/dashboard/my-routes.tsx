@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Route, Booking, Profile } from "@/lib/types";
-import { format } from "date-fns";
+import { format, addDays, startOfDay, endOfDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -56,8 +56,8 @@ const editRouteSchema = z.object({
 });
 
 
-const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
-  const [routes, setRoutes] = useState<Route[]>(allOwnerRoutes);
+const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
+  const [routes, setRoutes] = useState<Route[]>(initialRoutes);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [fromFilter, setFromFilter] = useState("");
@@ -72,15 +72,27 @@ const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [bookingUrl, setBookingUrl] = useState("");
   const [shareImageUrl, setShareImageUrl] = useState<string | undefined>(undefined);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
   });
 
-  useEffect(() => {
-    setRoutes(allOwnerRoutes);
-  }, [allOwnerRoutes]);
+   useEffect(() => {
+    const fetchInitialData = async () => {
+        setIsLoading(true);
+        const [bookings, profiles] = await Promise.all([
+            getBookings(true),
+            getAllProfiles(),
+        ]);
+        setAllBookings(bookings);
+        setAllProfiles(profiles);
+        setRoutes(initialRoutes);
+        setIsLoading(false);
+    };
+    fetchInitialData();
+  }, [initialRoutes]);
 
   useEffect(() => {
     if (selectedRoute && isEditDialogOpen) {
@@ -97,15 +109,6 @@ const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
       });
     }
   }, [selectedRoute, isEditDialogOpen, form]);
-
-
-  useEffect(() => {
-    const fetchBookingsAndProfile = async () => {
-        setAllBookings(await getBookings(true)); // Admin/Owner can see all
-        setAllProfiles(await getAllProfiles());
-    }
-    fetchBookingsAndProfile();
-  }, []);
 
   const getBookedSeats = (route: Route) => {
      return allBookings.filter(b => {
@@ -130,17 +133,6 @@ const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
     return allProfiles.find(p => p.email === email);
   }
 
-  const filteredRoutes = useMemo(() => {
-    if (!hasSearched && !dateFilter && !fromFilter && !toFilter) {
-      return [];
-    }
-    return routes.filter(route => {
-      const fromMatch = fromFilter ? route.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()) : true;
-      const toMatch = toFilter ? route.toLocation.toLowerCase().includes(toFilter.toLowerCase()) : true;
-      const dateMatch = dateFilter ? format(new Date(route.travelDate), 'yyyy-MM-dd') === format(dateFilter, 'yyyy-MM-dd') : true;
-      return fromMatch && toMatch && dateMatch;
-    });
-  }, [routes, fromFilter, toFilter, dateFilter, hasSearched]);
 
   const handleViewClick = (route: Route) => {
     const routeBookings = allBookings.filter(
@@ -186,6 +178,7 @@ const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
   const handleEditSubmit = async (data: z.infer<typeof editRouteSchema,>) => {
     if (!selectedRoute) return;
 
+    setIsSearching(true);
     const allRoutes = await getRoutes(true);
 
     const updatedRoutes = allRoutes.map(r => 
@@ -200,7 +193,9 @@ const MyRoutes = ({ routes: allOwnerRoutes }: MyRoutesProps) => {
     );
 
     await saveRoutes(updatedRoutes);
-    setRoutes(updatedRoutes);
+    setRoutes(updatedRoutes.filter(r => initialRoutes.some(ir => ir.id === r.id)));
+    
+    setIsSearching(false);
     toast({
       title: "Route Updated",
       description: "The route details have been successfully updated."
@@ -320,30 +315,44 @@ ${booking.driverName}
     }
   }
 
-  const handleSearch = () => {
-    if (!dateFilter && !fromFilter && !toFilter) {
-      toast({
-        title: 'Please select a filter',
-        description: 'You must apply at least one filter to search for routes.',
-        variant: 'destructive',
-      });
-      return;
+  const handleSearch = async () => {
+    setIsSearching(true);
+    let allRoutes = await getRoutes(true); // Fetch all routes
+    
+    if (fromFilter) {
+      allRoutes = allRoutes.filter(r => r.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()));
     }
-    setHasSearched(true);
+    if (toFilter) {
+      allRoutes = allRoutes.filter(r => r.toLocation.toLowerCase().includes(toFilter.toLowerCase()));
+    }
+    if (dateFilter) {
+       allRoutes = allRoutes.filter(r => format(new Date(r.travelDate), 'yyyy-MM-dd') === format(dateFilter, 'yyyy-MM-dd'));
+    }
+    
+    setRoutes(allRoutes);
+    setIsSearching(false);
   };
 
   const clearFilters = () => {
     setFromFilter('');
     setToFilter('');
     setDateFilter(undefined);
-    setHasSearched(false);
+    setRoutes(initialRoutes); // Revert to initial default routes
   }
   
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
+  }
+
   return (
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Routes</CardTitle>
-        <CardDescription>Filter your routes to view bookings and details.</CardDescription>
+        <CardDescription>Routes for today and tomorrow are shown by default. Use filters to find other routes.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -384,78 +393,74 @@ ${booking.driverName}
                 />
               </PopoverContent>
             </Popover>
-            <Button onClick={handleSearch}><Search className="mr-2 h-4 w-4" /> Search</Button>
+            <Button onClick={handleSearch} disabled={isSearching}>
+                {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />} 
+                Search
+            </Button>
             {(fromFilter || toFilter || dateFilter) && (
                  <Button variant="ghost" onClick={clearFilters}>Clear</Button>
             )}
         </div>
 
-        {hasSearched ? (
-            <Table>
-            <TableHeader>
-                <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
-                <TableHead className="rounded-l-lg">From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Departure</TableHead>
-                <TableHead>Seats Left</TableHead>
-                <TableHead className="rounded-r-lg text-center">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {filteredRoutes.length > 0 ? (
-                filteredRoutes.map((route) => {
-                    const bookedSeats = getBookedSeats(route);
-                    const availableSeats = route.availableSeats - bookedSeats;
-                    return (
-                        <TableRow key={route.id}>
-                        <TableCell className="font-medium">{route.fromLocation}</TableCell>
-                        <TableCell>{route.toLocation}</TableCell>
-                        <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
-                        <TableCell>{route.departureTime}</TableCell>
-                        <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
-                        <TableCell className="flex gap-2 justify-center">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewClick(route)}
-                            >
-                                View Bookings
-                            </Button>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => handleEditClick(route)}
-                            >
-                                <Edit className="mr-2 h-4 w-4" /> Edit
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => handleShareClick(route)}
-                            >
-                                <QrCode className="h-4 w-4" />
-                            </Button>
-                        </TableCell>
-                        </TableRow>
-                    )
-                })
-                ) : (
-                <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                    No routes found for the selected filters.
-                    </TableCell>
-                </TableRow>
-                )}
-            </TableBody>
-            </Table>
-        ) : (
-             <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                <Search className="mx-auto h-12 w-12" />
-                <h3 className="mt-4 text-lg font-medium">Search for Your Routes</h3>
-                <p className="mt-1 text-sm">Use the filters above to find and manage your routes.</p>
-            </div>
-        )}
+        <Table>
+          <TableHeader>
+              <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
+              <TableHead className="rounded-l-lg">From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Departure</TableHead>
+              <TableHead>Seats Left</TableHead>
+              <TableHead className="rounded-r-lg text-center">Actions</TableHead>
+              </TableRow>
+          </TableHeader>
+          <TableBody>
+              {routes.length > 0 ? (
+              routes.map((route) => {
+                  const bookedSeats = getBookedSeats(route);
+                  const availableSeats = route.availableSeats - bookedSeats;
+                  return (
+                      <TableRow key={route.id}>
+                      <TableCell className="font-medium">{route.fromLocation}</TableCell>
+                      <TableCell>{route.toLocation}</TableCell>
+                      <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
+                      <TableCell>{route.departureTime}</TableCell>
+                      <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
+                      <TableCell className="flex gap-2 justify-center">
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewClick(route)}
+                          >
+                              View Bookings
+                          </Button>
+                          <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleEditClick(route)}
+                          >
+                              <Edit className="mr-2 h-4 w-4" /> Edit
+                          </Button>
+                          <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleShareClick(route)}
+                          >
+                              <QrCode className="h-4 w-4" />
+                          </Button>
+                      </TableCell>
+                      </TableRow>
+                  )
+              })
+              ) : (
+              <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    No routes found.
+                  </TableCell>
+              </TableRow>
+              )}
+          </TableBody>
+        </Table>
+       
 
         {/* View Bookings Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

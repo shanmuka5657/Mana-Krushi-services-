@@ -7,20 +7,29 @@ import MyRoutes from '@/components/dashboard/my-routes';
 import { getRoutes, getCurrentUserName } from '@/lib/storage';
 import type { Route } from '@/lib/types';
 import { Suspense } from 'react';
+import { format, addDays, startOfDay, endOfDay } from 'date-fns';
 
 function MyRoutesPageContent() {
     const [routes, setRoutes] = useState<Route[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        // We will now fetch routes inside the MyRoutes component based on filters.
-        // This initial fetch is no longer needed.
         const fetchInitialData = async () => {
             const ownerName = getCurrentUserName();
             if (ownerName) {
                 const allRoutes = await getRoutes();
                 const ownerRoutes = allRoutes.filter(r => r.ownerName === ownerName);
-                setRoutes(ownerRoutes);
+                
+                // Default filter: today and tomorrow
+                const today = startOfDay(new Date());
+                const tomorrow = endOfDay(addDays(new Date(), 1));
+
+                const defaultRoutes = ownerRoutes.filter(r => {
+                    const routeDate = new Date(r.travelDate);
+                    return routeDate >= today && routeDate <= tomorrow;
+                });
+                
+                setRoutes(defaultRoutes);
             }
             setIsLoaded(true);
         };
