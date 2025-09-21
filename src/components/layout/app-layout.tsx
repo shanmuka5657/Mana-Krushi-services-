@@ -123,6 +123,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     if(window.matchMedia('(display-mode: standalone)').matches) {
         setIsStandalone(true);
     }
+    
+    // Reset performance counters on initial mount
+    perfTracker.reset();
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();

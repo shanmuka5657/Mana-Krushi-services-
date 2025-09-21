@@ -11,11 +11,15 @@ const listeners: ((event: PerfEvent) => void)[] = [];
 let sessionReads = 0;
 let sessionWrites = 0;
 
+const notifyListeners = () => {
+    listeners.forEach(listener => listener({ reads: sessionReads, writes: sessionWrites }));
+};
+
 export const perfTracker = {
     increment: (event: PerfEvent) => {
         sessionReads += event.reads;
         sessionWrites += event.writes;
-        listeners.forEach(listener => listener({ reads: sessionReads, writes: sessionWrites }));
+        notifyListeners();
     },
     
     subscribe: (listener: (event: PerfEvent) => void): (() => void) => {
@@ -35,4 +39,10 @@ export const perfTracker = {
         reads: sessionReads,
         writes: sessionWrites,
     }),
+
+    reset: () => {
+        sessionReads = 0;
+        sessionWrites = 0;
+        notifyListeners();
+    }
 };
