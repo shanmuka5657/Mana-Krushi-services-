@@ -14,6 +14,7 @@ import { Suspense } from 'react';
 import { getBookings, saveBookings, getRoutes, addRoute, getCurrentUserName, getCurrentUser } from "@/lib/storage";
 import MyRoutes from "@/components/dashboard/my-routes";
 import ProfileForm from "@/components/dashboard/profile-form";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 function DashboardPage() {
   const searchParams = useSearchParams();
@@ -28,19 +29,16 @@ function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [bookingsFromStorage, allRoutes] = await Promise.all([getBookings(), getRoutes()]);
+      const bookingsFromStorage = await getBookings();
       
       setAllBookings(bookingsFromStorage);
-      const currentUserName = getCurrentUserName();
       const currentUserEmail = getCurrentUser();
 
       if (role === 'passenger') {
         const filteredBookings = currentUserEmail ? bookingsFromStorage.filter(b => b.clientEmail === currentUserEmail) : [];
         setUserBookings(filteredBookings);
       } else {
-        const ownerName = getCurrentUserName();
-        const ownerRoutes = ownerName ? allRoutes.filter(r => r.ownerName === ownerName) : [];
-        setRoutes(ownerRoutes);
+         const ownerName = getCurrentUserName();
         const ownerBookings = ownerName ? bookingsFromStorage.filter(b => b.driverName === ownerName) : [];
         setUserBookings(ownerBookings);
       }
@@ -72,7 +70,9 @@ function DashboardPage() {
     };
 
     await addRoute(routeWithOwner);
-    await fetchOwnerRoutes(); // Refetch routes after adding a new one
+    // After adding a route, we can redirect or show a success message.
+    // For now, we will just show a toast, which is handled inside OwnerDashboard.
+    // To see the new route, user will navigate to My Routes page from sidebar.
   };
   
   const handleTabSwitch = (tab: string) => {
@@ -101,22 +101,7 @@ function DashboardPage() {
   return (
     <AppLayout>
       {role === 'owner' ? (
-        <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
-          <TabsList>
-            <TabsTrigger value="add-route">Add Route</TabsTrigger>
-            <TabsTrigger value="my-routes">My Routes</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-          </TabsList>
-          <TabsContent value="add-route">
-            <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
-          </TabsContent>
-          <TabsContent value="my-routes">
-            <MyRoutes routes={routes} />
-          </TabsContent>
-          <TabsContent value="profile">
-            <ProfileForm />
-          </TabsContent>
-        </Tabs>
+        <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleTabSwitch} />
       ) : (
         <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={handleTabSwitch} className="w-full">
           <TabsList>
