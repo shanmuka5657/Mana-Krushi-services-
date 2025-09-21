@@ -4,10 +4,11 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import RecentBookings from '@/components/dashboard/recent-bookings';
-import { getBookings, saveBookings, getCurrentUserName, getCurrentUser } from '@/lib/storage';
+import { getBookings, saveBookings, getCurrentUser, getCurrentUserName } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { addDays, startOfDay } from 'date-fns';
 
 function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -16,8 +17,8 @@ function BookingsPageContent() {
     const role = searchParams.get('role') || 'passenger';
 
     useEffect(() => {
-        const fetchBookings = async () => {
-            const allBookings = await getBookings();
+        const fetchInitialBookings = async () => {
+            const allBookings = await getBookings(true);
             let userBookings: Booking[] = [];
             const currentUserEmail = getCurrentUser();
             const currentUserName = getCurrentUserName();
@@ -28,48 +29,29 @@ function BookingsPageContent() {
                 userBookings = allBookings.filter(b => b.driverName === currentUserName);
             }
             
-            const now = new Date();
-            // Show only upcoming bookings
+            const today = startOfDay(new Date());
+            const tomorrow = addDays(new Date(), 1);
+
             const upcomingBookings = userBookings
-                .filter(b => new Date(b.departureDate) >= now && b.status !== 'Cancelled')
+                .filter(b => {
+                    const departureDate = new Date(b.departureDate);
+                    return departureDate >= today && departureDate <= tomorrow && b.status !== 'Cancelled';
+                })
                 .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
 
             setBookings(upcomingBookings);
             setIsLoaded(true);
         };
-        fetchBookings();
+        fetchInitialBookings();
     }, [role]);
     
-    const handleUpdateBooking = async (updatedBooking: Booking) => {
-        const allBookings = await getBookings();
-        const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
-        await saveBookings(updatedAllBookings);
-        
-        let userBookings: Booking[] = [];
-        const currentUserEmail = getCurrentUser();
-        const currentUserName = getCurrentUserName();
-
-        if (role === 'passenger' && currentUserEmail) {
-            userBookings = updatedAllBookings.filter(b => b.clientEmail === currentUserEmail);
-        } else if (role === 'owner' && currentUserName) {
-            userBookings = updatedAllBookings.filter(b => b.driverName === currentUserName);
-        }
-        
-        const now = new Date();
-        const upcomingBookings = userBookings
-            .filter(b => new Date(b.departureDate) >= now && b.status !== 'Cancelled')
-            .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-
-        setBookings(upcomingBookings);
-    };
-
     if (!isLoaded) {
         return <AppLayout><div>Loading bookings...</div></AppLayout>;
     }
 
     return (
         <AppLayout>
-            <RecentBookings bookings={bookings} onUpdateBooking={handleUpdateBooking} />
+            <RecentBookings initialBookings={bookings} mode="upcoming" />
         </AppLayout>
     );
 }
