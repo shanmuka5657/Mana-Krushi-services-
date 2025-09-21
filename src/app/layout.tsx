@@ -38,7 +38,6 @@ export default function RootLayout({
         {children}
         <Toaster />
         <ConditionalFooter />
-        <Script type='text/javascript' src='//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js' strategy="afterInteractive" />
       </body>
     </html>
   );
