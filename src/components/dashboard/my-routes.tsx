@@ -317,19 +317,14 @@ ${booking.driverName}
 
   const handleSearch = async () => {
     setIsSearching(true);
-    let allRoutes = await getRoutes(true); // Fetch all routes
+    const searchParams: { from?: string; to?: string; date?: string } = {};
+    if (fromFilter) searchParams.from = fromFilter;
+    if (toFilter) searchParams.to = toFilter;
+    if (dateFilter) searchParams.date = format(dateFilter, 'yyyy-MM-dd');
     
-    if (fromFilter) {
-      allRoutes = allRoutes.filter(r => r.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()));
-    }
-    if (toFilter) {
-      allRoutes = allRoutes.filter(r => r.toLocation.toLowerCase().includes(toFilter.toLowerCase()));
-    }
-    if (dateFilter) {
-       allRoutes = allRoutes.filter(r => format(new Date(r.travelDate), 'yyyy-MM-dd') === format(dateFilter, 'yyyy-MM-dd'));
-    }
+    const filteredRoutes = await getRoutes(true, searchParams);
     
-    setRoutes(allRoutes);
+    setRoutes(filteredRoutes);
     setIsSearching(false);
   };
 
@@ -777,3 +772,5 @@ ${booking.driverName}
 };
 
 export default MyRoutes;
+
+    
