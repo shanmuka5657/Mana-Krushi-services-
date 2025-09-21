@@ -26,15 +26,16 @@ export default function RootLayout({
   }, [pathname]);
 
   React.useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = '//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js';
-    script.async = true;
-    document.body.appendChild(script);
+    const script1 = document.createElement('script');
+    script1.type = 'text/javascript';
+    script1.src = '//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js';
+    script1.async = true;
+    
+    document.body.appendChild(script1);
 
     return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+      if (document.body.contains(script1)) {
+        document.body.removeChild(script1);
       }
     };
   }, []);
