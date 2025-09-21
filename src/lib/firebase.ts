@@ -147,19 +147,7 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
 export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string }): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
     try {
-        let q = query(bookingsCollection);
-
-        if (searchParams?.destination) {
-            q = query(q, where("destination", "==", searchParams.destination));
-        }
-
-        if (searchParams?.date) {
-            const searchDate = new Date(searchParams.date);
-            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
-            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
-            q = query(q, where("departureDate", ">=", startOfDay), where("departureDate", "<=", endOfDay));
-        }
-
+        const q = query(bookingsCollection);
         const snapshot = await getDocs(q);
         
         let bookings = snapshot.docs.map(doc => {
@@ -172,6 +160,20 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
             } as Booking;
         });
 
+        if (searchParams?.destination) {
+            bookings = bookings.filter(b => b.destination === searchParams.destination);
+        }
+
+        if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
+            bookings = bookings.filter(b => {
+                const departureDate = new Date(b.departureDate);
+                return departureDate >= startOfDay && departureDate <= endOfDay;
+            });
+        }
+        
         if (searchParams?.time) {
             bookings = bookings.filter(booking => {
                  const bookingTime = new Date(booking.departureDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
