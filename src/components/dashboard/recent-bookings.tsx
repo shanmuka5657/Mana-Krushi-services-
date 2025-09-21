@@ -23,11 +23,11 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search, MapPin as MapIcon, Milestone, Shield } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search, MapPin, Milestone, Shield } from "lucide-react";
 import { format, isSameDay, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getCurrentUserName } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getCurrentUserName, getProfile } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -56,8 +56,8 @@ interface RecentBookingsProps {
 
 const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
-  const [allData, setAllData] = useState<{routes: Route[], profiles: Profile[]}>({ routes: [], profiles: [] });
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedBookingDetails, setSelectedBookingDetails] = useState<{route: Route | undefined, clientProfile: Profile | undefined, driverProfile: Profile | undefined}>({ route: undefined, clientProfile: undefined, driverProfile: undefined });
   const [reportText, setReportText] = useState("");
   const [cancellationReason, setCancellationReason] = useState("");
   const { toast } = useToast();
@@ -71,14 +71,8 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-        setIsLoading(true);
-        const [routes, profiles] = await Promise.all([getRoutes(true), getAllProfiles()]);
-        setAllData({ routes, profiles });
-        setBookings(initialBookings);
-        setIsLoading(false);
-    }
-    fetchData();
+    setBookings(initialBookings);
+    setIsLoading(false);
   }, [initialBookings]);
 
   const handleUpdateBooking = async (updatedBooking: Booking) => {
@@ -112,11 +106,25 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     const rideEndTime = new Date(booking.departureDate); // This should ideally be arrival time if available
     return rideEndTime < new Date();
   }
+  
+  const handleViewClick = async (booking: Booking) => {
+    setSelectedBooking(booking);
+    
+    // Fetch details on demand
+    const bookingDateStr = format(new Date(booking.departureDate), 'yyyy-MM-dd');
+    const [routeData, clientProfile, driverProfile] = await Promise.all([
+        getRoutes(true, { date: bookingDateStr, from: booking.destination.split(' to ')[0], to: booking.destination.split(' to ')[1] }),
+        getProfile(booking.clientEmail),
+        getProfile(booking.driverEmail),
+    ]);
+    
+    // Find the specific route that matches the booking's departure time
+    const bookingTime = format(new Date(booking.departureDate), 'HH:mm');
+    const route = routeData.find(r => r.departureTime === bookingTime);
 
-  const getProfileForUser = (email?: string): Profile | undefined => {
-    if (!email) return undefined;
-    return allData.profiles.find(p => p.email === email);
-  }
+    setSelectedBookingDetails({ route, clientProfile, driverProfile });
+    setIsViewOpen(true);
+  };
   
   const handleReportSubmit = async () => {
     if (!selectedBooking || !reportText.trim()) {
@@ -178,23 +186,6 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     return booking.status;
   }
   
-  const getDistanceForBooking = (booking: Booking) => {
-      const bookingTime = format(new Date(booking.departureDate), 'HH:mm');
-      const bookingDate = new Date(booking.departureDate);
-      
-      const relatedRoute = allData.routes.find(route => {
-          const routeDate = new Date(route.travelDate);
-          const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                            routeDate.getMonth() === bookingDate.getMonth() &&
-                            routeDate.getDate() === bookingDate.getDate();
-
-          return route.departureTime === bookingTime && 
-                 `${route.fromLocation} to ${route.toLocation}` === booking.destination && 
-                 isSameDay;
-      });
-      return relatedRoute?.distance;
-  }
-  
   const maskPhoneNumber = (phone: string | undefined): string => {
       if (!phone || phone.length < 10) return 'N/A';
       return `${phone.substring(0, 5)}xxxxx`;
@@ -208,19 +199,8 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     setIsSearching(true);
     const role = getCurrentUserRole();
     const currentUserEmail = getCurrentUser();
-    const currentUserName = getCurrentUserName();
 
-    const allBookings = await getBookings(true, { date: format(dateFilter, 'yyyy-MM-dd') });
-    
-    let userBookings: Booking[] = [];
-    
-    if (mode === 'all') {
-      userBookings = allBookings;
-    } else if (role === 'passenger' && currentUserEmail) {
-        userBookings = allBookings.filter(b => b.clientEmail === currentUserEmail);
-    } else if (role === 'owner' && currentUserName) {
-        userBookings = allBookings.filter(b => b.driverName === currentUserName);
-    }
+    const userBookings = await getBookings(false, { date: format(dateFilter, 'yyyy-MM-dd'), userEmail: currentUserEmail as string, role: role as any });
     
     setBookings(userBookings.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()));
     setIsSearching(false);
@@ -322,7 +302,7 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                                 <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => { setSelectedBooking(booking); setIsViewOpen(true); }}
+                                onClick={() => handleViewClick(booking)}
                                 >
                                 View
                                 </Button>
@@ -379,7 +359,7 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                                 <p className="text-sm text-muted-foreground">Mobile</p>
                                 <div className="flex items-center gap-1 flex-wrap">
                                     <p className="font-medium">{selectedBooking.mobile}</p>
-                                    {getProfileForUser(selectedBooking.clientEmail)?.mobileVerified && (
+                                    {selectedBookingDetails.clientProfile?.mobileVerified && (
                                         <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                                             <CheckCircle className="h-3 w-3 mr-1" /> Verified
                                         </Badge>
@@ -391,7 +371,7 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                    <hr/>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex items-start gap-3">
-                            <MapIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Destination</p>
                                 <p className="font-medium">{selectedBooking.destination}</p>
@@ -401,11 +381,11 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                             <Milestone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Distance</p>
-                                <p className="font-medium">{selectedBooking.distance ? `${selectedBooking.distance.toFixed(0)} km` : (getDistanceForBooking(selectedBooking) ? `${getDistanceForBooking(selectedBooking)?.toFixed(0)} km` : 'N/A')}</p>
+                                <p className="font-medium">{selectedBookingDetails.route?.distance ? `${selectedBookingDetails.route.distance.toFixed(0)} km` : 'N/A'}</p>
                             </div>
                         </div>
                     </div>
-                    <hr />
+                     <hr />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex items-start gap-3">
                             <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />

@@ -239,7 +239,7 @@ export const incrementVisitorCount = async () => {
 };
 
 // --- Bookings ---
-export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string }): Promise<Booking[]> => {
+export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!isBrowser) return [];
     try {
         const bookings = await getBookingsFromFirestore(searchParams);
@@ -260,7 +260,7 @@ export const saveBookings = async (bookings: Booking[]) => {
 export const getNextRideForUser = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
     if (!isBrowser) return null;
     const ride = await getNextRideForUserFromFirestore(email, role);
-    perfTracker.increment({ reads: 1, writes: 0 });
+    perfTracker.increment({ reads: ride ? 1 : 0, writes: 0 });
     return ride;
 }
 

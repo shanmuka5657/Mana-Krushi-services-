@@ -147,7 +147,7 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
 };
 
 // --- Bookings ---
-export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, forRouteIds?: string[] }): Promise<Booking[]> => {
+export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
     try {
         let q = query(bookingsCollection);
@@ -158,6 +158,16 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
             const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
             q = query(q, where("departureDate", ">=", startOfDay), where("departureDate", "<=", endOfDay));
         }
+
+        // If user specific, filter by user email
+        if (searchParams?.userEmail && searchParams?.role) {
+            if (searchParams.role === 'passenger') {
+                q = query(q, where("clientEmail", "==", searchParams.userEmail));
+            } else if (searchParams.role === 'owner') {
+                q = query(q, where("driverEmail", "==", searchParams.userEmail));
+            }
+        }
+
 
         const snapshot = await getDocs(q);
         
@@ -212,6 +222,8 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
         const now = new Date();
         const fieldToQuery = role === 'owner' ? 'driverEmail' : 'clientEmail';
 
+        // Simplified query to fetch all bookings for the user.
+        // This avoids needing a composite index.
         const q = query(
             bookingsCollection,
             where(fieldToQuery, "==", email)
@@ -233,6 +245,7 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             } as Booking;
         });
 
+        // Filter and sort in-memory. This is efficient enough for a single user's bookings.
         const upcomingConfirmedRides = userBookings
             .filter(b => b.status === 'Confirmed' && new Date(b.departureDate) > now)
             .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());

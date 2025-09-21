@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import RecentBookings from '@/components/dashboard/recent-bookings';
-import { getBookings, getCurrentUser, getCurrentUserName } from '@/lib/storage';
+import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -18,16 +18,11 @@ function BookingsPageContent() {
 
     useEffect(() => {
         const fetchInitialBookings = async () => {
-            const allBookings = await getBookings(true);
-            let userBookings: Booking[] = [];
-            const currentUserEmail = getCurrentUser();
-            const currentUserName = getCurrentUserName();
-
-            if (role === 'passenger' && currentUserEmail) {
-                userBookings = allBookings.filter(b => b.clientEmail === currentUserEmail);
-            } else if (role === 'owner' && currentUserName) {
-                userBookings = allBookings.filter(b => b.driverName === currentUserName);
-            }
+            const userRole = getCurrentUserRole();
+            const userEmail = getCurrentUser();
+            
+            // Fetch ONLY the user's bookings, not all bookings.
+            const userBookings = await getBookings(false, { userEmail, role: userRole as any });
             
             const today = startOfDay(new Date());
 
