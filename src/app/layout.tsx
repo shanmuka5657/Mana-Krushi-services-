@@ -1,4 +1,3 @@
-
 'use client';
 
 import './globals.css';
@@ -32,7 +31,6 @@ export default function RootLayout({
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
-          <Script async src="//x7i0.com/tag.min.js" data-zone="9905911" data-cfasync="false" strategy="afterInteractive" />
       </head>
       <body>
         {children}
