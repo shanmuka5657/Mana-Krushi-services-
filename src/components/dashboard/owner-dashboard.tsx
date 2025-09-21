@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, Sparkles, Star, X } from "lucide-react";
 import { format, addMonths } from "date-fns";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -94,6 +95,7 @@ const getTravelDuration = (departureTime?: string, arrivalTime?: string): string
 
 export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashboardProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -284,27 +286,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
       });
       
-      const profileName = form.getValues('ownerName');
-      const profileMobile = form.getValues('driverMobile');
-      const profileEmail = form.getValues('ownerEmail');
-
-      form.reset({
-        ownerName: profileName,
-        driverName: profileName,
-        driverMobile: profileMobile,
-        ownerEmail: profileEmail,
-        fromLocation: "",
-        toLocation: "",
-        distance: 0,
-        pickupPoints: "",
-        dropOffPoints: "",
-        departureTime: "09:00",
-        arrivalTime: "18:00",
-        availableSeats: 1,
-        price: 500,
-        rating: 4.5
-      });
-      setRouteDataToSubmit(null);
+      router.push('/my-routes?role=owner');
   }
   
   const handlePaymentSuccess = async () => {
