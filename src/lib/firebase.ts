@@ -214,28 +214,30 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
 
         const q = query(
             bookingsCollection,
-            where(fieldToQuery, "==", email),
-            where("departureDate", ">", now),
-            orderBy("departureDate", "asc")
+            where(fieldToQuery, "==", email)
         );
 
         const snapshot = await getDocs(q);
 
-        if (!snapshot.empty) {
-            // Find the first confirmed ride from the results
-            for (const doc of snapshot.docs) {
-                const data = doc.data();
-                if (data.status === 'Confirmed') {
-                    return {
-                        ...data,
-                        id: doc.id,
-                        departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
-                        returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
-                    } as Booking;
-                }
-            }
+        if (snapshot.empty) {
+            return null;
         }
-        return null;
+
+        const userBookings = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        });
+
+        const upcomingConfirmedRides = userBookings
+            .filter(b => b.status === 'Confirmed' && new Date(b.departureDate) > now)
+            .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+
+        return upcomingConfirmedRides[0] || null;
 
     } catch (e) {
         console.error("Error getting next ride:", e);
