@@ -25,6 +25,20 @@ export default function RootLayout({
     logVisit(pathname);
   }, [pathname]);
 
+  React.useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '//markswaitingrouge.com/8d/62/5f/8d625f6c0ee1cd63f181069e4d8bab94.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
