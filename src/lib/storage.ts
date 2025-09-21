@@ -1,7 +1,8 @@
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { perfTracker } from './perf-tracker';
@@ -256,6 +257,21 @@ export const saveBookings = async (bookings: Booking[]) => {
     perfTracker.increment({ reads: 0, writes: bookings.length });
 };
 
+export const getNextRideForUser = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
+    if (!isBrowser) return null;
+    const ride = await getNextRideForUserFromFirestore(email, role);
+    perfTracker.increment({ reads: 1, writes: 0 });
+    return ride;
+}
+
+export const updateBookingLocation = async (bookingId: string, location: { passengerLatitude?: number, passengerLongitude?: number, driverLatitude?: number, driverLongitude?: number }) => {
+    if (!isBrowser) return;
+    await updateBookingInFirestore(bookingId, location);
+    // This is 1 read (for merge) and 1 write
+    perfTracker.increment({ reads: 1, writes: 1 });
+}
+
+
 // --- Routes ---
 export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean }): Promise<Route[]> => {
     if (!isBrowser) return [];
@@ -360,5 +376,3 @@ export const getGlobalLogoUrl = async (): Promise<string | null> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return url;
 };
-
-    

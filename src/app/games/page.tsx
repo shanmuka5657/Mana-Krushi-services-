@@ -6,7 +6,7 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole, saveBookings } from '@/lib/storage';
+import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole, saveBookings, getNextRideForUser, updateBookingLocation } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
@@ -63,38 +63,20 @@ function GamesPageContent() {
                 return;
             }
 
-            const allBookings = await getBookings(true); // Fetch all as we might be a driver
-            const now = new Date();
-
-            if (role === 'owner') {
-                const driverBookings = allBookings.filter(b => 
-                    b.driverEmail === userEmail && 
-                    b.status === 'Confirmed' && 
-                    new Date(b.departureDate) > now
-                );
-                driverBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-                
-                if (driverBookings.length > 0) {
-                    const nextDrive = driverBookings[0];
-                    setDriverRide(nextDrive);
-
-                    const passengersForRide = allBookings.filter(b => 
-                        b.destination === nextDrive.destination &&
-                        new Date(b.departureDate).getTime() === new Date(nextDrive.departureDate).getTime() &&
+            const nextRide = await getNextRideForUser(userEmail, role as 'owner' | 'passenger');
+            
+            if (nextRide) {
+                 if (role === 'owner') {
+                    setDriverRide(nextRide);
+                    const allBookings = await getBookings(true);
+                     const passengersForRide = allBookings.filter(b => 
+                        b.destination === nextRide.destination &&
+                        new Date(b.departureDate).getTime() === new Date(nextRide.departureDate).getTime() &&
                         b.status === 'Confirmed'
                     );
                     setPassengerCount(passengersForRide.reduce((sum, b) => sum + (Number(b.travelers) || 1), 0));
-                }
-
-            } else { // Passenger
-                const userBookings = allBookings.filter(b => b.clientEmail === userEmail && b.status === 'Confirmed');
-                
-                const upcomingBookings = userBookings
-                    .filter(b => new Date(b.departureDate) > now)
-                    .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-
-                if (upcomingBookings.length > 0) {
-                    setLatestBooking(upcomingBookings[0]);
+                } else {
+                    setLatestBooking(nextRide);
                 }
             }
 
@@ -161,15 +143,8 @@ function GamesPageContent() {
 
         const success = async (position: GeolocationPosition) => {
             const { latitude, longitude } = position.coords;
-
-            // Save location to booking
-            const allBookings = await getBookings(true);
-            const updatedBookings = allBookings.map(b => 
-                b.id === latestBooking.id 
-                ? { ...b, passengerLatitude: latitude, passengerLongitude: longitude } 
-                : b
-            );
-            await saveBookings(updatedBookings);
+            // OPTIMIZED: Update only the specific booking
+            await updateBookingLocation(latestBooking.id, { passengerLatitude: latitude, passengerLongitude: longitude });
 
             if(isFirstShare) toast({ title: "Location Sharing Active!", description: "Your location will now be shared with the driver periodically." });
         };

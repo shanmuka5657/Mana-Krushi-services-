@@ -20,7 +20,8 @@ import {
     orderBy,
     initializeFirestore,
     persistentLocalCache,
-    limit
+    limit,
+    updateDoc,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
@@ -205,6 +206,47 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
         batch.set(docRef, bookingToSave, { merge: true });
     });
     await batch.commit();
+};
+
+export const getNextRideForUserFromFirestore = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
+    if (!bookingsCollection) return null;
+    try {
+        const now = new Date();
+        const fieldToQuery = role === 'owner' ? 'driverEmail' : 'clientEmail';
+
+        const q = query(
+            bookingsCollection,
+            where(fieldToQuery, "==", email),
+            where("status", "==", "Confirmed"),
+            where("departureDate", ">", now),
+            orderBy("departureDate", "asc"),
+            limit(1)
+        );
+
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        }
+        return null;
+
+    } catch (e) {
+        console.error("Error getting next ride:", e);
+        return null;
+    }
+};
+
+export const updateBookingInFirestore = async (bookingId: string, data: Partial<Booking>) => {
+    if (!db) return;
+    const docRef = doc(db, 'bookings', bookingId);
+    await updateDoc(docRef, data);
 };
 
 
