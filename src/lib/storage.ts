@@ -4,6 +4,7 @@ import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
+import { perfTracker } from './perf-tracker';
 
 
 const isBrowser = typeof window !== "undefined";
@@ -12,6 +13,7 @@ const isBrowser = typeof window !== "undefined";
 export const saveAdsEnabled = async (isEnabled: boolean) => {
     if (!isBrowser) return;
     await saveSetting('areAdsEnabled', isEnabled);
+    perfTracker.increment({ reads: 0, writes: 1 });
 }
 
 export const onAdsEnabledChange = (callback: (isEnabled: boolean) => void) => {
@@ -28,13 +30,14 @@ export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;
     await saveSetting('globalLogoUrl', url);
     await saveSetting('logoCacheBuster', new Date().getTime()); // Add cache buster
+    perfTracker.increment({ reads: 0, writes: 2 });
 };
 
 export const getGlobalLogoUrlWithCache = async (): Promise<string | null> => {
     if (!isBrowser) return null;
     const url = await getSetting('globalLogoUrl');
-    if (!url) return null;
     const cacheBuster = await getSetting('logoCacheBuster');
+    perfTracker.increment({ reads: 2, writes: 0 });
     return cacheBuster ? `${url}?v=${cacheBuster}` : url;
 };
 
@@ -43,8 +46,9 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
 
     const handleLogoUpdate = async () => {
         const url = await getSetting('globalLogoUrl');
+        const cacheBuster = await getSetting('logoCacheBuster');
+        perfTracker.increment({ reads: 2, writes: 0 });
         if (url) {
-            const cacheBuster = await getSetting('logoCacheBuster');
             callback(cacheBuster ? `${url}?v=${cacheBuster}` : url);
         } else {
             callback(null);
@@ -78,12 +82,15 @@ export const logVideoUnmute = async (videoUrl: string) => {
             videoUrl,
             // timestamp will be added by Firestore
         } as Omit<VideoEvent, 'id' | 'timestamp'>);
+        perfTracker.increment({ reads: 0, writes: 1 });
     }
 };
 
 export const getVideoEvents = async (): Promise<VideoEvent[]> => {
     if (!isBrowser) return [];
-    return await getVideoEventsFromFirestore();
+    const events = await getVideoEventsFromFirestore();
+    perfTracker.increment({ reads: events.length, writes: 0 });
+    return events;
 }
 
 // --- Visits ---
@@ -130,17 +137,21 @@ export const logVisit = async (path: string) => {
         path,
         // timestamp will be added by Firestore
     } as Omit<Visit, 'id' | 'timestamp'>);
+    perfTracker.increment({ reads: 0, writes: 1 });
 };
 
 
 export const getVisits = async (): Promise<Visit[]> => {
     if (!isBrowser) return [];
-    return await getVisitsFromFirestore();
+    const visits = await getVisitsFromFirestore();
+    perfTracker.increment({ reads: visits.length, writes: 0 });
+    return visits;
 }
 
 export const getLiveVisitorsCount = async (minutes = 5): Promise<number> => {
     if (!isBrowser) return 0;
     const allVisits = await getVisitsFromFirestore();
+    perfTracker.increment({ reads: allVisits.length, writes: 0 });
     const now = new Date();
     const activeSince = new Date(now.getTime() - minutes * 60 * 1000);
 
@@ -158,6 +169,7 @@ export const getLiveVisitorsCount = async (minutes = 5): Promise<number> => {
 export const getTodaysVisitCountForUser = async (email: string): Promise<number> => {
     if (!isBrowser) return 0;
     const allVisits = await getVisitsFromFirestore();
+    perfTracker.increment({ reads: allVisits.length, writes: 0 });
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -175,11 +187,14 @@ export const getTodaysVisitCountForUser = async (email: string): Promise<number>
 export const saveGlobalVideoUrl = async (url: string) => {
     if (!isBrowser) return;
     await saveSetting('backgroundVideoUrl', url);
+    perfTracker.increment({ reads: 0, writes: 1 });
 }
 
 export const getGlobalVideoUrl = async (): Promise<string | null> => {
     if (!isBrowser) return null;
-    return await getSetting('backgroundVideoUrl');
+    const url = await getSetting('backgroundVideoUrl');
+    perfTracker.increment({ reads: 1, writes: 0 });
+    return url;
 }
 
 export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
@@ -190,11 +205,13 @@ export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
 export const saveGlobalVideoVisibility = async (isVisible: boolean) => {
     if (!isBrowser) return;
     await saveSetting('isGlobalVideoPlayerVisible', isVisible);
+    perfTracker.increment({ reads: 0, writes: 1 });
 };
 
 export const getGlobalVideoVisibility = async (): Promise<boolean> => {
     if (!isBrowser) return true; // Default to visible
     const isVisible = await getSetting('isGlobalVideoPlayerVisible');
+    perfTracker.increment({ reads: 1, writes: 0 });
     return isVisible === null ? true : isVisible; // Default to true if not set
 };
 
@@ -224,7 +241,9 @@ export const incrementVisitorCount = async () => {
 export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string }): Promise<Booking[]> => {
     if (!isBrowser) return [];
     try {
-        return await getBookingsFromFirestore(searchParams);
+        const bookings = await getBookingsFromFirestore(searchParams);
+        perfTracker.increment({ reads: bookings.length || 1, writes: 0 });
+        return bookings;
     } catch (error) {
         console.error("Error getting bookings:", error);
         return [];
@@ -234,13 +253,17 @@ export const getBookings = async (isAdmin = false, searchParams?: { destination?
 export const saveBookings = async (bookings: Booking[]) => {
     if (!isBrowser) return;
     await saveBookingsToFirestore(bookings);
+    perfTracker.increment({ reads: 0, writes: bookings.length });
 };
 
 // --- Routes ---
-export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string }): Promise<Route[]> => {
+export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean }): Promise<Route[]> => {
     if (!isBrowser) return [];
     try {
-        return await getRoutesFromFirestore(searchParams);
+        const routes = await getRoutesFromFirestore(searchParams);
+        // Estimate 1 read if the query returns 0, otherwise count the docs.
+        perfTracker.increment({ reads: routes.length || 1, writes: 0 });
+        return routes;
     } catch(e) {
         console.error("Error getting routes:", e);
         return [];
@@ -250,11 +273,14 @@ export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?:
 export const saveRoutes = async (routes: Route[]) => {
     if (!isBrowser) return;
     await saveRoutesToFirestore(routes);
+    perfTracker.increment({ reads: 0, writes: routes.length });
 };
 
 export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
     if (!isBrowser) throw new Error("This function can only be called from the browser.");
-    return await addRouteToFirestore(route);
+    const newRoute = await addRouteToFirestore(route);
+    perfTracker.increment({ reads: 0, writes: 1 });
+    return newRoute;
 }
 
 
@@ -264,6 +290,7 @@ export const saveProfile = async (profile: Profile) => {
     const userEmail = profile.email || getCurrentUser(); // Use profile email if available, fallback to session
     if (userEmail) {
         await saveProfileToFirestore({ ...profile, email: userEmail });
+        perfTracker.increment({ reads: 0, writes: 1 });
     } else {
         console.error("Cannot save profile, no user is logged in.");
     }
@@ -273,16 +300,18 @@ export const getProfile = async (email?: string): Promise<Profile | null> => {
     if (!isBrowser) return null;
     const userEmail = email || getCurrentUser();
     if (userEmail) {
-        return await getProfileFromFirestore(userEmail);
+        const profile = await getProfileFromFirestore(userEmail);
+        perfTracker.increment({ reads: 1, writes: 0 });
+        return profile;
     }
     return null;
 };
 
 export const getAllProfiles = async (): Promise<Profile[]> => {
     if (!isBrowser) return [];
-    // This function needs to be public to allow fetching driver avatars.
-    // Security should be handled by Firestore rules if sensitive data is involved.
-    return await getAllProfilesFromFirestore();
+    const profiles = await getAllProfilesFromFirestore();
+    perfTracker.increment({ reads: profiles.length, writes: 0 });
+    return profiles;
 }
 
 
@@ -327,7 +356,9 @@ export const clearCurrentUser = () => {
 // Deprecated branding functions, kept for compatibility, will be removed later.
 export const getGlobalLogoUrl = async (): Promise<string | null> => {
     if (!isBrowser) return null;
-    return await getSetting('globalLogoUrl');
+    const url = await getSetting('globalLogoUrl');
+    perfTracker.increment({ reads: 1, writes: 0 });
+    return url;
 };
 
     

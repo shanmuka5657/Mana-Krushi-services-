@@ -1,4 +1,5 @@
 
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
     getFirestore, 
@@ -18,7 +19,8 @@ import {
     addDoc, 
     orderBy,
     initializeFirestore,
-    persistentLocalCache
+    persistentLocalCache,
+    limit
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
@@ -90,7 +92,7 @@ export const addVisitToFirestore = async (visit: Omit<Visit, 'id' | 'timestamp'>
 export const getVisitsFromFirestore = async (): Promise<Visit[]> => {
     if (!visitsCollection) return [];
     try {
-        const q = query(visitsCollection, orderBy("timestamp", "desc"));
+        const q = query(visitsCollection, orderBy("timestamp", "desc"), limit(200));
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => {
             const data = doc.data();
@@ -207,17 +209,25 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
 
 
 // --- Routes ---
-export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string }): Promise<Route[]> => {
+export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean }): Promise<Route[]> => {
     if (!routesCollection) return [];
     try {
         let q = query(routesCollection);
 
         // Date filter is the most selective, apply it first if present.
-        if (searchParams && searchParams.date) {
+        if (searchParams?.date) {
              const searchDate = new Date(searchParams.date);
              const startOfDay = new Date(searchDate.setHours(0,0,0,0));
              const endOfDay = new Date(searchDate.setHours(23,59,59,999));
             q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
+        }
+
+        if (searchParams?.promoted) {
+            q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()));
+        }
+
+        if (searchParams?.promoted) {
+             q = query(q, orderBy("travelDate", "asc"), limit(5));
         }
 
         const snapshot = await getDocs(q);
@@ -230,18 +240,21 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
             } as Route;
         });
 
-        // Client-side filtering for other params
-        if (searchParams && searchParams.to) {
-             routes = routes.filter(route => route.toLocation.trim().toLowerCase() === searchParams.to?.trim().toLowerCase());
+        // Client-side filtering for other params (if not a promoted-only query)
+        if (!searchParams?.promoted) {
+            if (searchParams?.to) {
+                routes = routes.filter(route => route.toLocation.trim().toLowerCase() === searchParams.to?.trim().toLowerCase());
+            }
+
+            if (searchParams?.from) {
+                const searchFromLower = searchParams.from.trim().toLowerCase();
+                routes = routes.filter(route => 
+                    route.fromLocation.trim().toLowerCase() === searchFromLower ||
+                    route.pickupPoints?.some(p => p.trim().toLowerCase() === searchFromLower)
+                );
+            }
         }
 
-        if (searchParams && searchParams.from) {
-            const searchFromLower = searchParams.from.trim().toLowerCase();
-            routes = routes.filter(route => 
-                route.fromLocation.trim().toLowerCase() === searchFromLower ||
-                route.pickupPoints?.some(p => p.trim().toLowerCase() === searchFromLower)
-            );
-        }
 
         return routes;
     } catch(e) {
