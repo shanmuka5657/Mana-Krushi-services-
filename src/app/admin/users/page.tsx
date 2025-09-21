@@ -9,13 +9,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAllProfiles, getTodaysVisitCountForUser } from '@/lib/storage';
 import type { Profile } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert, Gift, Activity } from 'lucide-react';
+import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert, Gift, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge as UiBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/utils';
 
 type FilterRole = 'all' | 'owner' | 'passenger';
 type ProfileWithActivity = Profile & { activity: number };
+
+const USERS_PER_PAGE = 20;
 
 function AdminUsersPage() {
     const [allProfiles, setAllProfiles] = useState<ProfileWithActivity[]>([]);
@@ -25,6 +27,7 @@ function AdminUsersPage() {
     
     const initialRole = (searchParams.get('role') as FilterRole) || 'all';
     const [filter, setFilter] = useState<FilterRole>(initialRole);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         const fetchProfiles = async () => {
@@ -43,6 +46,7 @@ function AdminUsersPage() {
     
     const handleFilterChange = (newFilter: FilterRole) => {
         setFilter(newFilter);
+        setCurrentPage(1); // Reset to first page on filter change
         const params = new URLSearchParams(window.location.search);
         if (newFilter === 'all') {
             params.delete('role');
@@ -52,7 +56,7 @@ function AdminUsersPage() {
         router.push(`/admin/users?${params.toString()}`);
     }
 
-    const filteredProfiles = useMemo(() => {
+    const { paginatedProfiles, totalPages } = useMemo(() => {
         let sortedProfiles: ProfileWithActivity[];
         if (filter === 'all') {
             sortedProfiles = [...allProfiles];
@@ -60,11 +64,27 @@ function AdminUsersPage() {
             sortedProfiles = allProfiles.filter(p => p.role === filter);
         }
         // Sort by activity, descending
-        return sortedProfiles.sort((a,b) => b.activity - a.activity);
-    }, [allProfiles, filter]);
+        const profilesToPaginate = sortedProfiles.sort((a,b) => b.activity - a.activity);
+        
+        const total = Math.ceil(profilesToPaginate.length / USERS_PER_PAGE);
+
+        const start = (currentPage - 1) * USERS_PER_PAGE;
+        const end = start + USERS_PER_PAGE;
+        const paginated = profilesToPaginate.slice(start, end);
+
+        return { paginatedProfiles: paginated, totalPages: total };
+    }, [allProfiles, filter, currentPage]);
 
     const handleExport = () => {
-        const dataToExport = filteredProfiles.map(p => ({
+        // Export all filtered profiles, not just the paginated ones
+        let profilesToExport: ProfileWithActivity[];
+        if (filter === 'all') {
+            profilesToExport = [...allProfiles];
+        } else {
+            profilesToExport = allProfiles.filter(p => p.role === filter);
+        }
+        
+        const dataToExport = profilesToExport.map(p => ({
             Name: p.name,
             Email: p.email,
             Mobile: p.mobile,
@@ -127,7 +147,7 @@ function AdminUsersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredProfiles.length > 0 ? filteredProfiles.map(profile => (
+                            {paginatedProfiles.length > 0 ? paginatedProfiles.map(profile => (
                                 <TableRow key={profile.email}>
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-2">
@@ -199,6 +219,29 @@ function AdminUsersPage() {
                             )}
                         </TableBody>
                     </Table>
+                    <div className="flex items-center justify-end space-x-2 py-4">
+                        <span className="text-sm text-muted-foreground">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                             <ChevronLeft className="mr-2 h-4 w-4" />
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                            <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </AppLayout>
