@@ -29,15 +29,12 @@ function BookingsPageContent() {
             }
             
             const now = new Date();
+            // Show only upcoming bookings
             const upcomingBookings = userBookings
-                .filter(b => new Date(b.departureDate) >= now)
+                .filter(b => new Date(b.departureDate) >= now && b.status !== 'Cancelled')
                 .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
 
-            const pastBookings = userBookings
-                .filter(b => new Date(b.departureDate) < now)
-                .sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-            
-            setBookings([...upcomingBookings, ...pastBookings]);
+            setBookings(upcomingBookings);
             setIsLoaded(true);
         };
         fetchBookings();
@@ -60,14 +57,10 @@ function BookingsPageContent() {
         
         const now = new Date();
         const upcomingBookings = userBookings
-            .filter(b => new Date(b.departureDate) >= now)
+            .filter(b => new Date(b.departureDate) >= now && b.status !== 'Cancelled')
             .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
 
-        const pastBookings = userBookings
-            .filter(b => new Date(b.departureDate) < now)
-            .sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-
-        setBookings([...upcomingBookings, ...pastBookings]);
+        setBookings(upcomingBookings);
     };
 
     if (!isLoaded) {
