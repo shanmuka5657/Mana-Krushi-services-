@@ -35,8 +35,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { saveCurrentUser, saveProfile, getProfile } from '@/lib/storage';
 import placeholderImages from '@/lib/placeholder-images.json';
 import type { Profile } from '@/lib/types';
@@ -54,7 +54,10 @@ export function SignupForm() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [formData, setFormData] = useState<z.infer<typeof formSchema> | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { defaultLogo } = placeholderImages;
+  
+  const refCodeFromUrl = searchParams.get('ref');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,9 +66,15 @@ export function SignupForm() {
       email: '',
       password: '',
       role: 'passenger',
-      referralCode: '',
+      referralCode: refCodeFromUrl || '',
     },
   });
+  
+  useEffect(() => {
+    if (refCodeFromUrl) {
+      form.setValue('referralCode', refCodeFromUrl);
+    }
+  }, [refCodeFromUrl, form]);
   
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
     setFormData(values);
@@ -74,22 +83,6 @@ export function SignupForm() {
 
   async function handleConfirmation() {
     if (!formData) return;
-
-    let referredByEmail: string | undefined = undefined;
-    if (formData.referralCode) {
-        // In a real app, you'd query the backend for this user.
-        // Here, we simulate it by checking all profiles.
-        const allProfiles = await getProfile(undefined); // Assuming getProfile() gets all if no email
-        // This is inefficient but works for a demo.
-        // A dedicated backend endpoint `getUserByReferralCode` would be better.
-        // For now, let's assume getProfile can search by referral code if no email is passed
-        // This is a simplification.
-        // Let's find the user with this referral code.
-        // This is a placeholder for a real backend call.
-        // The current `getProfile` doesn't support this, so we'll just store the code.
-        // In a real scenario, you'd validate the code and find the referrer's email.
-        referredByEmail = `user_with_code_${formData.referralCode}`; // Placeholder
-    }
     
     // Generate a unique referral code for the new user
     const newReferralCode = `${formData.name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
@@ -201,9 +194,9 @@ export function SignupForm() {
                 name="referralCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Referral Code (Optional)</FormLabel>
+                    <FormLabel>Referral Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter code from a friend" {...field} />
+                      <Input placeholder="Enter code from a friend" {...field} disabled={!!refCodeFromUrl} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
