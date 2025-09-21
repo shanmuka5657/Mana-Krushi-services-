@@ -171,11 +171,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
 
 
   useEffect(() => {
-    const checkProfileAndFetchLocations = async () => {
-        const [userProfile, allRoutes] = await Promise.all([
-          getProfile(),
-          getRoutes(true)
-        ]);
+    const checkProfile = async () => {
+        const userProfile = await getProfile();
 
         // Check Profile
         setProfile(userProfile);
@@ -196,18 +193,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             });
             onSwitchTab('profile');
         }
-
-        // Fetch Locations
-        const allLocations = new Set<string>();
-        allRoutes.forEach(route => {
-            allLocations.add(route.fromLocation);
-            allLocations.add(route.toLocation);
-            route.pickupPoints?.forEach(p => allLocations.add(p));
-            route.dropOffPoints?.forEach(d => allLocations.add(d));
-        });
-        setLocations(Array.from(allLocations));
     }
-    checkProfileAndFetchLocations();
+    checkProfile();
   }, [onSwitchTab, toast]);
   
   useEffect(() => {
@@ -693,3 +680,5 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </div>
   );
 }
+
+    
