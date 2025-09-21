@@ -1,22 +1,17 @@
 
-
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, User, Calendar, Shield, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2 } from "lucide-react";
+import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2 } from "lucide-react";
 import { getRoutes, getBookings, getAllProfiles, getVisitorCount, getLiveVisitorsCount, saveGlobalLogoUrl, getGlobalLogoUrlWithCache as getGlobalLogoUrl } from "@/lib/storage";
-import type { Booking, Route as RouteType, Profile } from "@/lib/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { cropLogo } from "@/app/actions";
+import Link from "next/link";
+import Image from "next/image";
 
 const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: string | number, icon: React.ElementType, href?: string }) => {
     const cardContent = (
@@ -34,42 +29,6 @@ const StatCard = ({ title, value, icon: Icon, href }: { title: string, value: st
     return href ? <Link href={href}>{cardContent}</Link> : <div>{cardContent}</div>;
 };
 
-const RecentBookingItem = ({ booking, profile }: { booking: Booking, profile?: Profile }) => (
-    <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-             <AvatarImage src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${booking.client.replace(' ', '+')}&background=random`} />
-            <AvatarFallback>{booking.client.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-            <p className="text-sm font-medium leading-none">{booking.client}</p>
-            <p className="text-sm text-muted-foreground">{booking.destination}</p>
-        </div>
-        <div className="ml-auto font-medium">₹{booking.amount.toFixed(2)}</div>
-    </div>
-);
-
-const NewUserItem = ({ profile }: { profile: Profile }) => (
-     <div className="flex items-center gap-4">
-        <Avatar className="hidden h-9 w-9 sm:flex">
-             <AvatarImage src={profile.selfieDataUrl || `https://ui-avatars.com/api/?name=${profile.name.replace(' ', '+')}&background=random`} />
-            <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="grid gap-1">
-            <p className="text-sm font-medium leading-none">{profile.name}</p>
-            <p className="text-sm text-muted-foreground">{profile.email}</p>
-        </div>
-        <div className="ml-auto text-right">
-             <Badge variant={profile.role === 'owner' ? 'secondary' : 'outline'}>{profile.role}</Badge>
-            {profile.planExpiryDate && (
-                 <div className="text-xs text-muted-foreground mt-1 flex items-center justify-end gap-1">
-                    <Shield className="h-3 w-3 text-green-500" />
-                    <span>{format(new Date(profile.planExpiryDate), "dd MMM yyyy")}</span>
-                </div>
-            )}
-        </div>
-    </div>
-);
-
 
 function AdminDashboardPage() {
   const [stats, setStats] = useState({
@@ -80,9 +39,6 @@ function AdminDashboardPage() {
     totalVisitors: 0,
     liveVisitors: 0,
   });
-  const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
-  const [newUsers, setNewUsers] = useState<Profile[]>([]);
-  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -98,7 +54,7 @@ function AdminDashboardPage() {
         getLiveVisitorsCount(),
         getGlobalLogoUrl(),
       ]);
-      setAllProfiles(profiles);
+      
       setLogoUrl(currentLogo);
 
       const bookingRevenue = bookings
@@ -109,12 +65,6 @@ function AdminDashboardPage() {
 
       const totalRevenue = bookingRevenue + subscriptionRevenue;
       
-      const sortedBookings = [...bookings].sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-      setRecentBookings(sortedBookings.slice(0, 5));
-
-      setNewUsers(profiles.sort((a,b) => (b.planExpiryDate ? 1 : -1) - (a.planExpiryDate ? 1 : -1)).slice(0, 5));
-
-
       setStats({
         totalUsers: profiles.length,
         totalRoutes: routes.length,
@@ -138,10 +88,6 @@ function AdminDashboardPage() {
 
   }, []);
   
-  const getProfileForBooking = (booking: Booking): Profile | undefined => {
-    return allProfiles.find(p => p.email === booking.clientEmail);
-  }
-
   const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -206,46 +152,26 @@ function AdminDashboardPage() {
                 <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="lg:col-span-5">
-                    <CardHeader>
-                        <CardTitle>Recent Bookings</CardTitle>
-                        <CardDescription>The 5 most recent bookings from across the platform.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {recentBookings.length > 0 ? recentBookings.map(b => <RecentBookingItem key={b.id} booking={b} profile={getProfileForBooking(b)} />) : <p className="text-sm text-muted-foreground">No bookings yet.</p>}
-                    </CardContent>
-                </Card>
-                 <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><ImageIcon /> Branding</CardTitle>
-                        <CardDescription>Set the global app logo.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4 flex flex-col items-center">
-                        {logoUrl ? (
-                            <Image src={logoUrl} alt="Current App Logo" width={96} height={96} className="rounded-full object-cover h-24 w-24 border p-1" />
-                        ) : (
-                             <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center">
-                                <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                            </div>
-                        )}
-                        <Button asChild variant="outline">
-                            <label htmlFor="logo-upload" className="cursor-pointer">
-                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                Upload & Enhance
-                                <Input id="logo-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleLogoUpload} />
-                            </label>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-            <Card>
+            <Card className="lg:col-span-2">
                 <CardHeader>
-                    <CardTitle>Recent Users</CardTitle>
-                    <CardDescription>The most recently registered or subscribed users.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><ImageIcon /> Branding</CardTitle>
+                    <CardDescription>Set the global app logo.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {newUsers.length > 0 ? newUsers.map(p => <NewUserItem key={p.email} profile={p} />) : <p className="text-sm text-muted-foreground">No users yet.</p>}
+                <CardContent className="space-y-4 flex flex-col items-center">
+                    {logoUrl ? (
+                        <Image src={logoUrl} alt="Current App Logo" width={96} height={96} className="rounded-full object-cover h-24 w-24 border p-1" />
+                    ) : (
+                         <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center">
+                            <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                        </div>
+                    )}
+                    <Button asChild variant="outline">
+                        <label htmlFor="logo-upload" className="cursor-pointer">
+                            {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                            Upload & Enhance
+                            <Input id="logo-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleLogoUpload} />
+                        </label>
+                    </Button>
                 </CardContent>
             </Card>
         </div>
