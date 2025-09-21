@@ -53,6 +53,17 @@ export default function BookRidePage() {
 
   useEffect(() => {
     const fetchRouteAndBookings = async () => {
+        const passengerEmail = getCurrentUser();
+        if (!passengerEmail) {
+            toast({
+                title: "Please Login",
+                description: "You need to be logged in to book a ride.",
+                variant: "destructive",
+            });
+            router.push(`/login?redirect=/book/${params.id}`);
+            return;
+        }
+
         const routes = await getRoutes();
         const routeId = typeof params.id === 'string' ? params.id : '';
         const foundRoute = routes.find((r) => r.id === routeId);
@@ -96,7 +107,7 @@ export default function BookRidePage() {
         setIsLoaded(true);
     }
     fetchRouteAndBookings();
-  }, [params.id]);
+  }, [params.id, router, toast]);
   
   const handleSeatChange = (amount: number) => {
       setNumberOfSeats(prev => {
@@ -114,6 +125,7 @@ export default function BookRidePage() {
     const passengerEmail = getCurrentUser();
     
     if (!passengerEmail) {
+        // This check is now mostly redundant due to useEffect, but good for safety
         toast({
             title: "Please Login",
             description: "You need to be logged in to book a ride.",
@@ -515,6 +527,3 @@ ${newlyBooked.client}
     </>
   );
 }
-
-    
-    
