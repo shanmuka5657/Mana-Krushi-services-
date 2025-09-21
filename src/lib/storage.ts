@@ -209,14 +209,15 @@ export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => 
 
 export const getVisitorCount = async (): Promise<number> => {
     if (!isBrowser) return 0;
-    const count = await getSetting('visitorCount');
-    return typeof count === 'number' ? count : 0;
+    const allVisits = await getVisits();
+    // Count unique sessions to get a more accurate visitor count
+    const uniqueSessions = new Set(allVisits.map(v => v.sessionId));
+    return uniqueSessions.size;
 };
 
 export const incrementVisitorCount = async () => {
-    if (!isBrowser) return;
-    const currentCount = await getVisitorCount();
-    await saveSetting('visitorCount', currentCount + 1);
+    // This function is now deprecated as we use a more sophisticated session-based counting.
+    // Kept for compatibility but does nothing.
 };
 
 // --- Bookings ---
