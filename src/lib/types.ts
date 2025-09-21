@@ -67,6 +67,8 @@ export type Profile = {
     role?: 'owner' | 'passenger' | 'admin';
     selfieDataUrl?: string;
     status?: 'active' | 'deleted';
+    referralCode?: string;
+    referredBy?: string;
 }
 
 export type MovieSite = {

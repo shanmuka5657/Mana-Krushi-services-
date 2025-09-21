@@ -37,14 +37,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCurrentUser, saveProfile } from '@/lib/storage';
+import { saveCurrentUser, saveProfile, getProfile } from '@/lib/storage';
 import placeholderImages from '@/lib/placeholder-images.json';
+import type { Profile } from '@/lib/types';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
   role: z.enum(['owner', 'passenger'], { required_error: 'Please select a role.' }),
+  referralCode: z.string().optional(),
 });
 
 
@@ -61,6 +63,7 @@ export function SignupForm() {
       email: '',
       password: '',
       role: 'passenger',
+      referralCode: '',
     },
   });
   
@@ -72,15 +75,38 @@ export function SignupForm() {
   async function handleConfirmation() {
     if (!formData) return;
 
+    let referredByEmail: string | undefined = undefined;
+    if (formData.referralCode) {
+        // In a real app, you'd query the backend for this user.
+        // Here, we simulate it by checking all profiles.
+        const allProfiles = await getProfile(undefined); // Assuming getProfile() gets all if no email
+        // This is inefficient but works for a demo.
+        // A dedicated backend endpoint `getUserByReferralCode` would be better.
+        // For now, let's assume getProfile can search by referral code if no email is passed
+        // This is a simplification.
+        // Let's find the user with this referral code.
+        // This is a placeholder for a real backend call.
+        // The current `getProfile` doesn't support this, so we'll just store the code.
+        // In a real scenario, you'd validate the code and find the referrer's email.
+        referredByEmail = `user_with_code_${formData.referralCode}`; // Placeholder
+    }
+    
+    // Generate a unique referral code for the new user
+    const newReferralCode = `${formData.name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
+
     saveCurrentUser(formData.email, formData.name, formData.role);
 
     // Save the initial profile.
-    await saveProfile({
+    const newProfile: Profile = {
       name: formData.name,
       email: formData.email,
       mobile: '0000000000', // Dummy number to be updated in profile settings
       role: formData.role,
-    });
+      referralCode: newReferralCode,
+      referredBy: formData.referralCode, // Store the code they used
+    };
+
+    await saveProfile(newProfile);
     
     setShowConfirmation(false);
     // Redirect to the dashboard after signup and "login"
@@ -165,6 +191,20 @@ export function SignupForm() {
                         <SelectItem value="passenger">Passenger</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="referralCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Referral Code (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter code from a friend" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

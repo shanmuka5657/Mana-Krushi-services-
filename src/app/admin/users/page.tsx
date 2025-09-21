@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getAllProfiles } from '@/lib/storage';
 import type { Profile } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert } from 'lucide-react';
+import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert, Gift } from 'lucide-react';
 import { Badge as UiBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/utils';
@@ -57,7 +57,9 @@ function AdminUsersPage() {
             Mobile: p.mobile,
             'Mobile Verified': p.mobileVerified ? 'Yes' : 'No',
             Role: p.role,
-            'Plan Expiry': p.planExpiryDate ? format(new Date(p.planExpiryDate), 'PPP') : 'N/A'
+            'Plan Expiry': p.planExpiryDate ? format(new Date(p.planExpiryDate), 'PPP') : 'N/A',
+            'Referral Code': p.referralCode,
+            'Referred By': p.referredBy,
         }));
         exportToCsv(`${filter}-users.csv`, dataToExport);
     }
@@ -105,6 +107,7 @@ function AdminUsersPage() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Contact</TableHead>
                                 <TableHead>Role</TableHead>
+                                <TableHead>Referrals</TableHead>
                                 <TableHead>Plan</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -140,6 +143,22 @@ function AdminUsersPage() {
                                         <UiBadge variant={profile.role === 'owner' ? 'secondary' : 'outline'}>
                                             {profile.role}
                                         </UiBadge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            {profile.referralCode && (
+                                                <div className="flex items-center gap-2 text-xs">
+                                                    <Gift className="h-3 w-3 text-muted-foreground" />
+                                                    <span className="font-mono">{profile.referralCode}</span>
+                                                </div>
+                                            )}
+                                            {profile.referredBy && (
+                                                <div className="flex items-center gap-2 text-xs">
+                                                    <User className="h-3 w-3 text-muted-foreground" />
+                                                    <span className="font-mono">by {profile.referredBy}</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         {profile.planExpiryDate ? (

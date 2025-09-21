@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2 } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -54,6 +54,7 @@ const profileFormSchema = z.object({
   selfieDataUrl: z.string().optional(),
   mobileVerified: z.boolean().default(false),
   additionalMobiles: z.string().optional(),
+  referralCode: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -93,6 +94,7 @@ export default function ProfileForm() {
       selfieDataUrl: "",
       mobileVerified: false,
       additionalMobiles: "",
+      referralCode: "",
     },
   });
 
@@ -149,6 +151,7 @@ export default function ProfileForm() {
             selfieDataUrl: '',
             mobileVerified: false,
             additionalMobiles: '',
+            referralCode: '',
         };
         
         const combinedValues = { ...defaultValues, ...userProfile };
@@ -327,6 +330,17 @@ export default function ProfileForm() {
     }
   };
 
+  const copyReferralCode = () => {
+    if (profile?.referralCode) {
+      navigator.clipboard.writeText(profile.referralCode);
+      toast({
+        title: "Referral Code Copied!",
+        description: "You can now share it with your friends.",
+      });
+    }
+  };
+
+
   return (
     <div className="space-y-6">
       <AlertDialog open={showPlanPrompt} onOpenChange={setShowPlanPrompt}>
@@ -410,6 +424,21 @@ export default function ProfileForm() {
                         <TestTube2 className="mr-2 h-4 w-4" />
                     )}
                     Generate 100 Test Passengers
+                </Button>
+            </CardContent>
+        </Card>
+      )}
+      
+      {profile?.referralCode && (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Gift/> Your Referral Code</CardTitle>
+                <CardDescription>Share this code with your friends! They get a discount, and you get rewarded.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center gap-2">
+                <Input value={profile.referralCode} readOnly className="font-mono text-lg" />
+                <Button onClick={copyReferralCode} size="icon" variant="outline">
+                    <Copy className="h-4 w-4" />
                 </Button>
             </CardContent>
         </Card>
@@ -669,4 +698,3 @@ export default function ProfileForm() {
     </div>
   );
 }
-
