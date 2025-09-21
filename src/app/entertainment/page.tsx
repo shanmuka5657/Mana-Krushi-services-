@@ -132,35 +132,7 @@ function EntertainmentPageContent() {
                             <CardDescription>Manage global settings for all users.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="flex items-center justify-between p-4 border rounded-md">
-                                <div>
-                                    <Label htmlFor="ads-toggle" className="font-medium flex items-center gap-2">
-                                        <BadgeDollarSign />
-                                        Advertisements
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                       {areAdsEnabled ? "Ads are currently ON for all users." : "Ads are currently OFF for all users."}
-                                    </p>
-                                </div>
-                                <Button
-                                    id="ads-toggle"
-                                    size="sm"
-                                    variant={areAdsEnabled ? "destructive" : "outline"}
-                                    onClick={handleAdsToggle}
-                                >
-                                    {areAdsEnabled ? (
-                                        <>
-                                            <PowerOff className="mr-2 h-4 w-4" />
-                                            Stop Ads
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Power className="mr-2 h-4 w-4" />
-                                            Start Ads
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
+                             
                             <div className="flex items-center justify-between p-4 border rounded-md">
                                 <div>
                                     <Label htmlFor="visibility-toggle" className="font-medium flex items-center gap-2">
