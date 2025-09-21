@@ -147,10 +147,18 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
 };
 
 // --- Bookings ---
-export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string }): Promise<Booking[]> => {
+export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, forRouteIds?: string[] }): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
     try {
-        const q = query(bookingsCollection);
+        let q = query(bookingsCollection);
+
+        if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
+            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
+            q = query(q, where("departureDate", ">=", startOfDay), where("departureDate", "<=", endOfDay));
+        }
+
         const snapshot = await getDocs(q);
         
         let bookings = snapshot.docs.map(doc => {
@@ -165,16 +173,6 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
 
         if (searchParams?.destination) {
             bookings = bookings.filter(b => b.destination === searchParams.destination);
-        }
-
-        if (searchParams?.date) {
-            const searchDate = new Date(searchParams.date);
-            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
-            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
-            bookings = bookings.filter(b => {
-                const departureDate = new Date(b.departureDate);
-                return departureDate >= startOfDay && departureDate <= endOfDay;
-            });
         }
         
         if (searchParams?.time) {
@@ -217,23 +215,25 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
         const q = query(
             bookingsCollection,
             where(fieldToQuery, "==", email),
-            where("status", "==", "Confirmed"),
             where("departureDate", ">", now),
-            orderBy("departureDate", "asc"),
-            limit(1)
+            orderBy("departureDate", "asc")
         );
 
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-            const doc = snapshot.docs[0];
-            const data = doc.data();
-            return {
-                ...data,
-                id: doc.id,
-                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
-                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
-            } as Booking;
+            // Find the first confirmed ride from the results
+            for (const doc of snapshot.docs) {
+                const data = doc.data();
+                if (data.status === 'Confirmed') {
+                    return {
+                        ...data,
+                        id: doc.id,
+                        departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                        returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+                    } as Booking;
+                }
+            }
         }
         return null;
 
