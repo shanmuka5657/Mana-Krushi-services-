@@ -4,11 +4,11 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import RecentBookings from '@/components/dashboard/recent-bookings';
-import { getBookings, saveBookings, getCurrentUser, getCurrentUserName } from '@/lib/storage';
+import { getBookings, getCurrentUser, getCurrentUserName } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { addDays, startOfDay } from 'date-fns';
+import { startOfDay } from 'date-fns';
 
 function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -30,12 +30,11 @@ function BookingsPageContent() {
             }
             
             const today = startOfDay(new Date());
-            const tomorrow = addDays(new Date(), 1);
 
             const upcomingBookings = userBookings
                 .filter(b => {
                     const departureDate = new Date(b.departureDate);
-                    return departureDate >= today && departureDate <= tomorrow && b.status !== 'Cancelled';
+                    return departureDate >= today && b.status !== 'Cancelled';
                 })
                 .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
 

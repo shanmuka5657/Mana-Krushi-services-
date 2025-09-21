@@ -23,12 +23,12 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, MessageSquare, AlertCircle, MapPin, Milestone, Shield, Map, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search } from "lucide-react";
-import { format, isSameDay } from "date-fns";
+import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search } from "lucide-react";
+import { format, isSameDay, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getCurrentUserName } from "@/lib/storage";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar as DayPicker } from "@/components/ui/calendar";
@@ -65,21 +65,20 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+        setIsLoading(true);
         const [routes, profiles] = await Promise.all([getRoutes(true), getAllProfiles()]);
         setAllData({ routes, profiles });
+        setBookings(initialBookings);
+        setIsLoading(false);
     }
     fetchData();
-  }, []);
-  
-  useEffect(() => {
-    setBookings(initialBookings);
   }, [initialBookings]);
 
   const handleUpdateBooking = async (updatedBooking: Booking) => {
@@ -88,17 +87,23 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     await saveBookings(updatedAllBookings);
     
     // Update local state if the booking still matches the filter
-    const searchDate = dateFilter ? new Date(dateFilter) : null;
-    if (searchDate) {
-        const bookingDate = new Date(updatedBooking.departureDate);
-        if (isSameDay(bookingDate, searchDate)) {
+    if (dateFilter) {
+        if (isSameDay(new Date(updatedBooking.departureDate), dateFilter)) {
              setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
         } else {
             setBookings(prev => prev.filter(b => b.id !== updatedBooking.id));
         }
     } else {
-        // If no filter, just update the item in the list
-         setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+        const today = startOfDay(new Date());
+        const departureDate = new Date(updatedBooking.departureDate);
+        if (mode === 'upcoming' && departureDate >= today && updatedBooking.status !== 'Cancelled') {
+             setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b).sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()));
+        } else if (mode === 'past' && departureDate < today) {
+            setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b).sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime()));
+        }
+         else {
+            setBookings(prev => prev.filter(b => b.id !== updatedBooking.id));
+        }
     }
   };
 
@@ -209,7 +214,7 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     
     let userBookings: Booking[] = [];
     
-    if (mode === 'all') { // For admin pages
+    if (mode === 'all') {
       userBookings = allBookings;
     } else if (role === 'passenger' && currentUserEmail) {
         userBookings = allBookings.filter(b => b.clientEmail === currentUserEmail);
@@ -223,14 +228,14 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   
   const getPageInfo = () => {
     switch(mode) {
-        case 'upcoming': return { title: 'Upcoming Bookings', description: 'Your upcoming confirmed rides. Showing today and tomorrow by default.' };
-        case 'past': return { title: 'Booking History', description: 'A record of your past and cancelled rides. Use the filter to find bookings.' };
-        case 'all': return { title: 'All Bookings', description: 'A list of all bookings made by all passengers.' };
-        default: return { title: 'My Bookings', description: 'Your bookings' };
+        case 'upcoming': return { title: 'Upcoming Bookings', description: 'Your upcoming confirmed rides.', defaultMessage: "You have no upcoming bookings." };
+        case 'past': return { title: 'Booking History', description: 'A record of your past and cancelled rides.', defaultMessage: 'Use the filter to search your booking history.' };
+        case 'all': return { title: 'All Bookings', description: 'A list of all bookings made by all passengers.', defaultMessage: 'No bookings found.' };
+        default: return { title: 'My Bookings', description: 'Your bookings', defaultMessage: 'No bookings found.' };
     }
   };
   
-  const { title, description } = getPageInfo();
+  const { title, description, defaultMessage } = getPageInfo();
 
   return (
     <>
@@ -274,71 +279,77 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
             )}
         </div>
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[600px]">
-              <TableHeader>
-                <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
-                  <TableHead className="rounded-l-lg">Booking ID</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Departure</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="rounded-r-lg">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bookings.length > 0 ? (
-                  bookings.map((booking) => {
-                    const status = getBookingStatus(booking);
-                    const canCancel = !isRideComplete(booking) && (status === 'Confirmed' || status === 'Pending');
-
-                    return (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-medium font-mono text-xs">{booking.bookingCode || booking.id}</TableCell>
-                      <TableCell className="whitespace-nowrap">{booking.destination}</TableCell>
-                      <TableCell className="whitespace-nowrap">{format(new Date(booking.departureDate), "dd MMM, HH:mm")}</TableCell>
-                      <TableCell className="text-right whitespace-nowrap">
-                        ₹{(booking.amount || 0).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getStatusBadgeClass(status)}
-                        >
-                        {status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => { setSelectedBooking(booking); setIsViewOpen(true); }}
-                            >
-                              View
-                            </Button>
-                          {status === 'Completed' && !booking.report && (
-                                <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsReportOpen(true); }}>
-                                    <AlertCircle className="h-4 w-4 mr-2" /> Report
-                                </Button>
-                          )}
-                          {canCancel && (
-                                <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsCancelOpen(true); }}>
-                                  <Trash2 className="h-4 w-4 mr-2" /> Cancel
-                                </Button>
-                          )}
-                        </div>
-                      </TableCell>
+            {isLoading ? (
+                 <div className="flex items-center justify-center h-24">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : (
+                <Table className="min-w-[600px]">
+                <TableHeader>
+                    <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
+                    <TableHead className="rounded-l-lg">Booking ID</TableHead>
+                    <TableHead>Destination</TableHead>
+                    <TableHead>Departure</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="rounded-r-lg">Actions</TableHead>
                     </TableRow>
-                  )})
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      {dateFilter ? 'No bookings found for the selected date.' : (mode === 'past' ? 'Use the filter to search your history.' : 'You have no bookings for today or tomorrow.')}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                    {bookings.length > 0 ? (
+                    bookings.map((booking) => {
+                        const status = getBookingStatus(booking);
+                        const canCancel = !isRideComplete(booking) && (status === 'Confirmed' || status === 'Pending');
+
+                        return (
+                        <TableRow key={booking.id}>
+                        <TableCell className="font-medium font-mono text-xs">{booking.bookingCode || booking.id}</TableCell>
+                        <TableCell className="whitespace-nowrap">{booking.destination}</TableCell>
+                        <TableCell className="whitespace-nowrap">{format(new Date(booking.departureDate), "dd MMM, HH:mm")}</TableCell>
+                        <TableCell className="text-right whitespace-nowrap">
+                            ₹{(booking.amount || 0).toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                            <Badge
+                            variant="outline"
+                            className={getStatusBadgeClass(status)}
+                            >
+                            {status}
+                            </Badge>
+                        </TableCell>
+                        <TableCell>
+                            <div className="flex gap-2">
+                                <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => { setSelectedBooking(booking); setIsViewOpen(true); }}
+                                >
+                                View
+                                </Button>
+                            {status === 'Completed' && !booking.report && (
+                                    <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsReportOpen(true); }}>
+                                        <AlertCircle className="h-4 w-4 mr-2" /> Report
+                                    </Button>
+                            )}
+                            {canCancel && (
+                                    <Button variant="destructive" size="sm" onClick={() => { setSelectedBooking(booking); setIsCancelOpen(true); }}>
+                                    <Trash2 className="h-4 w-4 mr-2" /> Cancel
+                                    </Button>
+                            )}
+                            </div>
+                        </TableCell>
+                        </TableRow>
+                    )})
+                    ) : (
+                    <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                        {dateFilter ? 'No bookings found for the selected date.' : defaultMessage}
+                        </TableCell>
+                    </TableRow>
+                    )}
+                </TableBody>
+                </Table>
+            )}
           </div>
       </CardContent>
     </Card>
@@ -380,7 +391,7 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                    <hr/>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex items-start gap-3">
-                            <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <MapIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Destination</p>
                                 <p className="font-medium">{selectedBooking.destination}</p>
@@ -523,5 +534,3 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
 };
 
 export default RecentBookings;
-
-    
