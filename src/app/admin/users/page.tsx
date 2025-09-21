@@ -6,18 +6,19 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getAllProfiles } from '@/lib/storage';
+import { getAllProfiles, getTodaysVisitCountForUser } from '@/lib/storage';
 import type { Profile } from '@/lib/types';
 import { format } from 'date-fns';
-import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert, Gift } from 'lucide-react';
+import { User, Phone, Mail, Shield, Download, CheckCircle, ShieldAlert, Gift, Activity } from 'lucide-react';
 import { Badge as UiBadge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/utils';
 
 type FilterRole = 'all' | 'owner' | 'passenger';
+type ProfileWithActivity = Profile & { activity: number };
 
 function AdminUsersPage() {
-    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+    const [allProfiles, setAllProfiles] = useState<ProfileWithActivity[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -28,7 +29,13 @@ function AdminUsersPage() {
     useEffect(() => {
         const fetchProfiles = async () => {
             const profiles = await getAllProfiles();
-            setAllProfiles(profiles);
+            const profilesWithActivity = await Promise.all(
+                profiles.map(async (p) => ({
+                    ...p,
+                    activity: await getTodaysVisitCountForUser(p.email),
+                }))
+            );
+            setAllProfiles(profilesWithActivity);
             setIsLoaded(true);
         };
         fetchProfiles();
@@ -46,8 +53,14 @@ function AdminUsersPage() {
     }
 
     const filteredProfiles = useMemo(() => {
-        if (filter === 'all') return allProfiles;
-        return allProfiles.filter(p => p.role === filter);
+        let sortedProfiles: ProfileWithActivity[];
+        if (filter === 'all') {
+            sortedProfiles = [...allProfiles];
+        } else {
+            sortedProfiles = allProfiles.filter(p => p.role === filter);
+        }
+        // Sort by activity, descending
+        return sortedProfiles.sort((a,b) => b.activity - a.activity);
     }, [allProfiles, filter]);
 
     const handleExport = () => {
@@ -57,6 +70,7 @@ function AdminUsersPage() {
             Mobile: p.mobile,
             'Mobile Verified': p.mobileVerified ? 'Yes' : 'No',
             Role: p.role,
+            'Todays Activity': p.activity,
             'Plan Expiry': p.planExpiryDate ? format(new Date(p.planExpiryDate), 'PPP') : 'N/A',
             'Referral Code': p.referralCode,
             'Referred By': p.referredBy,
@@ -109,6 +123,7 @@ function AdminUsersPage() {
                                 <TableHead>Role</TableHead>
                                 <TableHead>Referrals</TableHead>
                                 <TableHead>Plan</TableHead>
+                                <TableHead>Today's Activity</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -170,10 +185,16 @@ function AdminUsersPage() {
                                             <span className="text-muted-foreground">N/A</span>
                                         )}
                                     </TableCell>
+                                     <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <Activity className="h-4 w-4 text-muted-foreground" />
+                                            <span>{profile.activity} visits</span>
+                                        </div>
+                                    </TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">No users found for this filter.</TableCell>
+                                    <TableCell colSpan={6} className="h-24 text-center">No users found for this filter.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

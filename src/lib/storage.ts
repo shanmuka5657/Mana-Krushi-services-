@@ -155,6 +155,22 @@ export const getLiveVisitorsCount = async (minutes = 5): Promise<number> => {
     return activeSessions.size;
 }
 
+export const getTodaysVisitCountForUser = async (email: string): Promise<number> => {
+    if (!isBrowser) return 0;
+    const allVisits = await getVisitsFromFirestore();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const userVisitsToday = allVisits.filter(visit => 
+        visit.userEmail === email && visit.timestamp >= today
+    );
+    
+    // Count unique paths visited today as a simple measure of "activity"
+    const uniquePaths = new Set(userVisitsToday.map(v => v.path));
+    return uniquePaths.size;
+};
+
+
 // --- Settings ---
 export const saveGlobalVideoUrl = async (url: string) => {
     if (!isBrowser) return;
