@@ -5,10 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Search, Loader2, Star, Users, Car, Sparkles, Shield, Milestone } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Search, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from 'next/image';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +27,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile, getRoutes, getBookings, getAllProfiles } from "@/lib/storage";
+import { getProfile, getRoutes } from "@/lib/storage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,12 +37,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Route, Booking, Profile } from '@/lib/types';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import Autoplay from "embla-carousel-autoplay";
-
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -58,113 +51,6 @@ type SearchFormValues = z.infer<typeof searchFormSchema>;
 interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
 }
-
-const TopMembersCarousel = () => {
-    const [topRoutes, setTopRoutes] = useState<Route[]>([]);
-    const [profiles, setProfiles] = useState<Profile[]>([]);
-    const router = useRouter();
-
-    useEffect(() => {
-        const fetchTopMembers = async () => {
-            // New efficient query: Get only promoted, upcoming routes, limited to 5
-            const allRoutes = await getRoutes(true); // Still need a way to query efficiently
-            const upcomingPromotedRoutes = allRoutes
-                .filter(route => route.isPromoted && new Date(route.travelDate) >= new Date())
-                .sort((a,b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime())
-                .slice(0, 5);
-            
-            setTopRoutes(upcomingPromotedRoutes);
-
-            // We only need profiles for the drivers of these few routes
-            if (upcomingPromotedRoutes.length > 0) {
-                const driverEmails = upcomingPromotedRoutes.map(r => r.ownerEmail);
-                const uniqueDriverEmails = [...new Set(driverEmails)];
-                const driverProfiles = await Promise.all(uniqueDriverEmails.map(email => getProfile(email)));
-                setProfiles(driverProfiles.filter(p => p !== null) as Profile[]);
-            }
-        };
-        fetchTopMembers();
-    }, []);
-
-    const getDriverProfile = (ownerEmail?: string): Profile | undefined => {
-        if (!ownerEmail) return undefined;
-        return profiles.find(p => p.email === ownerEmail);
-    }
-    
-    if (topRoutes.length === 0) {
-        return null; // Don't render if no top members
-    }
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="text-yellow-500" />
-                    Top Rides
-                </CardTitle>
-                 <CardDescription>Featured rides from our top owners.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Carousel
-                    opts={{ align: "start", loop: true }}
-                    plugins={[Autoplay({ delay: 5000 })]}
-                    className="w-full"
-                >
-                    <CarouselContent>
-                        {topRoutes.map((route) => {
-                             const driverProfile = getDriverProfile(route.ownerEmail);
-                             return (
-                                <CarouselItem key={route.id}>
-                                    <Card className="overflow-hidden border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10" onClick={() => router.push(`/book/${route.id}`)}>
-                                        <CardContent className="p-4 cursor-pointer">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-bold text-lg">{route.fromLocation} to {route.toLocation}</p>
-                                                    <p className="text-sm text-muted-foreground">{format(new Date(route.travelDate), "PPP")} at {route.departureTime}</p>
-                                                </div>
-                                                <div className="text-right flex-shrink-0">
-                                                    <div className="text-lg font-bold">
-                                                        ₹{(route.price || 0).toFixed(2)}
-                                                    </div>
-                                                    <p className="text-xs text-muted-foreground">per seat</p>
-                                                </div>
-                                            </div>
-                                             <div className="flex flex-wrap gap-2 mt-3">
-                                                <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
-                                                    <Sparkles className="mr-1 h-3 w-3" />
-                                                    Promoted
-                                                </Badge>
-                                                <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
-                                                    <Shield className="mr-1 h-3 w-3" />
-                                                    Insurance: Yes
-                                                </Badge>
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={driverProfile?.selfieDataUrl} />
-                                                    <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <div className="font-semibold text-sm">{route.driverName}</div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                                        <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </CardFooter>
-                                    </Card>
-                                </CarouselItem>
-                             )
-                        })}
-                    </CarouselContent>
-                </Carousel>
-            </CardContent>
-        </Card>
-    );
-};
 
 
 export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
@@ -234,8 +120,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <TopMembersCarousel />
 
       <Card className="shadow-sm">
           <CardHeader>
