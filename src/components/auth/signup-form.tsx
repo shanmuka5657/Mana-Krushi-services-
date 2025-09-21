@@ -194,7 +194,7 @@ export function SignupForm() {
                 name="referralCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Referral Code</FormLabel>
+                    <FormLabel>Referral Code (Optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter code from a friend" {...field} disabled={!!refCodeFromUrl} />
                     </FormControl>
