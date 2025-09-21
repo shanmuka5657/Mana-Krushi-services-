@@ -9,6 +9,21 @@ import { getApp } from "firebase/app";
 
 const isBrowser = typeof window !== "undefined";
 
+// --- Ad Control ---
+export const saveAdsEnabled = async (isEnabled: boolean) => {
+    if (!isBrowser) return;
+    await saveSetting('areAdsEnabled', isEnabled);
+}
+
+export const onAdsEnabledChange = (callback: (isEnabled: boolean) => void) => {
+    if (!isBrowser) return () => {};
+    return onSettingChange('areAdsEnabled', (value) => {
+        // Default to false if not set
+        callback(value === null ? false : value);
+    });
+};
+
+
 // --- Branding ---
 export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;
