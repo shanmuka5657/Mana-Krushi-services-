@@ -351,10 +351,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center gap-3 cursor-pointer">
                     <Avatar className="h-10 w-10 border">
-                      <AvatarImage
-                        src={`https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
-                        alt={userName}
-                      />
+                       <AvatarImage src={profile?.selfieDataUrl} alt={userName} />
                       <AvatarFallback>{userInitial}</AvatarFallback>
                     </Avatar>
                     <div className="hidden text-sm md:block">

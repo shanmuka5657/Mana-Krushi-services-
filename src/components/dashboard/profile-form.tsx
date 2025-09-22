@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -48,6 +48,7 @@ const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   mobile: z.string().regex(/^\d{10}$/, { message: "Enter a valid 10-digit mobile number." }),
   email: z.string().email({ message: "Invalid email address." }),
+  selfieDataUrl: z.string().optional(),
   country: z.string().optional(),
   address: z.string().optional(),
   vehicleType: z.string().optional(),
@@ -79,6 +80,11 @@ export default function ProfileForm() {
   const [otpValue, setOtpValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -86,6 +92,7 @@ export default function ProfileForm() {
       name: "",
       mobile: "",
       email: "",
+      selfieDataUrl: "",
       country: "IN",
       address: "",
       vehicleType: "",
@@ -96,6 +103,63 @@ export default function ProfileForm() {
       referralCode: "",
     },
   });
+  
+   useEffect(() => {
+    if (isCameraOn) {
+        const getCameraPermission = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                setHasCameraPermission(true);
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                setHasCameraPermission(false);
+                toast({
+                    variant: 'destructive',
+                    title: 'Camera Access Denied',
+                    description: 'Please enable camera permissions in your browser settings.',
+                });
+                setIsCameraOn(false);
+            }
+        };
+        getCameraPermission();
+    } else {
+        if (videoRef.current?.srcObject) {
+            const stream = videoRef.current.srcObject as MediaStream;
+            stream.getTracks().forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+        }
+    }
+  }, [isCameraOn, toast]);
+
+  const handleCapture = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const context = canvas.getContext('2d');
+      if(context) {
+        context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        setCapturedImage(dataUrl);
+        setIsCameraOn(false);
+      }
+    }
+  };
+  
+  const handleSaveSelfie = async () => {
+      if (capturedImage) {
+          form.setValue('selfieDataUrl', capturedImage);
+          setCapturedImage(null); // Hide preview after saving to form state
+           toast({
+                title: "Selfie Saved",
+                description: "Your new profile picture is ready. Click 'Save Changes' to finalize.",
+            });
+      }
+  };
+
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -116,6 +180,7 @@ export default function ProfileForm() {
             name: userName || (userEmail ? userEmail.split('@')[0] : ''),
             email: userEmail || '',
             mobile: '',
+            selfieDataUrl: '',
             country: 'IN',
             address: '',
             vehicleType: '',
@@ -393,6 +458,66 @@ export default function ProfileForm() {
 
       <Card className="shadow-sm">
         <CardHeader>
+            <CardTitle>Profile Picture</CardTitle>
+            <CardDescription>A clear selfie helps build trust in the community.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4">
+            <Avatar className="h-32 w-32">
+                <AvatarImage src={capturedImage || form.watch('selfieDataUrl')} />
+                <AvatarFallback>
+                    <User className="h-16 w-16" />
+                </AvatarFallback>
+            </Avatar>
+            
+            {isCameraOn && (
+                <div className="w-full space-y-2">
+                    <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted />
+                    {hasCameraPermission === false && (
+                        <Alert variant="destructive">
+                            <AlertTitle>Camera Access Required</AlertTitle>
+                            <AlertDescription>
+                                Please allow camera access in your browser settings to use this feature.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    <div className="flex justify-center gap-2">
+                         <Button onClick={handleCapture} disabled={hasCameraPermission === false}>
+                            <Camera className="mr-2 h-4 w-4" />
+                            Capture
+                        </Button>
+                        <Button variant="outline" onClick={() => setIsCameraOn(false)}>
+                            Close Camera
+                        </Button>
+                    </div>
+                </div>
+            )}
+            
+            {capturedImage && (
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => { setCapturedImage(null); setIsCameraOn(true); }}>
+                        <RefreshCcw className="mr-2 h-4 w-4" />
+                        Retake
+                    </Button>
+                    <Button onClick={handleSaveSelfie}>
+                        <Save className="mr-2 h-4 w-4" />
+                        Use This Photo
+                    </Button>
+                </div>
+            )}
+            
+            {!isCameraOn && !capturedImage && (
+                 <Button variant="outline" onClick={() => setIsCameraOn(true)}>
+                    <Video className="mr-2 h-4 w-4" />
+                    Open Camera
+                </Button>
+            )}
+
+        </CardContent>
+      </Card>
+
+
+      <Card className="shadow-sm">
+        <CardHeader>
           <CardTitle>My Profile</CardTitle>
           <CardDescription>Update your personal information.</CardDescription>
         </CardHeader>
@@ -472,31 +597,30 @@ export default function ProfileForm() {
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Country</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <div className="relative">
-                          <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <SelectTrigger className="pl-10">
-                            <SelectValue placeholder="Select your country" />
-                          </SelectTrigger>
-                        </div>
-                      </FormControl>
-                      <SelectContent>
-                        {countries.map(c => (
-                          <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                 <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger className="pl-10">
+                                <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {countries.map(c => (
+                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    )}
+                    />
+                </div>
+              </FormItem>
               
               <FormField
                 control={form.control}
@@ -517,26 +641,25 @@ export default function ProfileForm() {
               />
 
               {profile?.role === 'admin' && (
-                <FormField
-                  control={form.control}
-                  name="additionalMobiles"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Additional Mobile Numbers</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                           <PhoneForwarded className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                           <Textarea
-                            placeholder="Enter up to 100 mobile numbers, one per line."
-                            {...field}
-                            className="pl-10 h-32"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 <FormItem>
+                    <FormLabel>Additional Mobile Numbers</FormLabel>
+                     <div className="relative">
+                        <PhoneForwarded className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <FormField
+                        control={form.control}
+                        name="additionalMobiles"
+                        render={({ field }) => (
+                            <FormControl>
+                                <Textarea
+                                    placeholder="Enter up to 100 mobile numbers, one per line."
+                                    {...field}
+                                    className="pl-10 h-32"
+                                />
+                            </FormControl>
+                        )}
+                        />
+                    </div>
+                 </FormItem>
               )}
 
               {profile?.role === 'owner' && (

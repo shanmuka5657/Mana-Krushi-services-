@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 
 export type Booking = {
@@ -59,6 +58,7 @@ export type Profile = {
     additionalMobiles?: string[];
     mobileVerified?: boolean;
     email: string;
+    selfieDataUrl?: string;
     country?: string;
     address?: string;
     vehicleType?: string;
