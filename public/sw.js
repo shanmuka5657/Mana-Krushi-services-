@@ -1,59 +1,53 @@
-// Define a cache name
-const CACHE_NAME = 'mana-krushi-cache-v1';
+// A basic service worker for caching assets and enabling offline functionality.
 
-// List of files to cache
+const CACHE_NAME = 'mana-krushi-cache-v1';
 const urlsToCache = [
   '/',
-  '/offline',
   '/login',
   '/signup',
-  '/favicon.ico',
-  '/manifest.json',
-  // Add other static assets like CSS, JS, images that are common across pages
+  '/offline',
+  '/styles/globals.css', // Adjust if your CSS paths are different
+  // Add other critical assets like your logo or key scripts if they aren't dynamically loaded
+  'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg' 
 ];
 
-// Install event: open a cache and add the core app shell files to it
-self.addEventListener('install', event => {
+// Install event: opens a cache and adds the core assets to it.
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
+      .then((cache) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Fetch event: serve cached content when offline
-self.addEventListener('fetch', event => {
+// Fetch event: serves assets from cache if available, otherwise fetches from network.
+// It provides a fallback to an offline page for navigation requests that fail.
+self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
+      .then((response) => {
         // Cache hit - return response
         if (response) {
           return response;
         }
 
-        // IMPORTANT: Clone the request. A request is a stream and
-        // can only be consumed once. Since we are consuming this
-        // once by cache and once by the browser for fetch, we need
-        // to clone the response.
+        // Clone the request to use it both for the cache and for the network.
         const fetchRequest = event.request.clone();
 
         return fetch(fetchRequest).then(
-          response => {
+          (response) => {
             // Check if we received a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // IMPORTANT: Clone the response. A response is a stream
-            // and because we want the browser to consume the response
-            // as well as the cache consuming the response, we need
-            // to clone it so we have two streams.
+            // Clone the response to put it in the cache.
             const responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
-              .then(cache => {
+              .then((cache) => {
                 cache.put(event.request, responseToCache);
               });
 
@@ -62,8 +56,8 @@ self.addEventListener('fetch', event => {
         );
       })
       .catch(() => {
-        // If the fetch fails (i.e., user is offline) and the request is for a navigation,
-        // serve the offline fallback page.
+        // If the fetch fails (i.e., user is offline) and it's a navigation request,
+        // show the offline fallback page.
         if (event.request.mode === 'navigate') {
           return caches.match('/offline');
         }
@@ -71,13 +65,13 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Activate event: remove old caches
-self.addEventListener('activate', event => {
+// Activate event: cleans up old caches.
+self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(cacheName => {
+        cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
