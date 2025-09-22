@@ -68,7 +68,7 @@ const countries = [
     { code: 'US', name: 'United States' },
     { code: 'CA', name: 'Canada' },
     { code: 'GB', name: 'United Kingdom' },
-    { code: 'AU', name: 'Australia' },
+    { code: 'AU', 'name': 'Australia' },
 ];
 
 export default function ProfileForm() {
@@ -177,7 +177,11 @@ export default function ProfileForm() {
 
         form.reset(combinedValues);
 
-        if (userProfile?.selfieDataUrl) {
+        // Load selfie from local storage first for instant feel, then from profile
+        const localSelfie = localStorage.getItem(`selfie_${userEmail}`);
+        if(localSelfie) {
+            setSelfie(localSelfie);
+        } else if (userProfile?.selfieDataUrl) {
             setSelfie(userProfile.selfieDataUrl);
         }
     };
@@ -199,8 +203,12 @@ export default function ProfileForm() {
               context.drawImage(video, 0, 0, canvas.width, canvas.height);
               const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
               
-              // Instant UI update
+              // Instant UI update & save to local storage
               setSelfie(dataUrl);
+              const userEmail = getCurrentUser();
+              if (userEmail) {
+                localStorage.setItem(`selfie_${userEmail}`, dataUrl);
+              }
               
               // Start upload in the background
               uploadSelfie(dataUrl);
@@ -210,7 +218,6 @@ export default function ProfileForm() {
 
   const uploadSelfie = async (dataUrl: string) => {
     setIsUploading(true);
-    toast({ title: 'Uploading Selfie...', description: 'Your new profile picture is being saved.' });
     
     try {
         const userEmail = getCurrentUser();
@@ -226,8 +233,9 @@ export default function ProfileForm() {
             await saveProfile({ ...currentProfile, selfieDataUrl: publicSelfieUrl });
         }
         
-        // Update the UI with the permanent URL
+        // Update the UI with the permanent URL and clear local storage
         setSelfie(publicSelfieUrl);
+        localStorage.removeItem(`selfie_${userEmail}`);
         toast({ title: 'Selfie Uploaded!', description: 'Your new profile picture is saved.' });
 
     } catch (error) {
@@ -242,6 +250,10 @@ export default function ProfileForm() {
   const handleRetakeSelfie = () => {
     setSelfie(null);
     form.setValue('selfieDataUrl', '');
+     const userEmail = getCurrentUser();
+    if (userEmail) {
+        localStorage.removeItem(`selfie_${userEmail}`);
+    }
   };
 
   async function onSubmit(data: ProfileFormValues) {
@@ -255,7 +267,6 @@ export default function ProfileForm() {
         .filter(num => /^\d{10,15}$/.test(num))
         .slice(0, 100);
 
-    // We don't save the temporary base64 selfie data to Firestore
     const profileToSave: Profile = { 
         ...(currentProfile || {}), 
         ...restOfData,
@@ -263,8 +274,11 @@ export default function ProfileForm() {
         additionalMobiles: additionalMobilesArray,
     };
     
+    // Only save the selfie URL if it's a permanent http URL, not a local data URL
     if (selfie && selfie.startsWith('http')) {
         profileToSave.selfieDataUrl = selfie;
+    } else if (!selfie) { // If selfie was removed
+        profileToSave.selfieDataUrl = '';
     }
 
 
@@ -752,7 +766,7 @@ export default function ProfileForm() {
 
 
               <Button type="submit" className="w-full" disabled={isSaving || isUploading}>
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUploading ? 'Waiting for upload...' : 'Save Changes'}
               </Button>
             </form>
@@ -762,5 +776,7 @@ export default function ProfileForm() {
     </div>
   );
 }
+
+    
 
     
