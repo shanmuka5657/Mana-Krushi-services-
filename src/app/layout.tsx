@@ -3,7 +3,7 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import * as React from 'react';
-import { logVisit, onAdsEnabledChange } from '@/lib/storage';
+import { logVisit } from '@/lib/storage';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
@@ -50,11 +50,29 @@ export default function RootLayout({
       </head>
       <body>
         <Script
-          id="monetag-ad-script"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(s){s.dataset.zone='9915521',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
-          }}
+            id="ad-limiter-script"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{
+                __html: `
+                    (function() {
+                        try {
+                            const AD_LIMIT = 4;
+                            const storageKey = 'popunderAdCount';
+                            let adCount = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
+                            
+                            if (adCount < AD_LIMIT) {
+                                sessionStorage.setItem(storageKey, (adCount + 1).toString());
+                                var s = document.createElement('script');
+                                s.dataset.zone = '9915521';
+                                s.src = 'https://al5sm.com/tag.min.js';
+                                document.body.appendChild(s);
+                            }
+                        } catch (e) {
+                            console.error('Ad script error:', e);
+                        }
+                    })();
+                `
+            }}
         />
         {children}
         <Toaster />
