@@ -1,8 +1,6 @@
 {
   "rules": {
-    // This is insecure for production. We will add proper security rules next.
-    // For now, this allows the demo to work.
-    ".read": true,
-    ".write": true
+    ".read": "auth != null",
+    ".write": "auth != null"
   }
 }
