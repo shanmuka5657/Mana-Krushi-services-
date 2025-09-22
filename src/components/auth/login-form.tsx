@@ -54,7 +54,9 @@ export function LoginForm() {
 
 
   React.useEffect(() => {
+    // This code runs only on the client
     setAppUrl(window.location.origin);
+    
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
     }
