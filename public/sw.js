@@ -1,48 +1,72 @@
-// Choose a cache name
-const cacheName = 'mana-krushi-cache-v1';
-
-// List the files to cache
-// IMPORTANT: Add all essential pages and assets here
-const filesToCache = [
+const CACHE_NAME = 'mana-krushi-cache-v1';
+const urlsToCache = [
   '/',
   '/offline',
-  '/login',
-  '/signup',
-  // Add other important assets like CSS, JS, and key images
-  '/favicon.ico', // Example
-  // The manifest itself should be cached
-  '/manifest.json'
+  '/icon-192x192.png',
+  '/icon-512x512.png'
+  // Add other critical assets here. Next.js chunks are dynamically named,
+  // so we'll cache them on the fly.
 ];
 
-// When the service worker is installed
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(cacheName)
-      .then((cache) => {
-        // Cache all the specified files
-        return cache.addAll(filesToCache);
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
       })
   );
 });
 
-// When the app fetches a resource
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        // If the resource is in the cache, serve it
+      .then(response => {
+        // Cache hit - return response
         if (response) {
           return response;
         }
 
-        // If not, try to fetch it from the network
-        return fetch(event.request).catch(() => {
-          // If the network request fails (e.g., offline),
-          // return the offline fallback page for navigation requests.
-          if (event.request.mode === 'navigate') {
-            return caches.match('/offline');
+        // Clone the request to use it in the cache and for the network request
+        const fetchRequest = event.request.clone();
+
+        return fetch(fetchRequest).then(
+          response => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
           }
+        ).catch(() => {
+            // Network request failed, try to serve the offline page for navigation requests
+            if (event.request.mode === 'navigate') {
+                return caches.match('/offline');
+            }
         });
       })
+  );
+});
+
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
