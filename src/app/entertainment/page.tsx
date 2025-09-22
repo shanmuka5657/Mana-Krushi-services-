@@ -132,7 +132,23 @@ function EntertainmentPageContent() {
                             <CardDescription>Manage global settings for all users.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             
+                             <div className="flex items-center justify-between p-4 border rounded-md">
+                                <div>
+                                    <Label htmlFor="ads-toggle" className="font-medium flex items-center gap-2">
+                                        <BadgeDollarSign />
+                                        Monetization
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {areAdsEnabled ? "Ads are active across the app." : "Ads are currently disabled."}
+                                    </p>
+                                </div>
+                                <Switch
+                                    id="ads-toggle"
+                                    checked={areAdsEnabled}
+                                    onCheckedChange={handleAdsToggle}
+                                />
+                            </div>
+                            
                             <div className="flex items-center justify-between p-4 border rounded-md">
                                 <div>
                                     <Label htmlFor="visibility-toggle" className="font-medium flex items-center gap-2">
