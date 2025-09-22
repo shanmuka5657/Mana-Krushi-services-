@@ -322,19 +322,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <div className="flex flex-col flex-1 h-full">
           <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
-            <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 flex-1 min-w-0">
               <SidebarTrigger className="md:hidden" />
-              <div className="hidden items-center gap-2 md:flex">
+               <div className="hidden md:flex items-center gap-2">
                 <ToggleSidebarButton />
-                 <div className="flex items-center gap-2">
-                    <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
-                    <h2 className="text-2xl font-semibold">
-                      Mana Krushi Services
-                    </h2>
-                  </div>
+              </div>
+              <div className="flex items-center gap-2 truncate">
+                <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
+                <h2 className="text-xl md:text-2xl font-semibold truncate">
+                  Mana Krushi Services
+                </h2>
               </div>
             </div>
-            <div className="flex flex-1 items-center justify-end gap-4">
+            <div className="flex flex-shrink-0 items-center justify-end gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center gap-3 cursor-pointer">
