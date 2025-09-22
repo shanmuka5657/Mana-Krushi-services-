@@ -1,11 +1,11 @@
 
-const CACHE_NAME = 'mana-krushi-services-v1';
+const CACHE_NAME = 'mana-krushi-services-cache-v1';
 const urlsToCache = [
   '/',
   '/offline',
-  '/favicon.ico',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/manifest.json',
+  // Add other important assets here that you want to cache
+  // Be careful not to cache everything, especially API calls.
 ];
 
 self.addEventListener('install', event => {
@@ -22,17 +22,24 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
+        // Cache hit - return response
         if (response) {
           return response;
         }
 
-        return fetch(event.request).then(
+        // Clone the request because it's a one-time-use stream
+        const fetchRequest = event.request.clone();
+
+        return fetch(fetchRequest).then(
           response => {
+            // Check if we received a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
+            // Clone the response because it's also a one-time-use stream
             const responseToCache = response.clone();
+
             caches.open(CACHE_NAME)
               .then(cache => {
                 cache.put(event.request, responseToCache);
@@ -43,10 +50,13 @@ self.addEventListener('fetch', event => {
         );
       })
       .catch(() => {
-        return caches.match('/offline');
+          // If the network request fails and there is no cache,
+          // return the offline page.
+          return caches.match('/offline');
       })
   );
 });
+
 
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
@@ -62,4 +72,3 @@ self.addEventListener('activate', event => {
     })
   );
 });
-
