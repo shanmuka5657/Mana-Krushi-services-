@@ -6,7 +6,6 @@ import * as React from 'react';
 import { logVisit } from '@/lib/storage';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import Script from 'next/script';
 
 const ConditionalFooter = dynamic(
   () => import('@/components/layout/conditional-footer'),
