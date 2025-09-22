@@ -520,3 +520,5 @@ ${newlyBooked.client}
     </AppLayout>
   );
 }
+
+    
