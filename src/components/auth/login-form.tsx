@@ -19,7 +19,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Loader2, QrCode } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import QRCode from 'qrcode.react';
@@ -45,15 +45,14 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = React.useState(false);
-  const [showQrDialog, setShowQrDialog] = React.useState(false);
-  const [appUrl, setAppUrl] = React.useState('');
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showQrDialog, setShowQrDialog] = useState(false);
+  const [appUrl, setAppUrl] = useState('');
   const { defaultLogo } = placeholderImages;
 
 
-  React.useEffect(() => {
-    // This code runs only on the client
+  useEffect(() => {
     setAppUrl(window.location.origin);
     
     if (window.matchMedia('(display-mode: standalone)').matches) {
