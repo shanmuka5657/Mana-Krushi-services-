@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import {
@@ -99,7 +98,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isMounted, setIsMounted] = React.useState(false);
-  const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
   
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -124,9 +122,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         setIsStandalone(true);
     }
     
-    // Reset performance counters on initial mount
-    perfTracker.reset();
-
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
@@ -134,12 +129,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // Subscribe to performance updates
-    const unsubscribePerf = perfTracker.subscribe(setPerfCounts);
-
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      unsubscribePerf();
     };
   }, []);
 
@@ -341,27 +332,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex flex-1 items-center justify-end gap-4">
-                <div className="flex items-center gap-4 border rounded-lg px-3 py-1.5 text-sm bg-muted/50">
-                    <div className="flex items-center gap-1 text-green-600" title="Reads">
-                        <ArrowDown className="h-4 w-4"/>
-                        <span>{perfCounts.reads}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-orange-600" title="Writes">
-                        <ArrowUp className="h-4 w-4" />
-                        <span>{perfCounts.writes}</span>
-                    </div>
-                </div>
-
-              <div className="relative w-full max-w-xs sm:max-w-sm">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by driver..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearch}
-                />
-              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center gap-3 cursor-pointer">
