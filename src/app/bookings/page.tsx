@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import RecentBookings from '@/components/dashboard/recent-bookings';
-import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole } from '@/lib/storage';
+import { getBookings, getCurrentUser, getProfile } from '@/lib/storage';
 import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -14,15 +14,20 @@ function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const searchParams = useSearchParams();
-    const role = searchParams.get('role') || 'passenger';
+    const roleParam = searchParams.get('role') || 'passenger';
 
     useEffect(() => {
         const fetchInitialBookings = async () => {
-            const userRole = getCurrentUserRole();
             const userEmail = getCurrentUser();
+            if (!userEmail) {
+                setIsLoaded(true);
+                return;
+            }
             
-            // Fetch ONLY the user's bookings, not all bookings.
-            const userBookings = await getBookings(false, { userEmail, role: userRole as any });
+            const userProfile = await getProfile(userEmail);
+            const userRole = userProfile?.role || 'passenger';
+            
+            const userBookings = await getBookings(false, { userEmail, role: userRole });
             
             const today = startOfDay(new Date());
 
@@ -37,7 +42,7 @@ function BookingsPageContent() {
             setIsLoaded(true);
         };
         fetchInitialBookings();
-    }, [role]);
+    }, [roleParam]);
     
     if (!isLoaded) {
         return <AppLayout><div>Loading bookings...</div></AppLayout>;
