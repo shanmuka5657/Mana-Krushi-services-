@@ -1,11 +1,11 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
+  "short_name": "Mana Krushi",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
   "theme_color": "#1E88E5",
+  "background_color": "#ffffff",
   "icons": [
     {
       "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
