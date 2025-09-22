@@ -478,20 +478,20 @@ export default function ProfileForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Country</FormLabel>
-                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                           <div className="relative">
-                            <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <SelectTrigger className="pl-10">
-                                <SelectValue placeholder="Select your country" />
-                            </SelectTrigger>
-                           </div>
-                        </FormControl>
-                        <SelectContent>
-                            {countries.map(c => (
-                                <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
-                            ))}
-                        </SelectContent>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <SelectTrigger className="pl-10">
+                            <SelectValue placeholder="Select your country" />
+                          </SelectTrigger>
+                        </div>
+                      </FormControl>
+                      <SelectContent>
+                        {countries.map(c => (
+                          <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
