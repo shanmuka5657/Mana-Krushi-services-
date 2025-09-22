@@ -1,6 +1,7 @@
 
 import type {NextConfig} from 'next';
 
+// Forcing a rebuild to solve chunk loading errors.
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
