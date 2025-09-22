@@ -1,13 +1,46 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import placeholderImages from "@/lib/placeholder-images.json";
+import { onAuthStateChanged } from "@/lib/auth";
+import { getProfile } from "@/lib/storage";
+import { Loader2 } from "lucide-react";
 
 export default function WelcomePage() {
   const { defaultLogo } = placeholderImages;
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(async (user) => {
+      if (user) {
+        // User is signed in, redirect to dashboard
+        const profile = await getProfile(user.email!);
+        const role = profile?.role || 'passenger';
+        router.replace(`/dashboard?role=${role}`);
+      } else {
+        // User is signed out, show the welcome page
+        setIsLoading(false);
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
       <div className="flex flex-col items-center gap-6">
