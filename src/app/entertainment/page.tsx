@@ -59,12 +59,14 @@ function EntertainmentPageContent() {
         
         const fetchAdminSettings = async () => {
             if (role === 'admin') {
-                const [currentUrl, currentVisibility] = await Promise.all([
+                const [currentUrl, currentVisibility, currentAdsEnabled] = await Promise.all([
                     getGlobalVideoUrl(),
-                    getGlobalVideoVisibility()
+                    getGlobalVideoVisibility(),
+                    getSetting('areAdsEnabled')
                 ]);
                 setVideoUrl(currentUrl || '');
                 setIsPlayerVisible(currentVisibility);
+                setAreAdsEnabled(currentAdsEnabled || false);
             }
         };
 
@@ -115,7 +117,7 @@ function EntertainmentPageContent() {
     const handleAdsToggle = async () => {
         const newAdStatus = !areAdsEnabled;
         await saveAdsEnabled(newAdStatus);
-        setAreAdsEnabled(newAdStatus); // This might not be necessary if onAdsEnabledChange works correctly
+        setAreAdsEnabled(newAdStatus);
         toast({
             title: `Advertisements ${newAdStatus ? 'Enabled' : 'Disabled'}`,
             description: `All users will ${newAdStatus ? 'now see' : 'no longer see'} ads. The change will apply on next page load.`,

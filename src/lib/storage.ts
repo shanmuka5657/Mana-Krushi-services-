@@ -2,7 +2,7 @@
 
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
@@ -268,12 +268,16 @@ export const getCurrentUser = (): string | null => {
 export const getCurrentUserName = (): string | null => {
     if (!isBrowser) return null;
     const user = getCurrentFirebaseUser();
-    return user ? user.displayName : null;
+    // This is a workaround to get the name, ideally it should come from the profile
+    return user?.displayName || user?.email?.split('@')[0] || null;
 };
 export const getCurrentUserRole = (): string | null => {
     // This is a bit of a hack, as role is not stored on the auth user.
     // This will be replaced by a proper claim-based system later.
      if (!isBrowser) return null;
+     const email = getCurrentUser();
+     if(email === 'mana-krushi-admin@google.com') return 'admin';
+     // In a real app, this would be fetched from the profile
      return 'passenger'; // Placeholder
 };
 export const clearCurrentUser = () => {
@@ -290,3 +294,9 @@ export const getGlobalLogoUrl = async (): Promise<string | null> => {
     const url = await getSetting('globalLogoUrl');
     return url;
 };
+
+// New getSetting function to be used by other parts of the app
+export const getSetting = async (key: string): Promise<any> => {
+    if (!isBrowser) return null;
+    return await getSettingFromFirestore(key);
+}
