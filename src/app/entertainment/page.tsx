@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite } from '@/lib/types';
-import { getCurrentUserRole, saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, onAdsEnabledChange, saveAdsEnabled } from '@/lib/storage';
+import { getCurrentUserRole, saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, onAdsEnabledChange, saveAdsEnabled, getSetting } from '@/lib/storage';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
