@@ -61,7 +61,18 @@ export function LoginForm() {
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
+      const promptEvent = event as BeforeInstallPromptEvent;
+      setInstallPrompt(promptEvent);
+      // Automatically trigger the install prompt
+      promptEvent.prompt();
+      promptEvent.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          setIsStandalone(true);
+          toast({ title: "Installation Complete!", description: "The app has been successfully installed." });
+        }
+        // We don't show a toast on dismissal to avoid being intrusive.
+        setInstallPrompt(null);
+      });
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -69,7 +80,7 @@ export function LoginForm() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [toast]);
 
   const handleInstallClick = () => {
     if (installPrompt) {
