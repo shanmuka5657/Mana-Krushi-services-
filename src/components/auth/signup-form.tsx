@@ -13,6 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -41,6 +42,7 @@ import { signUpWithEmail } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
 const formSchema = z.object({
@@ -49,6 +51,9 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
   role: z.enum(['owner', 'passenger'], { required_error: 'Please select a role.' }),
   referralCode: z.string().optional(),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions.",
+  }),
 });
 
 
@@ -71,6 +76,7 @@ export function SignupForm() {
       password: '',
       role: 'passenger',
       referralCode: refCodeFromUrl || '',
+      terms: false,
     },
   });
   
@@ -208,19 +214,41 @@ export function SignupForm() {
                   </FormItem>
                 )}
               />
+              
+              <FormField
+                control={form.control}
+                name="terms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Accept terms and conditions
+                      </FormLabel>
+                      <FormDescription>
+                        You agree to our{' '}
+                        <Link href="/disclaimer" className="underline hover:text-primary">
+                            Terms & Disclaimer
+                        </Link>
+                        .
+                      </FormDescription>
+                       <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                  {isSubmitting ? <Loader2 className="animate-spin" /> : 'Create Account'}
               </Button>
             </form>
           </Form>
-           <div className="mt-4 text-center text-xs text-muted-foreground">
-            By creating an account, you agree to our{' '}
-            <Link href="/disclaimer" className="underline hover:text-primary">
-              Terms & Disclaimer
-            </Link>
-            .
-          </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="underline">
