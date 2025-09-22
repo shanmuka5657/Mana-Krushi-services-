@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -67,11 +68,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole, getProfile } from "@/lib/storage";
+import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole, getProfile, onGlobalLogoUrlChange } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import type { Profile } from "@/lib/types";
-import { perfTracker } from "@/lib/perf-tracker";
+import placeholderImages from '@/lib/placeholder-images.json';
 
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
@@ -96,8 +97,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = React.useState('passenger');
   const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState('');
   const [isMounted, setIsMounted] = React.useState(false);
+  const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -161,6 +162,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       }
     };
     loadData();
+
+    const unsub = onGlobalLogoUrlChange((url) => {
+        if(url) setLogoUrl(url);
+    });
+
+    return () => unsub();
   }, []);
 
   const adminNavItems = [
@@ -263,13 +270,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       });
     }
   };
-  
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-        const targetPath = pathname === '/ecommerce' ? '/ecommerce' : '/search';
-        router.push(`${targetPath}?q=${searchQuery}`);
-    }
-  }
 
 
   return (
@@ -277,7 +277,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Briefcase className="size-8 text-accent" />
+            <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
             <h1 className="text-xl font-bold">
               Mana Krushi<span className="text-accent">Services</span>
             </h1>
@@ -326,9 +326,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="md:hidden" />
               <div className="hidden items-center gap-2 md:flex">
                 <ToggleSidebarButton />
-                <h2 className="text-2xl font-semibold">
-                  {role === 'admin' ? 'Admin Panel' : (role === 'owner' ? 'Owner Dashboard' : 'Passenger Dashboard')}
-                </h2>
+                 <div className="flex items-center gap-2">
+                    <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
+                    <h2 className="text-2xl font-semibold">
+                      Mana Krushi Services
+                    </h2>
+                  </div>
               </div>
             </div>
             <div className="flex flex-1 items-center justify-end gap-4">
