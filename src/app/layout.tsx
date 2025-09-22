@@ -49,6 +49,13 @@ export default function RootLayout({
           <meta name="theme-color" content="#1E88E5" />
       </head>
       <body>
+        <Script
+          id="monetag-ad-script"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(s){s.dataset.zone='9915521',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
+          }}
+        />
         {children}
         <Toaster />
         <ConditionalFooter />
