@@ -29,6 +29,8 @@ export default function RootLayout({
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').then(registration => {
                 console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                // Force service worker to check for updates on page load
+                registration.update();
             }, err => {
                 console.log('ServiceWorker registration failed: ', err);
             });
