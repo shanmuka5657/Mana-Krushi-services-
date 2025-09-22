@@ -126,17 +126,13 @@ export default function ProfileForm() {
         setHasCameraPermission(false);
       }
     };
-    
-    // Request camera permission as soon as the component loads
-    // but don't block the UI for it.
-    if (!selfie) {
-        getCameraPermission();
-    }
+
+    getCameraPermission();
 
     return () => {
         stream?.getTracks().forEach(track => track.stop());
     }
-  }, [selfie]);
+  }, []);
 
 
   useEffect(() => {
@@ -202,6 +198,8 @@ export default function ProfileForm() {
 
               context.drawImage(video, 0, 0, canvas.width, canvas.height);
               const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+              
+              // Instant UI update
               setSelfie(dataUrl);
               
               // Start upload in the background
@@ -212,7 +210,7 @@ export default function ProfileForm() {
 
   const uploadSelfie = async (dataUrl: string) => {
     setIsUploading(true);
-    toast({ title: 'Uploading Selfie...', description: 'Your new profile picture is being uploaded in the background.' });
+    toast({ title: 'Uploading Selfie...', description: 'Your new profile picture is being saved.' });
     
     try {
         const userEmail = getCurrentUser();
@@ -222,13 +220,14 @@ export default function ProfileForm() {
         await uploadString(imageRef, dataUrl, 'data_url');
         const publicSelfieUrl = await getDownloadURL(imageRef);
 
-        // Save the public URL to the profile
+        // Finalize by saving the public URL to the profile
         const currentProfile = await getProfile();
         if (currentProfile) {
             await saveProfile({ ...currentProfile, selfieDataUrl: publicSelfieUrl });
-            setProfile(prev => prev ? { ...prev, selfieDataUrl: publicSelfieUrl } : null);
         }
         
+        // Update the UI with the permanent URL
+        setSelfie(publicSelfieUrl);
         toast({ title: 'Selfie Uploaded!', description: 'Your new profile picture is saved.' });
 
     } catch (error) {
@@ -256,14 +255,19 @@ export default function ProfileForm() {
         .filter(num => /^\d{10,15}$/.test(num))
         .slice(0, 100);
 
+    // We don't save the temporary base64 selfie data to Firestore
     const profileToSave: Profile = { 
         ...(currentProfile || {}), 
         ...restOfData,
-        email: currentProfile?.email || data.email, // Ensure email is preserved
-        selfieDataUrl: currentProfile?.selfieDataUrl, // Keep existing URL, upload is separate
+        email: currentProfile?.email || data.email,
         additionalMobiles: additionalMobilesArray,
     };
     
+    if (selfie && selfie.startsWith('http')) {
+        profileToSave.selfieDataUrl = selfie;
+    }
+
+
     if (!profileToSave.role) {
         const userEmail = getCurrentUser();
         if (userEmail === 'admin@example.com') {
@@ -747,9 +751,9 @@ export default function ProfileForm() {
               )}
 
 
-              <Button type="submit" className="w-full" disabled={isSaving}>
+              <Button type="submit" className="w-full" disabled={isSaving || isUploading}>
                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Save Changes
+                {isUploading ? 'Waiting for upload...' : 'Save Changes'}
               </Button>
             </form>
           </Form>
