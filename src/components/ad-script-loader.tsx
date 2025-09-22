@@ -2,15 +2,32 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { onAdsEnabledChange } from '@/lib/storage';
+import { onAdsEnabledChange, getSetting } from '@/lib/storage';
 
 const AdScriptLoader = () => {
   const [areAdsEnabled, setAreAdsEnabled] = useState(false);
 
   useEffect(() => {
-    // Subscribe to changes in the ad setting from storage
-    const unsubscribe = onAdsEnabledChange(setAreAdsEnabled);
-    return () => unsubscribe();
+    const checkInitialStateAndSubscribe = async () => {
+      // 1. Fetch the initial state when the component mounts
+      const initialState = await getSetting('areAdsEnabled');
+      setAreAdsEnabled(initialState || false);
+
+      // 2. Subscribe to subsequent changes
+      const unsubscribe = onAdsEnabledChange(setAreAdsEnabled);
+      return unsubscribe;
+    };
+
+    const unsubscribePromise = checkInitialStateAndSubscribe();
+
+    // Cleanup function
+    return () => {
+      unsubscribePromise.then(unsubscribe => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      });
+    };
   }, []);
 
   useEffect(() => {
@@ -38,9 +55,11 @@ const AdScriptLoader = () => {
     // The cleanup function for this effect will run if the component unmounts
     // while ads are enabled, ensuring the script is removed.
     return () => {
+      // Check if ads were enabled to decide if cleanup is needed.
+      // This avoids trying to remove a script that wasn't there.
       if (areAdsEnabled) {
          const scriptToRemove = document.getElementById(scriptId);
-         if (scriptToRemove) {
+         if (scriptToRemove && scriptToRemove.parentNode === document.body) {
              document.body.removeChild(scriptToRemove);
          }
       }
