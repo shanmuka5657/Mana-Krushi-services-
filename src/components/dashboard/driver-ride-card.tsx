@@ -27,7 +27,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
     const [timeLeft, setTimeLeft] = useState('');
     const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
     const [passengersForRide, setPassengersForRide] = useState<Booking[]>([]);
-    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+    const [passengerProfiles, setPassengerProfiles] = useState<Profile[]>([]);
     const locationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
 
@@ -50,8 +50,8 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
                  // OPTIMIZED: Fetch only the profiles for the passengers on this ride.
                 const passengerEmails = confirmedPassengers.map(p => p.clientEmail).filter((email): email is string => !!email);
                 const profiles = await getAllProfiles(); // Still need all for now, but will filter
-                const passengerProfiles = profiles.filter(p => passengerEmails.includes(p.email));
-                setAllProfiles(passengerProfiles);
+                const profilesForRide = profiles.filter(p => passengerEmails.includes(p.email));
+                setPassengerProfiles(profilesForRide);
             }
         }
         fetchRideDetails();
@@ -171,13 +171,13 @@ Thank you,
 ${booking.driverName}
         `.trim();
         
-        const whatsappUrl = `https://wa.me/${booking.mobile}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/91${booking.mobile}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     };
     
     const getProfileForUser = (email?: string): Profile | undefined => {
         if (!email) return undefined;
-        return allProfiles.find(p => p.email === email);
+        return passengerProfiles.find(p => p.email === email);
     }
 
     const handleViewOnMap = (booking: Booking) => {
@@ -200,7 +200,7 @@ ${booking.driverName}
                     </div>
                 )}
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
                 <div className="font-semibold text-md text-primary">{ride.destination}</div>
                 <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
@@ -211,21 +211,44 @@ ${booking.driverName}
                         <Clock className="h-4 w-4" />
                         <span>{format(new Date(ride.departureDate), 'p')}</span>
                     </div>
-                     <button onClick={() => setIsContactDialogOpen(true)} className="flex items-center gap-2 text-left hover:text-primary transition-colors">
+                     <div className="flex items-center gap-2">
                         <Users className="h-4 w-4" />
                         <span>{passengers} passenger(s)</span>
-                    </button>
+                    </div>
                     <div className="flex items-center gap-2">
                         <Car className="h-4 w-4" />
                         <span>{ride.vehicleNumber}</span>
                     </div>
                 </div>
+                 {passengersForRide.length > 0 && (
+                    <div className="pt-2">
+                        <Label className="text-xs text-muted-foreground">Passengers on this ride:</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                            <div className="flex -space-x-2 overflow-hidden">
+                                {passengersForRide.slice(0, 5).map(passenger => {
+                                    const profile = getProfileForUser(passenger.clientEmail);
+                                    return (
+                                        <Avatar key={passenger.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-background">
+                                            <AvatarImage src={profile?.selfieDataUrl} />
+                                            <AvatarFallback>{passenger.client.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                    );
+                                })}
+                            </div>
+                            {passengersForRide.length > 5 && (
+                                <span className="text-xs font-medium text-muted-foreground">
+                                +{passengersForRide.length - 5} more
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                 <div className="grid grid-cols-2 gap-2 w-full">
-                    <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
-                        <Phone className="mr-2 h-4 w-4" />
-                        Contact
+                     <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
+                        <Users className="mr-2 h-4 w-4" />
+                        Contact Passengers
                     </Button>
                     <Button onClick={() => handleShareLocation(true)} className="w-full" variant="outline" disabled={isSharing}>
                         {isSharing ? (
@@ -263,7 +286,7 @@ ${booking.driverName}
                         <div key={passenger.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex items-center gap-3">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${passenger.client.replace(' ', '+')}&background=random`} />
+                                    <AvatarImage src={profile?.selfieDataUrl} />
                                     <AvatarFallback>{passenger.client.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
