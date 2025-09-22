@@ -49,31 +49,6 @@ export default function RootLayout({
           <meta name="theme-color" content="#1E88E5" />
       </head>
       <body>
-        <Script
-            id="ad-limiter-script"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-                __html: `
-                    (function() {
-                        try {
-                            const AD_LIMIT = 4;
-                            const storageKey = 'popunderAdCount';
-                            let adCount = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
-                            
-                            if (adCount < AD_LIMIT) {
-                                sessionStorage.setItem(storageKey, (adCount + 1).toString());
-                                var s = document.createElement('script');
-                                s.dataset.zone = '9915521';
-                                s.src = 'https://al5sm.com/tag.min.js';
-                                document.body.appendChild(s);
-                            }
-                        } catch (e) {
-                            console.error('Ad script error:', e);
-                        }
-                    })();
-                `
-            }}
-        />
         {children}
         <Toaster />
         <ConditionalFooter />
