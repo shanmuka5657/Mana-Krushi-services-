@@ -61,13 +61,21 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   const [locations, setLocations] = useState<string[]>([]);
 
   useEffect(() => {
-    const checkProfile = async () => {
+    const checkProfileAndFetchLocations = async () => {
         const profile = await getProfile();
         if (!profile || !profile.mobile || profile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         }
+
+        const allRoutes = await getRoutes(true);
+        const allLocations = new Set<string>();
+        allRoutes.forEach(route => {
+            allLocations.add(route.fromLocation);
+            allLocations.add(route.toLocation);
+        });
+        setLocations(Array.from(allLocations));
     }
-    checkProfile();
+    checkProfileAndFetchLocations();
   }, []);
   
   const form = useForm<SearchFormValues>({
