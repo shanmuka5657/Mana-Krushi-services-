@@ -1,5 +1,4 @@
 
-
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
@@ -19,7 +18,7 @@ export const signUpWithEmail = async (name: string, email: string, password: str
     
     const newReferralCode = `${name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
 
-    const finalRole = email === 'admin@example.com' ? 'admin' : role;
+    const finalRole = email === 'mana-krushi-admin@google.com' ? 'admin' : role;
 
     const newProfile: Profile = {
         name,

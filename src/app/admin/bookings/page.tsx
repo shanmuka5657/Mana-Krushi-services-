@@ -32,8 +32,10 @@ function AdminAllBookingsPage() {
         const allBookings = await getBookings(true);
         const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
         await saveBookings(updatedAllBookings);
-        updatedAllBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-        setBookings(updatedAllBookings);
+        
+        // Re-filter and sort after update to maintain consistency
+        const sortedBookings = updatedAllBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+        setBookings(sortedBookings);
     };
 
     const handleExport = () => {
@@ -68,7 +70,7 @@ function AdminAllBookingsPage() {
                     </Button>
                 </CardHeader>
            </Card>
-            <RecentBookings initialBookings={bookings} onUpdateBooking={handleUpdateBooking} />
+            <RecentBookings initialBookings={bookings} mode="all" onUpdateBooking={handleUpdateBooking} />
         </AppLayout>
     );
 }

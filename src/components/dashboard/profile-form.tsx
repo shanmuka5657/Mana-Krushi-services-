@@ -193,7 +193,7 @@ export default function ProfileForm() {
         
         const combinedValues = { ...defaultValues, ...userProfile };
 
-        if (userEmail === 'admin@example.com' && (!userProfile || !userProfile.name)) {
+        if (userEmail === 'mana-krushi-admin@google.com' && (!userProfile || !userProfile.name)) {
             combinedValues.name = 'Admin';
         }
 
@@ -226,7 +226,7 @@ export default function ProfileForm() {
 
     if (!profileToSave.role) {
         const userEmail = getCurrentUser();
-        if (userEmail === 'admin@example.com') {
+        if (userEmail === 'mana-krushi-admin@google.com') {
             profileToSave.role = 'admin';
         }
     }
