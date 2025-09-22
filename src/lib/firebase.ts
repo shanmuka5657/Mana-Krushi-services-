@@ -414,7 +414,6 @@ export const getProfileFromFirestore = async (email: string): Promise<Profile | 
             return { 
                 ...data, 
                 email: doc.id,
-                selfieDataUrl: data.selfieDataUrl,
                 planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
             } as Profile;
         }
@@ -433,7 +432,6 @@ export const getAllProfilesFromFirestore = async (): Promise<Profile[]> => {
             return {
                 ...data,
                 email: doc.id,
-                selfieDataUrl: data.selfieDataUrl,
                 planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
             } as Profile
         });
