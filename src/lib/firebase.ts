@@ -26,6 +26,7 @@ import {
     disableNetwork,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
@@ -39,7 +40,9 @@ const firebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_ENV === 'production'
 // Initialize Firebase
 let app;
 let db;
+let auth;
 let storage;
+
 
 if (typeof window !== 'undefined') {
     try {
@@ -47,6 +50,7 @@ if (typeof window !== 'undefined') {
         db = initializeFirestore(app, {
             localCache: persistentLocalCache({ tabManager: undefined }) 
         });
+        auth = getAuth(app);
         storage = getStorage(app);
     } catch(e) {
         console.error("Firebase initialization failed", e);
@@ -414,4 +418,4 @@ export const saveProfileToFirestore = async (profile: Profile) => {
     await setDoc(docRef, profileToSave, { merge: true });
 };
 
-export { storage };
+export { app, db, auth, storage };

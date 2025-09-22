@@ -5,6 +5,7 @@ import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
+import { getCurrentFirebaseUser } from './auth';
 
 
 const isBrowser = typeof window !== "undefined";
@@ -65,19 +66,18 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
 // --- Video Events ---
 export const logVideoUnmute = async (videoUrl: string) => {
     if (!isBrowser) return;
-    const userEmail = getCurrentUser();
-    const userName = getCurrentUserName();
-    const role = getCurrentUserRole();
-    
-    if (userEmail && userName && role) {
-        await addVideoEventToFirestore({
-            userEmail,
-            userName,
-            role,
-            eventType: 'unmute',
-            videoUrl,
-            // timestamp will be added by Firestore
-        } as Omit<VideoEvent, 'id' | 'timestamp'>);
+    const user = getCurrentFirebaseUser();
+    if (user && user.email) {
+        const profile = await getProfile(user.email);
+        if (profile) {
+             await addVideoEventToFirestore({
+                userEmail: profile.email,
+                userName: profile.name,
+                role: profile.role || 'passenger',
+                eventType: 'unmute',
+                videoUrl,
+            } as Omit<VideoEvent, 'id' | 'timestamp'>);
+        }
     }
 };
 
@@ -90,33 +90,29 @@ export const getVideoEvents = async (): Promise<VideoEvent[]> => {
 // --- Visits ---
 export const logVisit = async (path: string) => {
     if (!isBrowser) return;
+    const user = getCurrentFirebaseUser();
 
-    // For anonymous users, just increment the total visitor count once per session
-    if (!getCurrentUser()) {
+    if (!user || !user.email) {
         if (!sessionStorage.getItem('visitor_tracked')) {
             sessionStorage.setItem('visitor_tracked', 'true');
         }
         return;
     }
 
-    // For logged-in users, manage session-based activity tracking
-    const userEmail = getCurrentUser();
-    const userName = getCurrentUserName();
-    const role = getCurrentUserRole();
-    
-    if (!userEmail || !userName || !role) return;
+    const profile = await getProfile(user.email);
+    if (!profile) return;
+
 
     let sessionId = sessionStorage.getItem('session_id');
     const now = new Date().getTime();
 
-    // Check for session expiry (e.g., 30 minutes of inactivity)
     const lastActivity = sessionStorage.getItem('last_activity');
     if (lastActivity && now - parseInt(lastActivity, 10) > 30 * 60 * 1000) {
-        sessionId = null; // Expire session
+        sessionId = null; 
     }
 
     if (!sessionId) {
-        sessionId = `${userEmail}-${now}`;
+        sessionId = `${user.email}-${now}`;
         sessionStorage.setItem('session_id', sessionId);
     }
     
@@ -124,11 +120,10 @@ export const logVisit = async (path: string) => {
 
     await addVisitToFirestore({
         sessionId,
-        userEmail,
-        userName,
-        role,
+        userEmail: profile.email,
+        userName: profile.name,
+        role: profile.role || 'passenger',
         path,
-        // timestamp will be added by Firestore
     } as Omit<Visit, 'id' | 'timestamp'>);
 };
 
@@ -233,7 +228,8 @@ export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
 // --- Profile ---
 export const saveProfile = async (profile: Profile) => {
     if (!isBrowser) return;
-    const userEmail = profile.email || getCurrentUser(); // Use profile email if available, fallback to session
+    const user = getCurrentFirebaseUser();
+    const userEmail = profile.email || user?.email;
     if (userEmail) {
         await saveProfileToFirestore({ ...profile, email: userEmail });
     } else {
@@ -243,7 +239,8 @@ export const saveProfile = async (profile: Profile) => {
 
 export const getProfile = async (email?: string): Promise<Profile | null> => {
     if (!isBrowser) return null;
-    const userEmail = email || getCurrentUser();
+    const user = getCurrentFirebaseUser();
+    const userEmail = email || user?.email;
     if (userEmail) {
         const profile = await getProfileFromFirestore(userEmail);
         return profile;
@@ -257,44 +254,30 @@ export const getAllProfiles = async (): Promise<Profile[]> => {
     return profiles;
 }
 
-
-// --- User Session (remains in sessionStorage) ---
-export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'passenger' | 'admin') => {
-    if (!isBrowser) return;
-    try {
-        window.sessionStorage.setItem('currentUserEmail', email);
-        window.sessionStorage.setItem('currentUserName', name);
-        window.sessionStorage.setItem('currentUserRole', role);
-        window.sessionStorage.removeItem('session_id'); // Clear session on new login
-        window.sessionStorage.removeItem('last_activity');
-    } catch (error) {
-        console.error("Failed to save current user to sessionStorage", error);
-    }
-}
-
+// Deprecated functions that relied on sessionStorage, kept for temporary compatibility
 export const getCurrentUser = (): string | null => {
     if (!isBrowser) return null;
-    return window.sessionStorage.getItem('currentUserEmail');
-}
-
+    const user = getCurrentFirebaseUser();
+    return user ? user.email : null;
+};
 export const getCurrentUserName = (): string | null => {
     if (!isBrowser) return null;
-    return window.sessionStorage.getItem('currentUserName');
-}
-
-export const getCurrentUserRole = (): string | null => {
-    if (!isBrowser) return null;
-    return window.sessionStorage.getItem('currentUserRole');
-}
-
-export const clearCurrentUser = () => {
-    if (!isBrowser) return;
-    window.sessionStorage.removeItem('currentUserEmail');
-    window.sessionStorage.removeItem('currentUserName');
-    window.sessionStorage.removeItem('currentUserRole');
-    window.sessionStorage.removeItem('session_id');
-    window.sessionStorage.removeItem('last_activity');
+    const user = getCurrentFirebaseUser();
+    return user ? user.displayName : null;
 };
+export const getCurrentUserRole = (): string | null => {
+    // This is a bit of a hack, as role is not stored on the auth user.
+    // This will be replaced by a proper claim-based system later.
+     if (!isBrowser) return null;
+     return 'passenger'; // Placeholder
+};
+export const clearCurrentUser = () => {
+    // This is now handled by signOut
+};
+export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'passenger' | 'admin') => {
+   // This is now handled by signUpWithEmail
+};
+
 
 // Deprecated branding functions, kept for compatibility, will be removed later.
 export const getGlobalLogoUrl = async (): Promise<string | null> => {

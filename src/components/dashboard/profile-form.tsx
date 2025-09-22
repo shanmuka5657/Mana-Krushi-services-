@@ -86,6 +86,7 @@ export default function ProfileForm() {
   const [otpValue, setOtpValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -105,12 +106,9 @@ export default function ProfileForm() {
     },
   });
 
-  useEffect(() => {
+   useEffect(() => {
     let stream: MediaStream | null = null;
     const getCameraPermission = async () => {
-      // Only run this if there's no selfie taken
-      if (selfie) return;
-
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             console.error('Camera API not available.');
@@ -128,25 +126,27 @@ export default function ProfileForm() {
         setHasCameraPermission(false);
       }
     };
+    
+    // Request camera permission as soon as the component loads
+    // but don't block the UI for it.
     if (!selfie) {
-      getCameraPermission();
+        getCameraPermission();
     }
 
-    // Cleanup function to stop video stream
     return () => {
         stream?.getTracks().forEach(track => track.stop());
     }
   }, [selfie]);
 
+
   useEffect(() => {
     const loadProfile = async () => {
         let userProfile = await getProfile();
         
-        // Generate referral code if it doesn't exist
         if (userProfile && !userProfile.referralCode) {
             const newReferralCode = `${userProfile.name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
             userProfile.referralCode = newReferralCode;
-            await saveProfile(userProfile); // Save the updated profile
+            await saveProfile(userProfile);
         }
 
         setProfile(userProfile);
@@ -171,12 +171,10 @@ export default function ProfileForm() {
         
         const combinedValues = { ...defaultValues, ...userProfile };
 
-        // For admin, ensure the name is always 'Admin' if not set
         if (userEmail === 'admin@example.com' && (!userProfile || !userProfile.name)) {
             combinedValues.name = 'Admin';
         }
 
-        // Format additionalMobiles array back to a string for the textarea
         if (userProfile?.additionalMobiles) {
             combinedValues.additionalMobiles = userProfile.additionalMobiles.join('\n');
         }
@@ -203,12 +201,44 @@ export default function ProfileForm() {
               canvas.height = video.videoHeight * scale;
 
               context.drawImage(video, 0, 0, canvas.width, canvas.height);
-              const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG and quality 0.8
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
               setSelfie(dataUrl);
-              form.setValue('selfieDataUrl', dataUrl, { shouldDirty: true });
+              
+              // Start upload in the background
+              uploadSelfie(dataUrl);
           }
       }
   }
+
+  const uploadSelfie = async (dataUrl: string) => {
+    setIsUploading(true);
+    toast({ title: 'Uploading Selfie...', description: 'Your new profile picture is being uploaded in the background.' });
+    
+    try {
+        const userEmail = getCurrentUser();
+        if (!userEmail || !storage) throw new Error("User not logged in or storage not initialized");
+
+        const imageRef = storageRef(storage, `selfies/${userEmail}.jpg`);
+        await uploadString(imageRef, dataUrl, 'data_url');
+        const publicSelfieUrl = await getDownloadURL(imageRef);
+
+        // Save the public URL to the profile
+        const currentProfile = await getProfile();
+        if (currentProfile) {
+            await saveProfile({ ...currentProfile, selfieDataUrl: publicSelfieUrl });
+            setProfile(prev => prev ? { ...prev, selfieDataUrl: publicSelfieUrl } : null);
+        }
+        
+        toast({ title: 'Selfie Uploaded!', description: 'Your new profile picture is saved.' });
+
+    } catch (error) {
+        console.error("Error uploading selfie:", error);
+        toast({ title: 'Upload Failed', description: 'Could not upload your selfie. Please try again.', variant: 'destructive' });
+    } finally {
+        setIsUploading(false);
+    }
+  };
+
 
   const handleRetakeSelfie = () => {
     setSelfie(null);
@@ -216,48 +246,24 @@ export default function ProfileForm() {
   };
 
   async function onSubmit(data: ProfileFormValues) {
-    setIsUploading(true);
+    setIsSaving(true);
     const currentProfile = await getProfile();
-    const { additionalMobiles, selfieDataUrl, ...restOfData } = data;
-    
-    let publicSelfieUrl = currentProfile?.selfieDataUrl || '';
-
-    // Check if a new selfie was taken (it will be a base64 data URL)
-    if (selfieDataUrl && selfieDataUrl.startsWith('data:image')) {
-        toast({ title: 'Uploading Selfie...', description: 'Please wait while your new profile picture is uploaded.' });
-        try {
-            const userEmail = getCurrentUser();
-            if (!userEmail) throw new Error("User not logged in");
-            
-            const imageRef = storageRef(storage, `selfies/${userEmail}.jpg`);
-            await uploadString(imageRef, selfieDataUrl, 'data_url');
-            publicSelfieUrl = await getDownloadURL(imageRef);
-            
-            toast({ title: 'Selfie Uploaded!', description: 'Your new profile picture is saved.' });
-        } catch (error) {
-            console.error("Error uploading selfie:", error);
-            toast({ title: 'Upload Failed', description: 'Could not upload your selfie. Please try again.', variant: 'destructive' });
-            setIsUploading(false);
-            return;
-        }
-    }
-
+    const { selfieDataUrl, additionalMobiles, ...restOfData } = data;
 
     const additionalMobilesArray = additionalMobiles
         ?.split('\n')
         .map(num => num.trim())
-        .filter(num => /^\d{10,15}$/.test(num)) // Basic validation for phone numbers
-        .slice(0, 100); // Limit to 100 numbers
-
+        .filter(num => /^\d{10,15}$/.test(num))
+        .slice(0, 100);
 
     const profileToSave: Profile = { 
-        ...currentProfile, 
+        ...(currentProfile || {}), 
         ...restOfData,
-        selfieDataUrl: publicSelfieUrl, // Save the public URL
+        email: currentProfile?.email || data.email, // Ensure email is preserved
+        selfieDataUrl: currentProfile?.selfieDataUrl, // Keep existing URL, upload is separate
         additionalMobiles: additionalMobilesArray,
     };
     
-    // Add role if it's missing (especially for admin's first save)
     if (!profileToSave.role) {
         const userEmail = getCurrentUser();
         if (userEmail === 'admin@example.com') {
@@ -265,22 +271,26 @@ export default function ProfileForm() {
         }
     }
 
-    await saveProfile(profileToSave);
-    
-    // Update local state to reflect changes immediately
-    setProfile(profileToSave);
-    setIsUploading(false);
+    try {
+        await saveProfile(profileToSave);
+        setProfile(profileToSave);
 
-    toast({
-      title: "Profile Updated!",
-      description: "Your profile has been successfully updated.",
-    });
+        toast({
+          title: "Profile Updated!",
+          description: "Your profile information has been saved.",
+        });
 
-    const redirectUrl = searchParams.get('redirect');
-    if (redirectUrl) {
-      router.push(redirectUrl);
-    } else if (profileToSave.role === 'owner' && !profileToSave.planExpiryDate) {
-      setShowPlanPrompt(true);
+        const redirectUrl = searchParams.get('redirect');
+        if (redirectUrl) {
+          router.push(redirectUrl);
+        } else if (profileToSave.role === 'owner' && !profileToSave.planExpiryDate) {
+          setShowPlanPrompt(true);
+        }
+    } catch(error) {
+        console.error("Error saving profile:", error);
+        toast({ title: "Save Failed", description: "Could not save your profile. Please try again.", variant: 'destructive' });
+    } finally {
+        setIsSaving(false);
     }
   }
 
@@ -295,7 +305,6 @@ export default function ProfileForm() {
       form.setError('mobile', { message: 'Please enter a valid 10-digit mobile number to verify.' });
       return;
     }
-    // In a real app, this would trigger an API call to send an OTP
     toast({
       title: 'OTP Sent (Simulated)',
       description: 'An OTP has been sent to your mobile. Please enter 123456 to verify.',
@@ -304,7 +313,6 @@ export default function ProfileForm() {
   };
 
   const handleOtpSubmit = async () => {
-    // In a real app, you'd verify the OTP against your backend
     if (otpValue === '123456') {
       form.setValue('mobileVerified', true);
       const updatedProfile: Profile = { ...profile!, mobileVerified: true };
@@ -331,7 +339,7 @@ export default function ProfileForm() {
     const newExpiryDate = addMonths(new Date(), 3);
     const updatedProfile: Profile = { ...profile!, planExpiryDate: newExpiryDate };
     await saveProfile(updatedProfile);
-    setProfile(updatedProfile); // Update state to show new expiry date
+    setProfile(updatedProfile);
     toast({
         title: "Plan Activated!",
         description: `Your owner plan is now active until ${format(newExpiryDate, 'PPP')}.`,
@@ -514,13 +522,20 @@ export default function ProfileForm() {
                     )}
                 </div>
                  <div className="w-full sm:w-1/2 flex flex-col items-center gap-4">
-                    <Avatar className="w-24 h-24 text-lg">
-                        <AvatarImage src={selfie || profile?.selfieDataUrl} alt={profile?.name} />
-                        <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                        <Avatar className="w-24 h-24 text-lg">
+                            <AvatarImage src={selfie || profile?.selfieDataUrl} alt={profile?.name} />
+                            <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        {isUploading && (
+                            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                                <Loader2 className="h-8 w-8 text-white animate-spin" />
+                            </div>
+                        )}
+                    </div>
                      <Button 
                         onClick={selfie ? handleRetakeSelfie : handleTakeSelfie}
-                        disabled={!hasCameraPermission}
+                        disabled={!hasCameraPermission || isUploading}
                     >
                         <Camera className="mr-2 h-4 w-4" />
                         {selfie ? 'Retake Selfie' : 'Take Selfie'}
@@ -732,8 +747,8 @@ export default function ProfileForm() {
               )}
 
 
-              <Button type="submit" className="w-full" disabled={isUploading}>
-                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              <Button type="submit" className="w-full" disabled={isSaving}>
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save Changes
               </Button>
             </form>

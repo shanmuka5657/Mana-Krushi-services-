@@ -19,20 +19,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { saveCurrentUser, getProfile } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 import { Download, Loader2, QrCode } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import QRCode from 'qrcode.react';
 import placeholderImages from '@/lib/placeholder-images.json';
+import { signInWithEmail } from '@/lib/auth';
+import { getProfile } from '@/lib/storage';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-// Define the interface for the event, as it's not standard in all TS lib versions.
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: Array<string>;
   readonly userChoice: Promise<{
@@ -54,7 +54,6 @@ export function LoginForm() {
 
 
   React.useEffect(() => {
-    // This will only run on the client
     setAppUrl(window.location.origin);
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
@@ -96,48 +95,30 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Hardcoded admin check
-    if (values.email === 'admin@example.com') {
-      if (values.password === 'admin123') {
-        saveCurrentUser(values.email, 'Admin', 'admin');
-        router.push(`/admin/dashboard`);
-      } else {
-        form.setError('password', { message: 'Invalid admin password.' });
-      }
-      return;
+    try {
+      await signInWithEmail(values.email, values.password);
+      
+      const userProfile = await getProfile(values.email);
+      const role = userProfile?.role || 'passenger';
+      
+      const redirectUrl = searchParams.get('redirect');
+      router.push(redirectUrl || `/dashboard?role=${role}`);
+
+    } catch (error: any) {
+        let errorMessage = "An unexpected error occurred. Please try again.";
+        if (error.message.includes('auth/invalid-credential') || error.message.includes('auth/user-not-found') || error.message.includes('auth/wrong-password')) {
+            errorMessage = "Invalid email or password. Please check your credentials or sign up.";
+        } else if (error.message.includes('This account has been deleted')) {
+            errorMessage = "This account has been deleted.";
+        }
+        
+        toast({
+            title: "Login Failed",
+            description: errorMessage,
+            variant: "destructive",
+        });
+        form.setError('root', { message: errorMessage });
     }
-
-    // Fetch profile for regular users
-    const userProfile = await getProfile(values.email);
-
-    if (!userProfile || !userProfile.role) {
-      toast({
-        title: "Login Failed",
-        description: "No account found with this email. Please sign up.",
-        variant: "destructive",
-      });
-      form.setError('email', { message: 'No account found with this email.' });
-      return;
-    }
-    
-    if (userProfile.status === 'deleted') {
-       toast({
-        title: "Account Deleted",
-        description: "This account has been deleted.",
-        variant: "destructive",
-      });
-      form.setError('email', { message: 'This account has been deleted.' });
-      return;
-    }
-
-    // In a real app, you would validate the password against the backend/database.
-    // Here we assume the password is correct if the profile exists.
-
-    const name = userProfile.name || values.email.split('@')[0];
-    saveCurrentUser(userProfile.email, name, userProfile.role);
-    
-    const redirectUrl = searchParams.get('redirect');
-    router.push(redirectUrl || `/dashboard?role=${userProfile.role}`);
   }
 
   return (
@@ -186,7 +167,10 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              {form.formState.errors.root && (
+                <p className="text-sm font-medium text-destructive">{form.formState.errors.root.message}</p>
+              )}
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : 'Login'}
               </Button>
             </form>
@@ -242,5 +226,3 @@ export function LoginForm() {
     </>
   );
 }
-
-    

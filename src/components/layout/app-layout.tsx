@@ -68,11 +68,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { clearCurrentUser, getCurrentUserName, getCurrentUser, getCurrentUserRole, getProfile, onGlobalLogoUrlChange } from "@/lib/storage";
+import { onGlobalLogoUrlChange, getProfile, onAdsEnabledChange } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import type { Profile } from "@/lib/types";
 import placeholderImages from '@/lib/placeholder-images.json';
+import { signOut, onAuthStateChanged } from '@/lib/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
@@ -91,6 +93,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
   const [profile, setProfile] = React.useState<Profile | null>(null);
+  const [authUser, setAuthUser] = React.useState<FirebaseUser | null>(null);
   const [userName, setUserName] = React.useState("User");
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
@@ -137,38 +140,43 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setIsMounted(true);
-    const loadData = async () => {
-      const name = getCurrentUserName();
-      const email = getCurrentUser();
-      const roleFromSession = getCurrentUserRole() || 'passenger';
-      setRole(roleFromSession);
-      const userProfile = await getProfile();
-      setProfile(userProfile);
 
-      if (roleFromSession === 'admin') {
-        setUserName('Admin');
-        setUserInitial('A');
-        setUserRole('Administrator');
-      } else {
-        if (name) {
-          setUserName(name);
-          setUserInitial(name.charAt(0).toUpperCase());
-        } else if (email) {
-          const fallbackName = email.split('@')[0];
-          setUserName(fallbackName);
-          setUserInitial(fallbackName.charAt(0).toUpperCase());
+    const unsubAuth = onAuthStateChanged(async (user) => {
+        setAuthUser(user);
+        if (user) {
+            const userProfile = await getProfile(user.email!);
+            setProfile(userProfile);
+            const roleFromProfile = userProfile?.role || 'passenger';
+            setRole(roleFromProfile);
+
+            if (roleFromProfile === 'admin') {
+                setUserName('Admin');
+                setUserInitial('A');
+                setUserRole('Administrator');
+            } else {
+                const name = userProfile?.name || user.displayName || user.email?.split('@')[0] || 'User';
+                setUserName(name);
+                setUserInitial(name.charAt(0).toUpperCase());
+                setUserRole(roleFromProfile === 'owner' ? 'Owner' : 'Passenger');
+            }
+        } else {
+            // If user is not authenticated, redirect to login page
+            // Allow access to public pages like /disclaimer
+            if (!['/disclaimer'].includes(pathname)) {
+                 router.push('/login');
+            }
         }
-        setUserRole(roleFromSession === 'owner' ? 'Owner' : 'Passenger');
-      }
-    };
-    loadData();
+    });
 
-    const unsub = onGlobalLogoUrlChange((url) => {
+    const unsubLogo = onGlobalLogoUrlChange((url) => {
         if(url) setLogoUrl(url);
     });
 
-    return () => unsub();
-  }, []);
+    return () => { 
+        unsubAuth();
+        unsubLogo();
+    };
+  }, [router, pathname]);
 
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
@@ -243,8 +251,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const navItems = getNavItems();
 
 
-  const handleLogout = () => {
-    clearCurrentUser();
+  const handleLogout = async () => {
+    await signOut();
     router.push('/login');
   };
   

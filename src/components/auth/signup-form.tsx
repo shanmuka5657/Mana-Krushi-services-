@@ -28,7 +28,6 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -37,9 +36,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { saveCurrentUser, saveProfile, getProfile } from '@/lib/storage';
+import { signUpWithEmail } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
-import type { Profile } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
+
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -56,6 +57,8 @@ export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { defaultLogo } = placeholderImages;
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const refCodeFromUrl = searchParams.get('ref');
 
@@ -83,27 +86,29 @@ export function SignupForm() {
 
   async function handleConfirmation() {
     if (!formData) return;
-    
-    // Generate a unique referral code for the new user
-    const newReferralCode = `${formData.name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
-
-    saveCurrentUser(formData.email, formData.name, formData.role);
-
-    // Save the initial profile.
-    const newProfile: Profile = {
-      name: formData.name,
-      email: formData.email,
-      mobile: '0000000000', // Dummy number to be updated in profile settings
-      role: formData.role,
-      referralCode: newReferralCode,
-      referredBy: formData.referralCode, // Store the code they used
-    };
-
-    await saveProfile(newProfile);
-    
+    setIsSubmitting(true);
     setShowConfirmation(false);
-    // Redirect to the dashboard after signup and "login"
-    router.push(`/dashboard?role=${formData.role}`);
+
+    try {
+        await signUpWithEmail(formData.name, formData.email, formData.password, formData.role, formData.referralCode);
+        toast({
+            title: "Account Created!",
+            description: "You have been successfully signed up.",
+        });
+        router.push(`/dashboard?role=${formData.role}`);
+    } catch (error: any) {
+        let errorMessage = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = "This email is already in use. Please log in instead.";
+        }
+        toast({
+            title: "Sign-up Failed",
+            description: errorMessage,
+            variant: "destructive",
+        });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -203,8 +208,8 @@ export function SignupForm() {
                 )}
               />
 
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                 {isSubmitting ? <Loader2 className="animate-spin" /> : 'Create Account'}
               </Button>
             </form>
           </Form>
