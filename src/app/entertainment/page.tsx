@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import type { MovieSite } from '@/lib/types';
-import { getCurrentUserRole, saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, onAdsEnabledChange, saveAdsEnabled, getSetting } from '@/lib/storage';
+import type { MovieSite, Profile } from '@/lib/types';
+import { saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, onAdsEnabledChange, saveAdsEnabled, getSetting, getProfile } from '@/lib/storage';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
@@ -54,10 +54,11 @@ function EntertainmentPageContent() {
     const [areAdsEnabled, setAreAdsEnabled] = useState(false);
 
     useEffect(() => {
-        const role = getCurrentUserRole();
-        setUserRole(role);
-        
-        const fetchAdminSettings = async () => {
+        const fetchUserDataAndSettings = async () => {
+            const userProfile = await getProfile();
+            const role = userProfile?.role;
+            setUserRole(role || 'passenger');
+            
             if (role === 'admin') {
                 const [currentUrl, currentVisibility, currentAdsEnabled] = await Promise.all([
                     getGlobalVideoUrl(),
@@ -70,7 +71,7 @@ function EntertainmentPageContent() {
             }
         };
 
-        fetchAdminSettings();
+        fetchUserDataAndSettings();
         
         const unsub = onAdsEnabledChange(setAreAdsEnabled);
         return () => unsub();
@@ -240,7 +241,7 @@ function EntertainmentPageContent() {
                                         rel="noopener noreferrer"
                                         className="group"
                                     >
-                                        <Card className="h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 bg-background">
+                                        <Card className="h-full flex flex-col items-center justify-center p-6 text-center transition-all hover:shadow-lg hover-translate-y-1 bg-background">
                                             <div className="mb-4">
                                                 <Tv className="h-10 w-10 text-primary" />
                                             </div>
