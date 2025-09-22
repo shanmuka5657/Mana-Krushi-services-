@@ -67,13 +67,20 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
           setShowProfilePrompt(true);
         }
 
-        const allRoutes = await getRoutes(true);
-        const allLocations = new Set<string>();
-        allRoutes.forEach(route => {
-            allLocations.add(route.fromLocation);
-            allLocations.add(route.toLocation);
-        });
-        setLocations(Array.from(allLocations));
+        const cachedLocations = sessionStorage.getItem('routeLocations');
+        if (cachedLocations) {
+            setLocations(JSON.parse(cachedLocations));
+        } else {
+            const allRoutes = await getRoutes(true);
+            const allLocations = new Set<string>();
+            allRoutes.forEach(route => {
+                allLocations.add(route.fromLocation);
+                allLocations.add(route.toLocation);
+            });
+            const locationsArray = Array.from(allLocations);
+            setLocations(locationsArray);
+            sessionStorage.setItem('routeLocations', JSON.stringify(locationsArray));
+        }
     }
     checkProfileAndFetchLocations();
   }, []);

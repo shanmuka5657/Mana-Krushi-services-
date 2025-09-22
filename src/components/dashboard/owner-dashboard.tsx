@@ -194,14 +194,21 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             onSwitchTab('profile');
         }
 
-        // Fetch Locations
-        const allRoutes = await getRoutes(true);
-        const allLocations = new Set<string>();
-        allRoutes.forEach(route => {
-            allLocations.add(route.fromLocation);
-            allLocations.add(route.toLocation);
-        });
-        setLocations(Array.from(allLocations));
+        // Fetch Locations (with caching)
+        const cachedLocations = sessionStorage.getItem('routeLocations');
+        if (cachedLocations) {
+            setLocations(JSON.parse(cachedLocations));
+        } else {
+            const allRoutes = await getRoutes(true);
+            const allLocations = new Set<string>();
+            allRoutes.forEach(route => {
+                allLocations.add(route.fromLocation);
+                allLocations.add(route.toLocation);
+            });
+            const locationsArray = Array.from(allLocations);
+            setLocations(locationsArray);
+            sessionStorage.setItem('routeLocations', JSON.stringify(locationsArray));
+        }
     }
     checkProfileAndFetchLocations();
   }, [onSwitchTab, toast]);
