@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,7 +28,7 @@ import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Ca
 import { format, isSameDay, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getCurrentUserName, getProfile } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getCurrentUserName, getProfile, onBookingsUpdate } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -52,9 +53,10 @@ const getStatusBadgeClass = (status: Booking["status"]) => {
 interface RecentBookingsProps {
   initialBookings: Booking[];
   mode: "upcoming" | "past" | "all";
+  onUpdateBooking?: (updatedBooking: Booking) => Promise<void>;
 }
 
-const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
+const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookingProp }: RecentBookingsProps) => {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<{route: Route | undefined, clientProfile: Profile | undefined, driverProfile: Profile | undefined}>({ route: undefined, clientProfile: undefined, driverProfile: undefined });
@@ -69,36 +71,60 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
 
   useEffect(() => {
-    setBookings(initialBookings);
-    setIsLoading(false);
-  }, [initialBookings]);
+    const role = getCurrentUserRole();
+    setUserRole(role);
+
+    const handleRealtimeUpdates = (allUserBookings: Booking[]) => {
+        let filteredBookings;
+        const today = startOfDay(new Date());
+
+        if (dateFilter) {
+            filteredBookings = allUserBookings.filter(b => isSameDay(new Date(b.departureDate), dateFilter));
+        } else {
+            if (mode === 'upcoming') {
+                filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) >= today && b.status !== 'Cancelled');
+            } else if (mode === 'past') {
+                filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) < today || b.status === 'Cancelled');
+            } else { // 'all'
+                filteredBookings = allUserBookings;
+            }
+        }
+        
+        filteredBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+        setBookings(filteredBookings);
+        setIsLoading(false);
+    }
+    
+    // Set initial state and then subscribe for updates
+    handleRealtimeUpdates(initialBookings);
+
+    const currentUserEmail = getCurrentUser();
+    const isAdmin = role === 'admin';
+    const searchParams = isAdmin ? undefined : { userEmail: currentUserEmail as string, role: role as 'passenger' | 'owner' };
+    
+    const unsubscribe = onBookingsUpdate(handleRealtimeUpdates, searchParams);
+
+    return () => unsubscribe();
+
+  }, [initialBookings, mode, dateFilter]);
+
+
 
   const handleUpdateBooking = async (updatedBooking: Booking) => {
+    // If a prop is passed, use it (for admin page to update all bookings)
+    if (onUpdateBookingProp) {
+        await onUpdateBookingProp(updatedBooking);
+        return;
+    }
+
+    // Otherwise, perform the standard update
     const allBookings = await getBookings(true);
     const updatedAllBookings = allBookings.map(b => b.id === updatedBooking.id ? updatedBooking : b);
     await saveBookings(updatedAllBookings);
-    
-    // Update local state if the booking still matches the filter
-    if (dateFilter) {
-        if (isSameDay(new Date(updatedBooking.departureDate), dateFilter)) {
-             setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
-        } else {
-            setBookings(prev => prev.filter(b => b.id !== updatedBooking.id));
-        }
-    } else {
-        const today = startOfDay(new Date());
-        const departureDate = new Date(updatedBooking.departureDate);
-        if (mode === 'upcoming' && departureDate >= today && updatedBooking.status !== 'Cancelled') {
-             setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b).sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()));
-        } else if (mode === 'past' && departureDate < today) {
-            setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b).sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime()));
-        }
-         else {
-            setBookings(prev => prev.filter(b => b.id !== updatedBooking.id));
-        }
-    }
   };
 
 
@@ -187,8 +213,11 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   }
   
   const maskPhoneNumber = (phone: string | undefined): string => {
-      if (!phone || phone.length < 10) return 'N/A';
-      return `${phone.substring(0, 5)}xxxxx`;
+      if (!userRole || userRole !== 'admin') {
+          if (!phone || phone.length < 10) return 'N/A';
+          return `${phone.substring(0, 5)}xxxxx`;
+      }
+      return phone || 'N/A';
   };
   
   const handleSearch = async () => {
@@ -200,10 +229,14 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
     const role = getCurrentUserRole();
     const currentUserEmail = getCurrentUser();
 
-    const userBookings = await getBookings(false, { date: format(dateFilter, 'yyyy-MM-dd'), userEmail: currentUserEmail as string, role: role as any });
+    // This search is now handled by the useEffect filter. 
+    // We just need to trigger a re-evaluation by setting the state.
+    // The actual fetching logic is now inside the useEffect hook.
+    // The state update will cause the useEffect to run with the new dateFilter.
+    setDateFilter(dateFilter);
     
-    setBookings(userBookings.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()));
-    setIsSearching(false);
+    // Simulate search time for user feedback
+    setTimeout(() => setIsSearching(false), 500);
   };
   
   const getPageInfo = () => {
@@ -216,14 +249,19 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
   };
   
   const { title, description, defaultMessage } = getPageInfo();
+  
+  const shouldShowHeader = mode !== 'all';
+
 
   return (
     <>
     <Card className="shadow-sm mt-6">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
+      {shouldShowHeader && (
+        <CardHeader>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+        </CardHeader>
+      )}
       <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -244,18 +282,15 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                   mode="single"
                   selected={dateFilter}
                   onSelect={(date) => {
-                      setDateFilter(date);
+                      setDateFilter(date as Date);
                       setIsCalendarOpen(false);
+                      setIsSearching(true);
                   }}
                 />
               </PopoverContent>
             </Popover>
-            <Button onClick={handleSearch} disabled={isSearching}>
-                {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />} 
-                Search
-            </Button>
              {dateFilter && (
-                 <Button variant="ghost" onClick={() => { setDateFilter(undefined); setBookings(initialBookings); }}>Clear</Button>
+                 <Button variant="ghost" onClick={() => { setDateFilter(undefined); setIsSearching(true); }}>Clear</Button>
             )}
         </div>
           <div className="w-full overflow-x-auto">
@@ -402,7 +437,7 @@ const RecentBookings = ({ initialBookings, mode }: RecentBookingsProps) => {
                                     <p className="font-medium">{maskPhoneNumber(selectedBooking.driverMobile)}</p>
                                 </div>
                             </div>
-                            {selectedBooking.driverMobile && (
+                            {selectedBooking.driverMobile && userRole === 'admin' && (
                                 <a href={`tel:${selectedBooking.driverMobile}`}>
                                     <Button variant="outline">
                                         <Phone className="mr-2 h-4 w-4" />

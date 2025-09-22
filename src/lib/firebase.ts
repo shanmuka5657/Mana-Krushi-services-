@@ -208,6 +208,39 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
     }
 };
 
+export const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) => void, searchParams?: { userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }) => {
+    if (!bookingsCollection) return () => {};
+
+    let q = query(bookingsCollection, orderBy("departureDate", "desc"));
+    
+    // Apply user-specific filters if provided
+    if (searchParams?.userEmail && searchParams?.role) {
+        if (searchParams.role === 'passenger') {
+            q = query(q, where("clientEmail", "==", searchParams.userEmail));
+        } else if (searchParams.role === 'owner') {
+            q = query(q, where("driverEmail", "==", searchParams.userEmail));
+        }
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const bookings = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        });
+        callback(bookings);
+    }, (error) => {
+        console.error("Error listening to bookings updates:", error);
+    });
+
+    return unsubscribe;
+};
+
+
 export const saveBookingsToFirestore = async (bookings: Booking[]) => {
     if (!bookingsCollection || !db) return;
     const batch = writeBatch(db);
@@ -381,6 +414,7 @@ export const getProfileFromFirestore = async (email: string): Promise<Profile | 
             return { 
                 ...data, 
                 email: doc.id,
+                selfieDataUrl: data.selfieDataUrl,
                 planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
             } as Profile;
         }
@@ -399,6 +433,7 @@ export const getAllProfilesFromFirestore = async (): Promise<Profile[]> => {
             return {
                 ...data,
                 email: doc.id,
+                selfieDataUrl: data.selfieDataUrl,
                 planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
             } as Profile
         });
