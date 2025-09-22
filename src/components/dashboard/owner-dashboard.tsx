@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, Sparkles, Star, X } from "lucide-react";
-import { format, addMonths } from "date-fns";
+import { format, addMonths, parse } from "date-fns";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -251,7 +251,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
     
-    // Check for daily route limit
+    // Check for daily route limit & time overlaps
     const travelDateString = format(data.travelDate, 'yyyy-MM-dd');
     const existingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
 
@@ -262,6 +262,25 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             variant: "destructive"
         });
         return;
+    }
+
+    // Time conflict check
+    const today = new Date(travelDateString);
+    const newStart = parse(data.departureTime, 'HH:mm', today).getTime();
+    const newEnd = parse(data.arrivalTime, 'HH:mm', today).getTime();
+    
+    for (const existingRoute of existingRoutesToday) {
+        const existingStart = parse(existingRoute.departureTime, 'HH:mm', today).getTime();
+        const existingEnd = parse(existingRoute.arrivalTime, 'HH:mm', today).getTime();
+
+        if (newStart < existingEnd && newEnd > existingStart) {
+             toast({
+                title: "Time Conflict",
+                description: `This route from ${data.departureTime} to ${data.arrivalTime} overlaps with your existing ride from ${existingRoute.departureTime} to ${existingRoute.arrivalTime}.`,
+                variant: "destructive"
+            });
+            return;
+        }
     }
 
     const dataWithVehicleInfo = {
