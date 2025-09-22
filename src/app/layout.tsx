@@ -20,13 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const [areAdsEnabled, setAreAdsEnabled] = React.useState(false);
-
-  React.useEffect(() => {
-    const unsub = onAdsEnabledChange(setAreAdsEnabled);
-    return () => unsub();
-  }, []);
-
+  
   React.useEffect(() => {
     logVisit(pathname);
 
