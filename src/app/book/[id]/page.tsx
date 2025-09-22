@@ -298,7 +298,7 @@ Thank you,
 ${newlyBooked.client}
     `.trim().replace(/^\s+/gm, '');
     
-    const whatsappUrl = `https://wa.me/${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/91${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     router.push('/games');
   }
@@ -505,14 +505,14 @@ ${newlyBooked.client}
           <AlertDialogHeader>
             <AlertDialogTitle>Booking Successful!</AlertDialogTitle>
             <AlertDialogDescription>
-              Your ride is confirmed. You can now notify the driver.
+              Your ride is confirmed. You can now notify the driver via WhatsApp.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
              <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
             <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
                 <MessageSquare className="mr-2 h-4 w-4" />
-                Notify Driver via WhatsApp
+                Notify Driver
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
