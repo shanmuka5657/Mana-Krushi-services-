@@ -117,7 +117,6 @@ export function LoginForm() {
             description: errorMessage,
             variant: "destructive",
         });
-        form.setError('root', { message: errorMessage });
     }
   }
 
@@ -167,9 +166,6 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
-              {form.formState.errors.root && (
-                <p className="text-sm font-medium text-destructive">{form.formState.errors.root.message}</p>
-              )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : 'Login'}
               </Button>
