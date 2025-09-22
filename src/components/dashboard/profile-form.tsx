@@ -9,7 +9,6 @@ import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, 
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
-import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 import { useRouter, useSearchParams } from 'next/navigation';
 
 
@@ -43,7 +42,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { storage } from "@/lib/firebase";
 
 
 const profileFormSchema = z.object({
@@ -85,7 +83,6 @@ export default function ProfileForm() {
   const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
   const [otpValue, setOtpValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<ProfileFormValues>({
@@ -178,7 +175,7 @@ export default function ProfileForm() {
         form.reset(combinedValues);
 
         // Load selfie from local storage first for instant feel, then from profile
-        const localSelfie = localStorage.getItem(`selfie_${userEmail}`);
+        const localSelfie = userEmail ? localStorage.getItem(`selfie_${userEmail}`) : null;
         if(localSelfie) {
             setSelfie(localSelfie);
         } else if (userProfile?.selfieDataUrl) {
@@ -205,47 +202,15 @@ export default function ProfileForm() {
               
               // Instant UI update & save to local storage
               setSelfie(dataUrl);
+              form.setValue('selfieDataUrl', dataUrl);
               const userEmail = getCurrentUser();
               if (userEmail) {
                 localStorage.setItem(`selfie_${userEmail}`, dataUrl);
               }
-              
-              // Start upload in the background
-              uploadSelfie(dataUrl);
+              toast({ title: 'Selfie Captured!', description: 'Your new profile picture is ready to be saved.' });
           }
       }
   }
-
-  const uploadSelfie = async (dataUrl: string) => {
-    setIsUploading(true);
-    
-    try {
-        const userEmail = getCurrentUser();
-        if (!userEmail || !storage) throw new Error("User not logged in or storage not initialized");
-
-        const imageRef = storageRef(storage, `selfies/${userEmail}.jpg`);
-        await uploadString(imageRef, dataUrl, 'data_url');
-        const publicSelfieUrl = await getDownloadURL(imageRef);
-
-        // Finalize by saving the public URL to the profile
-        const currentProfile = await getProfile();
-        if (currentProfile) {
-            await saveProfile({ ...currentProfile, selfieDataUrl: publicSelfieUrl });
-        }
-        
-        // Update the UI with the permanent URL and clear local storage
-        setSelfie(publicSelfieUrl);
-        localStorage.removeItem(`selfie_${userEmail}`);
-        toast({ title: 'Selfie Uploaded!', description: 'Your new profile picture is saved.' });
-
-    } catch (error) {
-        console.error("Error uploading selfie:", error);
-        toast({ title: 'Upload Failed', description: 'Could not upload your selfie. Please try again.', variant: 'destructive' });
-    } finally {
-        setIsUploading(false);
-    }
-  };
-
 
   const handleRetakeSelfie = () => {
     setSelfie(null);
@@ -259,7 +224,7 @@ export default function ProfileForm() {
   async function onSubmit(data: ProfileFormValues) {
     setIsSaving(true);
     const currentProfile = await getProfile();
-    const { selfieDataUrl, additionalMobiles, ...restOfData } = data;
+    const { additionalMobiles, ...restOfData } = data;
 
     const additionalMobilesArray = additionalMobiles
         ?.split('\n')
@@ -274,13 +239,12 @@ export default function ProfileForm() {
         additionalMobiles: additionalMobilesArray,
     };
     
-    // Only save the selfie URL if it's a permanent http URL, not a local data URL
-    if (selfie && selfie.startsWith('http')) {
-        profileToSave.selfieDataUrl = selfie;
-    } else if (!selfie) { // If selfie was removed
+    // The selfie data URL from the form is now the source of truth
+    if (data.selfieDataUrl) {
+        profileToSave.selfieDataUrl = data.selfieDataUrl;
+    } else {
         profileToSave.selfieDataUrl = '';
     }
-
 
     if (!profileToSave.role) {
         const userEmail = getCurrentUser();
@@ -545,15 +509,10 @@ export default function ProfileForm() {
                             <AvatarImage src={selfie || profile?.selfieDataUrl} alt={profile?.name} />
                             <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        {isUploading && (
-                            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                                <Loader2 className="h-8 w-8 text-white animate-spin" />
-                            </div>
-                        )}
                     </div>
                      <Button 
                         onClick={selfie ? handleRetakeSelfie : handleTakeSelfie}
-                        disabled={!hasCameraPermission || isUploading}
+                        disabled={!hasCameraPermission}
                     >
                         <Camera className="mr-2 h-4 w-4" />
                         {selfie ? 'Retake Selfie' : 'Take Selfie'}
@@ -765,9 +724,9 @@ export default function ProfileForm() {
               )}
 
 
-              <Button type="submit" className="w-full" disabled={isSaving || isUploading}>
+              <Button type="submit" className="w-full" disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isUploading ? 'Waiting for upload...' : 'Save Changes'}
+                Save Changes
               </Button>
             </form>
           </Form>
@@ -776,7 +735,3 @@ export default function ProfileForm() {
     </div>
   );
 }
-
-    
-
-    
