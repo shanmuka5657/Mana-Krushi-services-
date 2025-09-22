@@ -234,7 +234,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }, [form]);
 
   async function onSubmit(data: OwnerFormValues) {
-    const userProfile = await getProfile();
+    const ownerEmail = getCurrentUser();
+    if(!ownerEmail) {
+        toast({ title: "Error", description: "Could not identify current user. Please log in again.", variant: "destructive" });
+        return;
+    }
+
+    const userProfile = await getProfile(ownerEmail);
     if (!userProfile?.planExpiryDate) {
         toast({
             title: "Owner Plan Required",
@@ -245,9 +251,16 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
     
-    const ownerEmail = getCurrentUser();
-    if(!ownerEmail) {
-        toast({ title: "Error", description: "Could not identify current user. Please log in again.", variant: "destructive" });
+    // Check for daily route limit
+    const travelDateString = format(data.travelDate, 'yyyy-MM-dd');
+    const existingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
+
+    if (existingRoutesToday.length >= 2) {
+        toast({
+            title: "Daily Limit Reached",
+            description: "You can only add a maximum of 2 routes per day.",
+            variant: "destructive"
+        });
         return;
     }
 
