@@ -1,8 +1,8 @@
 
 
-import type { Booking, Route, Profile, VideoPlayerState, Visit, VideoEvent } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, addVideoEventToFirestore, getVideoEventsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
@@ -62,30 +62,6 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
     };
 };
 
-
-// --- Video Events ---
-export const logVideoUnmute = async (videoUrl: string) => {
-    if (!isBrowser) return;
-    const user = getCurrentFirebaseUser();
-    if (user && user.email) {
-        const profile = await getProfile(user.email);
-        if (profile) {
-             await addVideoEventToFirestore({
-                userEmail: profile.email,
-                userName: profile.name,
-                role: profile.role || 'passenger',
-                eventType: 'unmute',
-                videoUrl,
-            } as Omit<VideoEvent, 'id' | 'timestamp'>);
-        }
-    }
-};
-
-export const getVideoEvents = async (): Promise<VideoEvent[]> => {
-    if (!isBrowser) return [];
-    const events = await getVideoEventsFromFirestore();
-    return events;
-}
 
 // --- Visits ---
 export const logVisit = async (path: string) => {

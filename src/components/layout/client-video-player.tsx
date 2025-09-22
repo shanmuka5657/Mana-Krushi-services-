@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import YouTube, { type YouTubePlayer } from 'react-youtube';
 import Image from 'next/image';
-import { onGlobalVideoUrlChange, logVideoUnmute, onGlobalVideoVisibilityChange } from '@/lib/storage';
+import { onGlobalVideoUrlChange, onGlobalVideoVisibilityChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
 import { Volume2, VolumeX, X, PlayCircle, ThumbsUp, Share2, EyeOff, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -73,9 +73,6 @@ const ClientVideoPlayer = () => {
         if (playerRef.current) {
             if (isMuted) {
                 playerRef.current.unMute();
-                if (videoUrl) {
-                    logVideoUnmute(videoUrl);
-                }
                  toast({
                     title: "How to Unmute",
                     description: "Due to browser policies, you may need to click the video directly to enable audio.",

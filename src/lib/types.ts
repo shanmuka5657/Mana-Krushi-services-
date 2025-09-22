@@ -94,16 +94,6 @@ export type Visit = {
   timestamp: Date;
 };
 
-export type VideoEvent = {
-  id: string;
-  userEmail: string;
-  userName: string;
-  role: string;
-  eventType: 'unmute';
-  videoUrl: string;
-  timestamp: Date;
-}
-
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({

@@ -184,7 +184,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/profile`, icon: User, label: "Profile" },
     { href: `/admin/users`, icon: Users, label: "Users" },
     { href: `/admin/visitors`, icon: Eye, label: "Visitors" },
-    { href: `/admin/video-views`, icon: Youtube, label: "Video Views" },
     { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
