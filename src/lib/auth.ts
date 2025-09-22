@@ -19,11 +19,13 @@ export const signUpWithEmail = async (name: string, email: string, password: str
     
     const newReferralCode = `${name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
 
+    const finalRole = email === 'admin@example.com' ? 'admin' : role;
+
     const newProfile: Profile = {
         name,
         email: user.email!,
         mobile: '0000000000',
-        role,
+        role: finalRole,
         referralCode: newReferralCode,
         referredBy: referredBy,
     };
