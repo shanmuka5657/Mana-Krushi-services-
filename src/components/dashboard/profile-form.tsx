@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save, Edit } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -274,8 +274,8 @@ export default function ProfileForm() {
 
   const handleOtpSubmit = async () => {
     if (otpValue === '123456') {
-      form.setValue('mobileVerified', true);
-      const updatedProfile: Profile = { ...profile!, mobileVerified: true };
+      form.setValue('mobileVerified', true, { shouldDirty: true });
+      const updatedProfile: Profile = { ...profile!, mobileVerified: true, mobile: form.getValues('mobile') };
       await saveProfile(updatedProfile);
       setProfile(updatedProfile);
 
@@ -351,6 +351,13 @@ export default function ProfileForm() {
       });
     }
   };
+
+  const mobileNumber = form.watch('mobile');
+  useEffect(() => {
+    if (profile?.mobile && mobileNumber !== profile.mobile) {
+        form.setValue('mobileVerified', false);
+    }
+  }, [mobileNumber, profile?.mobile, form]);
 
 
   return (
@@ -556,14 +563,18 @@ export default function ProfileForm() {
                               placeholder="Enter your primary mobile"
                               {...field}
                               className="pl-10"
-                              disabled={form.getValues('mobileVerified')}
                             />
                           </div>
                         </FormControl>
                         {form.getValues('mobileVerified') ? (
-                          <div className="flex items-center gap-1 text-sm text-green-600 font-medium px-3 py-2 rounded-md bg-green-50 border border-green-200">
-                             <CheckCircle className="h-4 w-4" /> Verified
-                          </div>
+                           <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => form.setValue('mobileVerified', false)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Change
+                          </Button>
                         ) : (
                           <Button
                             type="button"
