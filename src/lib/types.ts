@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export type Booking = {
@@ -65,7 +66,6 @@ export type Profile = {
     mileage?: number;
     planExpiryDate?: Date;
     role?: 'owner' | 'passenger' | 'admin';
-    selfieDataUrl?: string;
     status?: 'active' | 'deleted';
     referralCode?: string;
     referredBy?: string;

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import {
@@ -351,7 +352,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-3 cursor-pointer">
                     <Avatar className="h-10 w-10 border">
                       <AvatarImage
-                        src={profile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
+                        src={`https://ui-avatars.com/api/?name=${userName.replace(' ', '+')}&background=f39c12&color=fff`}
                         alt={userName}
                       />
                       <AvatarFallback>{userInitial}</AvatarFallback>

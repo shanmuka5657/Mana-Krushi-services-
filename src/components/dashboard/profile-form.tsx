@@ -53,7 +53,6 @@ const profileFormSchema = z.object({
   vehicleType: z.string().optional(),
   vehicleNumber: z.string().optional(),
   mileage: z.coerce.number().optional(),
-  selfieDataUrl: z.string().optional(),
   mobileVerified: z.boolean().default(false),
   additionalMobiles: z.string().optional(),
   referralCode: z.string().optional(),
@@ -74,10 +73,6 @@ export default function ProfileForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [selfie, setSelfie] = useState<string | null>(null);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [showPlanPrompt, setShowPlanPrompt] = useState(false);
   const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
@@ -96,41 +91,11 @@ export default function ProfileForm() {
       vehicleType: "",
       vehicleNumber: "",
       mileage: 0,
-      selfieDataUrl: "",
       mobileVerified: false,
       additionalMobiles: "",
       referralCode: "",
     },
   });
-
-   useEffect(() => {
-    let stream: MediaStream | null = null;
-    const getCameraPermission = async () => {
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            console.error('Camera API not available.');
-            setHasCameraPermission(false);
-            return;
-        }
-        stream = await navigator.mediaDevices.getUserMedia({video: true});
-        setHasCameraPermission(true);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
-      }
-    };
-
-    getCameraPermission();
-
-    return () => {
-        stream?.getTracks().forEach(track => track.stop());
-    }
-  }, []);
-
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -156,7 +121,6 @@ export default function ProfileForm() {
             vehicleType: '',
             vehicleNumber: '',
             mileage: 0,
-            selfieDataUrl: '',
             mobileVerified: false,
             additionalMobiles: '',
             referralCode: '',
@@ -173,53 +137,9 @@ export default function ProfileForm() {
         }
 
         form.reset(combinedValues);
-
-        // Load selfie from local storage first for instant feel, then from profile
-        const localSelfie = userEmail ? localStorage.getItem(`selfie_${userEmail}`) : null;
-        if(localSelfie) {
-            setSelfie(localSelfie);
-        } else if (userProfile?.selfieDataUrl) {
-            setSelfie(userProfile.selfieDataUrl);
-        }
     };
     loadProfile();
   }, [form]);
-
-  const handleTakeSelfie = () => {
-      if (videoRef.current && canvasRef.current) {
-          const video = videoRef.current;
-          const canvas = canvasRef.current;
-          const context = canvas.getContext('2d');
-          
-          if (context) {
-              const MAX_WIDTH = 800;
-              const scale = MAX_WIDTH / video.videoWidth;
-              canvas.width = MAX_WIDTH;
-              canvas.height = video.videoHeight * scale;
-
-              context.drawImage(video, 0, 0, canvas.width, canvas.height);
-              const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-              
-              // Instant UI update & save to local storage
-              setSelfie(dataUrl);
-              form.setValue('selfieDataUrl', dataUrl);
-              const userEmail = getCurrentUser();
-              if (userEmail) {
-                localStorage.setItem(`selfie_${userEmail}`, dataUrl);
-              }
-              toast({ title: 'Selfie Captured!', description: 'Your new profile picture is ready to be saved.' });
-          }
-      }
-  }
-
-  const handleRetakeSelfie = () => {
-    setSelfie(null);
-    form.setValue('selfieDataUrl', '');
-     const userEmail = getCurrentUser();
-    if (userEmail) {
-        localStorage.removeItem(`selfie_${userEmail}`);
-    }
-  };
 
   async function onSubmit(data: ProfileFormValues) {
     setIsSaving(true);
@@ -238,13 +158,6 @@ export default function ProfileForm() {
         email: currentProfile?.email || data.email,
         additionalMobiles: additionalMobilesArray,
     };
-    
-    // The selfie data URL from the form is now the source of truth
-    if (data.selfieDataUrl) {
-        profileToSave.selfieDataUrl = data.selfieDataUrl;
-    } else {
-        profileToSave.selfieDataUrl = '';
-    }
 
     if (!profileToSave.role) {
         const userEmail = getCurrentUser();
@@ -477,50 +390,6 @@ export default function ProfileForm() {
             </CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Picture</CardTitle>
-          <CardDescription>Take a selfie to set your profile picture.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="w-full sm:w-1/2 space-y-4">
-                    <div className="relative aspect-video w-full rounded-md overflow-hidden border">
-                        {selfie ? (
-                             <Image src={selfie} alt="Your selfie" layout="fill" objectFit="cover" />
-                        ) : (
-                           <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
-                        )}
-                        <canvas ref={canvasRef} className="hidden" />
-                    </div>
-                     {hasCameraPermission === false && (
-                        <Alert variant="destructive">
-                            <AlertTitle>Camera Access Required</AlertTitle>
-                            <AlertDescription>
-                                Please allow camera access to use this feature.
-                            </AlertDescription>
-                        </Alert>
-                    )}
-                </div>
-                 <div className="w-full sm:w-1/2 flex flex-col items-center gap-4">
-                    <div className="relative">
-                        <Avatar className="w-24 h-24 text-lg">
-                            <AvatarImage src={selfie || profile?.selfieDataUrl} alt={profile?.name} />
-                            <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                    </div>
-                     <Button 
-                        onClick={selfie ? handleRetakeSelfie : handleTakeSelfie}
-                        disabled={!hasCameraPermission}
-                    >
-                        <Camera className="mr-2 h-4 w-4" />
-                        {selfie ? 'Retake Selfie' : 'Take Selfie'}
-                    </Button>
-                 </div>
-            </div>
-        </CardContent>
-      </Card>
 
       <Card className="shadow-sm">
         <CardHeader>
