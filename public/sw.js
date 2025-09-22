@@ -1,13 +1,18 @@
+// Define a cache name
 const CACHE_NAME = 'mana-krushi-cache-v1';
+
+// List of files to cache
 const urlsToCache = [
   '/',
   '/offline',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
-  // Add other critical assets here. Next.js chunks are dynamically named,
-  // so we'll cache them on the fly.
+  '/login',
+  '/signup',
+  '/favicon.ico',
+  '/manifest.json',
+  // Add other static assets like CSS, JS, images that are common across pages
 ];
 
+// Install event: open a cache and add the core app shell files to it
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -18,6 +23,7 @@ self.addEventListener('install', event => {
   );
 });
 
+// Fetch event: serve cached content when offline
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -27,7 +33,10 @@ self.addEventListener('fetch', event => {
           return response;
         }
 
-        // Clone the request to use it in the cache and for the network request
+        // IMPORTANT: Clone the request. A request is a stream and
+        // can only be consumed once. Since we are consuming this
+        // once by cache and once by the browser for fetch, we need
+        // to clone the response.
         const fetchRequest = event.request.clone();
 
         return fetch(fetchRequest).then(
@@ -37,6 +46,10 @@ self.addEventListener('fetch', event => {
               return response;
             }
 
+            // IMPORTANT: Clone the response. A response is a stream
+            // and because we want the browser to consume the response
+            // as well as the cache consuming the response, we need
+            // to clone it so we have two streams.
             const responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
@@ -46,16 +59,19 @@ self.addEventListener('fetch', event => {
 
             return response;
           }
-        ).catch(() => {
-            // Network request failed, try to serve the offline page for navigation requests
-            if (event.request.mode === 'navigate') {
-                return caches.match('/offline');
-            }
-        });
+        );
+      })
+      .catch(() => {
+        // If the fetch fails (i.e., user is offline) and the request is for a navigation,
+        // serve the offline fallback page.
+        if (event.request.mode === 'navigate') {
+          return caches.match('/offline');
+        }
       })
   );
 });
 
+// Activate event: remove old caches
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
