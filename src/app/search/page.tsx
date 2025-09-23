@@ -44,7 +44,15 @@ function GlobalSearchResultsPage() {
     const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     
-    const query = searchParams.get('q') || '';
+    // Handle incoming share data
+    const sharedTitle = searchParams.get('title') || '';
+    const sharedText = searchParams.get('text') || '';
+    const sharedUrl = searchParams.get('url') || '';
+    const searchQuery = searchParams.get('q') || '';
+
+    // Combine shared data into a single query if it exists
+    const query = searchQuery || [sharedTitle, sharedText, sharedUrl].filter(Boolean).join(' ');
+
 
     useEffect(() => {
         const fetchAllData = async () => {
