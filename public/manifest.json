@@ -1,82 +1,79 @@
 {
-  "theme_color": "#1E88E5",
-  "background_color": "#FFFFFF",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
-  "name": "Mana Krushi Services",
-  "short_name": "MK Services",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "id": "/",
-  "dir": "auto",
-  "lang": "en",
-  "orientation": "any",
-  "display_override": [
-    "window-controls-overlay"
-  ],
-  "categories": [
-    "travel",
-    "navigation"
-  ],
-  "shortcuts": [
-    {
-      "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Search for available rides",
-      "url": "/dashboard?role=passenger",
-      "icons": [
+    "theme_color": "#1E88E5",
+    "background_color": "#FFFFFF",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Mana Krushi Services",
+    "short_name": "MK Services",
+    "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "icons": [
         {
-          "src": "/icons/search.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
-      "url": "/bookings",
-      "icons": [
+            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
         {
-          "src": "/icons/bookings.png",
-          "sizes": "192x192"
+            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
-      ]
-    }
-  ],
-  "iarc_rating_id": "",
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "protocol_handlers": [
-    {
-      "protocol": "web+mk",
-      "url": "/search?q=%s"
-    }
-  ],
-  "icons": [
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "maskable"
-    }
-  ]
+    ],
+    "id": "/",
+    "lang": "en",
+    "orientation": "any",
+    "display_override": [
+        "window-controls-overlay"
+    ],
+    "categories": [
+        "travel",
+        "navigation"
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "short_name": "Search",
+            "description": "Search for available rides",
+            "url": "/dashboard?role=passenger",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming and past bookings",
+            "url": "/bookings",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "iarc_rating_id": "",
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "protocol_handlers": [
+        {
+            "protocol": "web+mk",
+            "url": "/search?q=%s"
+        }
+    ]
 }
