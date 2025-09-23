@@ -66,8 +66,6 @@ export function SignupForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const refCodeFromUrl = searchParams.get('ref');
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,10 +79,11 @@ export function SignupForm() {
   });
   
   useEffect(() => {
+    const refCodeFromUrl = searchParams.get('ref');
     if (refCodeFromUrl) {
       form.setValue('referralCode', refCodeFromUrl);
     }
-  }, [refCodeFromUrl, form]);
+  }, [searchParams, form]);
   
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
     setFormData(values);
@@ -208,7 +207,7 @@ export function SignupForm() {
                   <FormItem>
                     <FormLabel>Referral Code (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter code from a friend" {...field} disabled={!!refCodeFromUrl} />
+                      <Input placeholder="Enter code from a friend" {...field} disabled={!!searchParams.get('ref')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
