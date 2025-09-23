@@ -1,58 +1,65 @@
 {
-    "theme_color": "#1E88E5",
-    "background_color": "#FFFFFF",
-    "display": "standalone",
-    "scope": "/",
-    "start_url": "/",
-    "name": "Mana Krushi Services",
-    "short_name": "MK Services",
-    "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "id": "/?utm_source=pwa",
-    "orientation": "any",
-    "icons": [
+  "theme_color": "#1E88E5",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "MK Services",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "id": "/?utm_source=pwa",
+  "orientation": "any",
+  "screenshots": [
+    {
+      "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "500x500",
+      "label": "App Logo"
+    },
+    {
+      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+      "type": "image/jpeg",
+      "sizes": "1080x2132",
+      "form_factor": "narrow",
+      "label": "Chat Screenshot"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Go to the main dashboard",
+      "url": "/dashboard",
+      "icons": [
         {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
+          "src": "/icons/home.png",
+          "sizes": "192x192"
         }
-    ],
-    "screenshots": [
+      ]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your upcoming and past bookings",
+      "url": "/bookings",
+      "icons": [
         {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "540x720",
-            "type": "image/png",
-            "form_factor": "narrow",
-            "label": "Welcome Screen"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "1080x720",
-            "type": "image/png",
-            "form_factor": "wide",
-            "label": "Dashboard View"
+          "src": "/icons/bookings.png",
+          "sizes": "192x192"
         }
-    ],
-    "shortcuts": [
-        {
-            "name": "Home",
-            "short_name": "Home",
-            "description": "Go to the main dashboard",
-            "url": "/dashboard?role=passenger",
-            "icons": [{ "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png", "sizes": "192x192" }]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming rides",
-            "url": "/bookings?role=passenger",
-            "icons": [{ "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png", "sizes": "192x192" }]
-        }
-    ]
+      ]
+    }
+  ]
 }
