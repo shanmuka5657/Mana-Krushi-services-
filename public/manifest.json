@@ -18,78 +18,66 @@
             "sizes": "192x192"
         },
         {
-            "src": "https://i.ibb.co/vxmGWQGH/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.jpg",
+            "src": "https://i.ibb.co/wJmF4T5/IMG-20250920-WA0025.png",
+            "type": "image/png",
+            "sizes": "256x256"
+        },
+        {
+            "src": "https://i.ibb.co/M7b2WzG/IMG-20250920-WA0025.png",
+            "type": "image/png",
+            "sizes": "384x384"
+        },
+        {
+            "src": "https://i.ibb.co/vxmGWQGH/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
             "type": "image/png",
             "sizes": "512x512"
         }
     ],
     "screenshots": [
         {
-            "src": "https://i.ibb.co/TD8TS9JX/screenshot1.jpg",
-            "sizes": "1080x2400",
+            "src": "https://i.ibb.co/TD8TS9JX/ey-Jp-ZCI6-Im1f-N2-I4-Nj-Y3-ODUt-Yj-E4-ZC00-ZGRh-LWE0-M2-Yt-Yj-Mw-ODQy-OWVk-Yj-Bh-O3-B1-Ymxp-Yy-54-Mj-Yy.jpg",
             "type": "image/jpeg",
+            "sizes": "1080x2400",
             "form_factor": "narrow"
         }
     ],
     "categories": [
-        "education",
-        "navigation",
-        "travel"
+        "education"
     ],
     "shortcuts": [
         {
             "name": "Find a Ride",
-            "short_name": "Find",
-            "description": "Search for available rides",
             "url": "/dashboard?role=passenger",
-            "icons": [
-                {
-                    "src": "/icons/find-ride.png",
-                    "sizes": "192x192"
-                }
-            ]
+            "description": "Find a ride to your destination"
         },
         {
             "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming and past bookings",
             "url": "/bookings",
-            "icons": [
-                {
-                    "src": "/icons/bookings.png",
-                    "sizes": "192x192"
-                }
-            ]
+            "description": "View your upcoming and past bookings"
         }
     ],
-    "share_target": {
-        "action": "/search",
-        "method": "GET",
-        "enctype": "application/x-www-form-urlencoded",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
-    },
-    "related_applications": [],
-    "prefer_related_applications": false,
-    "iarc_rating_id": "",
     "protocol_handlers": [
         {
             "protocol": "web+mk",
             "url": "/search?q=%s"
         }
     ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "iarc_rating_id": "",
     "file_handlers": [],
-    "launch_handler": {
-        "client_mode": [
-            "navigate-existing",
-            "auto"
-        ]
-    },
+    "launch_handler": {},
     "widgets": [],
     "edge_side_panel": {},
     "note_taking": {},
-    "scope_extensions": []
+    "scope_extensions": [],
+    "share_target": {
+        "action": "/search",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    }
 }
