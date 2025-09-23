@@ -286,3 +286,5 @@ export const getSetting = async (key: string): Promise<any> => {
     if (!isBrowser) return null;
     return await getSettingFromFirestore(key);
 }
+
+    
