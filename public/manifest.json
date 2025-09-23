@@ -1,39 +1,30 @@
 {
-    "theme_color": "#1E88E5",
-    "background_color": "#FFFFFF",
-    "display": "standalone",
-    "scope": "/",
-    "start_url": "/",
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
     "icons": [
         {
-            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/jpeg",
+            "purpose": "any maskable"
         },
         {
-            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
+            "type": "image/jpeg",
+            "purpose": "any maskable"
         }
     ],
+    "theme_color": "#1E88E5",
+    "background_color": "#FFFFFF",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
     "id": "/",
     "lang": "en",
-    "orientation": "any",
+    "dir": "ltr",
     "display_override": [
         "window-controls-overlay"
     ],
@@ -44,13 +35,14 @@
     "shortcuts": [
         {
             "name": "Find a Ride",
-            "short_name": "Search",
+            "short_name": "Find",
             "description": "Search for available rides",
             "url": "/dashboard?role=passenger",
             "icons": [
                 {
-                    "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
-                    "sizes": "192x192"
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "192x192",
+                    "type": "image/jpeg"
                 }
             ]
         },
@@ -61,8 +53,9 @@
             "url": "/bookings",
             "icons": [
                 {
-                    "src": "https://i.ibb.co/gDB12Wn/IMG-20250920-WA0025.png",
-                    "sizes": "192x192"
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "192x192",
+                    "type": "image/jpeg"
                 }
             ]
         }
