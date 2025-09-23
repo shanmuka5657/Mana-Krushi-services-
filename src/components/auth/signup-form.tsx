@@ -75,7 +75,7 @@ export function SignupForm() {
       email: '',
       password: '',
       role: 'passenger',
-      referralCode: refCodeFromUrl || '',
+      referralCode: '',
       terms: false,
     },
   });
