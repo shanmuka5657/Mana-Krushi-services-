@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, ChangeEvent } from "react";
@@ -327,5 +328,3 @@ function AdminDashboardPage() {
 export default function AdminDashboard() {
     return <AdminDashboardPage />;
 }
-
-    
