@@ -1,66 +1,87 @@
 {
-  "theme_color": "#1E88E5",
-  "background_color": "#FFFFFF",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
-  "name": "Mana Krushi Services",
-  "short_name": "MK Services",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "id": "/?utm_source=pwa",
-  "orientation": "any",
-  "icons": [
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
-      "sizes": "1080x1080",
-      "type": "image/jpeg",
-      "form_factor": "wide",
-      "label": "Welcome to Mana Krushi Services"
-    },
-    {
-      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
-      "sizes": "1080x2340",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Chat with Support"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Home",
-      "short_name": "Home",
-      "description": "Go to the Home page",
-      "url": "/dashboard",
-      "icons": [
+    "theme_color": "#1E88E5",
+    "background_color": "#FFFFFF",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Mana Krushi Services",
+    "short_name": "MK Services",
+    "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "icons": [
         {
-          "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
-      "url": "/bookings",
-      "icons": [
+            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
         {
-          "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-          "sizes": "192x192"
+            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
         }
-      ]
+    ],
+    "id": "/?utm_source=pwa",
+    "orientation": "any",
+    "screenshots": [
+        {
+            "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
+            "type": "image/jpeg",
+            "sizes": "1080x1080",
+            "form_factor": "wide"
+        },
+        {
+            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+            "type": "image/jpeg",
+            "sizes": "1080x2340",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Home",
+            "short_name": "Home",
+            "description": "Go to the main dashboard",
+            "url": "/dashboard?utm_source=pwa",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming and past bookings",
+            "url": "/bookings?utm_source=pwa",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "lang": "en-US",
+    "dir": "auto",
+    "categories": [
+        "travel",
+        "navigation",
+        "social"
+    ],
+    "share_target": {
+        "action": "/search",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    },
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "launch_handler": {
+        "client_mode": "focus-existing"
     }
-  ]
 }
