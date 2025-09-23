@@ -67,9 +67,6 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const router = useRouter();
-  const [dateFilter, setDateFilter] = useState<Date | undefined>();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -81,20 +78,16 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
     const handleRealtimeUpdates = (allUserBookings: Booking[]) => {
         let filteredBookings;
         const today = startOfDay(new Date());
-
-        if (dateFilter) {
-            filteredBookings = allUserBookings.filter(b => isSameDay(new Date(b.departureDate), dateFilter));
-        } else {
-            if (mode === 'upcoming') {
-                filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) >= today && b.status !== 'Cancelled');
-            } else if (mode === 'past') {
-                filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) < today || b.status === 'Cancelled');
-            } else { // 'all'
-                filteredBookings = allUserBookings;
-            }
+        
+        if (mode === 'upcoming') {
+            filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) >= today && b.status !== 'Cancelled');
+        } else if (mode === 'past') {
+            filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) < today || b.status === 'Cancelled');
+        } else { // 'all'
+            filteredBookings = allUserBookings;
         }
         
-        filteredBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+        filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
         setBookings(filteredBookings);
         setIsLoading(false);
     }
@@ -110,7 +103,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 
     return () => unsubscribe();
 
-  }, [initialBookings, mode, dateFilter]);
+  }, [initialBookings, mode]);
 
 
 
@@ -220,29 +213,10 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
       return phone || 'N/A';
   };
   
-  const handleSearch = async () => {
-    if (!dateFilter) {
-      toast({ title: 'Please select a date to search.', variant: 'destructive' });
-      return;
-    }
-    setIsSearching(true);
-    const role = getCurrentUserRole();
-    const currentUserEmail = getCurrentUser();
-
-    // This search is now handled by the useEffect filter. 
-    // We just need to trigger a re-evaluation by setting the state.
-    // The actual fetching logic is now inside the useEffect hook.
-    // The state update will cause the useEffect to run with the new dateFilter.
-    setDateFilter(dateFilter);
-    
-    // Simulate search time for user feedback
-    setTimeout(() => setIsSearching(false), 500);
-  };
-  
   const getPageInfo = () => {
     switch(mode) {
         case 'upcoming': return { title: 'Upcoming Bookings', description: 'Your upcoming confirmed rides.', defaultMessage: "You have no upcoming bookings." };
-        case 'past': return { title: 'Booking History', description: 'A record of your past and cancelled rides.', defaultMessage: 'Use the filter to search your booking history.' };
+        case 'past': return { title: 'Booking History', description: 'A record of your past and cancelled rides.', defaultMessage: 'You have no past bookings.' };
         case 'all': return { title: 'All Bookings', description: 'A list of all bookings made by all passengers.', defaultMessage: 'No bookings found.' };
         default: return { title: 'My Bookings', description: 'Your bookings', defaultMessage: 'No bookings found.' };
     }
@@ -263,36 +237,6 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
         </CardHeader>
       )}
       <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full md:w-[280px] justify-start text-left font-normal",
-                    !dateFilter && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFilter ? format(dateFilter, "PPP") : <span>Filter by date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <DayPicker
-                  mode="single"
-                  selected={dateFilter}
-                  onSelect={(date) => {
-                      setDateFilter(date as Date);
-                      setIsCalendarOpen(false);
-                      setIsSearching(true);
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-             {dateFilter && (
-                 <Button variant="ghost" onClick={() => { setDateFilter(undefined); setIsSearching(true); }}>Clear</Button>
-            )}
-        </div>
           <div className="w-full overflow-x-auto">
             {isLoading ? (
                  <div className="flex items-center justify-center h-24">
@@ -358,7 +302,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                     ) : (
                     <TableRow>
                         <TableCell colSpan={6} className="h-24 text-center">
-                        {dateFilter ? 'No bookings found for the selected date.' : defaultMessage}
+                        {defaultMessage}
                         </TableCell>
                     </TableRow>
                     )}
