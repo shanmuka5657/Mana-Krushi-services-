@@ -140,16 +140,6 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
             q = query(q, where("departureDate", ">=", startOfDay), where("departureDate", "<=", endOfDay));
         }
 
-        // If user specific, filter by user email
-        if (searchParams?.userEmail && searchParams?.role) {
-            if (searchParams.role === 'passenger') {
-                q = query(q, where("clientEmail", "==", searchParams.userEmail));
-            } else if (searchParams.role === 'owner') {
-                q = query(q, where("driverEmail", "==", searchParams.userEmail));
-            }
-        }
-
-
         const snapshot = await getDocs(q);
         
         let bookings = snapshot.docs.map(doc => {
@@ -161,6 +151,15 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
                 returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
             } as Booking;
         });
+        
+        // Client-side filtering for user
+        if (searchParams?.userEmail && searchParams?.role) {
+            if (searchParams.role === 'passenger') {
+                bookings = bookings.filter(b => b.clientEmail === searchParams.userEmail);
+            } else if (searchParams.role === 'owner') {
+                bookings = bookings.filter(b => b.driverEmail === searchParams.userEmail);
+            }
+        }
 
         if (searchParams?.destination) {
             bookings = bookings.filter(b => b.destination === searchParams.destination);
