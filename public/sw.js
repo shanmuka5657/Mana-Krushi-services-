@@ -4,7 +4,6 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox
 
 const CACHE = "pwabuilder-page";
 
-// Replace the placeholder with the correct offline fallback page
 const offlineFallbackPage = "/offline";
 
 self.addEventListener("message", (event) => {
