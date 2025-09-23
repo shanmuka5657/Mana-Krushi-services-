@@ -188,6 +188,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         if (cachedLocations) {
             setLocations(JSON.parse(cachedLocations));
         } else {
+            // OPTIMIZATION: Fetch routes here to populate cache for passenger dashboard
             const allRoutes = await getRoutes(true);
             const allLocations = new Set<string>();
             allRoutes.forEach(route => {

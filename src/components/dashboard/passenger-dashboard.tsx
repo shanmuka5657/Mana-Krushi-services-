@@ -73,19 +73,15 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
           setShowProfilePrompt(true);
         }
 
+        // OPTIMIZATION: Rely on sessionStorage first to avoid blocking render.
+        // The list will be populated by the owner dashboard or other parts of the app over time.
         const cachedLocations = sessionStorage.getItem('routeLocations');
         if (cachedLocations) {
             setLocations(JSON.parse(cachedLocations));
         } else {
-            const allRoutes = await getRoutes(true);
-            const allLocations = new Set<string>();
-            allRoutes.forEach(route => {
-                allLocations.add(route.fromLocation);
-                allLocations.add(route.toLocation);
-            });
-            const locationsArray = Array.from(allLocations);
-            setLocations(locationsArray);
-            sessionStorage.setItem('routeLocations', JSON.stringify(locationsArray));
+            // As a fallback, you could fetch a small number of *recent* routes, not all of them.
+            // For now, we'll leave it empty if not cached to prioritize speed.
+            setLocations([]);
         }
         setIsLoading(false);
     }
