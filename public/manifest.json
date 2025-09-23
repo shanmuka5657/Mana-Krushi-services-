@@ -7,12 +7,5 @@
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "id": "/?utm_source=pwa",
-    "icons": [
-        {
-            "src": "https://i.ibb.co/VvZGCp8/MK-Consulting-Services-Logo.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        }
-    ]
+    "icons": []
 }
