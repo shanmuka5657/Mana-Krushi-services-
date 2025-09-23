@@ -188,6 +188,7 @@ export const getBookings = async (isAdmin = false, searchParams?: { destination?
     const cacheKey = JSON.stringify(searchParams || {});
     const cachedEntry = cache.bookings.get(cacheKey);
     if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+        perfTracker.increment({ reads: 0, writes: 0 });
         return cachedEntry.data;
     }
     
@@ -239,6 +240,7 @@ export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?:
     const cacheKey = JSON.stringify(searchParams || {});
     const cachedEntry = cache.routes.get(cacheKey);
     if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+        perfTracker.increment({ reads: 0, writes: 0 });
         return cachedEntry.data;
     }
     
@@ -294,6 +296,7 @@ export const getProfile = async (email?: string): Promise<Profile | null> => {
     if (userEmail) {
         const cachedEntry = cache.profiles.get(userEmail);
         if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+            perfTracker.increment({ reads: 0, writes: 0 });
             return cachedEntry.data;
         }
         
@@ -310,6 +313,7 @@ export const getAllProfiles = async (): Promise<Profile[]> => {
 
     const cachedEntry = cache.allProfiles;
     if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+        perfTracker.increment({ reads: 0, writes: 0 });
         return cachedEntry.data;
     }
 
@@ -363,3 +367,4 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
