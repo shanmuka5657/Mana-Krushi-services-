@@ -1,10 +1,10 @@
 {
+  "id": "/",
   "theme_color": "#1E88E5",
   "background_color": "#FFFFFF",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
-  "id": "/",
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
@@ -34,11 +34,25 @@
       "purpose": "maskable"
     }
   ],
-  "lang": "en-US",
-  "dir": "ltr",
   "orientation": "portrait",
+  "dir": "ltr",
+  "lang": "en-US",
   "categories": [
     "education",
     "travel"
+  ],
+  "screenshots": [
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "1080x1080",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+      "sizes": "1080x2340",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
   ]
 }
