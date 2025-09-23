@@ -7,108 +7,30 @@
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "lang": "en",
-    "dir": "ltr",
-    "orientation": "any",
-    "id": "/?utm_source=pwa",
     "icons": [
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
-        }
-    ],
-    "screenshots": [],
-    "categories": [
-        "travel",
-        "business",
-        "lifestyle"
-    ],
-    "shortcuts": [
-        {
-            "name": "Find a Ride",
-            "short_name": "Find Ride",
-            "description": "Search for available rides",
-            "url": "/dashboard?role=passenger",
-            "icons": [
-                {
-                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-                    "sizes": "192x192"
-                }
-            ]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming bookings",
-            "url": "/bookings",
-            "icons": [
-                {
-                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-                    "sizes": "192x192"
-                }
-            ]
-        }
-    ],
-    "share_target": {
-        "action": "/search",
-        "method": "GET",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
-    },
-    "display_override": [
-        "window-controls-overlay"
-    ],
-    "related_applications": [],
-    "prefer_related_applications": false,
-    "protocol_handlers": [
-        {
-            "protocol": "web+manakrushi",
-            "url": "/handle-protocol?type=%s"
-        }
-    ],
-    "file_handlers": [
-        {
-            "action": "/handle-file",
-            "accept": {
-                "text/plain": [
-                    ".txt"
-                ]
-            }
-        }
-    ],
-    "launch_handler": {
-        "client_mode": "navigate-existing"
-    },
-    "iarc_rating_id": "e84b072d-8698-4475-a3f4-9048ba46c36b",
-    "widgets": [],
-    "edge_side_panel": {},
-    "note_taking": {},
-    "scope_extensions": [
-        {
-            "origin": "*.manakrushi.com"
         }
     ]
 }
