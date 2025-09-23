@@ -1,16 +1,72 @@
 {
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
-    "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "icons": [],
+    "id": "/",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#FFFFFF",
     "theme_color": "#1E88E5",
-    "scope": "/",
-    "id": "/",
+    "background_color": "#FFFFFF",
+    "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "icons": [
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "https://i.ibb.co/L8yT2vj/IMG-20250920-WA0025.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/PggGb9L/IMG-20250920-WA0025.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+            "sizes": "1080x2340",
+            "type": "image/jpeg",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "short_name": "Search",
+            "description": "Find a ride to your destination",
+            "url": "/dashboard?role=passenger",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/L8yT2vj/IMG-20250920-WA0025.png",
+                    "sizes": "512x512"
+                }
+            ]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming and past bookings",
+            "url": "/bookings",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/L8yT2vj/IMG-20250920-WA0025.png",
+                    "sizes": "512x512"
+                }
+            ]
+        }
+    ],
     "related_applications": [],
     "iarc_rating_id": "",
-    "widgets": [],
-    "scope_extensions": []
+    "scope_extensions": [
+        {
+            "origin": "*.manakrushi.com"
+        },
+        {
+            "origin": "*.google.com"
+        }
+    ]
 }
