@@ -35,6 +35,8 @@ import {
   MessageSquare,
   Gift,
   Activity,
+  ArrowDown,
+  ArrowUp,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -70,6 +72,7 @@ import type { Profile } from "@/lib/types";
 import placeholderImages from '@/lib/placeholder-images.json';
 import { signOut, onAuthStateChanged } from '@/lib/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
+import { perfTracker } from "@/lib/perf-tracker";
 
 
 // Define the interface for the event, as it's not standard in all TS lib versions.
@@ -97,6 +100,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isStandalone, setIsStandalone] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
+  const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
+
+  React.useEffect(() => {
+    const unsubscribe = perfTracker.subscribe(setPerfCounts);
+    return () => unsubscribe();
+  }, []);
   
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -183,7 +192,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: MessageSquare, label: "Bulk Messaging" },
-    { href: `/watch`, icon: Activity, label: "Performance" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
     { href: `/loans`, icon: IndianRupee, label: "Loans" },
@@ -330,6 +338,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex flex-shrink-0 items-center justify-end gap-4">
+               <div className="flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
+                  <div className="flex items-center gap-2" title="Database Reads (Session)">
+                      <ArrowDown className="h-4 w-4 text-green-500" />
+                      <span className="font-mono">{perfCounts.reads}</span>
+                  </div>
+                  <div className="h-4 w-px bg-border" />
+                   <div className="flex items-center gap-2" title="Database Writes (Session)">
+                      <ArrowUp className="h-4 w-4 text-orange-500" />
+                      <span className="font-mono">{perfCounts.writes}</span>
+                  </div>
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center gap-3 cursor-pointer">
