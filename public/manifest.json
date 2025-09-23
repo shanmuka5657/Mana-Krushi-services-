@@ -1,112 +1,103 @@
 {
-  "theme_color": "#1E88E5",
-  "background_color": "#FFFFFF",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
-  "name": "Mana Krushi Services",
-  "short_name": "MK Services",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "categories": [
-    "education",
-    "navigation",
-    "travel"
-  ],
-  "icons": [],
-  "id": "dev.cloudworkstations.qgge.d3rdd6.mana-krushi-services",
-  "shortcuts": [
-    {
-      "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Search for available rides",
-      "url": "/dashboard?role=passenger",
-      "icons": [
+    "theme_color": "#1E88E5",
+    "background_color": "#FFFFFF",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Mana Krushi Services",
+    "short_name": "MK Services",
+    "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "id": "/",
+    "icons": [
         {
-          "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-          "sizes": "192x192"
+            "src": "https://i.ibb.co/vzrVd2R/IMG-20250920-WA0025.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/Vvz1WqC/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/GcLbJtC/Screenshot-2025-09-14-12-37-47-041-com-whatsapp-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
-      ]
+    ],
+    "screenshots": [
+        {
+            "src": "https://i.ibb.co/TD8TS9JX/Screenshot-from-2024-09-14-11-00-50.png",
+            "sizes": "1080x2400",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "Find and book rides"
+        }
+    ],
+    "categories": [
+        "education",
+        "navigation",
+        "travel"
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "url": "/dashboard?role=passenger",
+            "description": "Search for available rides.",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/Vvz1WqC/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "My Bookings",
+            "url": "/bookings",
+            "description": "View your upcoming and past bookings.",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/Vvz1WqC/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+manakrushi",
+            "url": "/search?q=%s"
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "iarc_rating_id": "",
+    "widgets": [
+        {
+            "name": "Find a Ride",
+            "description": "Quickly search for your next ride",
+            "tag": "find-ride",
+            "template": "find-ride-template",
+            "ms_ac_template": "widgets/find-ride.json",
+            "data": "widgets/find-ride-data.json",
+            "type": "application/json"
+        }
+    ],
+    "edge_side_panel": {
+        "preferred_width": 400
     },
-    {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
-      "url": "/bookings",
-      "icons": [
+    "file_handlers": [],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "note_taking": {
+        "new_note_url": "/new-note",
+        "preferred_format": "text/html"
+    },
+    "scope_extensions": [
         {
-          "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-          "sizes": "192x192"
+            "origin": "*.manakrushi.com"
         }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "https://i.ibb.co/TD8TS9J/screenshot1.jpg",
-      "sizes": "1080x2400",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Find a Ride"
-    }
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "protocol_handlers": [
-    {
-      "protocol": "web+manakrushi",
-      "url": "/search?q=%s"
-    }
-  ],
-  "iarc_rating_id": "",
-  "widgets": [
-    {
-      "name": "Find a Ride Widget",
-      "description": "Quickly search for rides from your home screen.",
-      "tag": "find-ride",
-      "template": "find-ride-widget",
-      "ms_ac_template": "find-ride-widget",
-      "data": {
-        "title": "Find a Ride",
-        "items": [
-          {
-            "label": "From",
-            "value": ""
-          },
-          {
-            "label": "To",
-            "value": ""
-          }
-        ]
-      },
-      "icons": [
-        {
-          "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
-  "edge_side_panel": {},
-  "file_handlers": [
-    {
-      "action": "/handle-file",
-      "accept": {
-        "text/plain": [
-          ".txt"
-        ]
-      }
-    }
-  ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "note_taking": {
-    "new_note_url": "/new-note",
-    "needs_custom_implementation": true
-  },
-  "scope_extensions": [
-    {
-      "origin": "*.manakrushi.com"
-    }
-  ]
+    ]
 }
