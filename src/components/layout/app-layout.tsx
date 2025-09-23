@@ -34,6 +34,7 @@ import {
   Signal,
   MessageSquare,
   Gift,
+  Activity,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -182,6 +183,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: MessageSquare, label: "Bulk Messaging" },
+    { href: `/watch`, icon: Activity, label: "Performance" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
     { href: `/loans`, icon: IndianRupee, label: "Loans" },
