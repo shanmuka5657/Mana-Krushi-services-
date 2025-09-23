@@ -32,7 +32,6 @@ import {
   Eye,
   Youtube,
   Signal,
-  Tv,
   MessageSquare,
   Gift,
 } from "lucide-react";
@@ -184,7 +183,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: MessageSquare, label: "Bulk Messaging" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
-    { href: `/live`, icon: Tv, label: "Live" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
     { href: `/loans`, icon: IndianRupee, label: "Loans" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
@@ -201,7 +199,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
     { href: `/referral`, icon: Gift, label: "Referral" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
-    { href: `/live`, icon: Tv, label: "Live" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
     { href: `/loans?role=owner`, icon: IndianRupee, label: "Loans" },
     { href: `/insurance?role=owner`, icon: Shield, label: "Insurance" },
@@ -216,7 +213,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/referral`, icon: Gift, label: "Referral" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
-    { href: `/live`, icon: Tv, label: "Live" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
     { href: `/loans?role=passenger`, icon: IndianRupee, label: "Loans" },
@@ -373,3 +369,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    
