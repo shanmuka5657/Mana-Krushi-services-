@@ -1,42 +1,40 @@
 {
+  "name": "Mana Krushi Services",
+  "short_name": "MK Services",
+  "id": "/",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "theme_color": "#1E88E5",
   "background_color": "#FFFFFF",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
-  "name": "Mana Krushi Services",
-  "short_name": "MK Services",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "any",
   "icons": [
     {
-      "src": "https://i.ibb.co/C0TPkDs/IMG-20250920-WA0025.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/kX3B6V7/IMG-20250920-WA0025-1.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/SsvW96J/IMG-20250920-WA0025-2.png",
+      "src": "https://i.ibb.co/VvzK2Sj/IMG-20250920-WA0025.png",
       "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/VvzLg5M/IMG-20250920-WA0025-3.png",
+      "src": "https://i.ibb.co/yQW2XHt/IMG-20250920-WA0025.png",
       "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ],
-  "id": "/",
-  "dir": "ltr",
-  "lang": "en",
-  "orientation": "any",
   "display_override": [
     "window-controls-overlay"
   ],
@@ -46,27 +44,13 @@
   "shortcuts": [
     {
       "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Search for available rides",
       "url": "/dashboard?role=passenger",
-      "icons": [
-        {
-          "src": "/icons/find-ride.png",
-          "sizes": "192x192"
-        }
-      ]
+      "description": "Search for available rides."
     },
     {
       "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
       "url": "/bookings",
-      "icons": [
-        {
-          "src": "/icons/bookings.png",
-          "sizes": "192x192"
-        }
-      ]
+      "description": "View your upcoming and past bookings."
     }
   ],
   "iarc_rating_id": "",
@@ -90,12 +74,15 @@
   "file_handlers": [],
   "widgets": [],
   "edge_side_panel": {},
-  "note_taking": {
-    "new_note_url": "/dashboard"
-  },
-  "scope_extensions": [
+  "note_taking": {},
+  "scope_extensions": [],
+  "screenshots": [
     {
-      "origin": "*.manakrushi.com"
+      "src": "https://i.ibb.co/3f6wHh5/IMG-20250920-WA0024.jpg",
+      "sizes": "1080x2400",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "App Home Screen"
     }
   ]
 }
