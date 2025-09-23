@@ -24,15 +24,11 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Calendar as CalendarIcon, Loader2, Search, MapPin, Milestone, Shield } from "lucide-react";
-import { format, isSameDay, startOfDay } from "date-fns";
+import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Loader2, MapPin, Milestone, Shield } from "lucide-react";
+import { format, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getCurrentUserName, getProfile, onBookingsUpdate } from "@/lib/storage";
-import { useRouter } from "next/navigation";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Calendar as DayPicker } from "@/components/ui/calendar";
+import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getProfile, onBookingsUpdate } from "@/lib/storage";
 
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
@@ -66,7 +62,6 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -74,6 +69,8 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   useEffect(() => {
     const role = getCurrentUserRole();
     setUserRole(role);
+    const currentUserEmail = getCurrentUser();
+    const isAdmin = role === 'admin';
 
     const handleRealtimeUpdates = (allUserBookings: Booking[]) => {
         let filteredBookings;
@@ -87,7 +84,13 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
             filteredBookings = allUserBookings;
         }
         
-        filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+        // Sort by earliest date first for 'upcoming', latest first for others
+        if (mode === 'upcoming') {
+            filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+        } else {
+             filteredBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+        }
+        
         setBookings(filteredBookings);
         setIsLoading(false);
     }
@@ -95,13 +98,15 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
     // Set initial state and then subscribe for updates
     handleRealtimeUpdates(initialBookings);
 
-    const currentUserEmail = getCurrentUser();
-    const isAdmin = role === 'admin';
-    const searchParams = isAdmin ? undefined : { userEmail: currentUserEmail as string, role: role as 'passenger' | 'owner' };
-    
-    const unsubscribe = onBookingsUpdate(handleRealtimeUpdates, searchParams);
-
-    return () => unsubscribe();
+    // Only subscribe if we are not on the admin page (which passes all bookings)
+    if (mode !== 'all') {
+        const searchParams = isAdmin ? undefined : { userEmail: currentUserEmail as string, role: role as 'passenger' | 'owner' };
+        const unsubscribe = onBookingsUpdate(handleRealtimeUpdates, searchParams);
+        return () => unsubscribe();
+    } else {
+        // For admin page, we just use the initial list
+         setIsLoading(false);
+    }
 
   }, [initialBookings, mode]);
 

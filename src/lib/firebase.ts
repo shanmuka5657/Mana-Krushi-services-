@@ -133,11 +133,10 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
     try {
         let q = query(bookingsCollection);
 
-        if (searchParams?.date) {
-            const searchDate = new Date(searchParams.date);
-            const startOfDay = new Date(searchDate.setHours(0, 0, 0, 0));
-            const endOfDay = new Date(searchDate.setHours(23, 59, 59, 999));
-            q = query(q, where("departureDate", ">=", startOfDay), where("departureDate", "<=", endOfDay));
+        // Server-side filtering by user if possible
+        if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
+            const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
+            q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
         }
 
         const snapshot = await getDocs(q);
@@ -152,13 +151,9 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
             } as Booking;
         });
         
-        // Client-side filtering for user
-        if (searchParams?.userEmail && searchParams?.role) {
-            if (searchParams.role === 'passenger') {
-                bookings = bookings.filter(b => b.clientEmail === searchParams.userEmail);
-            } else if (searchParams.role === 'owner') {
-                bookings = bookings.filter(b => b.driverEmail === searchParams.userEmail);
-            }
+        // Client-side filtering for everything else
+        if (searchParams?.date) {
+            bookings = bookings.filter(b => format(new Date(b.departureDate), 'yyyy-MM-dd') === searchParams.date);
         }
 
         if (searchParams?.destination) {
@@ -186,12 +181,9 @@ export const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) =>
     let q = query(bookingsCollection);
     
     // Apply user-specific filters if provided. This is the simplest query we can make.
-    if (searchParams?.userEmail && searchParams?.role) {
-        if (searchParams.role === 'passenger') {
-            q = query(q, where("clientEmail", "==", searchParams.userEmail));
-        } else if (searchParams.role === 'owner') {
-            q = query(q, where("driverEmail", "==", searchParams.userEmail));
-        }
+    if (searchParams?.userEmail && searchParams?.role && searchParams.role !== 'admin') {
+        const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
+        q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -205,9 +197,7 @@ export const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) =>
             } as Booking;
         });
         
-        // Sorting is now handled on the client-side after data is received.
-        const sortedBookings = bookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-        callback(sortedBookings);
+        callback(bookings);
 
     }, (error) => {
         console.error("Error listening to bookings updates:", error);
@@ -234,13 +224,11 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
 };
 
 export const getNextRideForUserFromFirestore = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
-    if (!bookingsCollection) return null;
+    if (!bookingsCollection || !email) return null;
     try {
-        const now = new Date();
         const fieldToQuery = role === 'owner' ? 'driverEmail' : 'clientEmail';
 
         // Simplified query to fetch all bookings for the user.
-        // This avoids needing a composite index.
         const q = query(
             bookingsCollection,
             where(fieldToQuery, "==", email)
@@ -263,6 +251,7 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
         });
 
         // Filter and sort in-memory. This is efficient enough for a single user's bookings.
+        const now = new Date();
         const upcomingConfirmedRides = userBookings
             .filter(b => b.status === 'Confirmed' && new Date(b.departureDate) > now)
             .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());

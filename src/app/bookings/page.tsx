@@ -14,7 +14,6 @@ function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const searchParams = useSearchParams();
-    const roleParam = searchParams.get('role') || 'passenger';
 
     useEffect(() => {
         const fetchInitialBookings = async () => {
@@ -27,22 +26,15 @@ function BookingsPageContent() {
             const userProfile = await getProfile(userEmail);
             const userRole = userProfile?.role || 'passenger';
             
+            // Fetch all bookings for the user initially
             const userBookings = await getBookings(false, { userEmail, role: userRole });
             
-            const today = startOfDay(new Date());
-
-            const upcomingBookings = userBookings
-                .filter(b => {
-                    const departureDate = new Date(b.departureDate);
-                    return departureDate >= today && b.status !== 'Cancelled';
-                })
-                .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-
-            setBookings(upcomingBookings);
+            // The filtering will now happen inside the RecentBookings component
+            setBookings(userBookings);
             setIsLoaded(true);
         };
         fetchInitialBookings();
-    }, [roleParam]);
+    }, []);
     
     if (!isLoaded) {
         return <AppLayout><div>Loading bookings...</div></AppLayout>;
