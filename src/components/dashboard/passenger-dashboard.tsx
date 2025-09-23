@@ -60,11 +60,16 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [locations, setLocations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const checkProfileAndFetchLocations = async () => {
         const profile = await getProfile();
-        if (!profile || !profile.mobile || profile.mobile === '0000000000') {
+        if (isMounted && (!profile || !profile.mobile || profile.mobile === '0000000000')) {
           setShowProfilePrompt(true);
         }
 
@@ -84,8 +89,10 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         }
         setIsLoading(false);
     }
-    checkProfileAndFetchLocations();
-  }, []);
+    if (isMounted) {
+      checkProfileAndFetchLocations();
+    }
+  }, [isMounted]);
   
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),

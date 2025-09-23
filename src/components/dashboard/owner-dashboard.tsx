@@ -105,6 +105,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [locations, setLocations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
@@ -172,35 +173,15 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
 
 
   useEffect(() => {
-    const checkProfileAndFetchLocations = async () => {
+    const fetchInitialData = async () => {
         const userProfile = await getProfile();
         setProfile(userProfile);
         
-        // Populate form with profile data
         if (userProfile) {
             if(userProfile.name) form.setValue('ownerName', userProfile.name);
             if(userProfile.name) form.setValue('driverName', userProfile.name);
             if(userProfile.mobile && userProfile.mobile !== '0000000000') form.setValue('driverMobile', userProfile.mobile);
             if(userProfile.email) form.setValue('ownerEmail', userProfile.email);
-        }
-
-        // Defer checks to prevent pop-ups on load
-        if (!userProfile || !userProfile.mobile || userProfile.mobile === '0000000000') {
-          setShowProfilePrompt(true);
-        } else if (!userProfile.vehicleType || !userProfile.vehicleNumber) {
-            toast({
-                title: "Vehicle Info Missing",
-                description: "Please add your vehicle type and number in your profile.",
-                variant: "destructive",
-            });
-            setShowProfilePrompt(true);
-        } else if (!userProfile.planExpiryDate) {
-             toast({
-                title: "Owner Plan Inactive",
-                description: "Please activate your owner plan in your profile to add routes.",
-                variant: "destructive",
-            });
-            onSwitchTab('profile');
         }
 
         const cachedLocations = sessionStorage.getItem('routeLocations');
@@ -219,8 +200,34 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         }
         setIsLoading(false);
     }
-    checkProfileAndFetchLocations();
-  }, [onSwitchTab, toast, form]);
+    fetchInitialData();
+  }, [form]);
+
+  useEffect(() => {
+      setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+      if (isMounted && !isLoading) {
+          if (!profile || !profile.mobile || profile.mobile === '0000000000') {
+            setShowProfilePrompt(true);
+          } else if (!profile.vehicleType || !profile.vehicleNumber) {
+              toast({
+                  title: "Vehicle Info Missing",
+                  description: "Please add your vehicle type and number in your profile.",
+                  variant: "destructive",
+              });
+              setShowProfilePrompt(true);
+          } else if (!profile.planExpiryDate) {
+              toast({
+                  title: "Owner Plan Inactive",
+                  description: "Please activate your owner plan in your profile to add routes.",
+                  variant: "destructive",
+              });
+              onSwitchTab('profile');
+          }
+      }
+  }, [isMounted, isLoading, profile, onSwitchTab, toast]);
 
 
   async function onSubmit(data: OwnerFormValues) {
