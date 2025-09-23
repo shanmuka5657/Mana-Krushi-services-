@@ -1,35 +1,229 @@
 {
+    "theme_color": "#1E88E5",
+    "background_color": "#FFFFFF",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#1E88E5",
+    "id": "com.manakrushi.app",
+    "display_override": [
+        "tabbed",
+        "window-controls-overlay"
+    ],
+    "categories": [
+        "travel",
+        "business",
+        "lifestyle"
+    ],
+    "orientation": "any",
+    "lang": "en",
+    "dir": "ltr",
+    "iarc_rating_id": "",
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "scope_extensions": [
+        {
+            "origin": "*.manakrushi.com"
+        },
+        {
+            "origin": "*.manakrushi.net"
+        },
+        {
+            "origin": "*.manakrushi.org"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "short_name": "Find Ride",
+            "description": "Search for available rides",
+            "url": "/dashboard?role=passenger",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming bookings",
+            "url": "/bookings",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
     "icons": [
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "48x48",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "72x72",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "96x96",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "128x128",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "144x144",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "152x152",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "256x256",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "48x48",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "72x72",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "96x96",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "128x128",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "144x144",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "152x152",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "256x256",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "screenshots": [
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "1080x1920",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "Welcome Screen"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "1920x1080",
+            "type": "image/jpeg",
+            "form_factor": "wide",
+            "label": "Dashboard View"
+        }
+    ],
+    "share_target": {
+        "action": "/search",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    },
+    "file_handlers": [
+        {
+            "action": "/handle-file",
+            "accept": {
+                "text/plain": [
+                    ".txt"
+                ]
+            }
+        }
+    ],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "widgets": [
+        {
+            "name": "My Rides",
+            "description": "View your upcoming rides",
+            "tag": "rides",
+            "template": "rides-template",
+            "ms_ac_template": "widgets/rides.json",
+            "data": "widgets/rides-data.json",
+            "type": "application/json"
+        }
+    ],
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "note_taking": {
+        "new_note_url": "/new-note",
+        "needs_legacy_protocol_support": false
+    }
 }
