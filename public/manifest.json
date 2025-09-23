@@ -4,28 +4,23 @@
     "display": "standalone",
     "scope": "/",
     "start_url": "/",
-    "id": "/",
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "id": "dev.cloudworkstations.qgge.d3rdd6.mana-krushi-services",
     "icons": [
         {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "src": "https://i.ibb.co/vxmGWQGH/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.jpg",
             "sizes": "192x192",
             "type": "image/jpeg"
         },
         {
-            "src": "/icons/icon-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "/icons/icon-512x512.png",
+            "src": "https://i.ibb.co/Jq6G3p6/1.png",
             "sizes": "512x512",
             "type": "image/png"
         },
         {
-            "src": "/icons/icon-512x512-maskable.png",
+            "src": "https://i.ibb.co/rpx7sM2/2.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
@@ -34,14 +29,13 @@
     "shortcuts": [
         {
             "name": "Find a Ride",
-            "short_name": "Find Ride",
+            "short_name": "Find",
             "description": "Search for available rides",
             "url": "/dashboard?role=passenger",
             "icons": [
                 {
                     "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-                    "sizes": "192x192",
-                    "type": "image/jpeg"
+                    "sizes": "192x192"
                 }
             ]
         },
@@ -53,19 +47,18 @@
             "icons": [
                 {
                     "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-                    "sizes": "192x192",
-                    "type": "image/jpeg"
+                    "sizes": "192x192"
                 }
             ]
         }
     ],
+    "screenshots": [],
     "protocol_handlers": [
         {
             "protocol": "web+mana",
             "url": "/search?q=%s"
         }
     ],
-    "iarc_rating_id": "",
     "related_applications": [],
     "scope_extensions": [
         {
