@@ -10,54 +10,9 @@
     "id": "/?utm_source=pwa",
     "icons": [
         {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%232563eb'/%3E%3Ccircle cx='256' cy='256' r='200' fill='%231e3a8a'/%3E%3Ctext x='256' y='280' font-family='Arial, sans-serif' font-size='160' font-weight='bold' fill='white' text-anchor='middle'%3EMK%3C/text%3E%3Ctext x='256' y='350' font-family='Arial, sans-serif' font-size='36' font-weight='bold' fill='white' text-anchor='middle' letter-spacing='4'%3ECONSULTING%3C/text%3E%3Ctext x='256' y='390' font-family='Arial, sans-serif' font-size='36' font-weight='bold' fill='white' text-anchor='middle' letter-spacing='4'%3ESERVICES%3C/text%3E%3C/svg%3E",
-            "type": "image/svg+xml",
-            "sizes": "any",
-            "purpose": "any"
-        },
-        {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "src": "https://i.ibb.co/VvZGCp8/MK-Consulting-Services-Logo.png",
             "sizes": "192x192",
-            "type": "image/jpeg",
-            "purpose": "any"
-        },
-        {
-            "src": "https://i.ibb.co/VvZGCp8/MK-Consulting-Services-Logo.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "https://i.ibb.co/VvZGCp8/MK-Consulting-Services-Logo.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
-    ],
-    "screenshots": [
-        {
-            "src": "https://i.ibb.co/pWy1C1j/img-1.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "form_factor": "narrow"
-        },
-        {
-            "src": "https://i.ibb.co/dG7pS1g/img-2.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "form_factor": "narrow"
-        },
-        {
-            "src": "https://i.ibb.co/rfn2Vv5/img-3.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "form_factor": "narrow"
-        },
-        {
-            "src": "https://i.ibb.co/h1gt2C1/img-4.png",
-            "sizes": "1920x1080",
-            "type": "image/png",
-            "form_factor": "wide"
+            "type": "image/png"
         }
     ]
 }
