@@ -10,6 +10,31 @@ import { perfTracker } from './perf-tracker';
 
 const isBrowser = typeof window !== "undefined";
 
+// --- Caching Layer ---
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const cache = {
+    profiles: new Map<string, { timestamp: number, data: Profile | null }>(),
+    allProfiles: { timestamp: 0, data: [] as Profile[] },
+    routes: new Map<string, { timestamp: number, data: Route[] }>(),
+    bookings: new Map<string, { timestamp: number, data: Booking[] }>(),
+};
+
+const clearCache = (key?: 'profiles' | 'allProfiles' | 'routes' | 'bookings') => {
+    if (key) {
+        if (key === 'allProfiles') {
+            cache.allProfiles = { timestamp: 0, data: [] };
+        } else {
+            cache[key].clear();
+        }
+    } else {
+        cache.profiles.clear();
+        cache.allProfiles = { timestamp: 0, data: [] };
+        cache.routes.clear();
+        cache.bookings.clear();
+    }
+}
+
+
 // --- Branding ---
 export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;
@@ -77,7 +102,6 @@ export const logVisit = async (path: string) => {
         return;
     }
     
-    perfTracker.increment({ reads: 1, writes: 1 }); // 1 read for profile, 1 write for visit
     const profile = await getProfile(user.email);
     if (!profile) return;
 
@@ -96,7 +120,8 @@ export const logVisit = async (path: string) => {
     }
     
     sessionStorage.setItem('last_activity', String(now));
-
+    
+    perfTracker.increment({ reads: 0, writes: 1 });
     await addVisitToFirestore({
         sessionId,
         userEmail: profile.email,
@@ -159,9 +184,17 @@ export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => 
 // --- Bookings ---
 export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!isBrowser) return [];
+    
+    const cacheKey = JSON.stringify(searchParams || {});
+    const cachedEntry = cache.bookings.get(cacheKey);
+    if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+        return cachedEntry.data;
+    }
+    
     try {
         perfTracker.increment({ reads: 1, writes: 0 });
         const bookings = await getBookingsFromFirestore(searchParams);
+        cache.bookings.set(cacheKey, { timestamp: Date.now(), data: bookings });
         return bookings;
     } catch (error) {
         console.error("Error getting bookings:", error);
@@ -173,11 +206,13 @@ export const onBookingsUpdate = (callback: (bookings: Booking[]) => void, search
     if (!isBrowser) return () => {};
     // Subscription counts as one initial read
     perfTracker.increment({ reads: 1, writes: 0 });
+    // Real-time updates should bypass the cache to deliver fresh data.
     return onBookingsUpdateFromFirestore(callback, searchParams);
 };
 
 export const saveBookings = async (bookings: Booking[]) => {
     if (!isBrowser) return;
+    clearCache('bookings');
     perfTracker.increment({ reads: 0, writes: 1 }); // Counts as one batch write
     await saveBookingsToFirestore(bookings);
 };
@@ -191,6 +226,7 @@ export const getNextRideForUser = async (email: string, role: 'passenger' | 'own
 
 export const updateBookingLocation = async (bookingId: string, location: { passengerLatitude?: number, passengerLongitude?: number, driverLatitude?: number, driverLongitude?: number }) => {
     if (!isBrowser) return;
+    clearCache('bookings');
     perfTracker.increment({ reads: 0, writes: 1 });
     await updateBookingInFirestore(bookingId, location);
 }
@@ -199,9 +235,17 @@ export const updateBookingLocation = async (bookingId: string, location: { passe
 // --- Routes ---
 export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
     if (!isBrowser) return [];
+
+    const cacheKey = JSON.stringify(searchParams || {});
+    const cachedEntry = cache.routes.get(cacheKey);
+    if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+        return cachedEntry.data;
+    }
+    
     try {
         perfTracker.increment({ reads: 1, writes: 0 });
         const routes = await getRoutesFromFirestore(searchParams);
+        cache.routes.set(cacheKey, { timestamp: Date.now(), data: routes });
         return routes;
     } catch(e) {
         console.error("Error getting routes:", e);
@@ -211,12 +255,14 @@ export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?:
 
 export const saveRoutes = async (routes: Route[]) => {
     if (!isBrowser) return;
+    clearCache('routes');
     perfTracker.increment({ reads: 0, writes: 1 }); // Batch write
     await saveRoutesToFirestore(routes);
 };
 
 export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
     if (!isBrowser) throw new Error("This function can only be called from the browser.");
+    clearCache('routes');
     perfTracker.increment({ reads: 0, writes: 1 });
     const newRoute = await addRouteToFirestore(route);
     return newRoute;
@@ -226,10 +272,13 @@ export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
 // --- Profile ---
 export const saveProfile = async (profile: Profile) => {
     if (!isBrowser) return;
-    perfTracker.increment({ reads: 0, writes: 1 });
+    
     const user = getCurrentFirebaseUser();
     const userEmail = profile.email || user?.email;
     if (userEmail) {
+        clearCache('profiles'); // Clear specific profile
+        clearCache('allProfiles'); // And all profiles list
+        perfTracker.increment({ reads: 0, writes: 1 });
         await saveProfileToFirestore({ ...profile, email: userEmail });
     } else {
         console.error("Cannot save profile, no user is logged in.");
@@ -238,11 +287,19 @@ export const saveProfile = async (profile: Profile) => {
 
 export const getProfile = async (email?: string): Promise<Profile | null> => {
     if (!isBrowser) return null;
-    perfTracker.increment({ reads: 1, writes: 0 });
+    
     const user = getCurrentFirebaseUser();
     const userEmail = email || user?.email;
+    
     if (userEmail) {
+        const cachedEntry = cache.profiles.get(userEmail);
+        if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+            return cachedEntry.data;
+        }
+        
+        perfTracker.increment({ reads: 1, writes: 0 });
         const profile = await getProfileFromFirestore(userEmail);
+        cache.profiles.set(userEmail, { timestamp: Date.now(), data: profile });
         return profile;
     }
     return null;
@@ -250,8 +307,15 @@ export const getProfile = async (email?: string): Promise<Profile | null> => {
 
 export const getAllProfiles = async (): Promise<Profile[]> => {
     if (!isBrowser) return [];
+
+    const cachedEntry = cache.allProfiles;
+    if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
+        return cachedEntry.data;
+    }
+
     perfTracker.increment({ reads: 1, writes: 0 });
     const profiles = await getAllProfilesFromFirestore();
+    cache.allProfiles = { timestamp: Date.now(), data: profiles };
     return profiles;
 }
 
@@ -277,7 +341,8 @@ export const getCurrentUserRole = (): string | null => {
      return 'passenger'; // Placeholder
 };
 export const clearCurrentUser = () => {
-    // This is now handled by signOut
+    // This is now handled by signOut and cache clearing
+    clearCache();
 };
 export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'passenger' | 'admin') => {
    // This is now handled by signUpWithEmail
