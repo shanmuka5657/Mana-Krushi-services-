@@ -4,23 +4,28 @@
     "display": "standalone",
     "scope": "/",
     "start_url": "/",
+    "id": "/",
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "id": "/",
+    "categories": [
+        "education",
+        "navigation",
+        "travel"
+    ],
     "icons": [
         {
-            "src": "https://i.ibb.co/vzrVd2R/IMG-20250920-WA0025.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/Vvz1WqC/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
+            "src": "https://i.ibb.co/vxmGWQGH/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.jpg",
             "sizes": "512x512",
             "type": "image/png"
         },
         {
-            "src": "https://i.ibb.co/GcLbJtC/Screenshot-2025-09-14-12-37-47-041-com-whatsapp-maskable.png",
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
@@ -28,73 +33,47 @@
     ],
     "screenshots": [
         {
-            "src": "https://i.ibb.co/TD8TS9JX/Screenshot-from-2024-09-14-11-00-50.png",
-            "sizes": "1080x2400",
+            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+            "sizes": "1080x2340",
             "type": "image/jpeg",
-            "form_factor": "narrow",
-            "label": "Find and book rides"
+            "form_factor": "narrow"
         }
-    ],
-    "categories": [
-        "education",
-        "navigation",
-        "travel"
     ],
     "shortcuts": [
         {
             "name": "Find a Ride",
+            "short_name": "Find Ride",
+            "description": "Search for available rides",
             "url": "/dashboard?role=passenger",
-            "description": "Search for available rides.",
             "icons": [
                 {
-                    "src": "https://i.ibb.co/Vvz1WqC/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
-                    "sizes": "192x192"
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "96x96"
                 }
             ]
         },
         {
             "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming and past bookings",
             "url": "/bookings",
-            "description": "View your upcoming and past bookings.",
             "icons": [
                 {
-                    "src": "https://i.ibb.co/Vvz1WqC/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.png",
-                    "sizes": "192x192"
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "96x96"
                 }
             ]
         }
     ],
     "protocol_handlers": [
         {
-            "protocol": "web+manakrushi",
+            "protocol": "web+mana",
             "url": "/search?q=%s"
         }
     ],
     "related_applications": [],
-    "prefer_related_applications": false,
     "iarc_rating_id": "",
-    "widgets": [
-        {
-            "name": "Find a Ride",
-            "description": "Quickly search for your next ride",
-            "tag": "find-ride",
-            "template": "find-ride-template",
-            "ms_ac_template": "widgets/find-ride.json",
-            "data": "widgets/find-ride-data.json",
-            "type": "application/json"
-        }
-    ],
-    "edge_side_panel": {
-        "preferred_width": 400
-    },
-    "file_handlers": [],
-    "launch_handler": {
-        "client_mode": "navigate-existing"
-    },
-    "note_taking": {
-        "new_note_url": "/new-note",
-        "preferred_format": "text/html"
-    },
+    "widgets": [],
     "scope_extensions": [
         {
             "origin": "*.manakrushi.com"
