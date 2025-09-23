@@ -7,6 +7,15 @@
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "id": "com.manakrushi.app",
+  "categories": [
+    "travel",
+    "business",
+    "lifestyle"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "any",
   "icons": [
     {
       "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
@@ -35,22 +44,60 @@
   ],
   "screenshots": [
     {
-      "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "1280x1280",
+      "type": "image/jpeg",
       "form_factor": "wide",
-      "label": "Wide Screenshot"
+      "label": "Mana Krushi Services"
     },
     {
-      "src": "https://www.pwabuilder.com/assets/screenshots/screen2.png",
-      "sizes": "720x1280",
-      "type": "image/png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "1280x1280",
+      "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Narrow Screenshot"
+      "label": "Find or Offer Rides"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find Ride",
+      "description": "Search for available rides to your destination.",
+      "url": "/dashboard?role=passenger",
+      "icons": [
+        {
+          "src": "/icons/search.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your upcoming and past bookings.",
+      "url": "/bookings",
+      "icons": [
+        {
+          "src": "/icons/bookings.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "description": "Update your personal information.",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/icons/profile.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "share_target": {
-    "action": "/search/",
+    "action": "/search",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
@@ -72,53 +119,39 @@
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
-  "widgets": [
-    {
-      "name": "Quick Ride Search",
-      "description": "Find a ride quickly.",
-      "tag": "search-widget",
-      "template": "search-form-template",
-      "ms_ac_template": "widgets/search-form.json",
-      "data": "widgets/search-data.json",
-      "screenshots": [
-        {
-          "src": "/widgets/search-screenshot.png",
-          "sizes": "600x400",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
   "display_override": [
     "window-controls-overlay"
   ],
-  "note_taking": {
-    "new_note_url": "/new-note",
-    "needs_auth": true
-  },
-  "scope_extensions": [
-    {
-      "origin": "*.manakrushi.com"
-    }
-  ],
-  "iarc_rating_id": "",
-  "related_applications": [],
-  "prefer_related_applications": false,
   "protocol_handlers": [
     {
       "protocol": "web+manakrushi",
       "url": "/search?q=%s"
     }
   ],
-  "categories": [
-    "travel",
-    "business"
+  "note_taking": {
+    "new_note_url": "/new-note",
+    "needs_editing": true
+  },
+  "iarc_rating_id": "",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "scope_extensions": [
+    {
+      "origin": "*.manakrushi.com"
+    }
   ],
-  "lang": "en",
-  "dir": "ltr",
-  "orientation": "any",
-  "id": "/?utm_source=pwa"
+  "widgets": [
+    {
+      "name": "Find a Ride",
+      "description": "Quickly search for a ride.",
+      "tag": "find-ride",
+      "template": "find-ride-template",
+      "ms_ac_template": "find-ride-adaptive-card",
+      "data": "/widgets/find-ride.json",
+      "type": "application/json"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 480
+  }
 }
