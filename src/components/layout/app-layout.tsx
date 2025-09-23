@@ -36,7 +36,6 @@ import {
   Tv,
   MessageSquare,
   Gift,
-  History,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
