@@ -1,5 +1,4 @@
 {
-  "id": "com.manakrushi.app",
   "theme_color": "#1E88E5",
   "background_color": "#FFFFFF",
   "display": "standalone",
@@ -10,20 +9,48 @@
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "icons": [
     {
-      "src": "/logo192.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/logo512.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Wide Screenshot"
+    },
+    {
+      "src": "https://www.pwabuilder.com/assets/screenshots/screen2.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Narrow Screenshot"
+    }
+  ],
   "share_target": {
-    "action": "/search",
+    "action": "/search/",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
@@ -32,111 +59,6 @@
       "url": "url"
     }
   },
-  "screenshots": [
-    {
-      "src": "https://picsum.photos/seed/pwa-ss1/1080/1920",
-      "sizes": "1080x1920",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Find a Ride"
-    },
-    {
-      "src": "https://picsum.photos/seed/pwa-ss2/1080/1920",
-      "sizes": "1080x1920",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Booking Details"
-    },
-    {
-      "src": "https://picsum.photos/seed/pwa-ss3/1920/1080",
-      "sizes": "1920x1080",
-      "type": "image/jpeg",
-      "form_factor": "wide",
-      "label": "Owner Dashboard"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Find a Ride",
-      "short_name": "Find",
-      "description": "Search for available rides",
-      "url": "/dashboard?role=passenger",
-      "icons": [
-        {
-          "src": "/logo192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
-      "url": "/bookings",
-      "icons": [
-        {
-          "src": "/logo192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "My Profile",
-      "short_name": "Profile",
-      "description": "View and edit your profile",
-      "url": "/profile",
-      "icons": [
-        {
-          "src": "/logo192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
-  "categories": [
-    "travel",
-    "business",
-    "navigation",
-    "social"
-  ],
-  "iarc_rating_id": "",
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "protocol_handlers": [
-    {
-      "protocol": "web+manakrushi",
-      "url": "/search?q=%s"
-    }
-  ],
-  "widgets": [
-    {
-      "name": "Find a Ride",
-      "description": "Search for rides to your destination.",
-      "tag": "find-ride",
-      "template": "find-ride-template",
-      "ms_ac_template": "find-ride-template.json",
-      "data": "find-ride-data.json",
-      "type": "application/json"
-    }
-  ],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "display_override": [
-    "window-controls-overlay"
-  ],
-  "note_taking": {
-    "new_note_url": "/dashboard?role=owner",
-    "needs_editing_flag": true
-  },
-  "scope_extensions": [
-    {
-      "origin": "*.manakrushi.com"
-    },
-    {
-      "origin": "manakrushi.com"
-    }
-  ],
   "file_handlers": [
     {
       "action": "/handle-file",
@@ -148,12 +70,55 @@
     }
   ],
   "launch_handler": {
-    "client_mode": [
-      "navigate-existing",
-      "auto"
-    ]
+    "client_mode": "navigate-existing"
   },
+  "widgets": [
+    {
+      "name": "Quick Ride Search",
+      "description": "Find a ride quickly.",
+      "tag": "search-widget",
+      "template": "search-form-template",
+      "ms_ac_template": "widgets/search-form.json",
+      "data": "widgets/search-data.json",
+      "screenshots": [
+        {
+          "src": "/widgets/search-screenshot.png",
+          "sizes": "600x400",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "display_override": [
+    "window-controls-overlay"
+  ],
+  "note_taking": {
+    "new_note_url": "/new-note",
+    "needs_auth": true
+  },
+  "scope_extensions": [
+    {
+      "origin": "*.manakrushi.com"
+    }
+  ],
+  "iarc_rating_id": "",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+manakrushi",
+      "url": "/search?q=%s"
+    }
+  ],
+  "categories": [
+    "travel",
+    "business"
+  ],
   "lang": "en",
   "dir": "ltr",
-  "orientation": "any"
+  "orientation": "any",
+  "id": "/?utm_source=pwa"
 }
