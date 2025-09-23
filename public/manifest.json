@@ -8,10 +8,11 @@
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
     "id": "/",
+    "dir": "auto",
     "lang": "en",
     "orientation": "any",
     "display_override": [
-        "standalone"
+        "window-controls-overlay"
     ],
     "icons": [
         {
