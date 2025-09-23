@@ -1,60 +1,89 @@
 {
-  "theme_color": "#1E88E5",
-  "background_color": "#FFFFFF",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1E88E5",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "any",
+  "display_override": [
+    "window-controls-overlay"
+  ],
   "icons": [
     {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "src": "https://i.ibb.co/pW3g1T0/IMG-20250920-WA0025.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/yQ5qY0h/IMG-20250920-WA0025.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/2Z5g5d5/icon-256x256.png",
+      "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "512x512",
+      "src": "https://i.ibb.co/bF9gqY9/icon-384x384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-      "sizes": "1080x1080",
-      "type": "image/jpeg",
-      "form_factor": "wide"
-    },
-    {
-      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
-      "sizes": "1080x2340",
-      "type": "image/jpeg",
-      "form_factor": "narrow"
-    }
-  ],
-  "lang": "en-US",
-  "dir": "ltr",
-  "orientation": "portrait",
+  "screenshots": [],
   "categories": [
-    "education",
-    "travel"
+    "travel",
+    "navigation"
   ],
-  "id": "/",
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find",
+      "description": "Search for available rides",
+      "url": "/dashboard?role=passenger",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/pW3g1T0/IMG-20250920-WA0025.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your upcoming and past bookings",
+      "url": "/bookings?role=passenger",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/pW3g1T0/IMG-20250920-WA0025.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "iarc_rating_id": "",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+mk",
+      "url": "/search?q=%s"
+    }
+  ],
+  "file_handlers": [],
+  "launch_handler": {
+    "client_mode": "auto"
+  },
   "share_target": {
     "action": "/search",
     "method": "GET",
@@ -63,5 +92,6 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "widgets": []
 }
