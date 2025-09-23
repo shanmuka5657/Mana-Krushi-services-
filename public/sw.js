@@ -1,60 +1,58 @@
-const CACHE_NAME = 'mana-krushi-cache-v1';
+const CACHE_NAME = 'mana-krushi-services-cache-v1';
 const OFFLINE_URL = '/offline';
-const PRECACHE_ASSETS = [
-    OFFLINE_URL,
-    '/favicon.ico',
-    '/logo192.png',
-    '/logo512.png',
-    '/',
+
+// List of files to cache during service worker installation.
+const FILES_TO_CACHE = [
+  OFFLINE_URL,
+  '/',
+  '/login',
+  '/signup',
+  '/dashboard?role=passenger',
+  '/dashboard?role=owner',
+  '/manifest.json',
+  // You can add more critical assets here like your main CSS or logo
 ];
 
-
 self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Install');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(PRECACHE_ASSETS);
-      })
-      .then(() => self.skipWaiting()) // Force the waiting service worker to become the active service worker.
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[Service Worker] Pre-caching offline page and core assets');
+      return cache.addAll(FILES_TO_CACHE);
+    })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  // Clean up old caches
+  console.log('[Service Worker] Activate');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim()) // Take control of all clients as soon as the service worker is activated.
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => {
+        if (key !== CACHE_NAME) {
+          console.log('[Service Worker] Removing old cache', key);
+          return caches.delete(key);
+        }
+      }));
+    })
   );
+  self.clients.claim();
 });
 
-
 self.addEventListener('fetch', (event) => {
-  // We only want to handle navigation requests for the offline fallback.
   if (event.request.mode === 'navigate') {
     event.respondWith(
       (async () => {
         try {
-          // First, try to use the navigation preload response if it's supported.
           const preloadResponse = await event.preloadResponse;
           if (preloadResponse) {
             return preloadResponse;
           }
 
-          // Always try the network first.
           const networkResponse = await fetch(event.request);
           return networkResponse;
         } catch (error) {
-          // Catch is only triggered if the network fails.
-          console.log('Fetch failed; returning offline page instead.', error);
+          console.log('[Service Worker] Fetch failed; returning offline page instead.', error);
 
           const cache = await caches.open(CACHE_NAME);
           const cachedResponse = await cache.match(OFFLINE_URL);
@@ -62,12 +60,18 @@ self.addEventListener('fetch', (event) => {
         }
       })()
     );
-  } else if (PRECACHE_ASSETS.some(asset => event.request.url.endsWith(asset))) {
-     // For precached assets, serve from cache first
-      event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-          return cachedResponse || fetch(event.request);
-        })
-      );
+  } else {
+    // For non-navigation requests (CSS, JS, images), use a cache-first strategy
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        return cachedResponse || fetch(event.request).then((networkResponse) => {
+          // Optional: Cache new assets as they are fetched
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      })
+    );
   }
 });
