@@ -4,10 +4,73 @@
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
-  "id": "/",
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "screenshots": [
+    {
+      "src": "https://ibb.co/TD8TS9J",
+      "sizes": "1080x2400",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": [
+    "education"
+  ],
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find Ride",
+      "description": "Search for available rides",
+      "url": "/dashboard?role=passenger",
+      "icons": [
+        {
+          "src": "/icons/search.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your upcoming and past bookings",
+      "url": "/bookings",
+      "icons": [
+        {
+          "src": "/icons/bookings.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+mk",
+      "url": "/search?q=%s"
+    }
+  ],
+  "dir": "ltr",
+  "lang": "en",
+  "orientation": "any",
+  "share_target": {
+    "action": "/search",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "display_override": [
+    "standalone"
+  ],
+  "handle_links": "auto",
+  "launch_handler": {
+    "client_mode": "auto"
+  },
+  "id": "/",
   "icons": [
     {
       "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
@@ -15,48 +78,53 @@
       "type": "image/jpeg"
     },
     {
-      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAAAXNSR0IArs4c6QAAABxpTUNDXwMAGP949f+t////+w8A4QEAAP8A/wAASiQYAAD/+/gQAAAA/vrp6AAA/t3dJQAA/qen+AAA/q+t9wAA/7e45AAA/8rL2QAA/9jZzAAA/9/gvwAA/+/wqwAA/+fn+wAA//v8/AAA//z8/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7-/gD/7+L/AP/v4P8A/+7g/wD/7d//AP/a3v8A/9fY/wD/0NX/AP/Nyv8A/8fB/wD/wLz/AP+6tv8A/7Gr/wD/p6H/AP+hn/8A/6D9/wD/oPz/AP+g/f8A/6D+/wD/oP//AP+g//8A/6H//wD/of//AP+i//8A/6L//wD/pP//AP+l//8A/6b//wD/p///AP+o//8A/6v//wD/q///AP+v//8A/7L//wD/tP//AP+4//8A/7r//wD/vP//AP/C//8A/8b//wD/y///AP/T//8A/9n//wD/3/L/AP/h7f8A/+Tp/wD/6uv/AP/u8P8A//r8/wD/+/z/AP/8/f8A//7//wD//v//AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/vsemLy1OERCSUhN",
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAB/klEQVR4nO3BAQ0AAADCoPdPbQ8HFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAcBEi4AASi+9YAAAAAASUVORK5CYII=",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADg5PAIAAAAAXNSR0IArs4c6QAAABxpTUNDXwMAGP949f+t////+w8A4QEAAP8A/wAASiQYAAD/+/gQAAAA/vrp6AAA/t3dJQAA/qen+AAA/q+t9wAA/7e45AAA/8rL2QAA/9jZzAAA/9/gvwAA/+/wqwAA/+fn+wAA//v8/AAA//z8/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7+/AAA//7-/gD/7+L/AP/v4P8A/+7g/wD/7d//AP/a3v8A/9fY/wD/0NX/AP/Nyv8A/8fB/wD/wLz/AP+6tv8A/7Gr/wD/p6H/AP+hn/8A/6D9/wD/oPz/AP+g/f8A/6D+/wD/oP//AP+g//8A/6H//wD/of//AP+i//8A/6L//wD/pP//AP+l//8A/6b//wD/p///AP+o//8A/6v//wD/q///AP+v//8A/7L//wD/tP//AP+4//8A/7r//wD/vP//AP/C//8A/8b//wD/y///AP/T//8A/9n//wD/3/L/AP/h7f8A/+Tp/wD/6uv/AP/u8P8A//r8/wD/+/z/AP/8/f8A//7//wD//v//AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/v8A//7+/wD//v7/AP/+/vsemLy1OERCSUhN",
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYAAAAGACAYAAACkx7W/AAACaElEQVR4nO3BAQEAAACAkP6v7ggKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACg2wAE8AAa5gAAAABJRU5ErkJggg==",
       "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eP65AAADJklEQVR4nO3BAQEAAACAkP6v7ggKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACg2wAE8AAa5gAAAABJRU5ErkJggg==",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ],
-  "screenshots": [
+  "file_handlers": [
     {
-      "src": "https://i.ibb.co/TD8TS9J/IMG-20250920-WA0026.jpg",
-      "sizes": "1080x2400",
-      "type": "image/jpeg",
-      "form_factor": "narrow"
+      "action": "/handle-file",
+      "accept": {
+        "text/plain": [
+          ".txt"
+        ]
+      }
     }
   ],
-  "dir": "ltr",
-  "lang": "en",
-  "orientation": "any",
-  "display_override": [
-    "window-controls-overlay"
-  ],
-  "share_target": {
-    "action": "/search",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
+  "widgets": [
+    {
+      "name": "MK Services Widget",
+      "description": "Quickly access Mana Krushi Services features.",
+      "tag": "mks-widget",
+      "template": "mks-widget-template",
+      "ms_ac_template": "mks-widget-template",
+      "data": "{}"
     }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
   },
+  "note_taking": {
+    "new_note_url": "/new-note"
+  },
+  "scope_extensions": [
+    {
+      "origin": "*.manakrushi.com"
+    }
+  ],
   "related_applications": [],
-  "prefer_related_applications": false,
-  "protocol_handlers": [],
-  "shortcuts": [],
   "iarc_rating_id": "",
-  "file_handlers": [],
-  "launch_handler": {},
-  "widgets": [],
-  "edge_side_panel": {},
-  "note_taking": {},
-  "scope_extensions": []
+  "prefer_related_applications": false
 }
