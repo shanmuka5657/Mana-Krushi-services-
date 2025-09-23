@@ -428,4 +428,3 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
-
