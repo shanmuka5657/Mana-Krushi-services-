@@ -59,6 +59,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   const router = useRouter();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [locations, setLocations] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkProfileAndFetchLocations = async () => {
@@ -81,6 +82,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
             setLocations(locationsArray);
             sessionStorage.setItem('routeLocations', JSON.stringify(locationsArray));
         }
+        setIsLoading(false);
     }
     checkProfileAndFetchLocations();
   }, []);
@@ -101,6 +103,14 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         date: format(data.travelDate, 'yyyy-MM-dd')
     });
     router.push(`/find-ride?${params.toString()}`);
+  }
+  
+  if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )
   }
 
   return (

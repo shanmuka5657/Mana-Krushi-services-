@@ -80,6 +80,7 @@ export default function ProfileForm() {
   const [otpValue, setOtpValue] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -202,6 +203,7 @@ export default function ProfileForm() {
         }
 
         form.reset(combinedValues);
+        setIsLoading(false);
     };
     loadProfile();
   }, [form]);
@@ -359,6 +361,13 @@ export default function ProfileForm() {
     }
   }, [mobileNumber, profile?.mobile, form]);
 
+  if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )
+  }
 
   return (
     <div className="space-y-6">

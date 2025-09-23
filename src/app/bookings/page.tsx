@@ -9,6 +9,7 @@ import type { Booking } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { startOfDay } from 'date-fns';
+import { Loader2 } from 'lucide-react';
 
 function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -26,10 +27,8 @@ function BookingsPageContent() {
             const userProfile = await getProfile(userEmail);
             const userRole = userProfile?.role || 'passenger';
             
-            // Fetch all bookings for the user initially
             const userBookings = await getBookings(false, { userEmail, role: userRole });
             
-            // The filtering will now happen inside the RecentBookings component
             setBookings(userBookings);
             setIsLoaded(true);
         };
@@ -37,7 +36,13 @@ function BookingsPageContent() {
     }, []);
     
     if (!isLoaded) {
-        return <AppLayout><div>Loading bookings...</div></AppLayout>;
+        return (
+            <AppLayout>
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </AppLayout>
+        );
     }
 
     return (

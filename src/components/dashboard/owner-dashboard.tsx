@@ -104,6 +104,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [locations, setLocations] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
@@ -173,9 +174,17 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   useEffect(() => {
     const checkProfileAndFetchLocations = async () => {
         const userProfile = await getProfile();
-
-        // Check Profile
         setProfile(userProfile);
+        
+        // Populate form with profile data
+        if (userProfile) {
+            if(userProfile.name) form.setValue('ownerName', userProfile.name);
+            if(userProfile.name) form.setValue('driverName', userProfile.name);
+            if(userProfile.mobile && userProfile.mobile !== '0000000000') form.setValue('driverMobile', userProfile.mobile);
+            if(userProfile.email) form.setValue('ownerEmail', userProfile.email);
+        }
+
+        // Defer checks to prevent pop-ups on load
         if (!userProfile || !userProfile.mobile || userProfile.mobile === '0000000000') {
           setShowProfilePrompt(true);
         } else if (!userProfile.vehicleType || !userProfile.vehicleNumber) {
@@ -194,7 +203,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             onSwitchTab('profile');
         }
 
-        // Fetch Locations (with caching)
         const cachedLocations = sessionStorage.getItem('routeLocations');
         if (cachedLocations) {
             setLocations(JSON.parse(cachedLocations));
@@ -209,29 +217,11 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             setLocations(locationsArray);
             sessionStorage.setItem('routeLocations', JSON.stringify(locationsArray));
         }
+        setIsLoading(false);
     }
     checkProfileAndFetchLocations();
-  }, [onSwitchTab, toast]);
-  
-  useEffect(() => {
-    const loadProfile = async () => {
-        const userProfile = await getProfile();
-        if(userProfile?.name) {
-            form.setValue('ownerName', userProfile.name);
-            form.setValue('driverName', userProfile.name);
-        }
-         if(userProfile?.mobile && userProfile.mobile !== '0000000000') {
-            form.setValue('driverMobile', userProfile.mobile);
-        }
-        if(userProfile?.email) {
-            form.setValue('ownerEmail', userProfile.email);
-        }
-        if(userProfile) {
-            setProfile(userProfile);
-        }
-    }
-    loadProfile();
-  }, [form]);
+  }, [onSwitchTab, toast, form]);
+
 
   async function onSubmit(data: OwnerFormValues) {
     const ownerEmail = getCurrentUser();
@@ -251,7 +241,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
     
-    // Check for daily route limit & time overlaps
     const travelDateString = format(data.travelDate, 'yyyy-MM-dd');
     const existingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
 
@@ -264,7 +253,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
 
-    // Time conflict check
     const today = new Date(travelDateString);
     const newStart = parse(data.departureTime, 'HH:mm', today).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', today).getTime();
@@ -326,12 +314,16 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   
   const handlePaymentSuccess = async () => {
     if (routeDataToSubmit) {
-      // ** REAL-WORLD INTEGRATION POINT **
-      // An API call to the insurance provider (e.g., Acko) would be made here.
-      // This is where you would call: await generateInsuranceForRide(routeDataToSubmit);
-      // The policy ID returned from the insurer would be stored with the route data.
       handleRouteSubmission(routeDataToSubmit);
     }
+  }
+  
+  if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )
   }
 
   return (
@@ -728,4 +720,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </div>
   );
 }
-
