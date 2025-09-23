@@ -1,12 +1,10 @@
 
-
 import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
-
 
 const isBrowser = typeof window !== "undefined";
 
@@ -60,6 +58,18 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
         unsubUrl();
         unsubCacheBuster();
     };
+};
+
+// --- PWA ---
+export const savePwaScreenshots = async (screenshots: any[]) => {
+    if (!isBrowser) return;
+    // On client, only save to Firestore. The server action will handle the file write.
+    await saveSetting('pwaScreenshots', screenshots);
+};
+
+export const getPwaScreenshots = async (): Promise<any[] | null> => {
+    if (!isBrowser) return null;
+    return await getSettingFromFirestore('pwaScreenshots');
 };
 
 

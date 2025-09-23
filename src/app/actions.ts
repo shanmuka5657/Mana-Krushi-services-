@@ -8,7 +8,9 @@ import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { cropLogo as cropLogoFlow } from "@/ai/flows/crop-logo-flow";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
-import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, savePwaScreenshots as savePwaScreenshotsToDb } from "@/lib/storage";
+import fs from 'fs';
+import path from 'path';
 
 
 const SuggestDestinationsInput = z.object({
@@ -137,5 +139,64 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
   } catch (e) {
     console.error('Error deleting account:', e);
     return { success: false, error: 'An unexpected error occurred.' };
+  }
+}
+
+const ScreenshotSchema = z.object({
+  src: z.string(),
+  sizes: z.string(),
+  type: z.string(),
+  form_factor: z.string(),
+});
+
+const UploadScreenshotsInput = z.object({
+  screenshots: z.array(ScreenshotSchema),
+});
+
+export async function uploadPwaScreenshots(input: { screenshots: z.infer<typeof ScreenshotSchema>[] }): Promise<{ success: boolean; error?: string }> {
+  const validatedInput = UploadScreenshotsInput.safeParse(input);
+  if (!validatedInput.success) {
+    return { success: false, error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+  }
+  
+  const screenshots = validatedInput.data.screenshots;
+
+  try {
+    // 1. Save to DB for client-side retrieval if needed
+    await savePwaScreenshotsToDb(screenshots);
+
+    // 2. Write to physical manifest.json file
+    const manifestPath = path.join(process.cwd(), 'public', 'manifest.json');
+    try {
+        const manifestData = fs.readFileSync(manifestPath, 'utf-8');
+        const manifest = JSON.parse(manifestData);
+        manifest.screenshots = screenshots;
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    } catch (error) {
+        // manifest.json might not exist, create it
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+            const newManifest = {
+                "theme_color": "#1E88E5",
+                "background_color": "#FFFFFF",
+                "display": "standalone",
+                "scope": "/",
+                "start_url": "/",
+                "name": "Mana Krushi Services",
+                "short_name": "MK Services",
+                "description": "Your partner in shared travel. Find or offer a ride with ease.",
+                "icons": [], // This will be populated by another process or should be pre-filled
+                "screenshots": screenshots,
+            };
+            fs.writeFileSync(manifestPath, JSON.stringify(newManifest, null, 2));
+        } else {
+            console.error("Error writing to manifest.json:", error);
+            throw error; // Re-throw to be caught by outer catch
+        }
+    }
+
+    return { success: true };
+  } catch (e) {
+    console.error('Error processing PWA screenshots:', e);
+    return { success: false, error: 'An unexpected error occurred while saving screenshots.' };
   }
 }
