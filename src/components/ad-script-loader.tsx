@@ -2,12 +2,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Script from 'next/script';
 import { onAdsEnabledChange, getSetting } from '@/lib/storage';
 
 const AdScriptLoader = () => {
   const [areAdsEnabled, setAreAdsEnabled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const checkInitialStateAndSubscribe = async () => {
       const initialState = await getSetting('areAdsEnabled');
       setAreAdsEnabled(initialState || false);
@@ -27,50 +30,28 @@ const AdScriptLoader = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const scriptConfigs = [
-      {
-        id: 'monetag-ad-script-1',
-        innerHTML: `(function(s){s.dataset.zone='9915521',s.src='https://al5sm.com/tag.min.js'})(document.body.appendChild(document.createElement('script')))`
-      },
-      {
-        id: 'monetag-ad-script-2',
-        innerHTML: `(function(s){s.dataset.zone='9918780',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
-      }
-    ];
+  if (!isMounted || !areAdsEnabled) {
+    return null;
+  }
 
-    if (areAdsEnabled) {
-      scriptConfigs.forEach(config => {
-        if (!document.getElementById(config.id)) {
-          const s = document.createElement('script');
-          s.id = config.id;
-          s.async = true;
-          s.innerHTML = config.innerHTML;
-          document.body.appendChild(s);
-        }
-      });
-    } else {
-      scriptConfigs.forEach(config => {
-        const script = document.getElementById(config.id);
-        if (script) {
-          document.body.removeChild(script);
-        }
-      });
-    }
-
-    return () => {
-      if (areAdsEnabled) {
-        scriptConfigs.forEach(config => {
-          const script = document.getElementById(config.id);
-          if (script && script.parentNode === document.body) {
-            document.body.removeChild(script);
-          }
-        });
-      }
-    };
-  }, [areAdsEnabled]);
-
-  return null;
+  return (
+    <>
+      <Script
+        id="monetag-ad-script-1"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(s){s.dataset.zone='9915521',s.src='https://al5sm.com/tag.min.js'})(document.body.appendChild(document.createElement('script')))`
+        }}
+      />
+      <Script
+        id="monetag-ad-script-2"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(s){s.dataset.zone='9918780',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
+        }}
+      />
+    </>
+  );
 };
 
 export default AdScriptLoader;
