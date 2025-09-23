@@ -7,6 +7,8 @@
   "name": "Mana Krushi Services",
   "short_name": "MK Services",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "id": "/?utm_source=pwa",
+  "orientation": "any",
   "icons": [
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
@@ -19,32 +21,31 @@
       "type": "image/png"
     }
   ],
-  "id": "/?utm_source=pwa",
-  "orientation": "any",
   "screenshots": [
     {
       "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
+      "sizes": "1080x1080",
       "type": "image/jpeg",
-      "sizes": "500x500",
-      "label": "App Logo"
+      "form_factor": "wide",
+      "label": "Welcome to Mana Krushi Services"
     },
     {
       "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+      "sizes": "1080x2340",
       "type": "image/jpeg",
-      "sizes": "1080x2132",
       "form_factor": "narrow",
-      "label": "Chat Screenshot"
+      "label": "Chat with Support"
     }
   ],
   "shortcuts": [
     {
       "name": "Home",
       "short_name": "Home",
-      "description": "Go to the main dashboard",
+      "description": "Go to the Home page",
       "url": "/dashboard",
       "icons": [
         {
-          "src": "/icons/home.png",
+          "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
           "sizes": "192x192"
         }
       ]
@@ -56,7 +57,7 @@
       "url": "/bookings",
       "icons": [
         {
-          "src": "/icons/bookings.png",
+          "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
           "sizes": "192x192"
         }
       ]
