@@ -1,20 +1,20 @@
 {
-    "defaultLogo": {
-        "url": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-        "width": 120,
-        "height": 120,
-        "hint": "app logo"
-    },
-    "adBanner1": {
-        "seed": "adbanner1",
-        "width": 728,
-        "height": 90,
-        "hint": "advertisement banner"
-    },
-    "noRoutes": {
-        "url": "https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png",
-        "width": 200,
-        "height": 150,
-        "hint": "empty map"
-    }
+  "defaultLogo": {
+    "url": "https://i.ibb.co/VvZGCp8/MK-Consulting-Services-Logo.png",
+    "width": 120,
+    "height": 120,
+    "hint": "app logo"
+  },
+  "adBanner1": {
+    "seed": "adbanner1",
+    "width": 728,
+    "height": 90,
+    "hint": "advertisement banner"
+  },
+  "noRoutes": {
+    "url": "https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png",
+    "width": 200,
+    "height": 150,
+    "hint": "empty map"
+  }
 }
