@@ -1,77 +1,95 @@
-const CACHE_NAME = 'mana-krushi-services-cache-v1';
-const OFFLINE_URL = '/offline';
+// A unique version name for the cache. Change this on every deployment.
+const CACHE_VERSION = 'mana-krushi-v2';
+const CACHE_NAME = `mana-krushi-cache-${CACHE_VERSION}`;
 
-// List of files to cache during service worker installation.
-const FILES_TO_CACHE = [
-  OFFLINE_URL,
-  '/',
-  '/login',
-  '/signup',
-  '/dashboard?role=passenger',
-  '/dashboard?role=owner',
-  '/manifest.json',
-  // You can add more critical assets here like your main CSS or logo
+// A list of essential files to be cached on installation.
+const CORE_ASSETS = [
+    '/',
+    '/offline',
+    '/manifest.json',
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png',
 ];
 
+// 1. Installation: Cache the core assets of the application.
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Install');
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Pre-caching offline page and core assets');
-      return cache.addAll(FILES_TO_CACHE);
-    })
-  );
-  self.skipWaiting();
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(CORE_ASSETS);
+        })
+    );
+    self.skipWaiting(); // Force the new service worker to become active immediately.
 });
 
+// 2. Activation: Clean up old caches.
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activate');
-  event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => {
-        if (key !== CACHE_NAME) {
-          console.log('[Service Worker] Removing old cache', key);
-          return caches.delete(key);
-        }
-      }));
-    })
-  );
-  self.clients.claim();
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    // Delete any caches that are not the current version.
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => {
+            // Take control of all open clients (tabs) to ensure they use the new SW.
+            return self.clients.claim();
+        })
+    );
 });
 
+// 3. Fetch: Define caching strategies for different types of requests.
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      (async () => {
-        try {
-          const preloadResponse = await event.preloadResponse;
-          if (preloadResponse) {
-            return preloadResponse;
-          }
+    const { request } = event;
 
-          const networkResponse = await fetch(event.request);
-          return networkResponse;
-        } catch (error) {
-          console.log('[Service Worker] Fetch failed; returning offline page instead.', error);
+    // A. For navigation requests (HTML pages), use a Network-First strategy.
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    // If the network request is successful, cache a copy and return it.
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(request, responseToCache);
+                    });
+                    return response;
+                })
+                .catch(() => {
+                    // If the network fails, serve the cached offline page.
+                    return caches.match(request).then((cachedResponse) => {
+                        return cachedResponse || caches.match('/offline');
+                    });
+                })
+        );
+        return;
+    }
 
-          const cache = await caches.open(CACHE_NAME);
-          const cachedResponse = await cache.match(OFFLINE_URL);
-          return cachedResponse;
-        }
-      })()
-    );
-  } else {
-    // For non-navigation requests (CSS, JS, images), use a cache-first strategy
+    // B. For all other requests (CSS, JS, Images), use a Stale-While-Revalidate strategy.
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        return cachedResponse || fetch(event.request).then((networkResponse) => {
-          // Optional: Cache new assets as they are fetched
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        });
-      })
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.match(request).then((cachedResponse) => {
+                // Fetch from network in the background to update the cache.
+                const fetchPromise = fetch(request).then((networkResponse) => {
+                    const responseToCache = networkResponse.clone();
+                    cache.put(request, responseToCache);
+                    return networkResponse;
+                });
+
+                // Return the cached response immediately if available, otherwise wait for the network.
+                return cachedResponse || fetchPromise;
+            });
+        }).catch(() => {
+            // Fallback for when both cache and network fail (for non-navigation requests).
+            // This is less critical but good to have.
+            if (request.destination === 'image') {
+                // You could return a placeholder image here if needed.
+            }
+            return new Response('Network error occurred.', {
+                status: 408,
+                headers: { 'Content-Type': 'text/plain' },
+            });
+        })
     );
-  }
 });
