@@ -37,7 +37,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
             const rideTime = format(new Date(ride.departureDate), 'HH:mm');
 
             // OPTIMIZED: Fetch only bookings relevant to this ride
-            const relatedPassengers = await getBookings(true, {
+            const relatedPassengers = await getBookings(false, {
                 destination: ride.destination,
                 date: rideDate,
                 time: rideTime

@@ -326,7 +326,7 @@ ${booking.driverName}
     `.trim().replace(/^\s+/gm, '');
     }
     
-    const whatsappUrl = `https://wa.me/${booking.mobile}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/91${booking.mobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

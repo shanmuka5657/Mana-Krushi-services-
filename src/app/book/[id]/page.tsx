@@ -156,16 +156,14 @@ export default function BookRidePage() {
     routeDate.setHours(depHours, depMinutes, 0, 0);
 
     // Check for existing booking
-    const allBookings = await getBookings(true, { 
+    const allBookings = await getBookings(false, { 
+        clientEmail: passengerEmail,
         destination: `${route.fromLocation} to ${route.toLocation}`,
         date: format(routeDate, 'yyyy-MM-dd'),
         time: route.departureTime
     });
 
-    const foundExistingBooking = allBookings.find(b => 
-        b.clientEmail === passengerEmail &&
-        b.status !== "Cancelled"
-    );
+    const foundExistingBooking = allBookings.find(b => b.status !== "Cancelled");
 
     if (foundExistingBooking) {
         setSeatsToAdd(1);
@@ -224,7 +222,7 @@ export default function BookRidePage() {
     const totalSeats = (Number(existingBooking.travelers) || 0) + seatsToAdd;
     
     // Recalculate available seats to be sure.
-    const allBookings = await getBookings(true, { 
+    const allBookings = await getBookings(false, { 
         destination: `${route.fromLocation} to ${route.toLocation}`,
         date: format(new Date(route.travelDate), 'yyyy-MM-dd'),
         time: route.departureTime
@@ -520,5 +518,3 @@ ${newlyBooked.client}
     </AppLayout>
   );
 }
-
-    
