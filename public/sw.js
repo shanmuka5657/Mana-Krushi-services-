@@ -1,104 +1,137 @@
-// A basic, offline-first service worker
 
-const CACHE_NAME = 'mana-krushi-cache-v1';
-// A list of local resources we always want to be cached.
-const PRECACHE_URLS = [
-    '/',
-    '/offline',
-    '/styles/globals.css', // Adjust path based on your project structure
-    // Add other critical assets like logo, main script files, etc.
+const CACHE_NAME = 'mana-krushi-v1';
+const urlsToCache = [
+  '/',
+  '/offline',
+  '/manifest.json'
 ];
 
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(PRECACHE_URLS))
-            .then(() => self.skipWaiting())
-            .catch(err => {
-                console.error('Service worker install failed:', err);
-            })
-    );
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        // Skip waiting to ensure the new service worker activates immediately.
+        return self.skipWaiting();
+      })
+  );
 });
 
-self.addEventListener('activate', event => {
-    // Tell the active service worker to take control of the page immediately.
-    event.waitUntil(self.clients.claim());
-});
-
-
-self.addEventListener('fetch', event => {
-    // We only want to call event.respondWith() if this is a navigation request
-    // for an HTML page.
-    if (event.request.mode === 'navigate') {
-        event.respondWith((async () => {
-            try {
-                // First, try to use the navigation preload response if it's supported.
-                const preloadResponse = await event.preloadResponse;
-                if (preloadResponse) {
-                    return preloadResponse;
-                }
-
-                // Always try the network first.
-                const networkResponse = await fetch(event.request);
-                return networkResponse;
-            } catch (error) {
-                // catch is only triggered if an exception is thrown, which is likely
-                // due to a network error.
-                // If fetch() returns a valid HTTP response with a 4xx or 5xx status,
-                // the catch() will NOT be called.
-                console.log('Fetch failed; returning offline page instead.', error);
-
-                const cache = await caches.open(CACHE_NAME);
-                const cachedResponse = await cache.match('/offline');
-                return cachedResponse;
-            }
-        })());
-    }
-
-    // For non-navigation requests, use a cache-first strategy.
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request).then(fetchResponse => {
-                // Optional: Cache new resources dynamically
-                // if (fetchResponse.ok) {
-                //     const cache = await caches.open(CACHE_NAME);
-                //     cache.put(event.request, fetchResponse.clone());
-                // }
-                return fetchResponse;
-            });
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
         })
-    );
+      );
+    }).then(() => {
+      // Claim clients to take control of the page immediately.
+      return self.clients.claim();
+    })
+  );
 });
 
 
-// --- PUSH NOTIFICATIONS (Placeholder) ---
-self.addEventListener('push', event => {
-  const title = 'Mana Krushi Services';
+self.addEventListener('fetch', (event) => {
+  // Only handle navigation requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        try {
+          // First, try to use the navigation preload response if it's supported.
+          const preloadResponse = await event.preloadResponse;
+          if (preloadResponse) {
+            return preloadResponse;
+          }
+
+          // Always try the network first for navigation.
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch (error) {
+          // catch is only triggered if an exception is thrown, which happens
+          // when there's a network error.
+          console.log('Fetch failed; returning offline page instead.', error);
+
+          const cache = await caches.open(CACHE_NAME);
+          const cachedResponse = await cache.match('/offline');
+          return cachedResponse;
+        }
+      })()
+    );
+  } else if (urlsToCache.includes(new URL(event.request.url).pathname)) {
+      // For other assets, use a cache-first strategy
+      event.respondWith(
+          caches.match(event.request).then((response) => {
+              return response || fetch(event.request);
+          })
+      );
+  }
+});
+
+
+// --- Push Notification Handler ---
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : { title: 'Mana Krushi', body: 'New notification!' };
+  const { title, body, icon, data: notificationData } = data;
+  
   const options = {
-    body: event.data ? event.data.text() : 'You have a new notification.',
-    icon: '/images/icons/icon-192x192.png', // Make sure this path is correct
-    badge: '/images/icons/badge-72x72.png' // Make sure this path is correct
+    body,
+    icon: icon || '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
+    data: notificationData,
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
 
-// --- BACKGROUND SYNC (Placeholder) ---
-self.addEventListener('sync', event => {
-  if (event.tag == 'my-first-sync') {
+// --- Notification Click Handler ---
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      if (clientList.length > 0) {
+        let client = clientList[0];
+        for (let i = 0; i < clientList.length; i++) {
+          if (clientList[i].focused) {
+            client = clientList[i];
+          }
+        }
+        return client.focus().then(c => c.navigate(urlToOpen));
+      }
+      return clients.openWindow(urlToOpen);
+    })
+  );
+});
+
+
+// --- Background Sync Handler ---
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-data') {
     event.waitUntil(
-        // Do some sync work here
-        console.log("Background sync triggered!")
+      // Placeholder for a function that sends pending data to the server
+      console.log("Background sync event triggered for 'sync-data'.")
     );
   }
 });
 
-// --- PERIODIC SYNC (Placeholder) ---
-self.addEventListener('periodicsync', event => {
-  if (event.tag == 'get-daily-updates') {
+
+// --- Periodic Sync Handler ---
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'get-latest-content') {
     event.waitUntil(
-        // Do some periodic sync work here
-        console.log("Periodic background sync triggered!")
+      // Placeholder for a function that fetches fresh content from the server
+      console.log("Periodic sync event triggered for 'get-latest-content'.")
     );
   }
 });
