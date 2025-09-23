@@ -127,7 +127,7 @@ function EntertainmentPageContent() {
                                         Video Player
                                     </Label>
                                     <p className="text-sm text-muted-foreground">
-                                        {isPlayerVisible ? "Player is visible to all users." : "Player is hidden from all users."}
+                                        {isPlayerVisible ? "Player is enabled for all users." : "Player is disabled for all users."}
                                     </p>
                                 </div>
                                 <Button
@@ -139,12 +139,12 @@ function EntertainmentPageContent() {
                                     {isPlayerVisible ? (
                                         <>
                                             <PowerOff className="mr-2 h-4 w-4" />
-                                            Stop Video
+                                            Disable Player
                                         </>
                                     ) : (
                                         <>
                                             <Power className="mr-2 h-4 w-4" />
-                                            Show Video
+                                            Enable Player
                                         </>
                                     )}
                                 </Button>

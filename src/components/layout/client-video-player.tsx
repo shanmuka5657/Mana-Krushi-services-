@@ -14,7 +14,7 @@ import placeholderImages from '@/lib/placeholder-images.json';
 const ClientVideoPlayer = () => {
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [isPlayerGloballyVisible, setIsPlayerGloballyVisible] = useState(true);
-    const [isPlayerLocallyVisible, setIsPlayerLocallyVisible] = useState(true);
+    const [isPlayerLocallyVisible, setIsPlayerLocallyVisible] = useState(false); // Default to false
     const [isMuted, setIsMuted] = useState(true);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const playerRef = useRef<YouTubePlayer | null>(null);
@@ -27,9 +27,7 @@ const ClientVideoPlayer = () => {
 
         const unsubUrl = onGlobalVideoUrlChange((url) => {
             setVideoUrl(url);
-            if (url) {
-                setIsPlayerLocallyVisible(true); // Show player when URL changes
-            }
+            // Don't automatically show, let the user decide.
         });
 
         const unsubVisibility = onGlobalVideoVisibilityChange((isVisible) => {
