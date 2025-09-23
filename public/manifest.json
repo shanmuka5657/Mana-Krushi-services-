@@ -7,30 +7,102 @@
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "orientation": "any",
+    "id": "com.manakrushi.app",
+    "lang": "en",
+    "dir": "ltr",
+    "iarc_rating_id": "",
+    "display_override": [
+        "tabbed",
+        "window-controls-overlay"
+    ],
     "icons": [
+        { "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" },
+        { "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" },
+        { "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "maskable" },
+        { "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "maskable" }
+    ],
+    "screenshots": [
         {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "192x192",
-            "type": "image/jpeg",
-            "purpose": "any"
+            "src": "https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png",
+            "sizes": "1024x768",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Find a Ride"
         },
         {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "512x512",
-            "type": "image/jpeg",
-            "purpose": "any"
-        },
-        {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "192x192",
-            "type": "image/jpeg",
-            "purpose": "maskable"
-        },
-        {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "512x512",
-            "type": "image/jpeg",
-            "purpose": "maskable"
+            "src": "https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png",
+            "sizes": "469x941",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Booking Screen"
         }
-    ]
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "short_name": "Find Ride",
+            "description": "Search for available rides",
+            "url": "/dashboard?role=passenger",
+            "icons": [{ "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192" }]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming bookings",
+            "url": "/bookings",
+            "icons": [{ "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192" }]
+        }
+    ],
+    "categories": ["travel", "business", "lifestyle"],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "scope_extensions": [
+        { "origin": "*.manakrushi.com" },
+        { "origin": "*.manakrushiservices.com" }
+    ],
+    "share_target": {
+        "action": "/search",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    },
+    "file_handlers": [
+        {
+            "action": "/handle-file",
+            "accept": {
+                "text/plain": [".txt"]
+            }
+        }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+manakrushi",
+            "url": "/protocol?type=%s"
+        }
+    ],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "widgets": [
+        {
+            "name": "My Rides",
+            "description": "View your upcoming rides",
+            "tag": "rides",
+            "template": "rides-template",
+            "ms_ac_template": "/widgets/rides.json",
+            "data": "/widgets/rides-data.json",
+            "type": "application/json"
+        }
+    ],
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "note_taking": {
+        "new_note_url": "/new-note",
+        "needs_legacy_protocol_support": false
+    }
 }
