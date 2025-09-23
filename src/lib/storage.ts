@@ -1,21 +1,25 @@
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
+import { perfTracker } from './perf-tracker';
 
 const isBrowser = typeof window !== "undefined";
 
 // --- Ad Control ---
 export const saveAdsEnabled = async (isEnabled: boolean) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
     await saveSetting('areAdsEnabled', isEnabled);
 }
 
 export const onAdsEnabledChange = (callback: (isEnabled: boolean) => void) => {
     if (!isBrowser) return () => {};
+    // This is a subscription, not a direct read, so we don't count it.
     return onSettingChange('areAdsEnabled', (value) => {
         // Default to false if not set
         callback(value === null ? false : value);
@@ -26,12 +30,14 @@ export const onAdsEnabledChange = (callback: (isEnabled: boolean) => void) => {
 // --- Branding ---
 export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 2 }); // two writes
     await saveSetting('globalLogoUrl', url);
     await saveSetting('logoCacheBuster', new Date().getTime()); // Add cache buster
 };
 
 export const getGlobalLogoUrlWithCache = async (): Promise<string | null> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 2, writes: 0 }); // two reads
     const url = await getSetting('globalLogoUrl');
     const cacheBuster = await getSetting('logoCacheBuster');
     return cacheBuster ? `${url}?v=${cacheBuster}` : url;
@@ -41,6 +47,7 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
     if (!isBrowser) return () => {};
 
     const handleLogoUpdate = async () => {
+        perfTracker.increment({ reads: 2, writes: 0 });
         const url = await getSetting('globalLogoUrl');
         const cacheBuster = await getSetting('logoCacheBuster');
         if (url) {
@@ -63,12 +70,14 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
 // --- PWA ---
 export const savePwaScreenshots = async (screenshots: any[]) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
     // On client, only save to Firestore. The server action will handle the file write.
     await saveSetting('pwaScreenshots', screenshots);
 };
 
 export const getPwaScreenshots = async (): Promise<any[] | null> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore('pwaScreenshots');
 };
 
@@ -84,7 +93,8 @@ export const logVisit = async (path: string) => {
         }
         return;
     }
-
+    
+    perfTracker.increment({ reads: 1, writes: 1 }); // 1 read for profile, 1 write for visit
     const profile = await getProfile(user.email);
     if (!profile) return;
 
@@ -116,6 +126,7 @@ export const logVisit = async (path: string) => {
 
 export const getVisits = async (): Promise<Visit[]> => {
     if (!isBrowser) return [];
+    perfTracker.increment({ reads: 1, writes: 0 });
     const visits = await getVisitsFromFirestore();
     return visits;
 }
@@ -124,11 +135,13 @@ export const getVisits = async (): Promise<Visit[]> => {
 // --- Settings ---
 export const saveGlobalVideoUrl = async (url: string) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
     await saveSetting('backgroundVideoUrl', url);
 };
 
 export const getGlobalVideoUrl = async (): Promise<string | null> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 1, writes: 0 });
     const url = await getSetting('backgroundVideoUrl');
     return url;
 }
@@ -140,11 +153,13 @@ export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
 
 export const saveGlobalVideoVisibility = async (isVisible: boolean) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
     await saveSetting('isGlobalVideoPlayerVisible', isVisible);
 };
 
 export const getGlobalVideoVisibility = async (): Promise<boolean> => {
     if (!isBrowser) return true; // Default to visible
+    perfTracker.increment({ reads: 1, writes: 0 });
     const isVisible = await getSetting('isGlobalVideoPlayerVisible');
     return isVisible === null ? true : isVisible; // Default to true if not set
 };
@@ -162,6 +177,7 @@ export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => 
 export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!isBrowser) return [];
     try {
+        perfTracker.increment({ reads: 1, writes: 0 });
         const bookings = await getBookingsFromFirestore(searchParams);
         return bookings;
     } catch (error) {
@@ -172,22 +188,27 @@ export const getBookings = async (isAdmin = false, searchParams?: { destination?
 
 export const onBookingsUpdate = (callback: (bookings: Booking[]) => void, searchParams?: { userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }) => {
     if (!isBrowser) return () => {};
+    // Subscription counts as one initial read
+    perfTracker.increment({ reads: 1, writes: 0 });
     return onBookingsUpdateFromFirestore(callback, searchParams);
 };
 
 export const saveBookings = async (bookings: Booking[]) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 }); // Counts as one batch write
     await saveBookingsToFirestore(bookings);
 };
 
 export const getNextRideForUser = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 1, writes: 0 });
     const ride = await getNextRideForUserFromFirestore(email, role);
     return ride;
 }
 
 export const updateBookingLocation = async (bookingId: string, location: { passengerLatitude?: number, passengerLongitude?: number, driverLatitude?: number, driverLongitude?: number }) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
     await updateBookingInFirestore(bookingId, location);
 }
 
@@ -196,6 +217,7 @@ export const updateBookingLocation = async (bookingId: string, location: { passe
 export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
     if (!isBrowser) return [];
     try {
+        perfTracker.increment({ reads: 1, writes: 0 });
         const routes = await getRoutesFromFirestore(searchParams);
         return routes;
     } catch(e) {
@@ -206,11 +228,13 @@ export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?:
 
 export const saveRoutes = async (routes: Route[]) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 }); // Batch write
     await saveRoutesToFirestore(routes);
 };
 
 export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
     if (!isBrowser) throw new Error("This function can only be called from the browser.");
+    perfTracker.increment({ reads: 0, writes: 1 });
     const newRoute = await addRouteToFirestore(route);
     return newRoute;
 }
@@ -219,6 +243,7 @@ export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
 // --- Profile ---
 export const saveProfile = async (profile: Profile) => {
     if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
     const user = getCurrentFirebaseUser();
     const userEmail = profile.email || user?.email;
     if (userEmail) {
@@ -230,6 +255,7 @@ export const saveProfile = async (profile: Profile) => {
 
 export const getProfile = async (email?: string): Promise<Profile | null> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 1, writes: 0 });
     const user = getCurrentFirebaseUser();
     const userEmail = email || user?.email;
     if (userEmail) {
@@ -241,6 +267,7 @@ export const getProfile = async (email?: string): Promise<Profile | null> => {
 
 export const getAllProfiles = async (): Promise<Profile[]> => {
     if (!isBrowser) return [];
+    perfTracker.increment({ reads: 1, writes: 0 });
     const profiles = await getAllProfilesFromFirestore();
     return profiles;
 }
@@ -277,6 +304,7 @@ export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'pa
 // Deprecated branding functions, kept for compatibility, will be removed later.
 export const getGlobalLogoUrl = async (): Promise<string | null> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 1, writes: 0 });
     const url = await getSetting('globalLogoUrl');
     return url;
 };
@@ -284,7 +312,6 @@ export const getGlobalLogoUrl = async (): Promise<string | null> => {
 // New getSetting function to be used by other parts of the app
 export const getSetting = async (key: string): Promise<any> => {
     if (!isBrowser) return null;
+    perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-
-    
