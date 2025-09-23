@@ -1,82 +1,16 @@
 {
-    "theme_color": "#1E88E5",
-    "background_color": "#FFFFFF",
-    "display": "standalone",
-    "scope": "/",
-    "start_url": "/",
-    "id": "/",
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "categories": [
-        "education",
-        "navigation",
-        "travel"
-    ],
-    "icons": [
-        {
-            "src": "https://i.ibb.co/vxmGWQGH/ey-Jp-ZCI6-Im1f-Njhk-Mjg3-ODY1-ZWE0-ODE5-MWE2-Yj-Yx-NDkz-OTE3-Yj-E4-ZTE6c2-Vka-W1lbn-Q6-Ly81-NGQy-Yz.jpg",
-            "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
-    ],
-    "screenshots": [
-        {
-            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
-            "sizes": "1080x2340",
-            "type": "image/jpeg",
-            "form_factor": "narrow"
-        }
-    ],
-    "shortcuts": [
-        {
-            "name": "Find a Ride",
-            "short_name": "Find Ride",
-            "description": "Search for available rides",
-            "url": "/dashboard?role=passenger",
-            "icons": [
-                {
-                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-                    "sizes": "96x96"
-                }
-            ]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming and past bookings",
-            "url": "/bookings",
-            "icons": [
-                {
-                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-                    "sizes": "96x96"
-                }
-            ]
-        }
-    ],
-    "protocol_handlers": [
-        {
-            "protocol": "web+mana",
-            "url": "/search?q=%s"
-        }
-    ],
+    "icons": [],
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#1E88E5",
+    "scope": "/",
+    "id": "/",
     "related_applications": [],
     "iarc_rating_id": "",
     "widgets": [],
-    "scope_extensions": [
-        {
-            "origin": "*.manakrushi.com"
-        }
-    ]
+    "scope_extensions": []
 }
