@@ -7,19 +7,6 @@
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "id": "com.manakrushi.app",
-    "lang": "en",
-    "dir": "ltr",
-    "orientation": "any",
-    "categories": [
-        "travel",
-        "business",
-        "lifestyle"
-    ],
-    "display_override": [
-        "window-controls-overlay",
-        "tabbed"
-    ],
     "icons": [
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
@@ -45,94 +32,5 @@
             "type": "image/jpeg",
             "purpose": "maskable"
         }
-    ],
-    "screenshots": [
-        {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "1080x1920",
-            "type": "image/jpeg",
-            "form_factor": "narrow",
-            "label": "Welcome Screen"
-        },
-        {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "1920x1080",
-            "type": "image/jpeg",
-            "form_factor": "wide",
-            "label": "Dashboard View"
-        }
-    ],
-    "shortcuts": [
-        {
-            "name": "Find a Ride",
-            "short_name": "Find Ride",
-            "description": "Search for available rides",
-            "url": "/dashboard?role=passenger",
-            "icons": [{"src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192"}]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming bookings",
-            "url": "/bookings",
-            "icons": [{"src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192"}]
-        }
-    ],
-    "share_target": {
-        "action": "/search",
-        "method": "GET",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
-    },
-    "protocol_handlers": [
-        {
-            "protocol": "web+manakrushi",
-            "url": "/handle-protocol?type=%s"
-        }
-    ],
-    "file_handlers": [
-        {
-            "action": "/handle-file",
-            "accept": {
-                "text/plain": [".txt", ".csv"]
-            }
-        }
-    ],
-    "launch_handler": {
-        "client_mode": "navigate-existing"
-    },
-    "note_taking": {
-        "new_note_url": "/new-note",
-        "needs_legacy_protocol_support": false
-    },
-    "edge_side_panel": {
-        "preferred_width": 400
-    },
-    "widgets": [
-        {
-            "name": "Upcoming Rides",
-            "description": "View your upcoming rides from your home screen.",
-            "tag": "upcoming-rides",
-            "template": "upcoming-rides-template",
-            "ms_ac_template": "widgets/upcoming_rides.json",
-            "data": "widgets/upcoming_rides_data.json",
-            "type": "application/json"
-        }
-    ],
-    "iarc_rating_id": "e84b072d-8698-4475-a3f4-9048ba46c36b",
-    "related_applications": [
-        {
-            "platform": "play",
-            "url": "https://play.google.com/store/apps/details?id=com.manakrushi.app",
-            "id": "com.manakrushi.app"
-        }
-    ],
-    "prefer_related_applications": false,
-    "scope_extensions": [
-        { "origin": "*.manakrushi.com" },
-        { "origin": "*.manakrushiservices.com" }
     ]
 }
