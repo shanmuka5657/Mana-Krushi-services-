@@ -184,9 +184,9 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
 export const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) => void, searchParams?: { userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }) => {
     if (!bookingsCollection) return () => {};
 
-    let q = query(bookingsCollection, orderBy("departureDate", "desc"));
+    let q = query(bookingsCollection);
     
-    // Apply user-specific filters if provided
+    // Apply user-specific filters if provided. This is the simplest query we can make.
     if (searchParams?.userEmail && searchParams?.role) {
         if (searchParams.role === 'passenger') {
             q = query(q, where("clientEmail", "==", searchParams.userEmail));
@@ -205,7 +205,11 @@ export const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) =>
                 returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
             } as Booking;
         });
-        callback(bookings);
+        
+        // Sorting is now handled on the client-side after data is received.
+        const sortedBookings = bookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+        callback(sortedBookings);
+
     }, (error) => {
         console.error("Error listening to bookings updates:", error);
     });
@@ -425,3 +429,5 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
+
+    
