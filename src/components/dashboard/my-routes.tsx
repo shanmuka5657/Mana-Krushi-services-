@@ -61,19 +61,14 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
-  const [fromFilter, setFromFilter] = useState("");
-  const [toFilter, setToFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState<Date | undefined>();
   const { toast } = useToast();
   const [allProfiles, setAllProfiles] = useState<Map<string, Profile>>(new Map());
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [bookingUrl, setBookingUrl] = useState("");
   const [shareImageUrl, setShareImageUrl] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSearching, setIsSearching] = useState(false);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -209,7 +204,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const handleEditSubmit = async (data: z.infer<typeof editRouteSchema,>) => {
     if (!selectedRoute) return;
 
-    setIsSearching(true);
     const allCurrentRoutes = await getRoutes(true);
 
     const updatedRoutes = allCurrentRoutes.map(r => 
@@ -231,7 +225,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
         setRoutes(latestOwnerRoutes);
     }
     
-    setIsSearching(false);
     toast({
       title: "Route Updated",
       description: "The route details have been successfully updated."
@@ -348,40 +341,6 @@ ${booking.driverName}
         return { icon: AlertCircle, color: 'text-muted-foreground', label: status };
     }
   }
-
-  const handleSearch = async () => {
-    setIsSearching(true);
-    const ownerEmail = getCurrentUser();
-    if(!ownerEmail) {
-        setIsSearching(false);
-        return;
-    }
-    
-    // Use the efficient query
-    const allOwnerRoutes = await getRoutes(false, { ownerEmail });
-    let filteredRoutes = allOwnerRoutes;
-
-    if (fromFilter) {
-      filteredRoutes = filteredRoutes.filter(r => r.fromLocation.toLowerCase().includes(fromFilter.toLowerCase()));
-    }
-    if (toFilter) {
-      filteredRoutes = filteredRoutes.filter(r => r.toLocation.toLowerCase().includes(toFilter.toLowerCase()));
-    }
-    if (dateFilter) {
-        const searchDate = startOfDay(dateFilter);
-        filteredRoutes = filteredRoutes.filter(r => startOfDay(new Date(r.travelDate)).getTime() === searchDate.getTime());
-    }
-    
-    setRoutes(filteredRoutes);
-    setIsSearching(false);
-  };
-
-  const clearFilters = () => {
-    setFromFilter('');
-    setToFilter('');
-    setDateFilter(undefined);
-    setRoutes(initialRoutes); // Revert to initial default routes
-  }
   
   if (isLoading) {
     return (
@@ -395,55 +354,9 @@ ${booking.driverName}
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Routes</CardTitle>
-        <CardDescription>Routes for today and tomorrow are shown by default. Use filters to find other routes.</CardDescription>
+        <CardDescription>A list of your upcoming and past routes.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <Input 
-                placeholder="Filter by From location..."
-                value={fromFilter}
-                onChange={(e) => setFromFilter(e.target.value)}
-                className="max-w-sm"
-            />
-            <Input 
-                placeholder="Filter by To location..."
-                value={toFilter}
-                onChange={(e) => setToFilter(e.target.value)}
-                className="max-w-sm"
-            />
-             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full md:w-[280px] justify-start text-left font-normal",
-                    !dateFilter && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFilter ? format(dateFilter, "PPP") : <span>Filter by date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dateFilter}
-                  onSelect={(date) => {
-                      setDateFilter(date);
-                      setIsCalendarOpen(false);
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-            <Button onClick={handleSearch} disabled={isSearching}>
-                {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />} 
-                Search
-            </Button>
-            {(fromFilter || toFilter || dateFilter) && (
-                 <Button variant="ghost" onClick={clearFilters}>Clear</Button>
-            )}
-        </div>
-
         <Table>
           <TableHeader>
               <TableRow className="border-b-0 bg-secondary hover:bg-secondary">
