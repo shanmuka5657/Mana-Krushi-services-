@@ -1,50 +1,110 @@
 {
-  "theme_color": "#1E88E5",
-  "background_color": "#FFFFFF",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
-  "name": "Mana Krushi Services",
-  "short_name": "MK Services",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "id": "com.manakrushi.app",
-  "icons": [
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+    "theme_color": "#1E88E5",
+    "background_color": "#FFFFFF",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Mana Krushi Services",
+    "short_name": "MK Services",
+    "description": "Your partner in shared travel. Find or offer a ride with ease.",
+    "id": "com.manakrushi.app",
+    "lang": "en-US",
+    "dir": "ltr",
+    "orientation": "portrait-primary",
+    "categories": [
+        "travel",
+        "business",
+        "lifestyle"
+    ],
+    "display_override": [
+        "window-controls-overlay",
+        "tabbed"
+    ],
+    "scope_extensions": [
+        { "origin": "*.manakrushi.com" }
+    ],
+    "icons": [
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+          "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+          "type": "image/jpg",
+          "sizes": "1080x1920",
+          "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "short_name": "Find Ride",
+            "description": "Search for available rides",
+            "url": "/dashboard?role=passenger",
+            "icons": [{ "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "192x192" }]
+        }
+    ],
+    "file_handlers": [
+        {
+            "action": "/handle-file",
+            "accept": {
+                "text/plain": [".txt"]
+            }
+        }
+    ],
+    "share_target": {
+        "action": "/search",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
     },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+    "protocol_handlers": [
+        {
+            "protocol": "web+manakrushi",
+            "url": "/ride?id=%s"
+        }
+    ],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
     },
-    {
-        "src": "/icons/icon-maskable-192x192.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "maskable"
+    "note_taking": {
+        "new_note_url": "/new-note",
+        "needs_legacy_protocol_support": false
     },
-    {
-        "src": "/icons/icon-maskable-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "maskable"
-    }
-  ],
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.manakrushi.app",
-      "id": "com.manakrushi.app"
-    }
-  ],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "e84b072d-8698-4475-a3f4-9048ba46c36b",
-  "scope_extensions": [
-    { "origin": "*.manakrushi.com" },
-    { "origin": "*.manakrushiservices.com" }
-  ]
+    "edge_side_panel": {
+        "preferred_width": 480
+    },
+    "widgets": [
+      {
+        "name": "Upcoming Ride",
+        "description": "See your next ride at a glance",
+        "tag": "upcoming-ride",
+        "template": "upcoming_ride_widget"
+      }
+    ]
 }

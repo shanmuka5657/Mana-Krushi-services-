@@ -1,78 +1,62 @@
-// Service Worker
-
+// Names of the caches used in this version of the service worker.
 const CACHE_NAME = 'mana-krushi-cache-v1';
-const urlsToCache = [
+
+// A list of local resources we always want to be cached.
+const PRECACHE_ASSETS = [
   '/',
-  '/offline',
-  // Add other important assets and pages you want to cache
-  // For example: '/styles/globals.css', '/app.js'
-  // Be careful not to cache everything, only static assets and essential pages
+  '/offline.html',
+  '/styles/globals.css', // Adjust if your CSS path is different
+  '/images/logo.png' // Add path to your main logo
 ];
 
-// Install event
+// The install handler takes care of precaching the resources we always need.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(PRECACHE_ASSETS))
+      .then(self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
+// The activate handler takes care of cleaning up old caches.
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  const currentCaches = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+      return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
+    }).then(cachesToDelete => {
+      return Promise.all(cachesToDelete.map(cacheToDelete => {
+        return caches.delete(cacheToDelete);
+      }));
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event - serve from cache or network
+// The fetch handler serves responses for same-origin resources from a cache.
+// If no response is found, it populates the runtime cache with the response
+// from the network before returning it to the page.
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
+  // Skip cross-origin requests, like those for Google Analytics.
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
 
-        // Clone the request because it's a stream and can only be consumed once
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+        return caches.open(CACHE_NAME).then(cache => {
+          return fetch(event.request).then(response => {
+            // Put a copy of the response in the runtime cache.
+            return cache.put(event.request, response.clone()).then(() => {
               return response;
-            }
-
-            // Clone the response because it's a stream
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
+            });
+          });
+        }).catch(() => {
+            // If the network request fails and there's no cache,
+            // serve the offline page.
+            return caches.match('/offline.html');
+        })
       })
-      .catch(() => {
-        // If both network and cache fail, show a fallback page
-        if (event.request.mode === 'navigate') {
-            return caches.match('/offline');
-        }
-      })
-  );
+    );
+  }
 });
