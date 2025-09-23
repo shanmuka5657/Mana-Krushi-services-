@@ -24,7 +24,6 @@ import {
   Film,
   ShoppingCart,
   MonitorPlay,
-  Link as LinkIcon,
   MapPin,
   Gamepad2,
   Timer,
