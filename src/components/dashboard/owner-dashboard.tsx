@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Link2, Shield, Sparkles, Star, X } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X } from "lucide-react";
 import { format, addMonths, parse } from "date-fns";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -555,7 +555,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                           <div className="flex gap-2">
                               <FormControl>
                                   <div className="relative flex-grow">
-                                  <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                  
                                   <Input type="number" placeholder="Auto-calculated" {...field} className="pl-10" readOnly />
                                   {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
                                   </div>
@@ -728,3 +728,4 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     </div>
   );
 }
+
