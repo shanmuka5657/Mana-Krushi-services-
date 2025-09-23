@@ -7,128 +7,166 @@
     "name": "Mana Krushi Services",
     "short_name": "MK Services",
     "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "id": "/?utm_source=pwa",
+    "id": "com.manakrushi.app",
+    "display_override": [
+        "tabbed",
+        "window-controls-overlay"
+    ],
     "categories": [
         "travel",
         "business",
-        "lifestyle",
-        "social",
-        "navigation"
+        "lifestyle"
     ],
-    "lang": "en-US",
-    "dir": "ltr",
     "orientation": "any",
-    "display_override": [
-        "window-controls-overlay",
-        "standalone"
+    "lang": "en",
+    "dir": "ltr",
+    "iarc_rating_id": "",
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "scope_extensions": [
+        {
+            "origin": "*.manakrushi.com"
+        },
+        {
+            "origin": "*.manakrushi.net"
+        },
+        {
+            "origin": "*.manakrushi.org"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "short_name": "Find Ride",
+            "description": "Search for available rides",
+            "url": "/dashboard?role=passenger",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your upcoming bookings",
+            "url": "/bookings",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+                    "sizes": "192x192"
+                }
+            ]
+        }
     ],
     "icons": [
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "48x48",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "72x72",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "96x96",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "128x128",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "144x144",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "152x152",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "256x256",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "48x48",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "72x72",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "96x96",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "128x128",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "144x144",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "152x152",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "256x256",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         }
     ],
@@ -136,79 +174,48 @@
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "1080x1920",
-            "type": "image/png",
+            "type": "image/jpeg",
             "form_factor": "narrow",
             "label": "Welcome Screen"
         },
         {
             "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
             "sizes": "1920x1080",
-            "type": "image/png",
+            "type": "image/jpeg",
             "form_factor": "wide",
             "label": "Dashboard View"
         }
     ],
-    "shortcuts": [
-        {
-            "name": "Find a Ride",
-            "short_name": "Find",
-            "description": "Quickly search for available rides",
-            "url": "/dashboard?role=passenger",
-            "icons": [{ "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "96x96" }]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming and past bookings",
-            "url": "/bookings",
-            "icons": [{ "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "96x96" }]
-        },
-        {
-            "name": "My Profile",
-            "short_name": "Profile",
-            "description": "Update your account details",
-            "url": "/profile",
-            "icons": [{ "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg", "sizes": "96x96" }]
-        }
-    ],
     "share_target": {
-        "action": "/search/",
+        "action": "/search",
         "method": "GET",
-        "enctype": "application/x-www-form-urlencoded",
         "params": {
             "title": "title",
             "text": "text",
             "url": "url"
         }
     },
-    "protocol_handlers": [
-        {
-            "protocol": "web+manakrushi",
-            "url": "/search?q=%s"
-        }
-    ],
     "file_handlers": [
         {
             "action": "/handle-file",
             "accept": {
-                "text/plain": [".txt"]
+                "text/plain": [
+                    ".txt"
+                ]
             }
         }
     ],
     "launch_handler": {
         "client_mode": "navigate-existing"
     },
-    "related_applications": [],
-    "prefer_related_applications": false,
-    "iarc_rating_id": "",
     "widgets": [
         {
-            "name": "Upcoming Ride",
-            "description": "View details about your next ride.",
-            "tag": "next-ride",
-            "template": "next-ride-template",
-            "ms_ac_template": "next-ride-adaptive-card.json",
-            "data": "next-ride-data.json",
+            "name": "My Rides",
+            "description": "View your upcoming rides",
+            "tag": "rides",
+            "template": "rides-template",
+            "ms_ac_template": "widgets/rides.json",
+            "data": "widgets/rides-data.json",
             "type": "application/json"
         }
     ],
@@ -217,10 +224,6 @@
     },
     "note_taking": {
         "new_note_url": "/new-note",
-        "need_control": true
-    },
-    "scope_extensions": [
-        { "origin": "*.manakrushi.com" },
-        { "origin": "manakrushi.com" }
-    ]
+        "needs_legacy_protocol_support": false
+    }
 }
