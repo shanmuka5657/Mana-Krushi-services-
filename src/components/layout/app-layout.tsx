@@ -23,7 +23,6 @@ import {
   Loader2,
   Film,
   ShoppingCart,
-  MonitorPlay,
   MapPin,
   Gamepad2,
   Timer,
@@ -64,7 +63,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { onGlobalLogoUrlChange, getProfile, onAdsEnabledChange } from "@/lib/storage";
+import { onGlobalLogoUrlChange, getProfile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import type { Profile } from "@/lib/types";
@@ -187,7 +186,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/live`, icon: Tv, label: "Live" },
     { href: `/entertainment`, icon: Film, label: "Entertainment" },
-    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
     { href: `/loans`, icon: IndianRupee, label: "Loans" },
     { href: `/insurance`, icon: Shield, label: "Insurance" },
     { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
@@ -205,7 +203,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/live`, icon: Tv, label: "Live" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
-    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
     { href: `/loans?role=owner`, icon: IndianRupee, label: "Loans" },
     { href: `/insurance?role=owner`, icon: Shield, label: "Insurance" },
     { href: `/ecommerce?role=owner`, icon: ShoppingCart, label: "E-commerce" },
@@ -222,7 +219,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/live`, icon: Tv, label: "Live" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
     { href: `/entertainment?role=passenger`, icon: Film, label: "Entertainment" },
-    { href: `/ads`, icon: MonitorPlay, label: "Ads" },
     { href: `/loans?role=passenger`, icon: IndianRupee, label: "Loans" },
     { href: `/insurance?role=passenger`, icon: Shield, label: "Insurance" },
     { href: `/ecommerce?role=passenger`, icon: ShoppingCart, label: "E-commerce" },

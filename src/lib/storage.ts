@@ -10,23 +10,6 @@ import { perfTracker } from './perf-tracker';
 
 const isBrowser = typeof window !== "undefined";
 
-// --- Ad Control ---
-export const saveAdsEnabled = async (isEnabled: boolean) => {
-    if (!isBrowser) return;
-    perfTracker.increment({ reads: 0, writes: 1 });
-    await saveSetting('areAdsEnabled', isEnabled);
-}
-
-export const onAdsEnabledChange = (callback: (isEnabled: boolean) => void) => {
-    if (!isBrowser) return () => {};
-    // This is a subscription, not a direct read, so we don't count it.
-    return onSettingChange('areAdsEnabled', (value) => {
-        // Default to false if not set
-        callback(value === null ? false : value);
-    });
-};
-
-
 // --- Branding ---
 export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;

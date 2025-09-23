@@ -5,13 +5,13 @@ import { useState, useEffect, useRef } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Suspense } from 'react';
-import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube, PauseCircle, Power, PowerOff, BadgeDollarSign } from 'lucide-react';
+import { Film, Search, Loader2, PlayCircle, Tv, Clapperboard, Youtube, PauseCircle, Power, PowerOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite, Profile } from '@/lib/types';
-import { saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, onAdsEnabledChange, saveAdsEnabled, getSetting, getProfile } from '@/lib/storage';
+import { saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, getProfile } from '@/lib/storage';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
@@ -51,7 +51,6 @@ function EntertainmentPageContent() {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [videoUrl, setVideoUrl] = useState('');
     const [isPlayerVisible, setIsPlayerVisible] = useState(true);
-    const [areAdsEnabled, setAreAdsEnabled] = useState(false);
 
     useEffect(() => {
         const fetchUserDataAndSettings = async () => {
@@ -60,21 +59,17 @@ function EntertainmentPageContent() {
             setUserRole(role || 'passenger');
             
             if (role === 'admin') {
-                const [currentUrl, currentVisibility, currentAdsEnabled] = await Promise.all([
+                const [currentUrl, currentVisibility] = await Promise.all([
                     getGlobalVideoUrl(),
                     getGlobalVideoVisibility(),
-                    getSetting('areAdsEnabled')
                 ]);
                 setVideoUrl(currentUrl || '');
                 setIsPlayerVisible(currentVisibility);
-                setAreAdsEnabled(currentAdsEnabled || false);
             }
         };
 
         fetchUserDataAndSettings();
         
-        const unsub = onAdsEnabledChange(setAreAdsEnabled);
-        return () => unsub();
     }, []);
     
     const handleSearch = async () => {
@@ -114,16 +109,6 @@ function EntertainmentPageContent() {
             description: `All users will ${newVisibility ? 'now see' : 'no longer see'} the video player.`
         });
     };
-    
-    const handleAdsToggle = async () => {
-        const newAdStatus = !areAdsEnabled;
-        await saveAdsEnabled(newAdStatus);
-        setAreAdsEnabled(newAdStatus);
-        toast({
-            title: `Advertisements ${newAdStatus ? 'Enabled' : 'Disabled'}`,
-            description: `All users will ${newAdStatus ? 'now see' : 'no longer see'} ads. The change will apply on next page load.`,
-        });
-    };
 
     return (
         <AppLayout>
@@ -135,23 +120,6 @@ function EntertainmentPageContent() {
                             <CardDescription>Manage global settings for all users.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="flex items-center justify-between p-4 border rounded-md">
-                                <div>
-                                    <Label htmlFor="ads-toggle" className="font-medium flex items-center gap-2">
-                                        <BadgeDollarSign />
-                                        Monetization
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        {areAdsEnabled ? "Ads are active across the app." : "Ads are currently disabled."}
-                                    </p>
-                                </div>
-                                <Switch
-                                    id="ads-toggle"
-                                    checked={areAdsEnabled}
-                                    onCheckedChange={handleAdsToggle}
-                                />
-                            </div>
-                            
                             <div className="flex items-center justify-between p-4 border rounded-md">
                                 <div>
                                     <Label htmlFor="visibility-toggle" className="font-medium flex items-center gap-2">

@@ -6,7 +6,6 @@ import * as React from 'react';
 import { logVisit } from '@/lib/storage';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import AdScriptLoader from '@/components/ad-script-loader';
 
 const ConditionalFooter = dynamic(
   () => import('@/components/layout/conditional-footer'),
@@ -52,7 +51,6 @@ export default function RootLayout({
         {children}
         <Toaster />
         <ConditionalFooter />
-        <AdScriptLoader />
       </body>
     </html>
   );
