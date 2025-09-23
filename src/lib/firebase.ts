@@ -30,6 +30,7 @@ import { getAuth } from "firebase/auth";
 import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
+import { format } from "date-fns";
 
 // Your web app's Firebase configuration
 const firebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_ENV === 'production' 
