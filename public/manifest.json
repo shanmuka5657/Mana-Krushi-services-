@@ -1,5 +1,4 @@
 {
-  "id": "/",
   "theme_color": "#1E88E5",
   "background_color": "#FFFFFF",
   "display": "standalone",
@@ -34,9 +33,10 @@
       "purpose": "maskable"
     }
   ],
-  "orientation": "portrait",
-  "dir": "ltr",
+  "id": "/",
   "lang": "en-US",
+  "dir": "ltr",
+  "orientation": "portrait",
   "categories": [
     "education",
     "travel"
@@ -46,7 +46,7 @@
       "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "1080x1080",
       "type": "image/jpeg",
-      "form_factor": "narrow"
+      "form_factor": "wide"
     },
     {
       "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
@@ -54,5 +54,14 @@
       "type": "image/jpeg",
       "form_factor": "narrow"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/search",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
