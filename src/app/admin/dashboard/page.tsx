@@ -204,7 +204,24 @@ function AdminDashboardPage() {
         const screenshotPromises = Array.from(files).map(file => {
             return new Promise<{dataUrl: string, type: string}>((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onloadend = () => resolve({ dataUrl: reader.result as string, type: file.type });
+                reader.onloadend = () => {
+                    const img = document.createElement('img');
+                    img.onload = () => {
+                        if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx?.drawImage(img, 0, 0);
+                            const pngDataUrl = canvas.toDataURL('image/png');
+                            resolve({ dataUrl: pngDataUrl, type: 'image/png' });
+                        } else {
+                            resolve({ dataUrl: reader.result as string, type: file.type });
+                        }
+                    };
+                    img.onerror = reject;
+                    img.src = reader.result as string;
+                }
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
