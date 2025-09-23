@@ -1,72 +1,75 @@
 {
-    "name": "Mana Krushi Services",
-    "short_name": "MK Services",
-    "id": "/",
-    "start_url": "/",
-    "display": "standalone",
-    "theme_color": "#1E88E5",
-    "background_color": "#FFFFFF",
-    "description": "Your partner in shared travel. Find or offer a ride with ease.",
-    "icons": [
+  "theme_color": "#1E88E5",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "MK Services",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "data:image/png;base64,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",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAEcCSURBVHja7N15fJzXefa/73dmdzY3m03SBEGaZJqm23QTQgghpRQICZZYsl3LFizL27Gdb+N7x/XmXfO+8b7G8W3Hdrz34r147dgOLLFlyZYN2bZlS6SFEkJoN0m6yWxyM9vdmd/vD2SCSJBAkiYZ8ve8D09CgCRJ8pPzM+f7PY/z/V4AhBBCCCGEEIIYh7WdDyCEEEIIIYQQQhBfCBBCCCGEEEIIIYghBAgghBBCCCGEEEIMMUIgA3fccYfVq1KnsfIQYQ5s5c+bg4GBzc3Pb29sbGxtzcnK6u7u7u7tUKjU3N3d0dFRVVQkEgrdv3zY3N7e3t/f29pY8v6SkJCsry8zM7OzsbGtrW1hYCAQCN27ckDzb2Ng4PDwsEonOzs6uri6TyWRmZuZ4eJiLi4u7u7ujo4O7u7uLi0sqlaqsrGxoaEgkEk1NTU1NTY2NjT08PDzIe5966ilPP/208847/3/P991336WkpDzzzDMfffRRY2Mjz/POzs6xY8ekpaW5ubmpVCpFUVRVVYVCId/3NTU1DQ0NKpXKxcVFU1PTxcXl8uXLGxoaWltbNTU17d69W1hYyPO8qqqqqampra3ds2fPli1b5syZk5aWJhAIpFIp3/cPPvggKSlJEARBEMS/Gxsbu7u7s7KyLly4ICgoKDExMTExMSsrKzExMSUlhZ+fn1AoFBMTExsbGxsbExoa8jzv4uJydHT08PCgVCqdnp4mEAjEYpGZmZmpqanZ2dlms1ksFj08PPz9/f/fNzk5GR8f39zcDAQCxWLx5cuXJRIJX19fR0fH8PAwEAjMzMxqa2t936eqqvrhhx/Mzc3d2tr+uL//+7/Z2dk5nU5VVRVCodDZ2YnT6fS8vLy0tDSLxSIUCr/88ksvL6/f923btrV79247d+7s6OjYt2+fEATU1NTS0lJVVVVZWVlra2tpaWlubq6oqCgsLAyFQrdu3Tpo0CCXl5e3b99+/vz5zMxMLy+voaGhsbGxqakpEAjU1tays7P9vn/w4MGDBw9OnTrV09NzfHy8qampvr7+4sWLDx8+PDk5OTw8/PDDD7u6ujo6OoaHh6WlpSkUCi8vr9raWqFQOHToUFlZWWlpqbm5uampqaWlpa6uLjc3Nzc3t7KycnJy0tLSMjIyMjIycnJyMjIytmzZUlRU1NLS0tLS0tLSkpSUJJFIxGKxpaXl6dOnNTU1V69ePXDgQF5envXr109ISAgPD09NTZ2cnGRnZ4uKivLz8wMDA83NzcXFxaWlpR0dHVVVVWdnZ1NTU21tbV9f39zcbG5uLigoSE5O9ng8aWlpbty4sXDhgsTERHt7e3d3d3d3d0tLC0VRVFVVIpHwff/g4GCn05mYmNjR0TExMXH+/PkXL14YGBiYnp7+5S9/GRsbS0xMFAqF5HI5z/P29vb6+rq7uzs5Obl+/fqrV6+mp6cnJSXl5uZWVFRkZGQUFBRkZGQMDAzExcXl5eUlJSVlZGRcvXp16tSpdevW7d27d9OmTZcuXZKSkjwez87OnpSUlJaWVlBQUFBQkJSUpKenp6WlKSkpKSsr83g8mUwmlUpVVVXd3d2tra0DAwNTU1MAAAAASUVORK5CYII=",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find",
+      "description": "Search for available shared rides",
+      "url": "/dashboard?role=passenger",
+      "icons": [
         {
-            "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
-            "sizes": "192x192",
-            "type": "image/jpeg"
-        },
+          "src": "data:image/png;base64,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nZ2fHxcS8vL0VRbGlp6e7u7uPj4+Tk5OjoqKenp7S0NDs7W6/XEEIIIYQQQggx2BEggPzIysoqKipUKpWeTqejo6Ourq6np2dsbOzq6uphYWHTpk3z8/P1ekshhBBCCCGEEGKwI0AA+ZCQkNDS0rJy5coNGzaMjIxkZGRYlmVnZycSCUVRFEWJiYlbt27dvn37jh07Hj16tGPHjqysLP1eWwghhBBCCCFEAzECBJBHNzc3W1pa5HI5iqJer5eeno6Pj1++fLnBYLBv3779+vXLzc2lVCr1ev1LL7308MMP79ixIycnh5+fL5VKLS0tLS0t8/Lyrly5Yvfu3UuXLu3atWvPnj179uxZu3btzp07jx49euDAAb1fQQghhBBCCCFEAzACBJCH5HI5RVEURTU2Nvb09GzdurWhoSEoKOjzzz8XCARUKjUWi8XicnJySkpK8vPzBQUFtbW1DQ0N3d3dbW1tTU1NTU1NPT09kUi0e/fuJUuWPP300/fcc8/evXtXr14tEAgOHz48depUDw8P9XpNIYQQQgghhBCicYiTAOJfpaenp6amNjQ0NDU1JSQktLa21tbWNjU19fX1paSkpKWlpKSk9PX1dXR0dHZ2dnZ2trayMlVVVd/3pVKpra2tqakpFAqxWExLS0tISAgPD1+yZImuri4MwDAMw9LSUlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"BQUFtbW1VVVVNTU09PT1ZWVldX19vb29zc3Nra2tjYGBgYKC4uLikpqampqbW1tZ2dnZWVlZmZmZGRkZWVlY2NjZGRkZWVlZmZmZGRkY2NjZGRkZmZmY2NjZGRkZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZm-8b29vb29vb29vbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubmPPAgAAAAAAAAD/2AEEAABBbGVzaWduX3NpZ25hdHVyZQQIBAAAAAcDQVNDAlAAAAA=AQIDBAUG",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src/": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.example.app",
+      "id": "com.example.app"
+    }
+  ],
+  "iarc_rating_id": "",
+  "widgets": [
+    {
+      "name": "MK Services Widget",
+      "short_name": "MK Widget",
+      "description": "View upcoming rides",
+      "icons": [
         {
-            "src": "https://i.ibb.co/L8yT2vj/IMG-20250920-WA0025.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/PggGb9L/IMG-20250920-WA0025.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
+          "src": "/icons/widget.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
-    ],
-    "screenshots": [
-        {
-            "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
-            "sizes": "1080x2340",
-            "type": "image/jpeg",
-            "form_factor": "narrow"
-        }
-    ],
-    "shortcuts": [
-        {
-            "name": "Find a Ride",
-            "short_name": "Search",
-            "description": "Find a ride to your destination",
-            "url": "/dashboard?role=passenger",
-            "icons": [
-                {
-                    "src": "https://i.ibb.co/L8yT2vj/IMG-20250920-WA0025.png",
-                    "sizes": "512x512"
-                }
-            ]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming and past bookings",
-            "url": "/bookings",
-            "icons": [
-                {
-                    "src": "https://i.ibb.co/L8yT2vj/IMG-20250920-WA0025.png",
-                    "sizes": "512x512"
-                }
-            ]
-        }
-    ],
-    "related_applications": [],
-    "iarc_rating_id": "",
-    "scope_extensions": [
-        {
-            "origin": "*.manakrushi.com"
-        },
-        {
-            "origin": "*.google.com"
-        }
-    ]
+      ],
+      "tag": "upcoming-ride"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "*.example.com"
+    }
+  ]
 }
