@@ -3,29 +3,46 @@
 const CACHE_NAME = 'mana-krushi-cache-v1';
 const urlsToCache = [
   '/',
-  '/offline', // A dedicated offline page
+  '/offline',
   '/manifest.json',
-  '/favicon.ico',
-  // Add other critical assets here, e.g., logo, main CSS/JS bundles
+  '/globals.css',
+  // Add other critical assets here, e.g., logo
   'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg'
 ];
 
-// Install the service worker and cache assets
-self.addEventListener('install', event => {
+// Install event: opens a cache and adds the core files to it.
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
+      .then((cache) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Serve cached content when offline
-self.addEventListener('fetch', event => {
+// Activate event: cleans up old caches.
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+// Fetch event: serves assets from cache if available, otherwise fetches from network.
+self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
+      .then((response) => {
         // Cache hit - return response
         if (response) {
           return response;
@@ -38,9 +55,9 @@ self.addEventListener('fetch', event => {
         const fetchRequest = event.request.clone();
 
         return fetch(fetchRequest).then(
-          response => {
+          (response) => {
             // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
@@ -51,32 +68,18 @@ self.addEventListener('fetch', event => {
             const responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
-              .then(cache => {
+              .then((cache) => {
                 cache.put(event.request, responseToCache);
               });
 
             return response;
           }
-        ).catch(() => {
-            // If the fetch fails (e.g., user is offline), return the offline page.
-            return caches.match('/offline');
-        });
+        );
       })
-    );
-});
-
-// Update the cache with new assets
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+      .catch(() => {
+          // If the network request fails and there is no cache,
+          // return the offline page.
+          return caches.match('/offline');
+      })
   );
 });
