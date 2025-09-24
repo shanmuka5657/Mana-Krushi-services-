@@ -19,8 +19,8 @@ function MyRoutesPageContent() {
                 // Fetch only the routes for the current owner
                 const ownerRoutes = await getRoutes(false, { ownerEmail });
                 
-                // Show all routes, sorted by most recent first
-                setRoutes(ownerRoutes.sort((a, b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime()));
+                // Show all routes, sorted by earliest date first
+                setRoutes(ownerRoutes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime()));
             }
             setIsLoaded(true);
         };
