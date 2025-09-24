@@ -1,13 +1,14 @@
 {
-  "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#FFFFFF",
   "theme_color": "#FFFFFF",
-  "description": "Your partner in shared travel. Find or offer a ride with ease, manage bookings, and connect with a community of travelers. Built for carpooling and cost-sharing.",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "Mana Krushi",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "orientation": "any",
-  "id": "/",
+  "id": "/?utm_source=pwa",
   "icons": [
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
@@ -44,5 +45,23 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find Ride",
+      "description": "Search for available rides",
+      "url": "/dashboard?role=passenger",
+      "icons": [{ "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": [
+    "travel",
+    "business"
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-new"
+  },
+  "lang": "en-US",
+  "dir": "ltr"
 }
