@@ -1,81 +1,72 @@
-const CACHE_NAME = 'mana-krushi-cache-v2';
-const urlsToCache = [
-  '/',
-  '/offline.html',
-  '/manifest.json',
-  '/favicon.ico',
-  // Add other critical assets here, like a logo
+const CACHE_NAME = 'mana-krushi-v3'; // Incremented version
+const PRECACHE_ASSETS = [
+    '/',
+    '/offline.html',
+    '/manifest.json'
 ];
 
-// Install a service worker
+// Install event - Pre-cache assets
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        // addAll() is atomic - if one asset fails, the whole operation fails.
+        await cache.addAll(PRECACHE_ASSETS);
+    })().then(self.skipWaiting())); // Activate new SW immediately
 });
 
-// Activate the service worker
+// Activate event - Clean up old caches
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim()) // Take control of all clients
+    );
 });
 
-
-// Listen for requests
+// Fetch event - Cache-First Strategy
 self.addEventListener('fetch', event => {
-    // We only want to intercept navigation requests
-    if (event.request.mode !== 'navigate') {
-        return;
-    }
-
     event.respondWith(
-        fetch(event.request)
-            .then(response => {
-                // Check if we received a valid response
-                if (!response || response.status !== 200 || response.type !== 'basic') {
-                    return response;
+        caches.match(event.request)
+            .then(cachedResponse => {
+                // Cache hit - return response
+                if (cachedResponse) {
+                    return cachedResponse;
                 }
 
-                // IMPORTANT: Clone the response. A response is a stream
-                // and because we want the browser to consume the response
-                // as well as the cache consuming the response, we need
-                // to clone it so we have two streams.
-                const responseToCache = response.clone();
-
-                caches.open(CACHE_NAME)
-                    .then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
-
-                return response;
-            })
-            .catch(() => {
-                // Network request failed, try to get it from the cache.
-                return caches.match(event.request)
-                    .then(response => {
-                        // If we have a cached response, return it
-                        if (response) {
-                            return response;
+                // Not in cache - go to the network
+                return fetch(event.request).then(
+                    networkResponse => {
+                        // Check if we received a valid response
+                        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                            return networkResponse;
                         }
-                        // If the request is for an HTML page and it's not in the cache, show the offline page.
-                        if (event.request.headers.get('accept')?.includes('text/html')) {
-                            return caches.match('/offline.html');
-                        }
-                    });
+
+                        // IMPORTANT: Clone the response. A response is a stream
+                        // and because we want the browser to consume the response
+                        // as well as the cache consuming the response, we need
+                        // to clone it so we have two streams.
+                        const responseToCache = networkResponse.clone();
+
+                        caches.open(CACHE_NAME)
+                            .then(cache => {
+                                cache.put(event.request, responseToCache);
+                            });
+
+                        return networkResponse;
+                    }
+                ).catch(() => {
+                    // Network request failed, try to serve the offline page for navigation requests
+                    if (event.request.mode === 'navigate') {
+                        return caches.match('/offline.html');
+                    }
+                    // For other requests (images, api calls), just fail.
+                });
             })
     );
 });
