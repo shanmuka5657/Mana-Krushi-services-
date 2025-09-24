@@ -1,0 +1,21 @@
+{
+  "name": "Mana Krushi Services",
+  "short_name": "Mana Krushi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#209cee",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/MggT6G2/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/MggT6G2/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
