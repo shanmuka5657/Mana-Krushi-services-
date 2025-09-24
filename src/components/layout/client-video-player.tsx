@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import YouTube, { type YouTubePlayer } from 'react-youtube';
+import ReactPlayer from 'react-player/lazy';
 import Image from 'next/image';
 import { onGlobalVideoUrlChange, onGlobalVideoVisibilityChange } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
@@ -17,17 +17,13 @@ const ClientVideoPlayer = () => {
     const [isPlayerLocallyVisible, setIsPlayerLocallyVisible] = useState(false); // Default to false
     const [isMuted, setIsMuted] = useState(true);
     const [isFullScreen, setIsFullScreen] = useState(false);
-    const playerRef = useRef<YouTubePlayer | null>(null);
+    const playerRef = useRef<ReactPlayer | null>(null);
     const { toast } = useToast();
-    const [origin, setOrigin] = useState<string>('');
     const { defaultLogo } = placeholderImages;
 
     useEffect(() => {
-        setOrigin(window.location.origin);
-
         const unsubUrl = onGlobalVideoUrlChange((url) => {
             setVideoUrl(url);
-            // Don't automatically show, let the user decide.
         });
 
         const unsubVisibility = onGlobalVideoVisibilityChange((isVisible) => {
@@ -40,46 +36,31 @@ const ClientVideoPlayer = () => {
         };
     }, []);
 
-    const extractVideoId = (url: string | null): string | null => {
+    const getEmbedUrl = (url: string | null): string | null => {
         if (!url) return null;
-        try {
-            const urlObj = new URL(url);
-            if (urlObj.hostname === 'youtu.be') {
-                return urlObj.pathname.slice(1);
-            }
-            if (urlObj.hostname === 'www.youtube.com' || urlObj.hostname === 'youtube.com') {
-                return urlObj.searchParams.get('v');
-            }
-        } catch (error) {
-            console.error('Invalid URL for YouTube video:', url);
+
+        // YouTube
+        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        const youtubeMatch = url.match(youtubeRegex);
+        if (youtubeMatch) {
+            return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${youtubeMatch[1]}&controls=1&rel=0`;
         }
-        return null;
-    };
-    
-    const videoId = extractVideoId(videoUrl);
-    
-    const onPlayerReady = (event: { target: YouTubePlayer }) => {
-        playerRef.current = event.target;
-        if (isMuted) {
-            playerRef.current.mute();
-        } else {
-            playerRef.current.unMute();
+        
+        // Google Drive
+        const driveRegex = /drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/;
+        const driveMatch = url.match(driveRegex);
+        if (driveMatch) {
+            return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
         }
-    };
+
+        // Return original URL if it's a direct video link or another supported format by ReactPlayer
+        return url;
+    }
+    
+    const finalVideoUrl = getEmbedUrl(videoUrl);
 
     const toggleMute = () => {
-        if (playerRef.current) {
-            if (isMuted) {
-                playerRef.current.unMute();
-                 toast({
-                    title: "How to Unmute",
-                    description: "Due to browser policies, you may need to click the video directly to enable audio.",
-                });
-            } else {
-                playerRef.current.mute();
-            }
-            setIsMuted(!isMuted);
-        }
+        setIsMuted(!isMuted);
     };
     
     const toggleFullScreen = () => {
@@ -130,7 +111,7 @@ const ClientVideoPlayer = () => {
         );
     }
     
-    if (!videoId) {
+    if (!finalVideoUrl) {
         return (
             <div className="h-full w-full bg-black flex items-center justify-center text-muted-foreground p-2 relative">
                 <p>No video set by admin.</p>
@@ -140,32 +121,22 @@ const ClientVideoPlayer = () => {
             </div>
         );
     }
-    
-    const opts = {
-        height: '100%',
-        width: '100%',
-        playerVars: {
-            autoplay: 1,
-            controls: 1,
-            rel: 0,
-            mute: 1, 
-            loop: 1,
-            playlist: videoId,
-            origin: origin,
-        },
-    };
 
     return (
          <div className={cn(
-            "w-full h-full relative group",
-            isFullScreen && "fixed inset-0 z-[100] bg-black"
+            "w-full h-full relative group bg-black",
+            isFullScreen && "fixed inset-0 z-[100]"
          )}>
-            <YouTube
-                videoId={videoId}
-                opts={opts}
-                className="w-full h-full"
-                iframeClassName="w-full h-full"
-                onReady={onPlayerReady}
+            <ReactPlayer
+                ref={playerRef}
+                url={finalVideoUrl}
+                playing={true}
+                loop={true}
+                muted={isMuted}
+                controls={true}
+                width="100%"
+                height="100%"
+                className="react-player"
             />
             <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 p-2 rounded-lg pointer-events-none">
                  <Image 
@@ -191,7 +162,7 @@ const ClientVideoPlayer = () => {
                  <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={toggleFullScreen}>
                     {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </Button>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => setIsPlayerLocallyVisible(false)}>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={() => { setIsPlayerLocallyVisible(false); setIsFullScreen(false); }}>
                     <X className="h-4 w-4" />
                 </Button>
             </div>
