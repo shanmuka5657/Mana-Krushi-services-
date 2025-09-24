@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X } from "lucide-react";
-import { format, addMonths, parse } from "date-fns";
+import { format, addDays, parse } from "date-fns";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -648,9 +648,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                                   field.onChange(date)
                                   setIsCalendarOpen(false)
                               }}
-                              disabled={(date) =>
-                              date < new Date(new Date().setHours(0, 0, 0, 0))
-                              }
+                              fromDate={new Date()}
+                              toDate={addDays(new Date(), 3)}
                           />
                           </PopoverContent>
                       </Popover>

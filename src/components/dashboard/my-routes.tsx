@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Route, Booking, Profile } from "@/lib/types";
-import { format, addDays, startOfDay, endOfDay } from "date-fns";
+import { format, addDays, startOfDay, endOfDay, isSameDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +24,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye } from "lucide-react";
-import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUserName, getCurrentUser, getRouteViews } from "@/lib/storage";
+import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUser, getRouteViews } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -58,7 +58,6 @@ const editRouteSchema = z.object({
 
 const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [routes, setRoutes] = useState<Route[]>(initialRoutes);
-  const [filter, setFilter] = useState("");
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
@@ -71,6 +70,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [bookingUrl, setBookingUrl] = useState("");
   const [shareImageUrl, setShareImageUrl] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -357,14 +357,11 @@ ${booking.driverName}
   }
 
   const filteredRoutes = useMemo(() => {
-    if (!filter) return routes;
-    const lowercasedFilter = filter.toLowerCase();
+    if (!filterDate) return routes;
     return routes.filter(
-      (route) =>
-        route.fromLocation.toLowerCase().includes(lowercasedFilter) ||
-        route.toLocation.toLowerCase().includes(lowercasedFilter)
+      (route) => isSameDay(new Date(route.travelDate), filterDate)
     );
-  }, [routes, filter]);
+  }, [routes, filterDate]);
   
   if (isLoading) {
     return (
@@ -378,15 +375,32 @@ ${booking.driverName}
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Routes</CardTitle>
-        <CardDescription>A list of all your created routes. Search by location to filter.</CardDescription>
-         <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by location..."
-              className="w-full pl-8"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
+        <CardDescription>A list of all your created routes. Select a date to filter.</CardDescription>
+         <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !filterDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {filterDate ? format(filterDate, "PPP") : <span>Filter by date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={filterDate}
+                  onSelect={setFilterDate}
+                />
+              </PopoverContent>
+            </Popover>
+            {filterDate && (
+                <Button variant="ghost" onClick={() => setFilterDate(undefined)}>Clear</Button>
+            )}
           </div>
       </CardHeader>
       <CardContent>
