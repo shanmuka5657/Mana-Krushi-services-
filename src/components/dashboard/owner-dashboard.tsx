@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -100,7 +101,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean }) | null>(null);
+  const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean, id?: string }) | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [locations, setLocations] = useState<string[]>([]);
@@ -265,7 +266,16 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     const newStart = parse(data.departureTime, 'HH:mm', today).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', today).getTime();
     
+    // The bug is here. If we are editing a route, it might be in existingRoutesToday.
+    // The check below will compare the route with itself.
+    // We need to filter out the route we are currently editing if it exists.
+    const routeIdToEdit = (routeDataToSubmit as Route | null)?.id;
     for (const existingRoute of existingRoutesToday) {
+        // If we are editing a route, skip the check if the existing route is the one being edited
+        if (routeIdToEdit && existingRoute.id === routeIdToEdit) {
+            continue;
+        }
+
         const existingStart = parse(existingRoute.departureTime, 'HH:mm', today).getTime();
         const existingEnd = parse(existingRoute.arrivalTime, 'HH:mm', today).getTime();
 
