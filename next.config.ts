@@ -10,9 +10,6 @@ const withPWA = require('next-pwa')({
 // Forcing a rebuild to solve chunk loading errors.
 const nextConfig: NextConfig = {
   /* config options here */
-  env: {
-    MAPMYINDIA_API_KEY: process.env.MAPMYINDIA_API_KEY,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
