@@ -59,17 +59,19 @@ export function LoginForm() {
       setIsStandalone(true);
     }
 
+    // The listener is now in app-layout.tsx, this is just for the QR code button.
+    // A more robust solution might use a global state (Context) for the install prompt.
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
-      const promptEvent = event as BeforeInstallPromptEvent;
-      setInstallPrompt(promptEvent);
+      setInstallPrompt(event as BeforeInstallPromptEvent);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
+
   }, []);
 
   const handleInstallClick = () => {
@@ -182,6 +184,7 @@ export function LoginForm() {
         {!isStandalone && (
             <CardFooter className="flex-col gap-2">
                 <div className="w-full h-px bg-border" />
+                 <p className="text-sm text-muted-foreground pt-2">Get the best experience by installing the app.</p>
                 <div className="w-full grid grid-cols-2 gap-2">
                     <Button 
                         variant="outline" 
