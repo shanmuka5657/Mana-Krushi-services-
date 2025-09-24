@@ -145,25 +145,60 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
   }
 }
 
+async function getMapmyIndiaToken(): Promise<string | null> {
+    const clientId = process.env.MAPMYINDIA_CLIENT_ID;
+    const clientSecret = process.env.MAPMYINDIA_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+        console.error("MapmyIndia Client ID or Secret is not configured on the server.");
+        return null;
+    }
+    
+    try {
+        const response = await fetch("https://outpost.mapmyindia.com/api/security/oauth/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                grant_type: "client_credentials",
+                client_id: clientId,
+                client_secret: clientSecret,
+            }),
+        });
+
+        if (!response.ok) {
+            console.error("Failed to get MapmyIndia token. Status:", response.status, await response.text());
+            return null;
+        }
+
+        const data = await response.json();
+        return data.access_token;
+
+    } catch (error) {
+        console.error("Error fetching MapmyIndia token:", error);
+        return null;
+    }
+}
+
+
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
     if (!query || query.length < 2) {
         return { suggestions: [] };
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_MAPMYINDIA_API_KEY;
-    if (!apiKey) {
-        console.error("MAPMYINDIA_API_KEY is not configured on the server.");
+    const token = await getMapmyIndiaToken();
+
+    if (!token) {
         return { error: "Location search is temporarily unavailable." };
     }
 
     try {
-        const url = new URL('https://atlas.mapmyindia.com/api/places/search/json');
-        url.searchParams.append('query', query);
-        // The key should be part of the URL parameters, not a header
-        url.searchParams.append('key', apiKey); 
+        const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}`;
 
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url, {
             method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -172,7 +207,7 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         }
 
         const data = await response.json();
-        return { suggestions: data.suggestedLocations || [] };
+        return { suggestions: data.suggestedLocations || data.suggested_locations || [] }; // API uses both casings
     } catch (error) {
         console.error("Error fetching location suggestions from server action:", error);
         return { error: "An error occurred while fetching location suggestions." };
