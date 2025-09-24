@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRoutes, getBookings, getAllProfiles, getProfile } from '@/lib/storage';
 import type { Route, Booking, Profile } from '@/lib/types';
-import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield, CheckCircle } from 'lucide-react';
+import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield, CheckCircle, Bike } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { calculateDistance } from '../actions';
@@ -208,7 +208,11 @@ function FindRideResultsPage() {
                                 </CardContent>
                                 <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <Car className="text-muted-foreground" />
+                                        {route.vehicleType === 'Bike' ? (
+                                            <Bike className="text-muted-foreground h-5 w-5" />
+                                        ) : (
+                                            <Car className="text-muted-foreground h-5 w-5" />
+                                        )}
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
                                             <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>

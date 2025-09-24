@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike } from "lucide-react";
 import { format, addDays, parse } from "date-fns";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -47,6 +47,7 @@ import type { Profile, Route } from "@/lib/types";
 import { calculateDistance } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
@@ -125,7 +126,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         availableSeats: 1,
         price: 500,
         rating: 4.5,
-        vehicleType: "",
+        vehicleType: "Car",
         vehicleNumber: "",
     },
   });
@@ -179,6 +180,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             if(userProfile.name) form.setValue('driverName', userProfile.name);
             if(userProfile.mobile && userProfile.mobile !== '0000000000') form.setValue('driverMobile', userProfile.mobile);
             if(userProfile.email) form.setValue('ownerEmail', userProfile.email);
+            if(userProfile.vehicleType) form.setValue('vehicleType', userProfile.vehicleType);
         }
 
         const cachedLocations = sessionStorage.getItem('routeLocations');
@@ -426,10 +428,17 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                                   </div>
                               </div>
                           </div>
-                          <div className="text-right">
-                          <div className="text-xs font-medium">{profile?.vehicleType}</div>
-                          <Car className="text-muted-foreground h-5 w-5 ml-auto" />
-                          </div>
+                           <div className="text-right flex items-center gap-2">
+                                <div>
+                                    <div className="text-xs font-medium">{routeDataToSubmit?.vehicleType}</div>
+                                    <div className="text-xs text-muted-foreground">{routeDataToSubmit?.vehicleNumber}</div>
+                                </div>
+                                {routeDataToSubmit?.vehicleType === 'Bike' ? (
+                                    <Bike className="text-muted-foreground h-5 w-5" />
+                                ) : (
+                                    <Car className="text-muted-foreground h-5 w-5" />
+                                )}
+                            </div>
                       </CardFooter>
                   </Card>
               </div>
@@ -722,6 +731,30 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                   />
               </div>
+                <FormField
+                  control={form.control}
+                  name="vehicleType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vehicle Type</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select vehicle type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Car">Car</SelectItem>
+                          <SelectItem value="Bike">Bike</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <Button type="submit" className="w-full">
                   Add Route

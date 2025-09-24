@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save, Edit } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save, Edit, Bike } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -690,12 +690,24 @@ export default function ProfileForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Vehicle Type</FormLabel>
-                        <FormControl>
-                           <div className="relative">
-                            <Car className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input placeholder="e.g., Sedan, SUV, etc." {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                           <FormControl>
+                               <div className="relative">
+                                {field.value === 'Bike' ? (
+                                    <Bike className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                ) : (
+                                    <Car className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                )}
+                               <SelectTrigger className="pl-10">
+                                   <SelectValue placeholder="Select vehicle type" />
+                               </SelectTrigger>
+                               </div>
+                           </FormControl>
+                           <SelectContent>
+                               <SelectItem value="Car">Car (Sedan, SUV, etc.)</SelectItem>
+                               <SelectItem value="Bike">Bike / Scooter</SelectItem>
+                           </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
