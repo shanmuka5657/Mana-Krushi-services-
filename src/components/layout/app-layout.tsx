@@ -37,6 +37,7 @@ import {
   ArrowDown,
   ArrowUp,
   FileText,
+  History,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -207,6 +208,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
     { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
+    { href: `/history?role=owner`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/entertainment?role=owner`, icon: Film, label: "Entertainment" },
@@ -222,6 +224,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
+    { href: `/history?role=passenger`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/reports?role=passenger`, icon: BarChart, label: "Reports" },
