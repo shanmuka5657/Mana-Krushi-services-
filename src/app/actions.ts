@@ -157,14 +157,20 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
     }
 
     try {
-        const response = await fetch(`https://atlas.mapmyindia.com/api/places/search/json?query=${query}&location=india`, {
+        const url = new URL('https://atlas.mapmyindia.com/api/places/search/json');
+        url.searchParams.append('query', query);
+        url.searchParams.append('location', 'india');
+
+        const response = await fetch(url.toString(), {
+            method: 'GET',
             headers: {
-                'Authorization': `bearer ${apiKey}`
+                'Authorization': `bearer ${apiKey}`,
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            console.error("MapmyIndia API request failed with status:", response.status);
+            console.error("MapmyIndia API request failed with status:", response.status, await response.text());
             return { error: "Failed to fetch location suggestions." };
         }
 
