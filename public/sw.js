@@ -1,146 +1,82 @@
-// The version of the cache.
-const VERSION = 'v1';
+// A simple, robust, cache-first service worker.
 
-// The name of the cache
-const CACHE_NAME = `mana-krushi-services-${VERSION}`;
-
-// A list of essential files to be precached.
+const CACHE_NAME = 'mana-krushi-cache-v1';
 const PRECACHE_ASSETS = [
-  '/',
-  '/offline.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/assets/icons/icon-192x192.png',
-  '/assets/icons/icon-512x512.png'
+    '/',
+    '/offline.html',
+    '/manifest.json',
+    '/favicon.ico',
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png',
 ];
 
-/**
- * The install event is fired when the service worker is first installed.
- * We use this event to pre-cache our essential assets.
- */
+// On install, pre-cache the essential assets.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        return cache.addAll(PRECACHE_ASSETS);
+      })
+      .then(() => {
+        return self.skipWaiting();
+      })
   );
 });
 
-/**
- * The activate event is fired when the service worker is activated.
- * We use this event to clean up old caches and ensure the new service worker
- * takes control of the page.
- */
+// On activation, take control of all clients and clean up old caches.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      return self.clients.claim();
-    })
+    self.clients.claim()
+      .then(() => {
+        // Clean up old caches
+        return caches.keys().then((cacheNames) => {
+          return Promise.all(
+            cacheNames.filter((cacheName) => {
+              return cacheName.startsWith('mana-krushi-cache-') && cacheName !== CACHE_NAME;
+            }).map((cacheName) => {
+              return caches.delete(cacheName);
+            })
+          );
+        });
+      })
   );
 });
 
-/**
- * The fetch event is fired for every network request.
- * We use a "Network-first, falling back to cache" strategy.
- * For navigation requests, if the network fails, we show a custom offline page.
- */
+// On fetch, use a cache-first strategy.
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      try {
-        // 1. Try to fetch from the network
-        const networkResponse = await fetch(event.request);
-        
-        // If the request is successful, update the cache and return the response
-        if (event.request.method === 'GET') {
-          cache.put(event.request, networkResponse.clone());
-        }
-        return networkResponse;
+  if (event.request.method !== 'GET') {
+    return;
+  }
 
-      } catch (error) {
-        // 2. If the network fails, try to get it from the cache
-        const cachedResponse = await cache.match(event.request);
+  event.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      // 1. Check the cache for a matching request.
+      return cache.match(event.request).then((cachedResponse) => {
+        // Return the cached response if found.
         if (cachedResponse) {
           return cachedResponse;
         }
 
-        // 3. For navigation requests, if both fail, show the offline fallback page
-        if (event.request.mode === 'navigate') {
-          const offlinePage = await cache.match('/offline.html');
-          return offlinePage;
-        }
-        
-        // For other requests, return a generic error response
-        return new Response("Network error", {
-          status: 408,
-          headers: { 'Content-Type': 'text/plain' },
+        // 2. If not in cache, fetch from the network.
+        return fetch(event.request).then((networkResponse) => {
+          // 2a. If the fetch is successful, clone it and cache it.
+          if (networkResponse.ok) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          // Return the network response.
+          return networkResponse;
+        }).catch(() => {
+          // 3. If the network fails, and it's a navigation request, return the offline fallback page.
+          if (event.request.mode === 'navigate') {
+            return cache.match('/offline.html');
+          }
+          // For other failed requests (e.g., images), return a generic error response.
+          return new Response('Network error occurred.', {
+            status: 408,
+            headers: { 'Content-Type': 'text/plain' },
+          });
         });
-      }
+      });
     })
   );
-});
-
-/**
- * The push event is fired when a push notification is received.
- */
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'Mana Krushi Services', body: 'You have a new notification.' };
-  const { title, body, icon, badge } = data;
-  
-  const options = {
-    body: body,
-    icon: icon || '/assets/icons/icon-192x192.png',
-    badge: badge || '/assets/icons/icon-96x96.png'
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-/**
- * The notificationclick event is fired when a user clicks on a notification.
- */
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
-});
-
-/**
- * The sync event is fired for background sync operations.
- * This is useful for deferring actions until the user has a stable connection.
- */
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-data') {
-    event.waitUntil(
-      console.log("Background sync in progress...")
-      // In a real app, you would put your data synchronization logic here.
-      // For example: sending form data that was submitted offline.
-    );
-  }
-});
-
-
-/**
- * The periodicsync event is fired for periodic background sync operations.
- * This allows the app to fetch fresh content periodically.
- */
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'get-latest-routes') {
-    event.waitUntil(
-        console.log("Fetching latest routes periodically...")
-      // In a real app, you would fetch new data and update the cache.
-      // For example: fetch('/api/latest-routes').then(response => response.json()).then(data => cache.put(...))
-    );
-  }
 });
