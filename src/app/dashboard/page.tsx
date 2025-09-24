@@ -5,22 +5,46 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from 'react';
 import type { OwnerFormValues } from "@/components/dashboard/owner-dashboard";
-import { addRoute, getCurrentUser } from "@/lib/storage";
-import { useRouter } from "next/navigation";
+import { addRoute, getCurrentUser, getProfile } from "@/lib/storage";
+import React from "react";
 
 
 function DashboardPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const role = searchParams.get("role") || "passenger"; 
-  const [isClient, setIsClient] = useState(false);
+  const roleFromUrl = searchParams.get("role");
+  const [role, setRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const determineRole = async () => {
+        const userProfile = await getProfile();
+        let actualRole = userProfile?.role || 'passenger';
+
+        // Override role if it's explicitly in the URL, but respect admin role from profile
+        if (roleFromUrl && actualRole !== 'admin') {
+            actualRole = roleFromUrl;
+        }
+        
+        if (actualRole === 'admin') {
+            router.replace('/admin/dashboard');
+            // Don't set role or stop loading, to prevent rendering anything on this page
+            return;
+        }
+
+        setRole(actualRole);
+        // Update URL to reflect the correct role if it's not already set
+        if (!roleFromUrl || roleFromUrl !== actualRole) {
+             router.replace(`/dashboard?role=${actualRole}`);
+        }
+        setIsLoading(false);
+    };
+    determineRole();
+  }, [roleFromUrl, router]);
 
 
   const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => {
@@ -47,7 +71,7 @@ function DashboardPage() {
     }
   };
 
-  if (!isClient) {
+  if (isLoading || !role) {
       return <AppLayout><div>Loading...</div></AppLayout>;
   }
 
