@@ -179,7 +179,7 @@ export function LoginForm() {
             </Link>
           </div>
         </CardContent>
-        {!isStandalone && (
+        {!isStandalone && installPrompt && (
             <CardFooter className="flex-col gap-2">
                 <div className="w-full h-px bg-border" />
                  <p className="text-sm text-muted-foreground pt-2">Get the best experience by installing the app.</p>
@@ -188,7 +188,6 @@ export function LoginForm() {
                         variant="outline" 
                         className="w-full" 
                         onClick={handleInstallClick}
-                        disabled={!installPrompt}
                     >
                         <Download className="mr-2 h-4 w-4" />
                         Install App
