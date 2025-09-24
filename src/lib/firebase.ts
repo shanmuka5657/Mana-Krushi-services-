@@ -292,24 +292,18 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
 
         let q = query(routesCollection);
 
-        if(searchParams?.ownerEmail) {
+        if (searchParams?.ownerEmail) {
             q = query(q, where("ownerEmail", "==", searchParams.ownerEmail));
-        }
-        
-        // Date filter is the most selective, apply it first if present.
-        if (searchParams?.date) {
-             const searchDate = new Date(searchParams.date);
-             const startOfDay = new Date(searchDate.setHours(0,0,0,0));
-             const endOfDay = new Date(searchDate.setHours(23,59,59,999));
+            // The query requiring an index was a combination of filtering by ownerEmail and ordering by travelDate.
+            // By removing the orderBy clause from the query, we avoid the need for the composite index.
+            // Sorting will now be handled client-side after fetching.
+        } else if (searchParams?.promoted) {
+            q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()), orderBy("travelDate", "asc"), limit(5));
+        } else if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            const startOfDay = new Date(searchDate.setHours(0,0,0,0));
+            const endOfDay = new Date(searchDate.setHours(23,59,59,999));
             q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
-        }
-
-        if (searchParams?.promoted) {
-            q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()));
-        }
-
-        if (searchParams?.promoted) {
-             q = query(q, orderBy("travelDate", "asc"), limit(5));
         }
 
         const snapshot = await getDocs(q);
@@ -321,6 +315,11 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
                 travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
             } as Route;
         });
+        
+        // If we filtered by ownerEmail, sort the results now in the code
+        if (searchParams?.ownerEmail) {
+            routes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
+        }
 
         // Client-side filtering for other params (if not a promoted-only query)
         if (!searchParams?.promoted) {
