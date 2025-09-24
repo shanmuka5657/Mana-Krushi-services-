@@ -1,86 +1,84 @@
-// A simple, stable service worker with a Cache-First strategy.
-
-const CACHE_NAME = 'mana-krushi-cache-v1';
+const PRECACHE = 'precache-v2';
+const RUNTIME = 'runtime';
 const OFFLINE_URL = '/offline.html';
+
 const PRECACHE_ASSETS = [
-    '/',
-    OFFLINE_URL,
-    '/manifest.json'
+  '/',
+  OFFLINE_URL,
+  '/manifest.json',
+  '/favicon.ico',
+  '/globals.css'
 ];
 
-// 1. Install the service worker and pre-cache assets
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('[Service Worker] Pre-caching core assets.');
-                return cache.addAll(PRECACHE_ASSETS);
-            })
-            .catch(error => {
-                console.error('[Service Worker] Pre-caching failed:', error);
-            })
-    );
-    self.skipWaiting();
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(PRECACHE)
+      .then(cache => cache.addAll(PRECACHE_ASSETS))
+      .then(self.skipWaiting())
+  );
 });
 
-// 2. Activate the service worker and clean up old caches
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('[Service Worker] Deleting old cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim())
-    );
+self.addEventListener('activate', event => {
+  const currentCaches = [PRECACHE, RUNTIME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
+    }).then(cachesToDelete => {
+      return Promise.all(cachesToDelete.map(cacheToDelete => {
+        return caches.delete(cacheToDelete);
+      }));
+    }).then(() => self.clients.claim())
+  );
 });
 
-// 3. Intercept fetch requests (Cache-First strategy)
-self.addEventListener('fetch', (event) => {
-    // We only want to handle GET requests.
-    if (event.request.method !== 'GET') {
-        return;
-    }
-
+self.addEventListener('fetch', event => {
+  // Handle navigation requests (for pages)
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-        caches.open(CACHE_NAME).then(async (cache) => {
-            // 1. Check the cache for a matching request
-            const cachedResponse = await cache.match(event.request);
-            if (cachedResponse) {
-                // Return the cached response if found
-                return cachedResponse;
-            }
+      (async () => {
+        try {
+          // First, try to use the navigation preload response if it's supported.
+          const preloadResponse = await event.preloadResponse;
+          if (preloadResponse) {
+            return preloadResponse;
+          }
 
-            // 2. If not in cache, go to the network
-            try {
-                const networkResponse = await fetch(event.request);
-                
-                // If the fetch is successful, clone the response and store it in the cache.
-                // We need to clone it because a response is a stream and can only be consumed once.
-                if (networkResponse.ok) {
-                    cache.put(event.request, networkResponse.clone());
-                }
+          // Always try the network first for navigation.
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch (error) {
+          // Catch is only triggered if the network fails.
+          console.log('Fetch failed; returning offline page instead.', error);
 
-                return networkResponse;
-            } catch (error) {
-                // 3. If the network fails (offline), and it's a navigation request, show the offline page.
-                console.log('[Service Worker] Fetch failed; returning offline page.', error);
-                if (event.request.mode === 'navigate') {
-                    const offlinePage = await cache.match(OFFLINE_URL);
-                    return offlinePage;
-                }
-                
-                // For other types of requests (e.g., images, API calls), just fail.
-                // You could return a placeholder image here if desired.
-                return new Response('Network error', {
-                    status: 408,
-                    headers: { 'Content-Type': 'text/plain' },
-                });
-            }
+          const cache = await caches.open(PRECACHE);
+          const cachedResponse = await cache.match(OFFLINE_URL);
+          return cachedResponse;
+        }
+      })()
+    );
+  } else if (PRECACHE_ASSETS.includes(event.request.url)) {
+    // For precached assets, use a cache-first strategy.
+     event.respondWith(
+        caches.match(event.request).then(cachedResponse => {
+            return cachedResponse || fetch(event.request);
         })
     );
+  } else {
+    // For all other requests, use a network-first, falling back to cache strategy.
+    event.respondWith(
+      caches.open(RUNTIME).then(cache => {
+        return fetch(event.request)
+          .then(response => {
+            // If the request is successful, clone it and store it in the runtime cache.
+            return cache.put(event.request, response.clone()).then(() => {
+              return response;
+            });
+          })
+          .catch(() => {
+            // If the network request fails, try to get it from the cache.
+            return caches.match(event.request);
+          });
+      })
+    );
+  }
 });
