@@ -1,82 +1,110 @@
-// A simple, robust, cache-first service worker.
-
 const CACHE_NAME = 'mana-krushi-cache-v1';
 const PRECACHE_ASSETS = [
     '/',
     '/offline.html',
-    '/manifest.json',
-    '/favicon.ico',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png',
+    '/manifest.json'
 ];
 
-// On install, pre-cache the essential assets.
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(PRECACHE_ASSETS);
-      })
-      .then(() => {
-        return self.skipWaiting();
-      })
-  );
+// Pre-cache assets on install
+self.addEventListener('install', event => {
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.addAll(PRECACHE_ASSETS);
+    })());
+    self.skipWaiting();
 });
 
-// On activation, take control of all clients and clean up old caches.
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    self.clients.claim()
-      .then(() => {
-        // Clean up old caches
-        return caches.keys().then((cacheNames) => {
-          return Promise.all(
-            cacheNames.filter((cacheName) => {
-              return cacheName.startsWith('mana-krushi-cache-') && cacheName !== CACHE_NAME;
-            }).map((cacheName) => {
-              return caches.delete(cacheName);
-            })
-          );
-        });
-      })
-  );
+// Clean up old caches on activation
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
 });
 
-// On fetch, use a cache-first strategy.
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  event.respondWith(
-    caches.open(CACHE_NAME).then((cache) => {
-      // 1. Check the cache for a matching request.
-      return cache.match(event.request).then((cachedResponse) => {
-        // Return the cached response if found.
+// Cache-First Fetch Strategy
+self.addEventListener('fetch', event => {
+    event.respondWith((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        
+        // Try to get the response from the cache
+        const cachedResponse = await cache.match(event.request);
         if (cachedResponse) {
-          return cachedResponse;
+            return cachedResponse;
         }
 
-        // 2. If not in cache, fetch from the network.
-        return fetch(event.request).then((networkResponse) => {
-          // 2a. If the fetch is successful, clone it and cache it.
-          if (networkResponse.ok) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          // Return the network response.
-          return networkResponse;
-        }).catch(() => {
-          // 3. If the network fails, and it's a navigation request, return the offline fallback page.
-          if (event.request.mode === 'navigate') {
-            return cache.match('/offline.html');
-          }
-          // For other failed requests (e.g., images), return a generic error response.
-          return new Response('Network error occurred.', {
-            status: 408,
-            headers: { 'Content-Type': 'text/plain' },
-          });
-        });
-      });
+        try {
+            // If not in cache, try to fetch from the network
+            const networkResponse = await fetch(event.request);
+            
+            // If the network request is successful, cache the new response
+            if (networkResponse.ok) {
+                await cache.put(event.request, networkResponse.clone());
+            }
+
+            return networkResponse;
+        } catch (error) {
+            // If the network fails and the request is for a page, show the offline fallback page
+            if (event.request.mode === 'navigate') {
+                return cache.match('/offline.html');
+            }
+            // For other asset types (images, etc.), just fail without a fallback
+            return new Response(null, { status: 404 });
+        }
+    })());
+});
+
+// --- Push Notification Event Listener ---
+self.addEventListener('push', event => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Mana Krushi Services';
+  const options = {
+    body: data.body || 'You have a new message.',
+    icon: '/images/icons/icon-192x192.png', // Default icon
+    badge: '/images/icons/icon-96x96.png', // Badge for the notification bar
+    ...data.options,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// --- Notification Click Event Listener ---
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      const urlToOpen = event.notification.data?.url || '/';
+      
+      // If a window for the app is already open, focus it
+      if (clientList.length > 0) {
+        let client = clientList[0];
+        for (const c of clientList) {
+            if (c.url === urlToOpen && 'focus' in c) {
+                client = c;
+                break;
+            }
+        }
+        if (client && 'focus' in client) {
+            client.focus();
+            client.navigate(urlToOpen);
+        }
+      }
+      
+      // Otherwise, open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
     })
   );
 });
