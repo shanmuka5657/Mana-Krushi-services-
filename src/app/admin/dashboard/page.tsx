@@ -5,12 +5,12 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2, RefreshCw, ScreenShare, Atom } from "lucide-react";
-import { getRoutes, getBookings, getAllProfiles, getVisits, saveGlobalLogoUrl, getGlobalLogoUrlWithCache as getGlobalLogoUrl, getPwaScreenshots } from "@/lib/storage";
+import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Loader2, Wand2, RefreshCw } from "lucide-react";
+import { getRoutes, getBookings, getAllProfiles, getVisits, saveGlobalLogoUrl, getGlobalLogoUrlWithCache as getGlobalLogoUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { cropLogo, uploadPwaScreenshots } from "@/app/actions";
+import { cropLogo } from "@/app/actions";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -60,20 +60,13 @@ function AdminDashboardPage() {
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [pwaScreenshots, setPwaScreenshots] = useState<{src: string}[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [isUploadingScreenshots, setIsUploadingScreenshots] = useState(false);
-  const [isGeneratingIcon, setIsGeneratingIcon] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const [currentLogo, currentScreenshots] = await Promise.all([
-          getGlobalLogoUrl(),
-          getPwaScreenshots(),
-      ]);
+      const currentLogo = await getGlobalLogoUrl();
       setLogoUrl(currentLogo);
-      setPwaScreenshots(currentScreenshots || []);
       setIsLoaded(true);
       
       fetchVisitorStats(true);
@@ -198,75 +191,6 @@ function AdminDashboardPage() {
     }
   };
 
-  const handleScreenshotUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-        setIsUploadingScreenshots(true);
-        const screenshotPromises = Array.from(files).map(file => {
-            return new Promise<{dataUrl: string, type: string}>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const img = document.createElement('img');
-                    img.onload = () => {
-                        if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx?.drawImage(img, 0, 0);
-                            const pngDataUrl = canvas.toDataURL('image/png');
-                            resolve({ dataUrl: pngDataUrl, type: 'image/png' });
-                        } else {
-                            resolve({ dataUrl: reader.result as string, type: file.type });
-                        }
-                    };
-                    img.onerror = reject;
-                    img.src = reader.result as string;
-                }
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        });
-
-        Promise.all(screenshotPromises).then(async (results) => {
-            const screenshots = await Promise.all(results.map(async ({dataUrl, type}) => {
-                const img = document.createElement('img');
-                return new Promise<{src: string, sizes: string, type: string, form_factor: string}>((resolve) => {
-                    img.onload = () => {
-                        const form_factor = img.width > img.height ? "wide" : "narrow";
-                        resolve({
-                            src: dataUrl,
-                            sizes: `${img.width}x${img.height}`,
-                            type: type,
-                            form_factor: form_factor,
-                        });
-                    }
-                    img.src = dataUrl;
-                });
-            }));
-            
-            const result = await uploadPwaScreenshots({ screenshots });
-
-            if (result.success) {
-                setPwaScreenshots(screenshots);
-                toast({
-                    title: "Screenshots Updated",
-                    description: "PWA screenshots have been successfully updated in your manifest.",
-                });
-            } else {
-                toast({
-                    title: "Error Uploading Screenshots",
-                    description: result.error || "An unknown error occurred.",
-                    variant: "destructive",
-                });
-            }
-
-            setIsUploadingScreenshots(false);
-        });
-    }
-  };
-
-
   if (!isLoaded) {
     return <AppLayout><div>Loading admin dashboard...</div></AppLayout>;
   }
@@ -289,7 +213,7 @@ function AdminDashboardPage() {
                 <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" onRefresh={fetchBookingAndRevenueStats} isLoading={loadingStats.revenue} />
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-1">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><ImageIcon /> Branding</CardTitle>
@@ -308,31 +232,6 @@ function AdminDashboardPage() {
                                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                                 Upload & Enhance
                                 <Input id="logo-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleLogoUpload} />
-                            </label>
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><ScreenShare /> PWA Screenshots</CardTitle>
-                        <CardDescription>Upload screenshots for the PWA installation screen.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4 flex flex-col items-center">
-                        <div className="flex flex-wrap gap-2 justify-center">
-                            {pwaScreenshots.length > 0 ? pwaScreenshots.map((ss, index) => (
-                                <Image key={index} src={ss.src} alt={`PWA Screenshot ${index + 1}`} width={80} height={160} className="object-contain h-40 w-auto border p-1 rounded-md" />
-                            )) : (
-                                <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">
-                                    <p className="text-sm text-muted-foreground">No screenshots uploaded yet.</p>
-                                </div>
-                            )}
-                        </div>
-                        <Button asChild variant="outline">
-                            <label htmlFor="screenshot-upload" className="cursor-pointer">
-                                {isUploadingScreenshots ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                                Upload Screenshots
-                                <Input id="screenshot-upload" type="file" multiple className="hidden" accept="image/png, image/jpeg" onChange={handleScreenshotUpload} />
                             </label>
                         </Button>
                     </CardContent>

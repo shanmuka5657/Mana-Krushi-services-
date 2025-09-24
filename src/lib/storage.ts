@@ -76,13 +76,6 @@ export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) =>
 };
 
 // --- PWA ---
-export const savePwaScreenshots = async (screenshots: any[]) => {
-    if (!isBrowser) return;
-    perfTracker.increment({ reads: 0, writes: 1 });
-    // On client, only save to Firestore. The server action will handle the file write.
-    await saveSetting('pwaScreenshots', screenshots);
-};
-
 export const getPwaScreenshots = async (): Promise<any[] | null> => {
     if (!isBrowser) return null;
     perfTracker.increment({ reads: 1, writes: 0 });
@@ -388,10 +381,3 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-
-// --- Add this function to storage.ts ---
-export const savePwaScreenshotsToDb = async (screenshots: any[]) => {
-    if (!isBrowser) return;
-    perfTracker.increment({ reads: 0, writes: 1 });
-    await saveSetting('pwaScreenshots', screenshots);
-};
