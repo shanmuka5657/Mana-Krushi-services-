@@ -5,12 +5,12 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2, RefreshCw, ScreenShare } from "lucide-react";
+import { Users, Route, Book, IndianRupee, Eye, Signal, Image as ImageIcon, Upload, Loader2, Wand2, RefreshCw, ScreenShare, Atom } from "lucide-react";
 import { getRoutes, getBookings, getAllProfiles, getVisits, saveGlobalLogoUrl, getGlobalLogoUrlWithCache as getGlobalLogoUrl, getPwaScreenshots } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { cropLogo, uploadPwaScreenshots } from "@/app/actions";
+import { cropLogo, uploadPwaScreenshots, setPwaIcon } from "@/app/actions";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -63,6 +63,7 @@ function AdminDashboardPage() {
   const [pwaScreenshots, setPwaScreenshots] = useState<{src: string}[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingScreenshots, setIsUploadingScreenshots] = useState(false);
+  const [isGeneratingIcon, setIsGeneratingIcon] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -265,6 +266,30 @@ function AdminDashboardPage() {
     }
   };
 
+  const handleGenerateIcon = async () => {
+    setIsGeneratingIcon(true);
+    toast({
+        title: "Generating PWA Icons...",
+        description: "This might take a moment. The page will reload on success."
+    });
+    const result = await setPwaIcon({ imageUrl: 'https://i.ibb.co/MggT6G2/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png' });
+    setIsGeneratingIcon(false);
+
+    if (result.success) {
+        toast({
+            title: "PWA Icons Generated!",
+            description: "The manifest.json file has been updated.",
+        });
+        window.location.reload();
+    } else {
+        toast({
+            title: "Icon Generation Failed",
+            description: result.error || "An unknown error occurred.",
+            variant: "destructive"
+        });
+    }
+  };
+
 
   if (!isLoaded) {
     return <AppLayout><div>Loading admin dashboard...</div></AppLayout>;
@@ -288,7 +313,7 @@ function AdminDashboardPage() {
                 <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon={IndianRupee} href="/admin/payments" onRefresh={fetchBookingAndRevenueStats} isLoading={loadingStats.revenue} />
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-3">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><ImageIcon /> Branding</CardTitle>
@@ -336,6 +361,21 @@ function AdminDashboardPage() {
                         </Button>
                     </CardContent>
                 </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Atom /> PWA Icon</CardTitle>
+                        <CardDescription>Set the icon for the installable Progressive Web App.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 flex flex-col items-center">
+                        <Image src="/manifest-icon.png" alt="Current PWA Icon" width={96} height={96} className="rounded-lg object-cover h-24 w-24 border p-1" onError={(e) => e.currentTarget.src='https://placehold.co/96x96/f0f0f0/333?text=Icon'} />
+                        <Button variant="outline" onClick={handleGenerateIcon} disabled={isGeneratingIcon}>
+                            {isGeneratingIcon ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                            Generate PWA Icons
+                        </Button>
+                    </CardContent>
+                </Card>
+
             </div>
         </div>
     </AppLayout>
