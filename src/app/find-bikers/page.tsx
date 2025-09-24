@@ -126,11 +126,14 @@ function FindBikersContent() {
                 const lowerFrom = fromLocation.toLowerCase();
                 const lowerTo = toLocation.toLowerCase();
 
-                const filteredRoutes = allRoutes.filter(route => 
-                    route.vehicleType === 'Bike' &&
-                    route.fromLocation.toLowerCase().includes(lowerFrom) &&
-                    route.toLocation.toLowerCase().includes(lowerTo)
-                );
+                const filteredRoutes = allRoutes.filter(route => {
+                    const routeFrom = route.fromLocation.toLowerCase();
+                    const routeTo = route.toLocation.toLowerCase();
+                    const fromMatch = routeFrom.includes(lowerFrom) || lowerFrom.includes(routeFrom);
+                    const toMatch = routeTo.includes(lowerTo) || lowerTo.includes(routeTo);
+                    
+                    return route.vehicleType === 'Bike' && fromMatch && toMatch;
+                });
 
                 // Sort results: exact matches first, then by date
                 filteredRoutes.sort((a, b) => {
