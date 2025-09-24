@@ -1,84 +1,72 @@
-const PRECACHE = 'precache-v2';
-const RUNTIME = 'runtime';
-const OFFLINE_URL = '/offline.html';
-
+const CACHE_NAME = 'mana-krushi-cache-v2';
 const PRECACHE_ASSETS = [
   '/',
-  OFFLINE_URL,
-  '/manifest.json',
-  '/favicon.ico',
-  '/globals.css'
+  '/manifest.json'
 ];
 
+// Install event: pre-cache the essential assets.
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(PRECACHE)
-      .then(cache => cache.addAll(PRECACHE_ASSETS))
-      .then(self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Service Worker: Caching pre-cache assets');
+        return cache.addAll(PRECACHE_ASSETS);
+      })
+      .catch(error => {
+        console.error('Service Worker: Failed to cache pre-cache assets:', error);
+      })
   );
 });
 
+// Activate event: clean up old caches.
 self.addEventListener('activate', event => {
-  const currentCaches = [PRECACHE, RUNTIME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
-      return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
-    }).then(cachesToDelete => {
-      return Promise.all(cachesToDelete.map(cacheToDelete => {
-        return caches.delete(cacheToDelete);
-      }));
-    }).then(() => self.clients.claim())
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log('Service Worker: Clearing old cache:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
   );
+  return self.clients.claim();
 });
 
+// Fetch event: serve from cache first, fall back to network.
 self.addEventListener('fetch', event => {
-  // Handle navigation requests (for pages)
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      (async () => {
-        try {
-          // First, try to use the navigation preload response if it's supported.
-          const preloadResponse = await event.preloadResponse;
-          if (preloadResponse) {
-            return preloadResponse;
-          }
-
-          // Always try the network first for navigation.
-          const networkResponse = await fetch(event.request);
-          return networkResponse;
-        } catch (error) {
-          // Catch is only triggered if the network fails.
-          console.log('Fetch failed; returning offline page instead.', error);
-
-          const cache = await caches.open(PRECACHE);
-          const cachedResponse = await cache.match(OFFLINE_URL);
-          return cachedResponse;
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response
+        if (response) {
+          return response;
         }
-      })()
-    );
-  } else if (PRECACHE_ASSETS.includes(event.request.url)) {
-    // For precached assets, use a cache-first strategy.
-     event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || fetch(event.request);
-        })
-    );
-  } else {
-    // For all other requests, use a network-first, falling back to cache strategy.
-    event.respondWith(
-      caches.open(RUNTIME).then(cache => {
-        return fetch(event.request)
-          .then(response => {
-            // If the request is successful, clone it and store it in the runtime cache.
-            return cache.put(event.request, response.clone()).then(() => {
+
+        // Not in cache - fetch from network
+        return fetch(event.request).then(
+          response => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
-            });
-          })
-          .catch(() => {
-            // If the network request fails, try to get it from the cache.
-            return caches.match(event.request);
-          });
+            }
+
+            // IMPORTANT: Clone the response. A response is a stream
+            // and because we want the browser to consume the response
+            // as well as the cache consuming the response, we need
+            // to clone it so we have two streams.
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          }
+        );
       })
     );
-  }
 });
