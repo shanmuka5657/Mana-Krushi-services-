@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from 'react';
@@ -120,13 +121,38 @@ function FindBikersContent() {
         const fetchBikers = async () => {
             if (fromLocation && toLocation) {
                 setIsSearching(true);
-                const allRoutes = await getRoutes(true, { from: fromLocation, to: toLocation });
-                const bikeRoutes = allRoutes.filter(route => route.vehicleType === 'Bike');
-                bikeRoutes.sort((a,b) => new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime());
-                setBikers(bikeRoutes);
+                const allRoutes = await getRoutes(true); // Fetch all routes
+                
+                const lowerFrom = fromLocation.toLowerCase();
+                const lowerTo = toLocation.toLowerCase();
 
-                if (bikeRoutes.length > 0) {
-                    const driverEmails = new Set(bikeRoutes.map(r => r.ownerEmail));
+                const filteredRoutes = allRoutes.filter(route => 
+                    route.vehicleType === 'Bike' &&
+                    route.fromLocation.toLowerCase().includes(lowerFrom) &&
+                    route.toLocation.toLowerCase().includes(lowerTo)
+                );
+
+                // Sort results: exact matches first, then by date
+                filteredRoutes.sort((a, b) => {
+                    const aFromExact = a.fromLocation.toLowerCase() === lowerFrom;
+                    const bFromExact = b.fromLocation.toLowerCase() === lowerFrom;
+                    const aToExact = a.toLocation.toLowerCase() === lowerTo;
+                    const bToExact = b.toLocation.toLowerCase() === lowerTo;
+
+                    const aIsExact = aFromExact && aToExact;
+                    const bIsExact = bFromExact && bToExact;
+
+                    if (aIsExact && !bIsExact) return -1;
+                    if (!aIsExact && bIsExact) return 1;
+
+                    // If both are exact or both are not, sort by date
+                    return new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime();
+                });
+                
+                setBikers(filteredRoutes);
+
+                if (filteredRoutes.length > 0) {
+                    const driverEmails = new Set(filteredRoutes.map(r => r.ownerEmail));
                     const newProfilesToFetch = Array.from(driverEmails).filter(email => !driverProfiles.has(email));
                     if (newProfilesToFetch.length > 0) {
                         const profilePromises = newProfilesToFetch.map(email => getProfile(email));
