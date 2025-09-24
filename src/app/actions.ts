@@ -222,7 +222,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ addres
     }
 
     try {
-        const url = `https://atlas.mapmyindia.com/api/places/rev_geocode?lat=${lat}&lng=${lon}`;
+        const url = `https://atlas.mapmyindia.com/api/places/rev_geocode?lat=${lat}&lng=${lon}&region=IND`;
         
         const response = await fetch(url, {
             method: 'GET',
@@ -250,4 +250,6 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ addres
         return { error: "An error occurred while fetching the address." };
     }
 }
+    
+
     
