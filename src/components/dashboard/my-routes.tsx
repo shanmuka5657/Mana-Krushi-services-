@@ -37,6 +37,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
 import QRCode from "qrcode.react";
+import { onSnapshot, query, collection, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 
 interface MyRoutesProps {
@@ -75,55 +77,68 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   });
 
    useEffect(() => {
-    const calculateBookedSeatsAndViews = async () => {
-        if (initialRoutes.length === 0) {
-            setIsLoading(false);
-            return;
-        }
+    const ownerEmail = getCurrentUser();
+    if (!ownerEmail) {
+      setIsLoading(false);
+      return;
+    }
+
+    const routesCollectionRef = collection(db, "routes");
+    const q = query(routesCollectionRef, where("ownerEmail", "==", ownerEmail));
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
         setIsLoading(true);
+        const fetchedRoutes = querySnapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+            travelDate: doc.data().travelDate.toDate(),
+        })) as Route[];
 
-        const newBookedSeatsMap = new Map<string, number>();
-        const newRouteViewsMap = new Map<string, number>();
+        setRoutes(fetchedRoutes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime()));
 
-        // Fetch bookings for all displayed routes at once
-        const bookingPromises = initialRoutes.map(route => {
-            const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
-            const routeTime = route.departureTime;
-            return getBookings(false, { // Use false to indicate non-admin, more targeted fetch
-                destination: `${route.fromLocation} to ${route.toLocation}`,
-                date: routeDate,
-                time: routeTime,
+        if (fetchedRoutes.length > 0) {
+            const newBookedSeatsMap = new Map<string, number>();
+            const newRouteViewsMap = new Map<string, number>();
+
+            const bookingPromises = fetchedRoutes.map(route => {
+                const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
+                const routeTime = route.departureTime;
+                return getBookings(false, {
+                    destination: `${route.fromLocation} to ${route.toLocation}`,
+                    date: routeDate,
+                    time: routeTime,
+                });
             });
-        });
-        
-        // Fetch views for all displayed routes
-        const viewPromises = initialRoutes.map(route => getRouteViews(route.id));
-        
-        const [bookingsByRoute, viewsByRoute] = await Promise.all([
-            Promise.all(bookingPromises),
-            Promise.all(viewPromises)
-        ]);
 
-        initialRoutes.forEach((route, index) => {
-            // Process bookings
-            const bookingsForThisRoute = bookingsByRoute[index];
-            const bookedSeats = bookingsForThisRoute
-                .filter(b => b.status !== 'Cancelled')
-                .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-            newBookedSeatsMap.set(route.id, bookedSeats);
+            const viewPromises = fetchedRoutes.map(route => getRouteViews(route.id));
+            
+            const [bookingsByRoute, viewsByRoute] = await Promise.all([
+                Promise.all(bookingPromises),
+                Promise.all(viewPromises)
+            ]);
 
-            // Process views
-            newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
-        });
+            fetchedRoutes.forEach((route, index) => {
+                const bookingsForThisRoute = bookingsByRoute[index];
+                const bookedSeats = bookingsForThisRoute
+                    .filter(b => b.status !== 'Cancelled')
+                    .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+                newBookedSeatsMap.set(route.id, bookedSeats);
+                newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
+            });
 
-        setBookedSeatsMap(newBookedSeatsMap);
-        setRouteViewsMap(newRouteViewsMap);
-        setRoutes(initialRoutes);
+            setBookedSeatsMap(newBookedSeatsMap);
+            setRouteViewsMap(newRouteViewsMap);
+        }
         setIsLoading(false);
-    };
+    }, (error) => {
+        console.error("Error fetching real-time routes:", error);
+        toast({ title: "Error", description: "Could not fetch routes in real-time.", variant: "destructive"});
+        setIsLoading(false);
+    });
 
-    calculateBookedSeatsAndViews();
-  }, [initialRoutes]);
+    return () => unsubscribe();
+  }, [toast]);
+
 
   useEffect(() => {
     if (selectedRoute && isEditDialogOpen) {
@@ -226,12 +241,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     );
 
     await saveRoutes(updatedRoutes);
-    // Refresh the routes list from props after saving
-    const ownerEmail = getCurrentUser();
-    if(ownerEmail) {
-        const latestOwnerRoutes = updatedRoutes.filter(r => r.ownerEmail === ownerEmail);
-        setRoutes(latestOwnerRoutes);
-    }
+    // The real-time listener will automatically update the UI, so no need to call setRoutes here.
     
     toast({
       title: "Route Updated",

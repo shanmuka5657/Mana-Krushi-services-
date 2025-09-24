@@ -7,29 +7,21 @@ import MyRoutes from '@/components/dashboard/my-routes';
 import { getRoutes, getCurrentUser } from '@/lib/storage';
 import type { Route } from '@/lib/types';
 import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 function MyRoutesPageContent() {
     const [routes, setRoutes] = useState<Route[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(true); // Default to true to show loader initially
 
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            const ownerEmail = getCurrentUser();
-            if (ownerEmail) {
-                // Fetch only the routes for the current owner
-                const ownerRoutes = await getRoutes(false, { ownerEmail });
-                
-                // Show all routes, sorted by earliest date first
-                setRoutes(ownerRoutes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime()));
-            }
-            setIsLoaded(true);
-        };
-        fetchInitialData();
-    }, []);
-
+    // The data fetching is now handled by the real-time listener in MyRoutes component
+    // This component now just acts as a shell.
 
     if (!isLoaded) {
-        return <AppLayout><div>Loading...</div></AppLayout>;
+        return <AppLayout>
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        </AppLayout>;
     }
 
     return (
