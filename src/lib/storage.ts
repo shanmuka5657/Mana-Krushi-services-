@@ -388,3 +388,10 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
+// --- Add this function to storage.ts ---
+export const savePwaScreenshotsToDb = async (screenshots: any[]) => {
+    if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
+    await saveSetting('pwaScreenshots', screenshots);
+};
