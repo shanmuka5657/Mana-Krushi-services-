@@ -6,10 +6,9 @@ import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-
 import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { cropLogo as cropLogoFlow } from "@/ai/flows/crop-logo-flow";
-import { createPwaIcon as createPwaIconFlow } from "@/ai/flows/create-pwa-icon-flow";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
-import { getProfile, saveProfile, getCurrentUser, savePwaScreenshots as savePwaScreenshotsToDb } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, savePwaScreenshotsToDb } from "@/lib/storage";
 import fs from 'fs';
 import path from 'path';
 
@@ -199,69 +198,6 @@ export async function uploadPwaScreenshots(input: { screenshots: z.infer<typeof 
   } catch (e) {
     console.error('Error processing PWA screenshots:', e);
     return { success: false, error: 'An unexpected error occurred while saving screenshots.' };
-  }
-}
-
-const SetPwaIconInput = z.object({
-  imageUrl: z.string().url(),
-});
-
-export async function setPwaIcon(input: { imageUrl: string }): Promise<{ success: boolean; error?: string }> {
-  const validatedInput = SetPwaIconInput.safeParse(input);
-  if (!validatedInput.success) {
-    return { success: false, error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
-  }
-
-  try {
-    const result = await createPwaIconFlow(validatedInput.data);
-    if (!result.iconDataUri) {
-      return { success: false, error: 'AI flow failed to return icon data.' };
-    }
-
-    const icons = [
-      {
-        "src": result.iconDataUri,
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": result.iconDataUri,
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ];
-
-    const manifestPath = path.join(process.cwd(), 'public', 'manifest.json');
-    let manifest;
-    try {
-        const manifestData = fs.readFileSync(manifestPath, 'utf-8');
-        manifest = JSON.parse(manifestData);
-    } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-            manifest = {
-                "theme_color": "#1E88E5",
-                "background_color": "#FFFFFF",
-                "display": "standalone",
-                "scope": "/",
-                "start_url": "/",
-                "name": "Mana Krushi Services",
-                "short_name": "MK Services",
-                "description": "Your partner in shared travel. Find or offer a ride with ease.",
-                "screenshots": [],
-            };
-        } else {
-            throw error;
-        }
-    }
-    
-    manifest.icons = icons;
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-
-    return { success: true };
-
-  } catch (e) {
-    console.error('Error setting PWA icon:', e);
-    return { success: false, error: 'An unexpected error occurred while setting the PWA icon.' };
   }
 }
     
