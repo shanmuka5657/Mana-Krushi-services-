@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Copy } from "lucide-react";
+import { Loader2, Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import QRCode from 'qrcode.react';
 
@@ -29,7 +29,13 @@ const PAYEE_NAME = "Mana Krushi Services";
 
 export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, amount, title, description }: PaymentDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Basic check for mobile device
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  }, []);
   
   const upiParams = new URLSearchParams({
       pa: UPI_ID,
@@ -76,9 +82,18 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, 
         </DialogHeader>
         
         <div className="py-4 flex flex-col items-center gap-4">
-          <div className="p-4 bg-white rounded-lg border">
-            <QRCode value={paymentUrl} size={200} level="H" />
-          </div>
+          {isMobile ? (
+             <Button asChild size="lg" className="w-full">
+                <a href={paymentUrl}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Pay ₹{amount} with UPI
+                </a>
+            </Button>
+          ) : (
+            <div className="p-4 bg-white rounded-lg border">
+                <QRCode value={paymentUrl} size={200} level="H" />
+            </div>
+          )}
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Or pay to this UPI ID:</p>
             <div className="flex items-center gap-2 mt-1">
