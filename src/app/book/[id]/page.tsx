@@ -370,50 +370,6 @@ ${newlyBooked.client}
                 </CardContent>
             </Card>
 
-            {route.pickupPoints && route.pickupPoints.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pickup Points</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                       {route.pickupPoints.map((point, index) => (
-                           <a 
-                                key={index} 
-                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(point)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-muted-foreground hover:text-primary hover:underline"
-                           >
-                               <MapPin className="h-4 w-4" />
-                               <span>{point}</span>
-                           </a>
-                       ))}
-                    </CardContent>
-                </Card>
-            )}
-
-            {route.dropOffPoints && route.dropOffPoints.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Drop-off Points</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                       {route.dropOffPoints.map((point, index) => (
-                           <a 
-                                key={index} 
-                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(point)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-muted-foreground hover:text-primary hover:underline"
-                            >
-                               <MapPin className="h-4 w-4" />
-                               <span>{point}</span>
-                           </a>
-                       ))}
-                    </CardContent>
-                </Card>
-            )}
-
             <Card>
                 <CardHeader>
                     <CardTitle>Price summary</CardTitle>

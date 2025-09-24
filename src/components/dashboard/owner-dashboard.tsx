@@ -65,7 +65,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, on
         const result = await getMapSuggestions(searchQuery);
 
         if (result.error) {
-            console.error(result.error);
+            console.error("Failed to fetch location suggestions.");
             setSuggestions([]);
         } else if (result.suggestions) {
             setSuggestions(result.suggestions);
@@ -134,8 +134,6 @@ const ownerFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
   distance: z.coerce.number().optional(),
-  pickupPoints: z.string().optional(),
-  dropOffPoints: z.string().optional(),
   travelDate: z.date({
     required_error: "A travel date is required.",
   }),
@@ -151,7 +149,7 @@ const ownerFormSchema = z.object({
 export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
 
 interface OwnerDashboardProps {
-  onRouteAdded: (newRoute: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => void;
+  onRouteAdded: (newRoute: OwnerFormValues & { isPromoted?: boolean }) => void;
   onSwitchTab: (tab: string) => void;
 }
 
@@ -196,8 +194,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         fromLocation: "",
         toLocation: "",
         distance: 0,
-        pickupPoints: "",
-        dropOffPoints: "",
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -390,19 +386,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   };
 
   const handleRouteSubmission = (data: OwnerFormValues & { isPromoted?: boolean }) => {
-    const finalData = {
-      ...data,
-      pickupPoints: data.pickupPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
-      dropOffPoints: data.dropOffPoints?.split('\n').map(p => p.trim()).filter(p => p) || []
-    };
-
-     onRouteAdded(finalData);
-      toast({
-        title: "Route Added!",
-        description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
-      });
-      
-      router.push('/my-routes?role=owner');
+    onRouteAdded(data);
+    toast({
+      title: "Route Added!",
+      description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
+    });
+    
+    router.push('/my-routes?role=owner');
   }
   
   const handlePaymentSuccess = async () => {
@@ -654,44 +644,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                           </FormItem>
                       )}
                       />
-              </div>
-
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                      control={form.control}
-                      name="pickupPoints"
-                      render={({ field }) => (
-                      <FormItem>
-                          <FormLabel>Pickup Points</FormLabel>
-                          <FormControl>
-                          <Textarea 
-                              placeholder="Enter each pickup point on a new line" 
-                              className="h-24"
-                              {...field}
-                          />
-                          </FormControl>
-                          <FormMessage />
-                      </FormItem>
-                      )}
-                  />
-                  <FormField
-                      control={form.control}
-                      name="dropOffPoints"
-                      render={({ field }) => (
-                      <FormItem>
-                          <FormLabel>Drop-off Points</FormLabel>
-                          <FormControl>
-                          <Textarea 
-                              placeholder="Enter each drop-off point on a new line" 
-                              className="h-24"
-                              {...field}
-                              />
-                          </FormControl>
-                          <FormMessage />
-                      </FormItem>
-                      )}
-                  />
               </div>
 
               <FormField

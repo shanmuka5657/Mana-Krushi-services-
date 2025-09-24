@@ -40,8 +40,6 @@ export type Route = {
   fromLocation: string;
   toLocation: string;
   distance?: number;
-  pickupPoints?: string[];
-  dropOffPoints?: string[];
   travelDate: Date;
   departureTime: string;
   arrivalTime: string;

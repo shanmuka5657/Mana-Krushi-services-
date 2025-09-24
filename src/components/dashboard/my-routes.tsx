@@ -51,8 +51,6 @@ const editRouteSchema = z.object({
   arrivalTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   availableSeats: z.coerce.number().int().positive(),
   price: z.coerce.number().positive(),
-  pickupPoints: z.string().optional(),
-  dropOffPoints: z.string().optional(),
 });
 
 
@@ -137,8 +135,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
         arrivalTime: selectedRoute.arrivalTime,
         availableSeats: selectedRoute.availableSeats,
         price: selectedRoute.price,
-        pickupPoints: selectedRoute.pickupPoints?.join('\n') || '',
-        dropOffPoints: selectedRoute.dropOffPoints?.join('\n') || '',
       });
     }
   }, [selectedRoute, isEditDialogOpen, form]);
@@ -225,8 +221,6 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
       ? { 
           ...r, 
           ...data,
-          pickupPoints: data.pickupPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
-          dropOffPoints: data.dropOffPoints?.split('\n').map(p => p.trim()).filter(p => p) || [],
         } 
       : r
     );
@@ -740,34 +734,6 @@ ${booking.driverName}
                             )}
                         />
                    </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="pickupPoints"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Pickup Points</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="One point per line" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="dropOffPoints"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Drop-off Points</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="One point per line" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button type="button" variant="ghost">Cancel</Button>
