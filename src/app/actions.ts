@@ -213,4 +213,41 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         return { error: "An error occurred while fetching location suggestions." };
     }
 }
+
+export async function reverseGeocode(lat: number, lon: number): Promise<{ address?: string, error?: string }> {
+    const token = await getMapmyIndiaToken();
+
+    if (!token) {
+        return { error: "Location service is temporarily unavailable." };
+    }
+
+    try {
+        const url = `https://atlas.mapmyindia.com/api/places/rev_geocode?lat=${lat}&lng=${lon}`;
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error("MapmyIndia Reverse Geocode API request failed with status:", response.status, await response.text());
+            return { error: "Failed to fetch address for the location." };
+        }
+
+        const data = await response.json();
+
+        // The API returns an array of results, we'll take the first one.
+        if (data.results && data.results.length > 0) {
+            return { address: data.results[0].formatted_address };
+        } else {
+            return { error: "No address found for this location." };
+        }
+
+    } catch (error) {
+        console.error("Error reverse geocoding from server action:", error);
+        return { error: "An error occurred while fetching the address." };
+    }
+}
     

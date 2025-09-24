@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Search, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Search, Loader2, LocateFixed } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -38,7 +38,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getMapSuggestions } from "@/app/actions";
+import { getMapSuggestions, reverseGeocode } from "@/app/actions";
+import { useToast } from "@/hooks/use-toast";
+
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -55,11 +57,15 @@ interface PassengerDashboardProps {
 }
 
 // --- Location Autocomplete Component ---
-const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, onLocationSelect: (location: string) => void }) => {
+const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string }) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(field.value || '');
     const [isFocused, setIsFocused] = useState(false);
     const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        setQuery(field.value);
+    }, [field.value]);
 
     const fetchSuggestions = async (searchQuery: string) => {
         if (searchQuery.length < 2) {
@@ -110,6 +116,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, on
                     onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay to allow click
                     className="pl-10"
                     autoComplete="off"
+                    placeholder={placeholder}
                 />
             </div>
             {isFocused && suggestions.length > 0 && (
@@ -139,6 +146,8 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   const [locations, setLocations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsMounted(true);
@@ -151,14 +160,10 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
           setShowProfilePrompt(true);
         }
 
-        // OPTIMIZATION: Rely on sessionStorage first to avoid blocking render.
-        // The list will be populated by the owner dashboard or other parts of the app over time.
         const cachedLocations = sessionStorage.getItem('routeLocations');
         if (cachedLocations) {
             setLocations(JSON.parse(cachedLocations));
         } else {
-            // As a fallback, you could fetch a small number of *recent* routes, not all of them.
-            // For now, we'll leave it empty if not cached to prioritize speed.
             setLocations([]);
         }
         setIsLoading(false);
@@ -175,6 +180,35 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
       toLocation: "",
     },
   });
+
+  const handleUseCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({ title: "Geolocation is not supported by your browser.", variant: "destructive" });
+      return;
+    }
+    
+    setIsGettingLocation(true);
+    toast({ title: "Getting your location..." });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const result = await reverseGeocode(latitude, longitude);
+        setIsGettingLocation(false);
+
+        if (result.error) {
+          toast({ title: "Could not get address", description: result.error, variant: "destructive" });
+        } else if (result.address) {
+          form.setValue("fromLocation", result.address, { shouldValidate: true });
+          toast({ title: "Location set!", description: result.address });
+        }
+      },
+      () => {
+        setIsGettingLocation(false);
+        toast({ title: "Unable to retrieve your location.", description: "Please ensure location permissions are enabled.", variant: "destructive" });
+      }
+    );
+  };
   
   function onSubmit(data: SearchFormValues) {
     setIsSearching(true);
@@ -226,12 +260,19 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                           render={({ field }) => (
                           <FormItem>
                               <FormLabel>From</FormLabel>
-                              <FormControl>
-                                  <LocationAutocompleteInput
-                                    field={field}
-                                    onLocationSelect={(location) => form.setValue('fromLocation', location)}
-                                  />
-                              </FormControl>
+                               <div className="flex gap-2">
+                                <FormControl>
+                                    <LocationAutocompleteInput
+                                        field={field}
+                                        onLocationSelect={(location) => form.setValue('fromLocation', location)}
+                                        placeholder="Starting point"
+                                    />
+                                </FormControl>
+                                <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
+                                    {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+                                    <span className="sr-only">Use current location</span>
+                                </Button>
+                              </div>
                               <FormMessage />
                           </FormItem>
                           )}
@@ -246,6 +287,7 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
                                   <LocationAutocompleteInput
                                     field={field}
                                     onLocationSelect={(location) => form.setValue('toLocation', location)}
+                                    placeholder="Destination"
                                   />
                               </FormControl>
                               <FormMessage />
