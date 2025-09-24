@@ -63,7 +63,7 @@ function ProfitLossPageContent() {
 
             const ownerBookings = allBookings.filter(b => {
                 const bookingInDateRange = dateInterval ? isWithinInterval(new Date(b.departureDate), dateInterval) : true;
-                return b.driverEmail === userEmail && b.status === 'Completed' && bookingInDateRange;
+                return b.driverEmail === userEmail && (b.status === 'Completed' || b.paymentStatus === 'Paid') && bookingInDateRange;
             });
             
             const ownerRoutesInDateRange = allRoutes.filter(r => {
@@ -200,7 +200,7 @@ function ProfitLossPageContent() {
                         </CardHeader>
                         <CardContent>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                                <li><strong>Revenue</strong> is calculated from all your rides marked as 'Completed' within the selected date range.</li>
+                                <li><strong>Revenue</strong> is calculated from all your rides marked as 'Completed' or 'Paid' within the selected date range.</li>
                                 <li><strong>Fuel Cost</strong> is an estimate based on the total distance of completed routes and your profile's mileage (Avg. Fuel Price: ₹{FUEL_PRICE_PER_LITER}/L). Fuel cost is always in INR.</li>
                                 <li><strong>Promotion Cost</strong> is calculated at ₹100 for each route created within the selected date range that was marked as 'Promoted'.</li>
                                 <li>This is an estimate. Actual profit may vary based on maintenance, insurance, and other operational costs.</li>

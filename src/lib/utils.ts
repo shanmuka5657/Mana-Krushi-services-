@@ -13,13 +13,25 @@ const CURRENCY_MAP: { [key: string]: string } = {
   CA: 'CAD',
   AU: 'AUD',
 };
-const DEFAULT_CURRENCY = 'INR';
+const DEFAULT_CURRENCY_INFO = { code: 'INR', symbol: '₹' };
+
+const CURRENCY_INFO_MAP: { [key: string]: { code: string, symbol: string } } = {
+  IN: DEFAULT_CURRENCY_INFO,
+  US: { code: 'USD', symbol: '$' },
+  GB: { code: 'GBP', symbol: '£' },
+  CA: { code: 'CAD', symbol: '$' },
+  AU: { code: 'AUD', symbol: '$' },
+  PH: { code: 'PHP', symbol: '₱' },
+};
+
 
 export function formatCurrency(amount: number, countryCode?: string) {
-    const currency = CURRENCY_MAP[countryCode || 'IN'] || DEFAULT_CURRENCY;
+    const countryInfo = CURRENCY_INFO_MAP[countryCode || 'IN'] || DEFAULT_CURRENCY_INFO;
+
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: currency,
+        currency: countryInfo.code,
+        currencyDisplay: 'symbol',
         minimumFractionDigits: 2,
     }).format(amount);
 }
