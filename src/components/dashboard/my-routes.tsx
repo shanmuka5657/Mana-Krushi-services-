@@ -58,6 +58,7 @@ const editRouteSchema = z.object({
 
 const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [routes, setRoutes] = useState<Route[]>(initialRoutes);
+  const [filter, setFilter] = useState("");
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
@@ -354,6 +355,16 @@ ${booking.driverName}
         return { icon: AlertCircle, color: 'text-muted-foreground', label: status };
     }
   }
+
+  const filteredRoutes = useMemo(() => {
+    if (!filter) return routes;
+    const lowercasedFilter = filter.toLowerCase();
+    return routes.filter(
+      (route) =>
+        route.fromLocation.toLowerCase().includes(lowercasedFilter) ||
+        route.toLocation.toLowerCase().includes(lowercasedFilter)
+    );
+  }, [routes, filter]);
   
   if (isLoading) {
     return (
@@ -367,7 +378,16 @@ ${booking.driverName}
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Routes</CardTitle>
-        <CardDescription>A list of your upcoming and past routes.</CardDescription>
+        <CardDescription>A list of all your created routes. Search by location to filter.</CardDescription>
+         <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by location..."
+              className="w-full pl-8"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -382,8 +402,8 @@ ${booking.driverName}
               </TableRow>
           </TableHeader>
           <TableBody>
-              {routes.length > 0 ? (
-              routes.map((route) => {
+              {filteredRoutes.length > 0 ? (
+              filteredRoutes.map((route) => {
                   const bookedSeats = bookedSeatsMap.get(route.id) || 0;
                   const availableSeats = route.availableSeats - bookedSeats;
                   const views = routeViewsMap.get(route.id) || 0;
