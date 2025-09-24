@@ -162,7 +162,7 @@ function AdminDashboardPage() {
             const dataUrl = reader.result as string;
             
             toast({
-                title: "AI is enhancing your logo...",
+                title: "Processing logo...",
                 description: "This might take a moment.",
             });
 
@@ -172,7 +172,7 @@ function AdminDashboardPage() {
                 await saveGlobalLogoUrl(dataUrl); // Save original if AI fails
                 setLogoUrl(dataUrl);
                 toast({
-                    title: "AI enhancement failed, using original logo.",
+                    title: "Logo updated with original image.",
                     description: result.error || "An unknown error occurred during cropping.",
                     variant: "destructive",
                 });
@@ -181,7 +181,7 @@ function AdminDashboardPage() {
                 setLogoUrl(result.croppedLogoUrl);
                 toast({
                     title: "Logo Updated!",
-                    description: "The application logo has been enhanced and updated.",
+                    description: "The application logo has been updated.",
                 });
             }
             
@@ -230,7 +230,7 @@ function AdminDashboardPage() {
                         <Button asChild variant="outline">
                             <label htmlFor="logo-upload" className="cursor-pointer">
                                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                Upload & Enhance
+                                Upload Logo
                                 <Input id="logo-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/gif, image/webp" onChange={handleLogoUpload} />
                             </label>
                         </Button>

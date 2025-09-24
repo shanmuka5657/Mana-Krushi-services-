@@ -83,7 +83,7 @@ function EntertainmentPageContent() {
         setIsSearching(false);
 
         if (result.error) {
-            toast({ title: 'Something went wrong', description: result.error, variant: 'destructive' });
+            toast({ title: 'Feature Temporarily Disabled', description: result.error, variant: 'destructive' });
         } else if (result.sites && result.sites.length > 0) {
             setSearchResults(result.sites);
         } else {
@@ -177,12 +177,14 @@ function EntertainmentPageContent() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                disabled
                              />
-                             <Button onClick={handleSearch} disabled={isSearching}>
+                             <Button onClick={handleSearch} disabled>
                                 {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                                 <span className="ml-2 hidden sm:inline">Search</span>
                              </Button>
                         </div>
+                         <p className="text-xs text-muted-foreground mt-2">This feature is temporarily disabled.</p>
                     </CardContent>
                 </Card>
 

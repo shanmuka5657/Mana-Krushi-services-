@@ -144,11 +144,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
       setIsCalculating(false);
 
       if (result.error) {
-          toast({
-              title: "Error Calculating Distance",
-              description: result.error,
-              variant: "destructive"
-          });
+        // AI is disabled, do nothing
       } else if (result.distance) {
           form.setValue('distance', result.distance);
            toast({
@@ -566,7 +562,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                               <FormControl>
                                   <div className="relative flex-grow">
                                   
-                                  <Input type="number" placeholder="Auto-calculated" {...field} className="pl-10" readOnly />
+                                  <Input type="number" placeholder="Distance" {...field} className="pl-10" />
                                   {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
                                   </div>
                               </FormControl>

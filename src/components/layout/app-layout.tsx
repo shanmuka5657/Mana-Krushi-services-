@@ -207,7 +207,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
-    { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
+    // { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit/Loss" },
     { href: `/history?role=owner`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
