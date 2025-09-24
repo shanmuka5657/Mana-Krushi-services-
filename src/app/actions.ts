@@ -159,14 +159,11 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
     try {
         const url = new URL('https://atlas.mapmyindia.com/api/places/search/json');
         url.searchParams.append('query', query);
-        url.searchParams.append('location', 'india');
+        // The key should be part of the URL parameters, not a header
+        url.searchParams.append('key', apiKey); 
 
         const response = await fetch(url.toString(), {
             method: 'GET',
-            headers: {
-                'Authorization': `bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
         });
 
         if (!response.ok) {
