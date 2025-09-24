@@ -213,10 +213,4 @@ function ProfitLossPageContent() {
     );
 }
 
-export default function ProfitLossPage() {
-    return(
-        <Suspense>
-            <ProfitLossPageContent />
-        </Suspense>
-    )
-}
+export default ProfitLossPageContent;
