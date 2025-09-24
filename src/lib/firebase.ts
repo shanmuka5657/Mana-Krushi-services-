@@ -24,6 +24,7 @@ import {
     updateDoc,
     enableNetwork,
     disableNetwork,
+    getCountFromServer,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
@@ -64,6 +65,29 @@ const routesCollection = db ? collection(db, "routes") : null;
 const profilesCollection = db ? collection(db, "profiles") : null;
 const settingsCollection = db ? collection(db, "settings") : null;
 const visitsCollection = db ? collection(db, "visits") : null;
+const routeViewsCollection = db ? collection(db, "routeViews") : null;
+
+
+// --- Route Views ---
+export const addRouteViewToFirestore = async (routeId: string, sessionId: string) => {
+    if (!routeViewsCollection) return;
+    // We create a unique ID based on routeId and sessionId to prevent counting the same session multiple times.
+    const viewId = `${routeId}_${sessionId}`;
+    const docRef = doc(db, "routeViews", viewId);
+    await setDoc(docRef, { routeId, sessionId, timestamp: serverTimestamp() }, { merge: true });
+};
+
+export const getRouteViewsFromFirestore = async (routeId: string): Promise<number> => {
+    if (!routeViewsCollection) return 0;
+    try {
+        const q = query(routeViewsCollection, where("routeId", "==", routeId));
+        const snapshot = await getCountFromServer(q);
+        return snapshot.data().count;
+    } catch(e) {
+        console.error("Error getting route views from Firestore", e);
+        return 0;
+    }
+};
 
 
 // --- Visits ---

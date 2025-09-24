@@ -23,8 +23,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search } from "lucide-react";
-import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUserName, getCurrentUser } from "@/lib/storage";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye } from "lucide-react";
+import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUserName, getCurrentUser, getRouteViews } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -61,6 +61,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
+  const [routeViewsMap, setRouteViewsMap] = useState<Map<string, number>>(new Map());
   const { toast } = useToast();
   const [allProfiles, setAllProfiles] = useState<Map<string, Profile>>(new Map());
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -75,7 +76,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   });
 
    useEffect(() => {
-    const calculateBookedSeats = async () => {
+    const calculateBookedSeatsAndViews = async () => {
         if (initialRoutes.length === 0) {
             setIsLoading(false);
             return;
@@ -83,6 +84,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
         setIsLoading(true);
 
         const newBookedSeatsMap = new Map<string, number>();
+        const newRouteViewsMap = new Map<string, number>();
 
         // Fetch bookings for all displayed routes at once
         const bookingPromises = initialRoutes.map(route => {
@@ -95,22 +97,33 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
             });
         });
         
-        const bookingsByRoute = await Promise.all(bookingPromises);
+        // Fetch views for all displayed routes
+        const viewPromises = initialRoutes.map(route => getRouteViews(route.id));
+        
+        const [bookingsByRoute, viewsByRoute] = await Promise.all([
+            Promise.all(bookingPromises),
+            Promise.all(viewPromises)
+        ]);
 
         initialRoutes.forEach((route, index) => {
+            // Process bookings
             const bookingsForThisRoute = bookingsByRoute[index];
             const bookedSeats = bookingsForThisRoute
                 .filter(b => b.status !== 'Cancelled')
                 .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
             newBookedSeatsMap.set(route.id, bookedSeats);
+
+            // Process views
+            newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
         });
 
         setBookedSeatsMap(newBookedSeatsMap);
+        setRouteViewsMap(newRouteViewsMap);
         setRoutes(initialRoutes);
         setIsLoading(false);
     };
 
-    calculateBookedSeats();
+    calculateBookedSeatsAndViews();
   }, [initialRoutes]);
 
   useEffect(() => {
@@ -363,8 +376,8 @@ ${booking.driverName}
               <TableHead className="rounded-l-lg">From</TableHead>
               <TableHead>To</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Departure</TableHead>
               <TableHead>Seats Left</TableHead>
+              <TableHead>Views</TableHead>
               <TableHead className="rounded-r-lg text-center">Actions</TableHead>
               </TableRow>
           </TableHeader>
@@ -373,13 +386,19 @@ ${booking.driverName}
               routes.map((route) => {
                   const bookedSeats = bookedSeatsMap.get(route.id) || 0;
                   const availableSeats = route.availableSeats - bookedSeats;
+                  const views = routeViewsMap.get(route.id) || 0;
                   return (
                       <TableRow key={route.id}>
                       <TableCell className="font-medium">{route.fromLocation}</TableCell>
                       <TableCell>{route.toLocation}</TableCell>
                       <TableCell>{format(new Date(route.travelDate), "dd MMM yyyy")}</TableCell>
-                      <TableCell>{route.departureTime}</TableCell>
                       <TableCell>{availableSeats}/{route.availableSeats}</TableCell>
+                       <TableCell>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Eye className="h-4 w-4" />
+                            {views}
+                          </div>
+                        </TableCell>
                       <TableCell className="flex gap-2 justify-center">
                           <Button
                               variant="outline"

@@ -2,7 +2,7 @@
 
 import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
@@ -90,27 +90,18 @@ export const getPwaScreenshots = async (): Promise<any[] | null> => {
 };
 
 
-// --- Visits ---
-export const logVisit = async (path: string) => {
-    if (!isBrowser) return;
+// --- Visits & Views ---
+const getSessionId = (): string | null => {
+    if (!isBrowser) return null;
+
     const user = getCurrentFirebaseUser();
-
-    if (!user || !user.email) {
-        if (!sessionStorage.getItem('visitor_tracked')) {
-            sessionStorage.setItem('visitor_tracked', 'true');
-        }
-        return;
-    }
-    
-    const profile = await getProfile(user.email);
-    if (!profile) return;
-
+    if (!user || !user.email) return null;
 
     let sessionId = sessionStorage.getItem('session_id');
     const now = new Date().getTime();
 
     const lastActivity = sessionStorage.getItem('last_activity');
-    if (lastActivity && now - parseInt(lastActivity, 10) > 30 * 60 * 1000) {
+    if (lastActivity && now - parseInt(lastActivity, 10) > 30 * 60 * 1000) { // 30 min timeout
         sessionId = null; 
     }
 
@@ -120,6 +111,20 @@ export const logVisit = async (path: string) => {
     }
     
     sessionStorage.setItem('last_activity', String(now));
+    return sessionId;
+}
+
+export const logVisit = async (path: string) => {
+    if (!isBrowser) return;
+    
+    const user = getCurrentFirebaseUser();
+    if (!user || !user.email) return;
+
+    const profile = await getProfile(user.email);
+    if (!profile) return;
+
+    const sessionId = getSessionId();
+    if (!sessionId) return;
     
     perfTracker.increment({ reads: 0, writes: 1 });
     await addVisitToFirestore({
@@ -131,13 +136,29 @@ export const logVisit = async (path: string) => {
     } as Omit<Visit, 'id' | 'timestamp'>);
 };
 
-
 export const getVisits = async (): Promise<Visit[]> => {
     if (!isBrowser) return [];
     perfTracker.increment({ reads: 1, writes: 0 });
     const visits = await getVisitsFromFirestore();
     return visits;
 }
+
+export const logRouteView = async (routeId: string) => {
+    if (!isBrowser) return;
+
+    const sessionId = getSessionId();
+    if (!sessionId) return; // Don't log views for anonymous users
+
+    perfTracker.increment({ reads: 0, writes: 1 });
+    await addRouteViewToFirestore(routeId, sessionId);
+}
+
+export const getRouteViews = async (routeId: string): Promise<number> => {
+    if (!isBrowser) return 0;
+    perfTracker.increment({ reads: 1, writes: 0 });
+    return await getRouteViewsFromFirestore(routeId);
+};
+
 
 
 // --- Settings ---
@@ -367,4 +388,3 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-

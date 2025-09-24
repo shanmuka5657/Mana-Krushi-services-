@@ -9,7 +9,7 @@ import { getFirestore, addDoc, collection, doc, setDoc, updateDoc } from "fireba
 import { getApp } from "firebase/app";
 
 
-import { getRoutes, getProfile, getCurrentUser, getBookings, saveBookings } from "@/lib/storage";
+import { getRoutes, getProfile, getCurrentUser, getBookings, saveBookings, logRouteView } from "@/lib/storage";
 import type { Route, Booking, Profile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -54,6 +54,11 @@ export default function BookRidePage() {
 
   useEffect(() => {
     const fetchRouteAndBookings = async () => {
+        const routeId = typeof params.id === 'string' ? params.id : '';
+        if (routeId) {
+            logRouteView(routeId);
+        }
+
         const passengerEmail = getCurrentUser();
         if (!passengerEmail) {
             toast({
@@ -65,7 +70,6 @@ export default function BookRidePage() {
             return;
         }
 
-        const routeId = typeof params.id === 'string' ? params.id : '';
         const allRoutes = await getRoutes(false, { routeId });
         const foundRoute = allRoutes.length > 0 ? allRoutes[0] : null;
         

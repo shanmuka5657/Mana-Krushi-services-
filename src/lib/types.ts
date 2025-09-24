@@ -94,6 +94,12 @@ export type Visit = {
   timestamp: Date;
 };
 
+export type RouteView = {
+    routeId: string;
+    sessionId: string;
+    timestamp: Date;
+};
+
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({
