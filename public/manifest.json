@@ -55,9 +55,8 @@
       "icons": [{ "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png", "sizes": "192x192" }]
     }
   ],
-  "categories": [
-    "travel",
-    "business"
+  "categories": [    
+    "education"
   ],
   "launch_handler": {
     "client_mode": "navigate-new"
