@@ -1,39 +1,42 @@
 {
   "name": "Mana Krushi Services",
   "short_name": "ManaKrushi",
-  "start_url": "/",
+  "start_url": "/?app_id=manakrushi",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#007BFF",
+  "orientation": "portrait-primary",
+  "description": "Mana Krushi Services - Your partner in shared travel. Find or offer a ride with ease.",
+  "categories": ["travel", "navigation"],
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
   "icons": [
     {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "192x192",
+      "src": "https://i.ibb.co/6Rrvs6M/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "512x512",
+      "src": "https://i.ibb.co/6Rrvs6M/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],
-  "display_override": [
-    "window-controls-overlay",
-    "minimal-ui"
-  ],
-  "scope": "/",
-  "orientation": "portrait-primary",
-  "dir": "auto",
-  "lang": "en-US",
-  "id": "/?app_id=manakrushi",
-  "description": "Mana Krushi Services - Your partner in shared travel. Find or offer a ride with ease.",
-  "categories": [
-    "travel",
-    "navigation"
-  ],
-  "edge_side_panel": {
-    "preferred_width": 480
-  }
+  "screenshots": [
+    {
+      "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "1080x1080",
+      "form_factor": "wide"
+    },
+    {
+      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
+      "type": "image/jpeg",
+      "sizes": "1080x2340",
+      "form_factor": "narrow"
+    }
+  ]
 }
