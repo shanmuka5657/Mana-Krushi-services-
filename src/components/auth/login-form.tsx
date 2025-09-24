@@ -59,8 +59,6 @@ export function LoginForm() {
       setIsStandalone(true);
     }
 
-    // The listener is now in app-layout.tsx, this is just for the QR code button.
-    // A more robust solution might use a global state (Context) for the install prompt.
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
