@@ -150,7 +150,7 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         return { suggestions: [] };
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_MAPMYINDIA_API_KEY;
+    const apiKey = "70cec611aeb6148089cffc9844f4d236";
     if (!apiKey) {
         console.error("MAPMYINDIA_API_KEY is not configured on the server.");
         return { error: "Location search is temporarily unavailable." };
