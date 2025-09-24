@@ -331,16 +331,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     
     const travelDateString = format(data.travelDate, 'yyyy-MM-dd');
     const existingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
-
-    if (existingRoutesToday.length >= 2) {
-        toast({
-            title: "Daily Limit Reached",
-            description: "You can only add a maximum of 2 routes per day.",
-            variant: "destructive"
-        });
-        return;
-    }
-
+    
     const today = new Date(travelDateString);
     const newStart = parse(data.departureTime, 'HH:mm', today).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', today).getTime();
