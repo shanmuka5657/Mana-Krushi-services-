@@ -7,7 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike } from "lucide-react";
 import { format, addDays, parse } from "date-fns";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,97 @@ import { calculateDistance } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+
+// --- Location Autocomplete Component ---
+const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, onLocationSelect: (location: string) => void }) => {
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [query, setQuery] = useState('');
+    const [isFocused, setIsFocused] = useState(false);
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    const fetchSuggestions = async (searchQuery: string) => {
+        if (searchQuery.length < 2) {
+            setSuggestions([]);
+            return;
+        }
+        const apiKey = process.env.NEXT_PUBLIC_MAPMYINDIA_API_KEY;
+        if (!apiKey) {
+            console.error("MapmyIndia API key is not configured.");
+            setSuggestions([]);
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://atlas.mapmyindia.com/api/places/search/json?query=${searchQuery}&location=india`, {
+                headers: {
+                    'Authorization': `bearer ${apiKey}`
+                }
+            });
+            const data = await response.json();
+            if (data.suggestedLocations) {
+                setSuggestions(data.suggestedLocations);
+            } else {
+                setSuggestions([]);
+            }
+        } catch (error) {
+            console.error("Error fetching location suggestions:", error);
+            setSuggestions([]);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setQuery(value);
+        field.onChange(value);
+
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+        debounceTimeout.current = setTimeout(() => {
+            fetchSuggestions(value);
+        }, 300); // 300ms debounce
+    };
+
+    const handleSuggestionClick = (suggestion: any) => {
+        const locationName = suggestion.placeName;
+        setQuery(locationName);
+        onLocationSelect(locationName);
+        setSuggestions([]);
+        setIsFocused(false);
+    };
+
+    return (
+        <div className="relative">
+            <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    {...field}
+                    value={query}
+                    onChange={handleInputChange}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay to allow click
+                    className="pl-10"
+                    autoComplete="off"
+                />
+            </div>
+            {isFocused && suggestions.length > 0 && (
+                <ul className="absolute z-10 w-full bg-card border rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
+                    {suggestions.map((suggestion) => (
+                        <li
+                            key={suggestion.eLoc}
+                            onMouseDown={() => handleSuggestionClick(suggestion)} // Use onMouseDown to fire before onBlur
+                            className="px-4 py-2 hover:bg-muted cursor-pointer"
+                        >
+                            <p className="font-semibold text-sm">{suggestion.placeName}</p>
+                            <p className="text-xs text-muted-foreground">{suggestion.placeAddress}</p>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
 
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
@@ -530,10 +621,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormItem>
                       <FormLabel>From</FormLabel>
                       <FormControl>
-                          <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Starting city" {...field} className="pl-10" list="locations-list" />
-                          </div>
+                          <LocationAutocompleteInput
+                            field={field}
+                            onLocationSelect={(location) => form.setValue('fromLocation', location)}
+                          />
                       </FormControl>
                       <FormMessage />
                       </FormItem>
@@ -546,19 +637,16 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormItem>
                       <FormLabel>To</FormLabel>
                       <FormControl>
-                          <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Destination city" {...field} className="pl-10" list="locations-list" />
-                          </div>
+                           <LocationAutocompleteInput
+                            field={field}
+                            onLocationSelect={(location) => form.setValue('toLocation', location)}
+                          />
                       </FormControl>
                       <FormMessage />
                       </FormItem>
                   )}
                   />
               </div>
-              <datalist id="locations-list">
-                  {locations.map(loc => <option key={loc} value={loc} />)}
-              </datalist>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
                   <FormField
