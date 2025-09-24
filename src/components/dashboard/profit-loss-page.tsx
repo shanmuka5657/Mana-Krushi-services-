@@ -72,7 +72,7 @@ function ProfitLossPageContent() {
             });
             
             // 1. Calculate Revenue
-            const revenue = ownerBookings.reduce((acc, booking) => acc + booking.amount, 0);
+            const revenue = ownerBookings.reduce((acc, booking) => acc + (booking.amount || 0), 0);
             setTotalRevenue(revenue);
 
             // 2. Calculate Expenses

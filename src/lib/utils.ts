@@ -6,13 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const CURRENCY_MAP: { [key: string]: string } = {
-  IN: 'INR',
-  US: 'USD',
-  GB: 'GBP',
-  CA: 'CAD',
-  AU: 'AUD',
-};
 const DEFAULT_CURRENCY_INFO = { code: 'INR', symbol: '₹' };
 
 const CURRENCY_INFO_MAP: { [key: string]: { code: string, symbol: string } } = {
@@ -21,17 +14,15 @@ const CURRENCY_INFO_MAP: { [key: string]: { code: string, symbol: string } } = {
   GB: { code: 'GBP', symbol: '£' },
   CA: { code: 'CAD', symbol: '$' },
   AU: { code: 'AUD', symbol: '$' },
-  PH: { code: 'PHP', symbol: '₱' },
 };
 
 
 export function formatCurrency(amount: number, countryCode?: string) {
     const countryInfo = CURRENCY_INFO_MAP[countryCode || 'IN'] || DEFAULT_CURRENCY_INFO;
 
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: countryInfo.code,
-        currencyDisplay: 'symbol',
         minimumFractionDigits: 2,
     }).format(amount);
 }
