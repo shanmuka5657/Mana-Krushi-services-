@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import {
@@ -37,6 +36,7 @@ import {
   Activity,
   ArrowDown,
   ArrowUp,
+  FileText,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -166,7 +166,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         } else {
             // If user is not authenticated, redirect to login page
             // Allow access to public pages like /disclaimer
-            if (!['/disclaimer'].includes(pathname)) {
+            if (!['/disclaimer', '/privacy-policy'].includes(pathname)) {
                  router.push('/login');
             }
         }
@@ -215,6 +215,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/ecommerce?role=owner`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
+    { href: `/privacy-policy?role=owner`, icon: FileText, label: "Privacy Policy" },
   ];
 
   const passengerNavItems = [
@@ -230,6 +231,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/ecommerce?role=passenger`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
+    { href: `/privacy-policy?role=passenger`, icon: FileText, label: "Privacy Policy" },
   ];
   
   const getNavItems = () => {
