@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { getMapSuggestions } from "@/app/actions";
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -65,28 +66,14 @@ const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, on
             setSuggestions([]);
             return;
         }
-        const apiKey = process.env.NEXT_PUBLIC_MAPMYINDIA_API_KEY;
-        if (!apiKey) {
-            console.error("MapmyIndia API key is not configured.");
-            setSuggestions([]);
-            return;
-        }
+        
+        const result = await getMapSuggestions(searchQuery);
 
-        try {
-            const response = await fetch(`https://atlas.mapmyindia.com/api/places/search/json?query=${searchQuery}&location=india`, {
-                headers: {
-                    'Authorization': `bearer ${apiKey}`
-                }
-            });
-            const data = await response.json();
-            if (data.suggestedLocations) {
-                setSuggestions(data.suggestedLocations);
-            } else {
-                setSuggestions([]);
-            }
-        } catch (error) {
-            console.error("Error fetching location suggestions:", error);
+        if (result.error) {
+            console.error(result.error);
             setSuggestions([]);
+        } else if (result.suggestions) {
+            setSuggestions(result.suggestions);
         }
     };
 

@@ -144,4 +144,35 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
     return { success: false, error: 'An unexpected error occurred.' };
   }
 }
+
+export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
+    if (!query || query.length < 2) {
+        return { suggestions: [] };
+    }
+
+    const apiKey = process.env.MAPMYINDIA_API_KEY;
+    if (!apiKey) {
+        console.error("MAPMYINDIA_API_KEY is not configured on the server.");
+        return { error: "Location search is temporarily unavailable." };
+    }
+
+    try {
+        const response = await fetch(`https://atlas.mapmyindia.com/api/places/search/json?query=${query}&location=india`, {
+            headers: {
+                'Authorization': `bearer ${apiKey}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error("MapmyIndia API request failed with status:", response.status);
+            return { error: "Failed to fetch location suggestions." };
+        }
+
+        const data = await response.json();
+        return { suggestions: data.suggestedLocations || [] };
+    } catch (error) {
+        console.error("Error fetching location suggestions from server action:", error);
+        return { error: "An error occurred while fetching location suggestions." };
+    }
+}
     
