@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -382,11 +383,11 @@ ${newlyBooked.client}
                         <div className="flex items-center gap-4">
                             <Users className="h-6 w-6 text-muted-foreground" />
                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1 || isPast}>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(-1)} disabled={numberOfSeats <= 1 || isPast || route.vehicleType === 'Bike'}>
                                     <Minus className="h-4 w-4" />
                                 </Button>
                                 <span className="font-bold text-lg w-8 text-center">{numberOfSeats}</span>
-                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats || isPast}>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleSeatChange(1)} disabled={numberOfSeats >= availableSeats || isPast || route.vehicleType === 'Bike'}>
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             </div>

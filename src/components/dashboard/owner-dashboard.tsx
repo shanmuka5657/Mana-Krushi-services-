@@ -65,7 +65,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, on
         const result = await getMapSuggestions(searchQuery);
 
         if (result.error) {
-            console.error("Failed to fetch location suggestions.");
+            console.error(result.error);
             setSuggestions([]);
         } else if (result.suggestions) {
             setSuggestions(result.suggestions);
@@ -142,7 +142,7 @@ const ownerFormSchema = z.object({
   availableSeats: z.coerce.number().int().positive("Available seats must be a positive number."),
   price: z.coerce.number().positive("Price must be a positive number."),
   rating: z.coerce.number().min(1).max(5).default(Math.round((Math.random() * 2 + 3) * 10) / 10), // Random rating between 3 and 5
-  vehicleType: z.string().optional(),
+  vehicleType: z.string({ required_error: "Please select a vehicle type." }),
   vehicleNumber: z.string().optional(),
 });
 
@@ -206,8 +206,16 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
 
   const fromLocation = useWatch({ control: form.control, name: 'fromLocation' });
   const toLocation = useWatch({ control: form.control, name: 'toLocation' });
+  const vehicleType = useWatch({ control: form.control, name: 'vehicleType' });
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   
+  useEffect(() => {
+    if (vehicleType === 'Bike') {
+        form.setValue('availableSeats', 1);
+    }
+  }, [vehicleType, form]);
+
+
   const handleCalculateDistance = async (from: string, to: string) => {
       if(!from || !to || from.length < 2 || to.length < 2) {
           return;
@@ -680,7 +688,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                                   setIsCalendarOpen(false)
                               }}
                               fromDate={new Date()}
-                              toDate={addDays(new Date(), 3)}
+                              toDate={addDays(new Date(), 30)}
                           />
                           </PopoverContent>
                       </Popover>
@@ -723,6 +731,37 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                   />
               </div>
+
+               <FormField
+                  control={form.control}
+                  name="vehicleType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vehicle Type</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                            field.onChange(value);
+                            if (value === 'Bike') {
+                                form.setValue('availableSeats', 1);
+                            }
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select vehicle type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Car">Car</SelectItem>
+                          <SelectItem value="Bike">Bike</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                   control={form.control}
@@ -733,7 +772,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormControl>
                           <div className="relative">
                           <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="number" placeholder="Number of seats" {...field} className="pl-10" />
+                          <Input type="number" placeholder="Number of seats" {...field} className="pl-10" disabled={vehicleType === 'Bike'} />
                           </div>
                       </FormControl>
                       <FormMessage />
@@ -757,30 +796,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                   )}
                   />
               </div>
-                <FormField
-                  control={form.control}
-                  name="vehicleType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vehicle Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Car">Car</SelectItem>
-                          <SelectItem value="Bike">Bike</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
               <Button type="submit" className="w-full">
                   Add Route
