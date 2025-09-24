@@ -1,11 +1,11 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "Mana Krushi",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "short_name": "ManaKrushi",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#FFFFFF",
+  "description": "Your partner in shared travel. Find or offer a ride with ease, manage bookings, and connect with a community of travelers. Built for carpooling and cost-sharing.",
   "orientation": "any",
   "id": "/",
   "icons": [
@@ -27,13 +27,22 @@
       "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
       "sizes": "1080x1080",
       "type": "image/jpeg",
-      "label": "App Logo"
+      "form_factor": "wide"
     },
     {
       "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
       "sizes": "1080x2340",
       "type": "image/jpeg",
-      "label": "App Screenshot"
+      "form_factor": "narrow"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/search",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
