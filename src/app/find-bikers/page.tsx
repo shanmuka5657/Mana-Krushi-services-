@@ -25,6 +25,8 @@ import { useToast } from '@/hooks/use-toast';
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
   toLocation: z.string().min(2, "Destination is required."),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
 });
 
 type SearchFormValues = z.infer<typeof searchFormSchema>;
@@ -108,12 +110,16 @@ function FindBikersContent() {
 
     const fromLocation = searchParams.get('from') || '';
     const toLocation = searchParams.get('to') || '';
+    const startTime = searchParams.get('startTime') || '';
+    const endTime = searchParams.get('endTime') || '';
 
     const form = useForm<SearchFormValues>({
         resolver: zodResolver(searchFormSchema),
         defaultValues: {
-            fromLocation: fromLocation,
-            toLocation: toLocation,
+            fromLocation,
+            toLocation,
+            startTime,
+            endTime,
         },
     });
 
@@ -126,13 +132,22 @@ function FindBikersContent() {
                 const lowerFrom = fromLocation.toLowerCase();
                 const lowerTo = toLocation.toLowerCase();
 
-                const filteredRoutes = allRoutes.filter(route => {
+                let filteredRoutes = allRoutes.filter(route => {
                     const routeFrom = route.fromLocation.toLowerCase();
                     const routeTo = route.toLocation.toLowerCase();
                     const fromMatch = routeFrom.includes(lowerFrom) || lowerFrom.includes(routeFrom);
                     const toMatch = routeTo.includes(lowerTo) || lowerTo.includes(routeTo);
+
+                    if (route.vehicleType !== 'Bike' || !fromMatch || !toMatch) {
+                        return false;
+                    }
+
+                    if (startTime && endTime) {
+                        const routeDeparture = route.departureTime;
+                        return routeDeparture >= startTime && routeDeparture <= endTime;
+                    }
                     
-                    return route.vehicleType === 'Bike' && fromMatch && toMatch;
+                    return true;
                 });
 
                 // Sort results: exact matches first, then by date
@@ -171,13 +186,15 @@ function FindBikersContent() {
             }
         };
         fetchBikers();
-    }, [fromLocation, toLocation]);
+    }, [fromLocation, toLocation, startTime, endTime]);
 
     function onSubmit(data: SearchFormValues) {
         const params = new URLSearchParams({
             from: data.fromLocation,
             to: data.toLocation,
         });
+        if (data.startTime) params.set('startTime', data.startTime);
+        if (data.endTime) params.set('endTime', data.endTime);
         router.push(`/find-bikers?${params.toString()}`);
     }
 
@@ -233,6 +250,40 @@ function FindBikersContent() {
                                             <FormMessage />
                                         </FormItem>
                                     )}/>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <FormField
+                                        control={form.control}
+                                        name="startTime"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Start Time</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                                <Input type="time" className="pl-10" {...field} />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="endTime"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>End Time</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                                <Input type="time" className="pl-10" {...field} />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
                                 </div>
                                 <Button type="submit" className="w-full" disabled={isSearching}>
                                     {isSearching ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Searching...</> : <><Search className="mr-2 h-4 w-4" />Search</>}
@@ -305,5 +356,3 @@ export default function FindBikersPage() {
         </Suspense>
     )
 }
-
-    
