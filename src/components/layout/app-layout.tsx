@@ -205,6 +205,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const ownerNavItems = [
     { href: `/dashboard?role=owner`, icon: Home, label: "Home" },
     { href: `/profile?role=owner`, icon: User, label: "Profile" },
+    { href: `/messages?role=owner`, icon: MessageSquare, label: "Messages" },
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
@@ -220,6 +221,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const passengerNavItems = [
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
+    { href: `/messages?role=passenger`, icon: MessageSquare, label: "Messages" },
     { href: `/community`, icon: Users, label: "Community" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/history?role=passenger`, icon: History, label: "History" },
