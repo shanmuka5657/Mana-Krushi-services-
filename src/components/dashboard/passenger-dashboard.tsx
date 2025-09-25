@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -156,8 +155,9 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
   useEffect(() => {
     const checkProfileAndFetchLocations = async () => {
         const profile = await getProfile();
-        if (isMounted && (!profile || !profile.mobile || profile.mobile === '0000000000')) {
-          setShowProfilePrompt(true);
+        // The check now happens AFTER profile has been fetched.
+        if (profile === null || !profile.mobile || profile.mobile === '0000000000') {
+            setShowProfilePrompt(true);
         }
 
         const cachedLocations = sessionStorage.getItem('routeLocations');
