@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -22,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye, Car } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye, Car, X, ShieldAlert } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUser, getRouteViews } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -32,16 +33,27 @@ import { cn } from "@/lib/utils";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, F, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
 import QRCode from "qrcode.react";
-import { onSnapshot, query, collection, where } from "firebase/firestore";
+import { onSnapshot, query, collection, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 interface MyRoutesProps {
   routes: Route[];
+  bookingIdFromUrl?: string | null;
 }
 
 const editRouteSchema = z.object({
@@ -55,7 +67,7 @@ const editRouteSchema = z.object({
 });
 
 
-const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
+const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) => {
   const [routes, setRoutes] = useState<Route[]>(initialRoutes);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
@@ -70,6 +82,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
   const [shareImageUrl, setShareImageUrl] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+  const [activeBooking, setActiveBooking] = useState<Booking | null>(null);
   
   const form = useForm<z.infer<typeof editRouteSchema>>({
     resolver: zodResolver(editRouteSchema),
@@ -128,6 +141,15 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
             setBookedSeatsMap(newBookedSeatsMap);
             setRouteViewsMap(newRouteViewsMap);
         }
+        
+        if (bookingIdFromUrl) {
+            const allBookings = await getBookings(true); // Fetch all to find the one
+            const targetBooking = allBookings.find(b => b.id === bookingIdFromUrl);
+            if (targetBooking) {
+                setActiveBooking(targetBooking);
+            }
+        }
+
         setIsLoading(false);
     }, (error) => {
         console.error("Error fetching real-time routes:", error);
@@ -136,7 +158,7 @@ const MyRoutes = ({ routes: initialRoutes }: MyRoutesProps) => {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, bookingIdFromUrl]);
 
 
   useEffect(() => {
@@ -382,6 +404,19 @@ ${booking.driverName}
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleBookingAction = async (booking: Booking, action: 'confirm' | 'reject') => {
+    const bookingRef = doc(db, 'bookings', booking.id);
+    const newStatus = action === 'confirm' ? 'Confirmed' : 'Cancelled';
+
+    await updateDoc(bookingRef, { status: newStatus });
+    
+    setActiveBooking(null);
+    toast({
+        title: `Booking ${newStatus}!`,
+        description: `The booking for ${booking.client} has been ${newStatus.toLowerCase()}.`
+    });
+  }
+
 
   const getStatusInfo = (status: Booking['status']) => {
     switch(status) {
@@ -410,6 +445,7 @@ ${booking.driverName}
   }
 
   return (
+    <>
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>My Routes</CardTitle>
@@ -798,6 +834,29 @@ ${booking.driverName}
         </Dialog>
       </CardContent>
     </Card>
+
+    <AlertDialog open={!!activeBooking} onOpenChange={() => setActiveBooking(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2"><ShieldAlert/> New Booking Request</AlertDialogTitle>
+                <AlertDialogDescription>
+                    You have a new request from {activeBooking?.client} for the ride to {activeBooking?.destination.split(' to ')[1]}.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            {activeBooking && (
+                <div className="text-sm space-y-2">
+                    <p><span className="font-semibold">Passenger:</span> {activeBooking.client}</p>
+                    <p><span className="font-semibold">Seats:</span> {activeBooking.travelers}</p>
+                    <p><span className="font-semibold">Date:</span> {format(new Date(activeBooking.departureDate), 'PPP')}</p>
+                </div>
+            )}
+            <AlertDialogFooter>
+                <Button variant="destructive" onClick={() => handleBookingAction(activeBooking!, 'reject')}>Reject</Button>
+                <Button variant="default" onClick={() => handleBookingAction(activeBooking!, 'confirm')}>Confirm</Button>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 

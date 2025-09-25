@@ -283,8 +283,7 @@ export default function BookRidePage() {
     const formattedTime = format(bookingDate, 'p');
 
     const baseUrl = window.location.origin;
-    const acceptUrl = `${baseUrl}/api/booking-response?bookingId=${newlyBooked.id}&action=confirm`;
-    const rejectUrl = `${baseUrl}/api/booking-response?bookingId=${newlyBooked.id}&action=reject`;
+    const bookingLink = `${baseUrl}/my-routes?role=owner&booking_id=${newlyBooked.id}`;
 
     const message = `
 Hello ${newlyBooked.driverName},
@@ -299,13 +298,8 @@ You have a new ride request from Mana Krushi Services.
 - *Seats:* ${newlyBooked.travelers}
 - *Amount:* ₹${newlyBooked.amount.toFixed(2)}
 
-Please respond to the passenger:
-
-*Accept Ride:*
-${acceptUrl}
-
-*Reject Ride:*
-${rejectUrl}
+Please open this link to confirm or reject the booking:
+${bookingLink}
 
 Thank you,
 Mana Krushi Services
@@ -327,7 +321,7 @@ Mana Krushi Services
 
   return (
     <AppLayout>
-    <div className="min-h-screen bg-muted/20">
+      <div className="min-h-screen bg-muted/20">
         <header className="bg-background shadow-sm p-4 flex items-center gap-4">
             <h1 className="text-xl font-bold">Book online and secure your seat</h1>
         </header>
@@ -439,52 +433,52 @@ Mana Krushi Services
                     </>
                 )}
             </Button>
-        </main>
-        
-        <AlertDialog open={!!existingBooking} onOpenChange={(open) => !open && setExistingBooking(null)}>
-            <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
-                <AlertDialogDescription>
-                You have a booking for this ride with {existingBooking?.travelers} seat(s).
-                How many more seats would you like to add?
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="grid gap-2 py-4">
-                <Label htmlFor="seats-to-add">Additional Seats</Label>
-                <Input
-                    id="seats-to-add"
-                    type="number"
-                    value={seatsToAdd}
-                    onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
-                    min="1"
-                    className="col-span-3"
-                />
-                </div>
-            <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
-            </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+            
+            <AlertDialog open={!!existingBooking} onOpenChange={(open) => !open && setExistingBooking(null)}>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    You have a booking for this ride with {existingBooking?.travelers} seat(s).
+                    How many more seats would you like to add?
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="grid gap-2 py-4">
+                    <Label htmlFor="seats-to-add">Additional Seats</Label>
+                    <Input
+                        id="seats-to-add"
+                        type="number"
+                        value={seatsToAdd}
+                        onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
+                        min="1"
+                        className="col-span-3"
+                    />
+                    </div>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
-        <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
-            <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Booking Request Sent!</AlertDialogTitle>
-                <AlertDialogDescription>
-                Your request is pending driver confirmation. You can now notify the driver via WhatsApp to get a faster response.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
-                <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Notify Driver
-                </AlertDialogAction>
-            </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+            <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Booking Request Sent!</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    Your request is pending driver confirmation. You can now notify the driver via WhatsApp to get a faster response.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Notify Driver
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </main>
     </div>
     </AppLayout>
   );
