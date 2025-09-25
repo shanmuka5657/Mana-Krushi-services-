@@ -221,7 +221,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         if (newStart < existingEnd && newEnd > existingStart) {
              toast({
                 title: "Time Conflict",
-                description: `This ${data.vehicleType} route overlaps with your existing ${existingRoute.vehicleType} route from ${existingRoute.departureTime} to ${existingRoute.arrivalTime} on ${format(existingRouteDate, 'PPP')}.`,
+                description: `This ${data.vehicleType} route overlaps with your existing ${data.vehicleType} route from ${existingRoute.departureTime} to ${existingRoute.arrivalTime} on ${format(existingRouteDate, 'PPP')}.`,
                 variant: "destructive"
             });
             return;
@@ -295,7 +295,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
               Promote Your Ride?
               </DialogTitle>
               <DialogDescription>
-              Promote your ride for ₹100. Promoted rides are highlighted and include trip insurance for all passengers, increasing trust and bookings.
+              Promote your ride for ₹100. Promoted rides are highlighted to attract more passengers.
               </DialogDescription>
           </DialogHeader>
           <div className="pt-4 space-y-2">
@@ -334,10 +334,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                               <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
                                   <Sparkles className="mr-1 h-3 w-3" />
                                   Promoted
-                              </Badge>
-                              <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
-                                  <Shield className="mr-1 h-3 w-3" />
-                                  Insurance: Yes
                               </Badge>
                           </div>
                       </CardContent>
@@ -387,7 +383,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           onPaymentSuccess={handlePaymentSuccess}
           amount="100.00"
           title="Promote Ride"
-          description="This one-time fee of ₹100 will feature your ride at the top of search results and includes trip insurance for all passengers."
+          description="This one-time fee of ₹100 will feature your ride at the top of search results."
       />
       
       <Card className="shadow-sm">
@@ -682,5 +678,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
+
+    
 
     

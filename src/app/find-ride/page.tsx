@@ -237,12 +237,6 @@ function FindRideResultsPage() {
                                                 Promoted
                                             </Badge>
                                         )}
-                                        {route.isPromoted && (
-                                            <Badge variant="secondary" className="bg-green-200 text-green-800 border-green-300">
-                                                <Shield className="mr-1 h-3 w-3" />
-                                                Insurance: Yes
-                                            </Badge>
-                                        )}
                                     </div>
                                 </CardContent>
                                 <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
@@ -312,5 +306,7 @@ export default function FindRidePage() {
         </Suspense>
     )
 }
+
+    
 
     

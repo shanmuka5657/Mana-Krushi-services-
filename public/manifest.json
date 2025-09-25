@@ -11,12 +11,12 @@
   "categories": ["travel", "navigation"],
   "icons": [
     {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
+      "src": "https://i.ibb.co/DDRZYxnz/Logo.jpg",
       "sizes": "256x256",
       "type": "image/png"
     },
@@ -58,14 +58,14 @@
   },
   "screenshots" : [
     {
-      "src": "/screenshots/screenshot1.png",
+      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Mana Krushi Services - Find a Ride"
     },
     {
-      "src": "/screenshots/screenshot2.png",
+      "src": "https://i.ibb.co/3mSzzSGP/Screenshot-2025-09-14-12-37-47-041-com-whatsapp.jpg",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
