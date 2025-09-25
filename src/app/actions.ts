@@ -169,17 +169,12 @@ export async function sendBroadcastNotification(input: { title: string; message:
     return { success: false, error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
   }
   
-  console.log("Simulating sending push notification...");
+  // This is a placeholder for a server-side function that would send the notification to all users.
+  // In a real app, you would have a backend that queries all user FCM tokens from Firestore
+  // and sends a multicast message.
+  console.log("Simulating sending push notification to all users...");
   console.log("Title:", validatedInput.data.title);
   console.log("Message:", validatedInput.data.message);
   
-  // This is where you would integrate with a real push notification service like Firebase Cloud Messaging (FCM).
-  // For this simulation, we'll just return success.
-  
   return { success: true };
 }
-    
-
-    
-
-    
