@@ -56,6 +56,8 @@ const ownerFormSchema = z.object({
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
+  pickupPoints: z.string().optional(),
+  dropOffPoints: z.string().optional(),
   distance: z.coerce.number().optional(),
   travelDate: z.date({
     required_error: "A travel date is required.",
@@ -116,6 +118,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         driverMobile: "",
         fromLocation: "",
         toLocation: "",
+        pickupPoints: "",
+        dropOffPoints: "",
         distance: 0,
         departureTime: "09:00",
         arrivalTime: "18:00",
@@ -238,9 +242,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         route => route.vehicleType === data.vehicleType
     );
 
-    const today = new Date(travelDateString);
-    const newStart = parse(data.departureTime, 'HH:mm', today).getTime();
-    const newEnd = parse(data.arrivalTime, 'HH:mm', today).getTime();
+    const routeDate = data.travelDate; // The specific date of the new route
+    const newStart = parse(data.departureTime, 'HH:mm', routeDate).getTime();
+    const newEnd = parse(data.arrivalTime, 'HH:mm', routeDate).getTime();
     
     const routeIdToEdit = (routeDataToSubmit as Route | null)?.id;
 
@@ -250,13 +254,14 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
             continue;
         }
 
-        const existingStart = parse(existingRoute.departureTime, 'HH:mm', today).getTime();
-        const existingEnd = parse(existingRoute.arrivalTime, 'HH:mm', today).getTime();
+        const existingRouteDate = new Date(existingRoute.travelDate);
+        const existingStart = parse(existingRoute.departureTime, 'HH:mm', existingRouteDate).getTime();
+        const existingEnd = parse(existingRoute.arrivalTime, 'HH:mm', existingRouteDate).getTime();
 
         if (newStart < existingEnd && newEnd > existingStart) {
              toast({
                 title: "Time Conflict",
-                description: `This ${data.vehicleType} route overlaps with your existing ${existingRoute.vehicleType} route from ${existingRoute.departureTime} to ${existingRoute.arrivalTime}.`,
+                description: `This ${data.vehicleType} route overlaps with your existing ${existingRoute.vehicleType} route from ${existingRoute.departureTime} to ${existingRoute.arrivalTime} on ${format(existingRouteDate, 'PPP')}.`,
                 variant: "destructive"
             });
             return;
@@ -519,6 +524,35 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       </FormItem>
                   )}
                   />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
+                <FormField
+                    control={form.control}
+                    name="pickupPoints"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Pickup Points (Optional)</FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="e.g., Kukatpally, Ameerpet" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="dropOffPoints"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Drop-off Points (Optional)</FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="e.g., Dilsukhnagar, LB Nagar" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
