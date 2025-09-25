@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    allowedDevOrigins: [
+      "https://*.cluster-va5f6x3wzzh4stde63ddr3qgge.cloudworkstations.dev",
+    ],
+  }
 };
 
 export default withPWA(nextConfig);
