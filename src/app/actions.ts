@@ -9,6 +9,7 @@ import { cropLogo as cropLogoFlow } from "@/ai/flows/crop-logo-flow";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
+import { MAPMYINDIA_CLIENT_ID, MAPMYINDIA_CLIENT_SECRET } from "@/lib/map-config";
 
 
 const SuggestDestinationsInput = z.object({
@@ -146,8 +147,8 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
 }
 
 async function getMapmyIndiaToken(): Promise<string | null> {
-    const clientId = process.env.MAPMYINDIA_CLIENT_ID;
-    const clientSecret = process.env.MAPMYINDIA_CLIENT_SECRET;
+    const clientId = MAPMYINDIA_CLIENT_ID;
+    const clientSecret = MAPMYINDIA_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
         console.error("MapmyIndia Client ID or Secret is not configured on the server.");
