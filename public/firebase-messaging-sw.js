@@ -1,8 +1,9 @@
+// This file needs to be in the public directory.
 
-// Import the Firebase app and messaging libraries
-// Note: This is a simplified import for service workers.
-importScripts("https://www.gstatic.com/firebasejs/9.2.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.2.0/firebase-messaging-compat.js");
+// Import the Firebase app and messaging services.
+// Note: These are the v9 modular SDK imports.
+importScripts("https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js");
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -15,7 +16,8 @@ const firebaseConfig = {
   "messagingSenderId": "691006742493"
 };
 
-// Initialize Firebase
+
+// Initialize the Firebase app in the service worker
 firebase.initializeApp(firebaseConfig);
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages.
@@ -23,14 +25,14 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log(
-    '[firebase-messaging-sw.js] Received background message ',
+    "[firebase-messaging-sw.js] Received background message ",
     payload
   );
-  // Customize notification here
+  
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/icon-192x192.png'
+    icon: '/icon-192x192.png' 
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
