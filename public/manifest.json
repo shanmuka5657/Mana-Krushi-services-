@@ -5,41 +5,31 @@
   "scope": "/",
   "start_url": "/",
   "name": "Mana Krushi Services",
-  "short_name": "Mana Krushi",
+  "short_name": "ManaKrushi",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "orientation": "portrait",
+  "id": "/?source=pwa",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512x512.png",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-192x192-maskable.png",
+      "src": "/icons/icon-192x192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512x512-maskable.png",
+      "src": "/icons/icon-512x512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -47,75 +37,18 @@
   ],
   "screenshots": [
     {
-      "src": "/images/screenshots/screenshot1.png",
-      "sizes": "1080x1920",
+      "src": "/screenshots/screenshot1.png",
+      "sizes": "1080x2340",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Welcome Screen"
     },
     {
-      "src": "/images/screenshots/screenshot2.png",
-      "sizes": "1080x1920",
+      "src": "/screenshots/screenshot2.png",
+      "sizes": "1080x2340",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Dashboard"
-    }
-  ],
-  "display_override": [
-    "standalone",
-    "window-controls-overlay"
-  ],
-  "lang": "en-US",
-  "dir": "ltr",
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "prefer_related_applications": false,
-  "protocol_handlers": [
-    {
-      "protocol": "web+manakrushi",
-      "url": "/search?q=%s"
-    }
-  ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "file_handlers": [
-    {
-      "action": "/handle-file",
-      "accept": {
-        "text/*": [
-          ".txt"
-        ]
-      }
-    }
-  ],
-  "categories": [
-    "travel",
-    "business",
-    "lifestyle",
-    "navigation"
-  ],
-  "shortcuts": [
-    {
-      "name": "Find a Ride",
-      "url": "/dashboard?role=passenger",
-      "description": "Quickly search for available rides.",
-      "icons": [
-        {
-          "src": "/images/icons/shortcut-search.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "My Bookings",
-      "url": "/bookings",
-      "description": "View your upcoming and past bookings.",
-      "icons": [
-        {
-          "src": "/images/icons/shortcut-bookings.png",
-          "sizes": "96x96"
-        }
-      ]
     }
   ],
   "related_applications": [
@@ -125,40 +58,25 @@
       "id": "com.example.app"
     }
   ],
-  "share_target": {
-    "action": "/search",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
+  "prefer_related_applications": false,
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "widgets": [
     {
-      "name": "My Next Ride",
-      "description": "View details about your next scheduled ride.",
-      "tag": "next-ride",
-      "template": "next-ride-template",
-      "ms_ac_template": "next-ride-template.json",
+      "name": "Find a Ride",
+      "short_name": "Find Ride",
+      "description": "Quickly search for available rides.",
       "icons": [
-        {
-          "src": "/images/icons/widget-icon.png",
-          "sizes": "96x96"
-        }
-      ]
+        { "src": "/icons/widget-icon-96x96.png", "sizes": "96x96" }
+      ],
+      "launch_url": "/find-ride-widget"
     }
   ],
-  "edge_side_panel": {
-    "preferred_width": 480
-  },
-  "note_taking": {
-    "new_note_url": "/new-note",
-    "needs_account": true
-  },
   "scope_extensions": [
-    {
-      "origin": "*.example.com"
-    }
+    { "origin": "*.manakrushi.com" },
+    { "origin": "*.example.com" }
   ]
 }
