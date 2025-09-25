@@ -19,9 +19,9 @@ function MessagingCampaignsPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center py-12">
                     <MessageSquare className="h-16 w-16 text-muted-foreground" />
-                    <h3 className="mt-4 text-xl font-semibold">Automated Notifications Coming Soon!</h3>
-                    <p className="mt-2 text-muted-foreground">
-                        We are building a powerful system to send automated, intelligent notifications (like morning commute suggestions) to users via push notifications.
+                    <h3 className="mt-4 text-xl font-semibold">Automated Commute Suggestions Coming Soon!</h3>
+                    <p className="mt-2 text-muted-foreground max-w-xl">
+                        We are building a powerful system to automatically send "Morning Commute Suggestions" to passengers. The app will learn their daily route and send a push notification with a list of available bikers and drivers each morning, eliminating the need for manual searches.
                     </p>
                 </CardContent>
             </Card>
