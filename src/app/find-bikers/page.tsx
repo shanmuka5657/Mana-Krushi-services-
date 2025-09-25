@@ -135,7 +135,9 @@ function FindBikersContent() {
                 const lowerTo = toLocation.toLowerCase();
 
                 let filteredRoutes = allRoutes.filter(route => {
-                    if (route.vehicleType !== 'Bike') return false;
+                    if (route.vehicleType !== 'Bike') {
+                        return false;
+                    }
 
                     const routeFrom = route.fromLocation.toLowerCase();
                     const routeTo = route.toLocation.toLowerCase();
@@ -174,7 +176,7 @@ function FindBikersContent() {
                     if (!aIsExact && bIsExact) return 1;
 
                     // If both are exact or both are not, sort by date
-                    return new Date(b.travelDate).getTime() - new Date(a.travelDate).getTime();
+                    return new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime();
                 });
                 
                 setBikers(filteredRoutes);
