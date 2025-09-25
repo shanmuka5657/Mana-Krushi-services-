@@ -1,59 +1,67 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "MKS",
-  "description": "A ride-sharing and carpooling platform to connect drivers and passengers.",
+  "short_name": "ManaKrushi",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-256x256.png",
       "sizes": "256x256",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "theme_color": "#FFFFFF",
-  "background_color": "#FFFFFF",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
   "screenshots": [
     {
       "src": "/screenshots/screenshot1.png",
-      "sizes": "540x720",
+      "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Login Screen"
+      "form_factor": "narrow"
     },
     {
       "src": "/screenshots/screenshot2.png",
-      "sizes": "540x720",
+      "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Dashboard"
+      "form_factor": "narrow"
     },
     {
-      "src": "/screenshots/screenshot-wide.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Admin Dashboard"
+        "src": "/screenshots/screenshot-wide.png",
+        "sizes": "1920x1080",
+        "type": "image/png",
+        "form_factor": "wide"
     }
-  ]
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#00BCD4"
 }
