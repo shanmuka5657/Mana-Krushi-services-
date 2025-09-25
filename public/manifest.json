@@ -1,28 +1,24 @@
 {
-  "theme_color": "#1f83bd",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
   "name": "Mana Krushi Services",
   "short_name": "ManaKrushi",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "description": "A ride-sharing and carpooling platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f83bd",
+  "orientation": "portrait-primary",
+  "id": "/?utm_source=pwa",
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ],
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -47,25 +43,13 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot1.png",
+      "src": "https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png",
       "type": "image/png",
       "sizes": "1080x2340",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshots/screenshot2.png",
-      "type": "image/png",
-      "sizes": "1920x1080",
-      "form_factor": "wide"
+      "form_factor": "narrow",
+      "label": "App Screenshot"
     }
   ],
-  "display_override": [
-    "window-controls-overlay",
-    "standalone"
-  ],
-  "id": "/?source=pwa",
-  "iarc_rating_id": "e84b072d-8685-41c2-9c16-c7c13b35f32a",
-  "orientation": "portrait",
   "related_applications": [
     {
       "platform": "play",
@@ -74,32 +58,44 @@
     }
   ],
   "prefer_related_applications": false,
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "shortcuts": [
     {
       "name": "Find a Ride",
-      "short_name": "Find Ride",
+      "short_name": "Find",
       "description": "Search for available rides",
       "url": "/dashboard?role=passenger",
-      "icons": [{ "src": "/icons/shortcut-search.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/shortcut-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "My Bookings",
       "short_name": "Bookings",
       "description": "View your upcoming and past bookings",
       "url": "/bookings",
-      "icons": [{ "src": "/icons/shortcut-bookings.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/shortcut-icon.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "categories": [
     "travel",
-    "social",
     "navigation"
   ],
   "file_handlers": [
     {
       "action": "/handle-file",
       "accept": {
-        "text/plain": [".txt"]
+        "text/plain": [
+          ".txt"
+        ]
       }
     }
   ],
@@ -109,7 +105,7 @@
   "protocol_handlers": [
     {
       "protocol": "web+manakrushi",
-      "url": "/protocol-handler?path=%s"
+      "url": "/search?q=%s"
     }
   ],
   "share_target": {
@@ -123,13 +119,13 @@
   },
   "widgets": [
     {
-      "name": "Find a Ride",
-      "description": "Quickly search for rides",
-      "tag": "find-ride",
-      "template": "search-form",
-      "ms_ac_template": "/widgets/search-widget.html",
-      "data": "/widgets/search-data.json",
-      "type": "application/x-ms-widget-search"
+      "name": "My Next Ride",
+      "description": "View your next upcoming ride.",
+      "tag": "next-ride",
+      "template": "next-ride-template",
+      "ms_ac_template": "next-ride-template.json",
+      "data": "/next-ride-data.json",
+      "type": "application/json"
     }
   ],
   "edge_side_panel": {
@@ -137,11 +133,14 @@
   },
   "note_taking": {
     "new_note_url": "/new-note",
-    "needs_custom_implementation": true
+    "needs_custom_ui": true
   },
-  "lang": "en-US",
-  "dir": "ltr",
   "scope_extensions": [
-    { "origin": "*.example.com" }
+    {
+      "origin": "*.manakrushi.com"
+    },
+    {
+      "origin": "manakrushi.io"
+    }
   ]
 }
