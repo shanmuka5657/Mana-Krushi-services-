@@ -48,6 +48,20 @@
       "url": "url"
     }
   },
+  "screenshots": [
+    {
+      "src": "https://picsum.photos/seed/screenshot1/1080/1920",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "https://picsum.photos/seed/screenshot2/1920/1080",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
   "icons": [
     {
       "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
