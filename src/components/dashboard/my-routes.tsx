@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye, Car } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUser, getRouteViews } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -347,6 +347,41 @@ ${booking.driverName}
     const whatsappUrl = `https://wa.me/91${booking.mobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+  
+  const handleSendSummaryToDriver = () => {
+    if (!selectedRoute || !selectedRoute.driverMobile) {
+      toast({ title: "Driver mobile not found.", variant: "destructive" });
+      return;
+    }
+    if (bookingsForRoute.length === 0) {
+      toast({ title: "No passengers to report.", variant: "destructive" });
+      return;
+    }
+    
+    const confirmedBookings = bookingsForRoute.filter(b => b.status === 'Confirmed');
+    if (confirmedBookings.length === 0) {
+      toast({ title: "No confirmed bookings to send.", variant: "destructive" });
+      return;
+    }
+
+    const bookingDate = new Date(selectedRoute.travelDate);
+    const formattedDate = format(bookingDate, 'dd MMM, yyyy');
+    
+    let summary = `*Passenger Summary for ${selectedRoute.fromLocation} to ${selectedRoute.toLocation}*\n`;
+    summary += `*Date:* ${formattedDate} at ${selectedRoute.departureTime}\n\n`;
+
+    confirmedBookings.forEach((booking, index) => {
+      summary += `*${index + 1}. ${booking.client}*\n`;
+      summary += `   - Seats: ${booking.travelers}\n`;
+      summary += `   - Mobile: ${booking.mobile}\n\n`;
+    });
+    
+    const totalPassengers = confirmedBookings.reduce((sum, b) => sum + (Number(b.travelers) || 1), 0);
+    summary += `*Total Confirmed Passengers:* ${totalPassengers}`;
+    
+    const whatsappUrl = `https://wa.me/91${selectedRoute.driverMobile}?text=${encodeURIComponent(summary)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
 
   const getStatusInfo = (status: Booking['status']) => {
@@ -569,6 +604,14 @@ ${booking.driverName}
                   <p>No bookings for this route yet.</p>
                 )}
               </div>
+              {bookingsForRoute.length > 0 && (
+                <DialogFooter>
+                    <Button variant="secondary" onClick={handleSendSummaryToDriver}>
+                        <Car className="mr-2 h-4 w-4" />
+                        Send Summary to Driver
+                    </Button>
+                </DialogFooter>
+              )}
             </DialogContent>
         </Dialog>
         
