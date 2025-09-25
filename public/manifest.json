@@ -1,13 +1,15 @@
 {
-  "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
-  "description": "A ride-sharing and carpooling platform to make travel easier, more affordable, and community-driven.",
   "theme_color": "#1f83bd",
   "background_color": "#ffffff",
   "display": "standalone",
-  "orientation": "portrait",
   "scope": "/",
   "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "ManaKrushi",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "lang": "en-US",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
   "id": "/?utm_source=pwa",
   "icons": [
     {
@@ -23,36 +25,20 @@
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/bJCb5Yg/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff-maskable.png",
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/bJCb5Yg/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff-maskable.png",
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Homescreen of Awesome App"
-    },
-    {
-      "src": "https://www.pwabuilder.com/assets/screenshots/screen2.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "List of Awesome Resources"
-    }
-  ],
   "share_target": {
-    "action": "/search/",
+    "action": "/search",
     "method": "GET",
     "params": {
       "title": "title",
@@ -62,31 +48,76 @@
   },
   "shortcuts": [
     {
-      "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Search for available rides",
-      "url": "/dashboard?role=passenger",
-      "icons": [{ "src": "/icons/search.png", "sizes": "192x192" }]
-    },
-    {
       "name": "My Bookings",
       "short_name": "Bookings",
       "description": "View your upcoming and past bookings",
-      "url": "/bookings",
+      "url": "/bookings?role=passenger",
       "icons": [{ "src": "/icons/bookings.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Find a Ride",
+      "short_name": "Search",
+      "description": "Search for a new ride",
+      "url": "/dashboard?role=passenger",
+      "icons": [{ "src": "/icons/search.png", "sizes": "192x192" }]
     }
   ],
-  "categories": ["travel", "navigation"],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "file_handlers": [],
-  "protocol_handlers": [],
+  "categories": [
+    "travel",
+    "social",
+    "transportation"
+  ],
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
-  "widgets": [],
-  "edge_side_panel": {},
-  "note_taking": {},
-  "scope_extensions": []
+  "prefer_related_applications": false,
+  "file_handlers": [
+    {
+      "action": "/handle-file",
+      "accept": {
+        "text/*": [".txt", ".md"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+manakrushi",
+      "url": "/protocol?type=%s"
+    }
+  ],
+  "related_applications": [],
+  "widgets": [
+    {
+      "name": "Upcoming Ride",
+      "description": "Shows your next scheduled ride",
+      "tag": "upcoming-ride",
+      "template": "upcoming-ride-template",
+      "ms_ac_template": "upcoming-ride-template",
+      "data": {
+        "url": "/widget-data/upcoming-ride.json"
+      },
+      "screenshots": [
+        {
+          "src": "/screenshots/widget-upcoming.png",
+          "sizes": "600x400",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "note_taking": {
+    "new_note_url": "/new-note",
+    "needs_editing_flag": true
+  },
+  "scope_extensions": [
+    { "origin": "*.manakrushi.com" },
+    { "origin": "manakrushi.io" }
+  ]
 }
