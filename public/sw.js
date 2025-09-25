@@ -1,13 +1,13 @@
+// Custom Service Worker
 
 const CACHE_NAME = 'mana-krushi-cache-v1';
 const urlsToCache = [
   '/',
   '/offline',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  '/manifest.json'
 ];
 
-// Install Event - Cache initial resources
+// Install Event: Cache essential resources
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
 
@@ -15,12 +15,14 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Service Worker: Caching essential files...');
       return cache.addAll(urlsToCache);
+    }).catch(err => {
+      console.error('Service Worker: Caching failed', err);
     })
   );
   self.skipWaiting();
 });
 
-// Activate Event - Clean up old caches
+// Activate Event: Clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activating...');
   const cacheWhitelist = [CACHE_NAME];
@@ -40,67 +42,41 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// Fetch Event - Network falling back to cache
+// Fetch Event: Cache-first, then network, with offline fallback
 self.addEventListener('fetch', (event) => {
-    if (event.request.mode === 'navigate') {
-        event.respondWith(
-            fetch(event.request).catch(() => caches.match('/offline'))
-        );
-        return;
-    }
-
-    event.respondWith(
-        fetch(event.request)
-            .then(networkResponse => {
-                // Cache the new resource for future use
-                if (event.request.method === 'GET' && event.request.url.startsWith(self.location.origin)) {
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, networkResponse.clone());
-                    });
-                }
-                return networkResponse;
-            })
-            .catch(() => {
-                // If the network fails, try to get it from the cache
-                return caches.match(event.request);
-            })
-    );
-});
-
-
-// Background Sync (optional for offline form submission or syncing data)
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-data') {
-    event.waitUntil(syncData());
+  // Let the browser handle requests for Firebase assets
+  if (event.request.url.includes('firestore.googleapis.com')) {
+    return;
   }
-});
-
-// Example Sync Function: Sync data with server when back online
-async function syncData() {
-  console.log('Service Worker: Syncing data with server...');
-  // Your data sync logic here (e.g., send data to server)
-}
-
-// Push Notifications
-self.addEventListener('push', (event) => {
-  const payload = event.data ? event.data.json() : { title: 'Mana Krushi Services', body: 'You have a new notification.' };
   
-  const options = {
-    body: payload.body,
-    icon: '/icon-192x192.png',
-    badge: '/icon-192x192.png',
-    vibrate: [200, 100, 200]
-  };
+  event.respondWith(
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cachedResponse = await cache.match(event.request);
+      
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        // If the request is successful, update the cache
+        if (networkResponse.ok) {
+          cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      });
 
-  event.waitUntil(
-    self.registration.showNotification(payload.title, options)
+      // Return cached response if available, otherwise fetch from network
+      // If network fails, fall back to offline page
+      return cachedResponse || fetchPromise.catch(() => {
+        // If the request is for a document, show the offline page
+        if (event.request.mode === 'navigate') {
+          return caches.match('/offline');
+        }
+      });
+    })
   );
 });
 
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.openWindow('/') // Open your app when the notification is clicked
-  );
+// Background Sync (for features like offline form submission)
+self.addEventListener('sync', (event) => {
+  console.log('Service Worker: Background sync event received', event.tag);
+  if (event.tag === 'sync-data') {
+    event.waitUntil(console.log('Syncing data...'));
+  }
 });
