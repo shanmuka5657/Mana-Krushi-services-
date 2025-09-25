@@ -231,17 +231,20 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     }
     
     const travelDateString = format(data.travelDate, 'yyyy-MM-dd');
-    const existingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
+    const allExistingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
     
+    // Filter routes by the same vehicle type before checking for conflicts
+    const existingRoutesOfSameType = allExistingRoutesToday.filter(
+        route => route.vehicleType === data.vehicleType
+    );
+
     const today = new Date(travelDateString);
     const newStart = parse(data.departureTime, 'HH:mm', today).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', today).getTime();
     
-    // The bug is here. If we are editing a route, it might be in existingRoutesToday.
-    // The check below will compare the route with itself.
-    // We need to filter out the route we are currently editing if it exists.
     const routeIdToEdit = (routeDataToSubmit as Route | null)?.id;
-    for (const existingRoute of existingRoutesToday) {
+
+    for (const existingRoute of existingRoutesOfSameType) {
         // If we are editing a route, skip the check if the existing route is the one being edited
         if (routeIdToEdit && existingRoute.id === routeIdToEdit) {
             continue;
@@ -253,7 +256,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         if (newStart < existingEnd && newEnd > existingStart) {
              toast({
                 title: "Time Conflict",
-                description: `This route from ${data.departureTime} to ${data.arrivalTime} overlaps with your existing ride from ${existingRoute.departureTime} to ${existingRoute.arrivalTime}.`,
+                description: `This ${data.vehicleType} route overlaps with your existing ${existingRoute.vehicleType} route from ${existingRoute.departureTime} to ${existingRoute.arrivalTime}.`,
                 variant: "destructive"
             });
             return;
