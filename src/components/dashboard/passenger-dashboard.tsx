@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { getProfile, getRoutes } from "@/lib/storage";
+import type { Profile } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,6 +53,7 @@ type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
+  profile: Profile | null;
 }
 
 // --- Location Autocomplete Component ---
@@ -137,41 +138,19 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder }: { f
 };
 
 
-export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardProps) {
+export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [locations, setLocations] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const checkProfileAndFetchLocations = async () => {
-        const profile = await getProfile();
-        // The check now happens AFTER profile has been fetched.
-        if (profile === null || !profile.mobile || profile.mobile === '0000000000') {
-            setShowProfilePrompt(true);
-        }
-
-        const cachedLocations = sessionStorage.getItem('routeLocations');
-        if (cachedLocations) {
-            setLocations(JSON.parse(cachedLocations));
-        } else {
-            setLocations([]);
-        }
-        setIsLoading(false);
+    if (profile === null || !profile.mobile || profile.mobile === '0000000000') {
+      setShowProfilePrompt(true);
     }
-    if (isMounted) {
-      checkProfileAndFetchLocations();
-    }
-  }, [isMounted]);
+  }, [profile]);
   
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
@@ -218,14 +197,6 @@ export default function PassengerDashboard({ onSwitchTab }: PassengerDashboardPr
         date: format(data.travelDate, 'yyyy-MM-dd')
     });
     router.push(`/find-ride?${params.toString()}`);
-  }
-  
-  if (isLoading) {
-      return (
-        <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )
   }
 
   return (

@@ -75,6 +75,7 @@ export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
 interface OwnerDashboardProps {
   onRouteAdded: (newRoute: OwnerFormValues & { isPromoted?: boolean }) => void;
   onSwitchTab: (tab: string) => void;
+  profile: Profile;
 }
 
 const getTravelDuration = (departureTime?: string, arrivalTime?: string): string => {
@@ -94,7 +95,7 @@ const getTravelDuration = (departureTime?: string, arrivalTime?: string): string
     }
 }
 
-export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashboardProps) {
+export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: OwnerDashboardProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
@@ -102,19 +103,15 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean, id?: string }) | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [locations, setLocations] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
   
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
     defaultValues: {
-        ownerName: "",
-        ownerEmail: "",
-        driverName: "",
-        driverMobile: "",
+        ownerName: profile.name || "",
+        ownerEmail: profile.email || "",
+        driverName: profile.name || "",
+        driverMobile: (profile.mobile && profile.mobile !== '0000000000') ? profile.mobile : "",
         fromLocation: "",
         toLocation: "",
         pickupPoints: "",
@@ -125,7 +122,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         availableSeats: 1,
         price: 500,
         rating: 4.5,
-        vehicleType: "Car",
+        vehicleType: profile.vehicleType || "Car",
         vehicleNumber: "",
     },
   });
@@ -177,44 +174,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   }, [fromLocation, toLocation]);
 
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-        const userProfile = await getProfile();
-        setProfile(userProfile);
-        
-        if (userProfile) {
-            if(userProfile.name) form.setValue('ownerName', userProfile.name);
-            if(userProfile.name) form.setValue('driverName', userProfile.name);
-            if(userProfile.mobile && userProfile.mobile !== '0000000000') form.setValue('driverMobile', userProfile.mobile);
-            if(userProfile.email) form.setValue('ownerEmail', userProfile.email);
-            if(userProfile.vehicleType) form.setValue('vehicleType', userProfile.vehicleType);
-        }
-
-        const cachedLocations = sessionStorage.getItem('routeLocations');
-        if (cachedLocations) {
-            setLocations(JSON.parse(cachedLocations));
-        } else {
-            // OPTIMIZATION: Fetch routes here to populate cache for passenger dashboard
-            const allRoutes = await getRoutes(true);
-            const allLocations = new Set<string>();
-            allRoutes.forEach(route => {
-                allLocations.add(route.fromLocation);
-                allLocations.add(route.toLocation);
-            });
-            const locationsArray = Array.from(allLocations);
-            setLocations(locationsArray);
-            sessionStorage.setItem('routeLocations', JSON.stringify(locationsArray));
-        }
-        setIsLoading(false);
-    }
-    fetchInitialData();
-  }, []);
-
-  useEffect(() => {
-      setIsMounted(true);
-  }, []);
-
-
   async function onSubmit(data: OwnerFormValues) {
     const ownerEmail = getCurrentUser();
     if(!ownerEmail) {
@@ -222,8 +181,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
 
-    const userProfile = await getProfile(ownerEmail);
-    if (!userProfile?.planExpiryDate) {
+    if (!profile?.planExpiryDate) {
         toast({
             title: "Owner Plan Required",
             description: "Please activate your owner plan in your profile before adding a route.",
@@ -233,29 +191,25 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         return;
     }
     
-    const travelDateString = format(data.travelDate, 'yyyy-MM-dd');
-    const allExistingRoutesToday = await getRoutes(false, { ownerEmail, date: travelDateString });
+    const allExistingRoutesToday = await getRoutes(false, { ownerEmail, date: format(data.travelDate, 'yyyy-MM-dd') });
     
-    // Filter routes by the same vehicle type before checking for conflicts
     const existingRoutesOfSameType = allExistingRoutesToday.filter(
         route => route.vehicleType === data.vehicleType
     );
 
-    const routeDate = data.travelDate; // The specific date of the new route
+    const routeDate = data.travelDate;
     const newStart = parse(data.departureTime, 'HH:mm', routeDate).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', routeDate).getTime();
     
     const routeIdToEdit = (routeDataToSubmit as Route | null)?.id;
 
     for (const existingRoute of existingRoutesOfSameType) {
-        // If we are editing a route, skip the check if the existing route is the one being edited
         if (routeIdToEdit && existingRoute.id === routeIdToEdit) {
             continue;
         }
 
         const existingRouteDate = new Date(existingRoute.travelDate);
         
-        // Only check for conflict if it's the same day
         if (format(routeDate, 'yyyy-MM-dd') !== format(existingRouteDate, 'yyyy-MM-dd')) {
             continue;
         }
@@ -276,9 +230,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     const dataWithVehicleInfo = {
         ...data,
         ownerEmail: ownerEmail,
-        // BUG FIX: Use vehicleType from form data, not from profile
         vehicleType: data.vehicleType, 
-        vehicleNumber: userProfile.vehicleNumber,
+        vehicleNumber: profile.vehicleNumber,
     };
 
     setRouteDataToSubmit(dataWithVehicleInfo);
@@ -313,14 +266,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     if (routeDataToSubmit) {
       handleRouteSubmission(routeDataToSubmit);
     }
-  }
-  
-  if (isLoading) {
-      return (
-        <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )
   }
 
   return (

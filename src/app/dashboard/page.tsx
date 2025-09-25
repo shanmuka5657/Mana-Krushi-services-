@@ -1,45 +1,44 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from 'react';
 import type { OwnerFormValues } from "@/components/dashboard/owner-dashboard";
 import { addRoute, getCurrentUser, getProfile } from "@/lib/storage";
-import React from "react";
+import type { Profile } from "@/lib/types";
+import { Loader2 } from "lucide-react";
 
 
 function DashboardPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const roleFromUrl = searchParams.get("role");
-  const [role, setRole] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
 
   useEffect(() => {
-    const determineRole = async () => {
+    const determineRoleAndProfile = async () => {
         const userProfile = await getProfile();
-        const actualRole = userProfile?.role || 'passenger';
         
-        if (actualRole === 'admin') {
+        if (userProfile?.role === 'admin') {
             router.replace('/admin/dashboard');
             return;
         }
 
-        setRole(actualRole);
+        setProfile(userProfile);
         
-        // Always ensure the URL reflects the true role from the profile.
-        if (!roleFromUrl || roleFromUrl !== actualRole) {
-             router.replace(`/dashboard?role=${actualRole}`);
+        const roleFromUrl = searchParams.get("role");
+        // Ensure the URL reflects the true role from the profile.
+        if (userProfile?.role && (!roleFromUrl || roleFromUrl !== userProfile.role)) {
+             router.replace(`/dashboard?role=${userProfile.role}`);
         }
         setIsLoading(false);
     };
-    determineRole();
-  }, [roleFromUrl, router]);
+    determineRoleAndProfile();
+  }, [searchParams, router]);
 
 
   const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => {
@@ -59,24 +58,27 @@ function DashboardPage() {
   };
   
   const handleSwitchTab = (tab: string) => {
-    // This function is kept for compatibility but is no longer used for tab switching.
-    // It can be repurposed for other cross-component communication if needed.
-     if (tab === 'profile') {
-      router.push(`/profile?role=${role}`);
+     if (tab === 'profile' && profile?.role) {
+      router.push(`/profile?role=${profile.role}`);
     }
   };
 
-  if (isLoading || !role) {
-      return <AppLayout><div>Loading...</div></AppLayout>;
+  if (isLoading || !profile) {
+      return (
+        <AppLayout>
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        </AppLayout>
+      );
   }
-
 
   return (
     <AppLayout>
-      {role === 'owner' ? (
-        <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleSwitchTab} />
+      {profile.role === 'owner' ? (
+        <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleSwitchTab} profile={profile} />
       ) : (
-        <PassengerDashboard onSwitchTab={handleSwitchTab} />
+        <PassengerDashboard onSwitchTab={handleSwitchTab} profile={profile} />
       )}
     </AppLayout>
   );
