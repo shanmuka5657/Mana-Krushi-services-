@@ -1,142 +1,31 @@
 {
-  "theme_color": "#1f83bd",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
   "name": "Mana Krushi Services",
-  "short_name": "MKS",
+  "short_name": "ManaKrushi",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "orientation": "any",
-  "id": "/?utm_source=pwa",
-  "lang": "en-US",
-  "dir": "ltr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f83bd",
   "display_override": [
     "standalone",
-    "minimal-ui"
+    "minimal-ui",
+    "window-controls-overlay"
   ],
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
+  "id": "/?utm_source=pwa",
   "categories": [
-    "travel"
+    "travel",
+    "business",
+    "lifestyle"
   ],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "prefer_related_applications": false,
-  "related_applications": [],
   "scope_extensions": [
-    { "origin": "*.google.com" },
+    { "origin": "*.manakrushi.com" },
     { "origin": "*.firebaseapp.com" }
   ],
-  "shortcuts": [
-    {
-      "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Search for available rides",
-      "url": "/dashboard?role=passenger",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
-      "url": "/bookings",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+mks",
-      "url": "/search?q=%s"
-    }
-  ],
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "file_handlers": [
-    {
-      "action": "/handle-file",
-      "name": "MKS Document",
-      "accept": {
-        "text/plain": [
-          ".txt",
-          ".md"
-        ]
-      }
-    }
-  ],
-  "widgets": [
-    {
-      "name": "Upcoming Ride",
-      "description": "View your next ride details.",
-      "tag": "upcoming-ride",
-      "template": "upcoming-ride-template",
-      "ms_ac_template": "widgets/upcoming_ride.json",
-      "data": "widgets/upcoming_ride_data.json",
-      "screenshots": [
-        {
-          "src": "/images/widget-screenshot-1.png",
-          "sizes": "600x400",
-          "label": "Upcoming Ride Widget"
-        }
-      ],
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ],
-      "auth": false,
-      "update": 86400
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/images/screenshot1.png",
-      "type": "image/png",
-      "sizes": "1080x1920",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/images/screenshot2.png",
-      "type": "image/png",
-      "sizes": "1920x1080",
-      "form_factor": "wide"
-    }
-  ],
   "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
@@ -144,14 +33,69 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png"
-    },
-    {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot1.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screenshot2.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screenshot-wide.png",
+      "type": "image/png",
+      "sizes": "1920x1080",
+      "form_factor": "wide"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.example.app",
+      "id": "com.example.app"
+    }
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+manakrushi",
+      "url": "/bookings?id=%s"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find Ride",
+      "description": "Quickly find a ride to your destination.",
+      "tag": "find-ride",
+      "template": "search-form",
+      "icons": [
+        { "src": "/icons/widget-icon-96.png", "sizes": "96x96" }
+      ],
+      "data": {
+        "url-template": "/find-ride?to={to}",
+        "form": [
+          {
+            "name": "to",
+            "label": "Destination",
+            "value": ""
+          }
+        ]
+      }
     }
   ]
 }
