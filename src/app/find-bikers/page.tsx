@@ -139,10 +139,8 @@ function FindBikersContent() {
                         return false;
                     }
 
-                    const routeFrom = route.fromLocation.toLowerCase();
-                    const routeTo = route.toLocation.toLowerCase();
-                    const fromMatch = routeFrom.includes(lowerFrom) || lowerFrom.includes(routeFrom);
-                    const toMatch = routeTo.includes(lowerTo) || lowerTo.includes(routeTo);
+                    const fromMatch = route.fromLocation.toLowerCase().includes(lowerFrom);
+                    const toMatch = route.toLocation.toLowerCase().includes(lowerTo);
 
                     if (!fromMatch || !toMatch) {
                         return false;
