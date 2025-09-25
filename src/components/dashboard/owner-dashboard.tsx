@@ -49,83 +49,6 @@ import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-// --- Location Autocomplete Component ---
-const LocationAutocompleteInput = ({ field, onLocationSelect }: { field: any, onLocationSelect: (location: string) => void }) => {
-    const [suggestions, setSuggestions] = useState<any[]>([]);
-    const [query, setQuery] = useState('');
-    const [isFocused, setIsFocused] = useState(false);
-    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-
-    const fetchSuggestions = async (searchQuery: string) => {
-        if (searchQuery.length < 2) {
-            setSuggestions([]);
-            return;
-        }
-
-        const result = await getMapSuggestions(searchQuery);
-
-        if (result.error) {
-            console.error(result.error);
-            setSuggestions([]);
-        } else if (result.suggestions) {
-            setSuggestions(result.suggestions);
-        }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setQuery(value);
-        field.onChange(value);
-
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-        debounceTimeout.current = setTimeout(() => {
-            fetchSuggestions(value);
-        }, 300); // 300ms debounce
-    };
-
-    const handleSuggestionClick = (suggestion: any) => {
-        const locationName = suggestion.placeName;
-        setQuery(locationName);
-        onLocationSelect(locationName);
-        setSuggestions([]);
-        setIsFocused(false);
-    };
-
-    return (
-        <div className="relative">
-            <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                    {...field}
-                    value={query}
-                    onChange={handleInputChange}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay to allow click
-                    className="pl-10"
-                    autoComplete="off"
-                />
-            </div>
-            {isFocused && suggestions.length > 0 && (
-                <ul className="absolute z-10 w-full bg-card border rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
-                    {suggestions.map((suggestion) => (
-                        <li
-                            key={suggestion.eLoc}
-                            onMouseDown={() => handleSuggestionClick(suggestion)} // Use onMouseDown to fire before onBlur
-                            className="px-4 py-2 hover:bg-muted cursor-pointer"
-                        >
-                            <p className="font-semibold text-sm">{suggestion.placeName}</p>
-                            <p className="text-xs text-muted-foreground">{suggestion.placeAddress}</p>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
-};
-
-
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
   ownerEmail: z.string().email(),
@@ -287,28 +210,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
   useEffect(() => {
       setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-      if (isMounted && !isLoading) {
-          if (!profile || !profile.mobile || profile.mobile === '0000000000') {
-            setShowProfilePrompt(true);
-          } else if (!profile.vehicleType || !profile.vehicleNumber) {
-              toast({
-                  title: "Vehicle Info Missing",
-                  description: "Please add your vehicle type and number in your profile.",
-                  variant: "destructive",
-              });
-              setShowProfilePrompt(true);
-          } else if (!profile.planExpiryDate) {
-              toast({
-                  title: "Owner Plan Inactive",
-                  description: "Please activate your owner plan in your profile to add routes.",
-                  variant: "destructive",
-              });
-              onSwitchTab('profile');
-          }
-      }
-  }, [isMounted, isLoading, profile, onSwitchTab, toast]);
 
 
   async function onSubmit(data: OwnerFormValues) {
@@ -596,10 +497,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormItem>
                       <FormLabel>From</FormLabel>
                       <FormControl>
-                          <LocationAutocompleteInput
-                            field={field}
-                            onLocationSelect={(location) => form.setValue('fromLocation', location)}
-                          />
+                          <Input placeholder="Enter starting location" {...field} />
                       </FormControl>
                       <FormMessage />
                       </FormItem>
@@ -612,10 +510,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
                       <FormItem>
                       <FormLabel>To</FormLabel>
                       <FormControl>
-                           <LocationAutocompleteInput
-                            field={field}
-                            onLocationSelect={(location) => form.setValue('toLocation', location)}
-                          />
+                           <Input placeholder="Enter destination" {...field} />
                       </FormControl>
                       <FormMessage />
                       </FormItem>
