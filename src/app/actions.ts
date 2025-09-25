@@ -147,110 +147,115 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
 }
 
 async function getMapmyIndiaToken(): Promise<string | null> {
-    const clientId = MAPMYINDIA_CLIENT_ID;
-    const clientSecret = MAPMYINDIA_CLIENT_SECRET;
+    // const clientId = MAPMYINDIA_CLIENT_ID;
+    // const clientSecret = MAPMYINDIA_CLIENT_SECRET;
 
-    if (!clientId || !clientSecret) {
-        console.error("MapmyIndia Client ID or Secret is not configured on the server.");
-        return null;
-    }
+    // if (!clientId || !clientSecret) {
+    //     console.error("MapmyIndia Client ID or Secret is not configured on the server.");
+    //     return null;
+    // }
     
-    try {
-        const response = await fetch("https://outpost.mapmyindia.com/api/security/oauth/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-                grant_type: "client_credentials",
-                client_id: clientId,
-                client_secret: clientSecret,
-            }),
-        });
+    // try {
+    //     const response = await fetch("https://outpost.mapmyindia.com/api/security/oauth/token", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    //         body: new URLSearchParams({
+    //             grant_type: "client_credentials",
+    //             client_id: clientId,
+    //             client_secret: clientSecret,
+    //         }),
+    //     });
 
-        if (!response.ok) {
-            console.error("Failed to get MapmyIndia token. Status:", response.status, await response.text());
-            return null;
-        }
+    //     if (!response.ok) {
+    //         console.error("Failed to get MapmyIndia token. Status:", response.status, await response.text());
+    //         return null;
+    //     }
 
-        const data = await response.json();
-        return data.access_token;
+    //     const data = await response.json();
+    //     return data.access_token;
 
-    } catch (error) {
-        console.error("Error fetching MapmyIndia token:", error);
-        return null;
-    }
+    // } catch (error) {
+    //     console.error("Error fetching MapmyIndia token:", error);
+    //     return null;
+    // }
+    return null;
 }
 
 
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
-    if (!query || query.length < 2) {
-        return { suggestions: [] };
-    }
+    // if (!query || query.length < 2) {
+    //     return { suggestions: [] };
+    // }
 
-    const token = await getMapmyIndiaToken();
+    // const token = await getMapmyIndiaToken();
 
-    if (!token) {
-        return { error: "Location search is temporarily unavailable." };
-    }
+    // if (!token) {
+    //     return { error: "Location search is temporarily unavailable." };
+    // }
 
-    try {
-        const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}`;
+    // try {
+    //     const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}`;
 
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+    //     const response = await fetch(url, {
+    //         method: 'GET',
+    //         headers: {
+    //             'Authorization': `Bearer ${token}`
+    //         }
+    //     });
 
-        if (!response.ok) {
-            console.error("MapmyIndia API request failed with status:", response.status, await response.text());
-            return { error: "Failed to fetch location suggestions." };
-        }
+    //     if (!response.ok) {
+    //         console.error("MapmyIndia API request failed with status:", response.status, await response.text());
+    //         return { error: "Failed to fetch location suggestions." };
+    //     }
 
-        const data = await response.json();
-        return { suggestions: data.suggestedLocations || data.suggested_locations || [] }; // API uses both casings
-    } catch (error) {
-        console.error("Error fetching location suggestions from server action:", error);
-        return { error: "An error occurred while fetching location suggestions." };
-    }
+    //     const data = await response.json();
+    //     return { suggestions: data.suggestedLocations || data.suggested_locations || [] }; // API uses both casings
+    // } catch (error) {
+    //     console.error("Error fetching location suggestions from server action:", error);
+    //     return { error: "An error occurred while fetching location suggestions." };
+    // }
+    return { error: "Location search is temporarily unavailable." };
 }
 
 export async function reverseGeocode(lat: number, lon: number): Promise<{ address?: string, error?: string }> {
-    const token = await getMapmyIndiaToken();
+    // const token = await getMapmyIndiaToken();
 
-    if (!token) {
-        return { error: "Location service is temporarily unavailable." };
-    }
+    // if (!token) {
+    //     return { error: "Location service is temporarily unavailable." };
+    // }
 
-    try {
-        const url = `https://atlas.mapmyindia.com/api/places/rev_geocode?lat=${lat}&lng=${lon}&region=IND`;
+    // try {
+    //     const url = `https://atlas.mapmyindia.com/api/places/rev_geocode?lat=${lat}&lng=${lon}&region=IND`;
         
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+    //     const response = await fetch(url, {
+    //         method: 'GET',
+    //         headers: {
+    //             'Authorization': `Bearer ${token}`
+    //         }
+    //     });
 
-        if (!response.ok) {
-            console.error("MapmyIndia Reverse Geocode API request failed with status:", response.status, await response.text());
-            return { error: "Failed to fetch address for the location." };
-        }
+    //     if (!response.ok) {
+    //         console.error("MapmyIndia Reverse Geocode API request failed with status:", response.status, await response.text());
+    //         return { error: "Failed to fetch address for the location." };
+    //     }
 
-        const data = await response.json();
+    //     const data = await response.json();
 
-        // The API returns an array of results, we'll take the first one.
-        if (data.results && data.results.length > 0) {
-            return { address: data.results[0].formatted_address };
-        } else {
-            return { error: "No address found for this location." };
-        }
+    //     // The API returns an array of results, we'll take the first one.
+    //     if (data.results && data.results.length > 0) {
+    //         return { address: data.results[0].formatted_address };
+    //     } else {
+    //         return { error: "No address found for this location." };
+    //     }
 
-    } catch (error) {
-        console.error("Error reverse geocoding from server action:", error);
-        return { error: "An error occurred while fetching the address." };
-    }
+    // } catch (error) {
+    //     console.error("Error reverse geocoding from server action:", error);
+    //     return { error: "An error occurred while fetching the address." };
+    // }
+    return { error: "Location service is temporarily unavailable." };
 }
+    
+
     
 
     
