@@ -88,7 +88,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -103,6 +103,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = React.useState(false);
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
+  const [isLoading, setIsLoading] = React.useState(true);
+
 
   React.useEffect(() => {
     const unsubscribe = perfTracker.subscribe(setPerfCounts);
@@ -148,6 +150,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
 
     const unsubAuth = onAuthStateChanged(async (user) => {
+        setIsLoading(true);
         setAuthUser(user);
         if (user) {
             const userProfile = await getProfile(user.email!);
@@ -172,6 +175,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                  router.push('/login');
             }
         }
+        setIsLoading(false);
     });
 
     const unsubLogo = onGlobalLogoUrlChange((url) => {
@@ -195,10 +199,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: MessageSquare, label: "Bulk Messaging" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
-    { href: `/entertainment`, icon: Film, label: "Entertainment" },
-    { href: `/loans`, icon: IndianRupee, label: "Loans" },
-    { href: `/insurance`, icon: Shield, label: "Insurance" },
-    { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -380,7 +380,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </header>
           <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-            {children}
+            {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : (
+                typeof children === 'function' ? children(profile) : children
+            )}
           </main>
         </div>
       </SidebarInset>

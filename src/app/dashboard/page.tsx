@@ -7,40 +7,13 @@ import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { OwnerFormValues } from "@/components/dashboard/owner-dashboard";
-import { addRoute, getCurrentUser, getProfile } from "@/lib/storage";
+import { addRoute, getCurrentUser } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 
 
-function DashboardPage() {
-  const searchParams = useSearchParams();
+function DashboardPage({ profile }: { profile: Profile | null }) {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-
-  useEffect(() => {
-    const determineRoleAndProfile = async () => {
-        const userProfile = await getProfile();
-        
-        if (userProfile?.role === 'admin') {
-            router.replace('/admin/dashboard');
-            return;
-        }
-
-        setProfile(userProfile);
-        
-        const roleFromUrl = searchParams.get("role");
-        // Ensure the URL reflects the true role from the profile.
-        if (userProfile?.role && (!roleFromUrl || roleFromUrl !== userProfile.role)) {
-             router.replace(`/dashboard?role=${userProfile.role}`);
-        } else {
-            setIsLoading(false);
-        }
-    };
-    determineRoleAndProfile();
-  }, []);
-
 
   const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => {
     const ownerEmail = getCurrentUser();
@@ -64,32 +37,34 @@ function DashboardPage() {
     }
   };
 
-  if (isLoading || !profile) {
+  if (!profile) {
       return (
-        <AppLayout>
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-        </AppLayout>
       );
   }
 
   return (
-    <AppLayout>
+      <>
       {profile.role === 'owner' ? (
         <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleSwitchTab} profile={profile} />
       ) : (
         <PassengerDashboard onSwitchTab={handleSwitchTab} profile={profile} />
       )}
-    </AppLayout>
+      </>
   );
 }
 
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<AppLayout><div>Loading...</div></AppLayout>}>
-      <DashboardPage />
-    </Suspense>
+    <AppLayout>
+      {(profile) => (
+        <Suspense fallback={<div>Loading...</div>}>
+          <DashboardPage profile={profile} />
+        </Suspense>
+      )}
+    </AppLayout>
   )
 }
