@@ -1,0 +1,76 @@
+{
+    "name": "Mana Krushi Services",
+    "short_name": "ManaKrushi",
+    "description": "A ride-sharing platform for car owners and passengers.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1f83bd",
+    "orientation": "portrait",
+    "scope": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "id": "/?source=pwa",
+    "categories": [
+        "travel",
+        "social"
+    ],
+    "shortcuts": [
+        {
+            "name": "Find a Ride",
+            "url": "/dashboard?role=passenger",
+            "description": "Search for available rides."
+        },
+        {
+            "name": "My Bookings",
+            "url": "/bookings",
+            "description": "View your upcoming and past bookings."
+        }
+    ],
+    "icons": [
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square4A4x44-Logo-targetsize-16.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "https://i.ibb.co/k8B21G0/Screenshot-2024-07-24-112313.png",
+            "sizes": "1080x2340",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ]
+}
