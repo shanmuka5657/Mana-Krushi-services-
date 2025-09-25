@@ -1,15 +1,6 @@
 
 import type {NextConfig} from 'next';
 
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  fallbacks: {
-    document: '/offline', // Fallback for document requests
-  },
-})
-
-// Forcing a rebuild to solve chunk loading errors.
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
@@ -47,5 +38,10 @@ const nextConfig: NextConfig = {
     ],
   },
 };
+
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+});
 
 export default withPWA(nextConfig);
