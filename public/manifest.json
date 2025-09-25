@@ -1,56 +1,56 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "Mana Krushi",
-  "description": "A ride-sharing and carpooling platform to make travel easier and more affordable.",
+  "short_name": "MKS",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#200101",
+  "background_color": "#E0F7FA",
+  "theme_color": "#00BCD4",
   "icons": [
     {
-      "src": "https://i.ibb.co/tZxCjD0/icon-192x192.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/tZxCjD0/icon-192x192.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/88d4P39/icon-256x256.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/88d4P39/icon-256x256.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/bFzV7z2/icon-384x384.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/bFzV7z2/icon-384x384.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://i.ibb.co/k2L2gP6/icon-512x512.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/k2L2gP6/icon-512x512.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
