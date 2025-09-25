@@ -135,7 +135,6 @@ function FindBikersContent() {
                 const lowerTo = toLocation.toLowerCase();
 
                 let filteredRoutes = allRoutes.filter(route => {
-                    // Corrected Logic: Only check the route's vehicle type.
                     if (route.vehicleType !== 'Bike') {
                         return false;
                     }
