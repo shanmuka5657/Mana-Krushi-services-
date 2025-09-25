@@ -70,7 +70,8 @@ function FindRideResultsPage() {
                 const searchFromLower = from.trim().toLowerCase();
                 const pickupPointsArray = typeof route.pickupPoints === 'string'
                     ? route.pickupPoints.split(',').map(p => p.trim().toLowerCase())
-                    : [];
+                    : Array.isArray(route.pickupPoints) ? route.pickupPoints.map(p => p.trim().toLowerCase()) : [];
+
 
                 const fromMatch = route.fromLocation.trim().toLowerCase() === searchFromLower ||
                                   pickupPointsArray.includes(searchFromLower);
@@ -142,6 +143,12 @@ function FindRideResultsPage() {
         if (!ownerEmail) return undefined;
         return driverProfiles.get(ownerEmail);
     }
+    
+    const finalAvailableOwners = availableOwners.filter(route => {
+        const bookedSeats = getBookedSeats(route);
+        const availableSeats = route.availableSeats - bookedSeats;
+        return availableSeats > 0;
+    });
 
     if (!isLoaded) {
         return <AppLayout><div>Loading results...</div></AppLayout>
@@ -168,9 +175,9 @@ function FindRideResultsPage() {
                     </CardContent>
                 </Card>
 
-                {availableOwners.length > 0 ? (
+                {finalAvailableOwners.length > 0 ? (
                     <div className="space-y-4">
-                        {availableOwners.map((route) => {
+                        {finalAvailableOwners.map((route) => {
                             const bookedSeats = getBookedSeats(route);
                             const availableSeats = route.availableSeats - bookedSeats;
                             const driverProfile = getDriverProfile(route.ownerEmail);
@@ -300,5 +307,3 @@ export default function FindRidePage() {
         </Suspense>
     )
 }
-
-    
