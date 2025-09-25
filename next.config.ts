@@ -3,13 +3,11 @@ import type {NextConfig} from 'next';
 
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: true,
-  skipWaiting: true,
+  sw: 'sw.js', // Point to our custom service worker
   disable: process.env.NODE_ENV === 'development',
   fallbacks: {
-    document: '/offline',
+    document: '/offline', // Fallback for document requests
   },
-  sw: 'sw.js',
 })
 
 // Forcing a rebuild to solve chunk loading errors.
