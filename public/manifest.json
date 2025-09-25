@@ -1,39 +1,57 @@
 {
   "name": "Mana Krushi Services",
   "short_name": "ManaKrushi",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "description": "A ride-sharing and carpooling platform to make travel easier and more affordable.",
   "start_url": "/",
+  "id": "/?utm_source=pwa",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1f83bd",
-  "lang": "en",
+  "orientation": "any",
   "dir": "ltr",
+  "lang": "en-US",
   "scope": "/",
   "display_override": [
-    "standalone",
-    "minimal-ui"
+    "standalone"
   ],
   "icons": [
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "168x168",
+      "type": "image/png"
     },
     {
       "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
+      "type": "image/png"
     },
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -45,14 +63,18 @@
       "sizes": "1080x2400",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Main Dashboard"
+      "label": "Main dashboard view for ride-sharing."
     }
   ],
-  "categories": [
-    "travel",
-    "social",
-    "transportation"
-  ],
+  "share_target": {
+    "action": "/search/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "shortcuts": [
     {
       "name": "Find a Ride",
@@ -62,74 +84,53 @@
       "icons": [{ "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png", "sizes": "192x192" }]
     },
     {
-      "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
-      "url": "/bookings",
+      "name": "Add a Route",
+      "short_name": "Add Route",
+      "description": "Offer a new ride to passengers",
+      "url": "/dashboard?role=owner",
       "icons": [{ "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png", "sizes": "192x192" }]
     }
   ],
-  "share_target": {
-    "action": "/search",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
+  "iarc_rating_id": "e5c84d72-464a-428d-a0a3-35a1d743a6d9",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 480
   },
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
-  "protocol_handlers": [
-    {
-      "protocol": "web+manakrushi",
-      "url": "/search?q=%s"
-    }
-  ],
-  "file_handlers": [
-    {
-      "action": "/import",
-      "accept": {
-        "application/json": [".json"]
-      }
-    }
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "note_taking": {
     "new_note_url": "/new-note",
-    "needs_editing_flag": true
-  },
-  "edge_side_panel": {
-    "preferred_width": 400
+    "need_login": true
   },
   "widgets": [
     {
       "name": "My Next Ride",
-      "description": "Shows details of your next upcoming ride.",
+      "description": "Quickly see your next scheduled ride",
       "tag": "next-ride",
       "template": "next-ride-template",
-      "ms_ac_template": "next-ride-template",
-      "data": "/widgets/next-ride.json",
-      "screenshots": [
-        {
-          "src": "/widgets/next-ride-preview.png",
-          "label": "Next Ride Preview"
-        }
-      ],
-      "icons": [
-        {
-          "src": "/widgets/next-ride-icon.png",
-          "sizes": "128x128"
-        }
-      ],
-      "auth": true,
-      "update": 86400
+      "ms_ac_template": "next-ride-template.json",
+      "data": "next-ride-data.json",
+      "type": "application/json"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/open-file",
+      "accept": {
+        "text/plain": [".txt"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+manakrushi",
+      "url": "/protocol?type=%s"
     }
   ],
   "scope_extensions": [
-    { "origin": "*.manakrushi.com" }
+    { "origin": "*.manakrushi.com" },
+    { "origin": "manakrushi.io" }
   ]
 }
