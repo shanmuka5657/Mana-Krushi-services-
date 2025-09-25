@@ -15,12 +15,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getRoutes, getProfile, getCurrentUserName } from '@/lib/storage';
+import { getRoutes, getProfile, getCurrentUserName, getAllProfiles } from '@/lib/storage';
 import type { Route, Profile } from '@/lib/types';
 import { getMapSuggestions } from '@/app/actions';
-import { MapPin, Search, Loader2, Bike, User, Clock, MessageSquare, CheckCircle } from 'lucide-react';
+import { MapPin, Search, Loader2, Bike, User, Clock, MessageSquare, CheckCircle, Share2, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
@@ -107,6 +108,10 @@ function FindBikersContent() {
     const [isSearching, setIsSearching] = useState(false);
     const [bikers, setBikers] = useState<Route[]>([]);
     const [driverProfiles, setDriverProfiles] = useState<Map<string, Profile>>(new Map());
+    const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+    const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
+    const [passengerSearchQuery, setPassengerSearchQuery] = useState('');
+    const [foundPassenger, setFoundPassenger] = useState<Profile | null>(null);
 
     const fromLocation = searchParams.get('from') || '';
     const toLocation = searchParams.get('to') || '';
@@ -122,6 +127,14 @@ function FindBikersContent() {
             endTime,
         },
     });
+    
+    useEffect(() => {
+        const fetchAllUserProfiles = async () => {
+            const profiles = await getAllProfiles();
+            setAllProfiles(profiles);
+        };
+        fetchAllUserProfiles();
+    }, []);
 
     useEffect(() => {
         const fetchBikers = async () => {
@@ -139,8 +152,12 @@ function FindBikersContent() {
                         return false;
                     }
 
-                    const fromMatch = route.fromLocation.toLowerCase().includes(lowerFrom);
-                    const toMatch = route.toLocation.toLowerCase().includes(lowerTo);
+                    const routeFrom = route.fromLocation.toLowerCase();
+                    const routeTo = route.toLocation.toLowerCase();
+                    
+                    const fromMatch = routeFrom.includes(lowerFrom);
+                    const toMatch = routeTo.includes(lowerTo);
+
 
                     if (!fromMatch || !toMatch) {
                         return false;
@@ -208,8 +225,8 @@ function FindBikersContent() {
         router.push(`/find-bikers?${params.toString()}`);
     }
 
-    const handleAlertBikers = () => {
-        const passengerName = getCurrentUserName() || 'A passenger';
+    const handleAlertBikers = (passengerName?: string, passengerMobile?: string) => {
+        const name = passengerName || getCurrentUserName() || 'A passenger';
         const numbers = bikers.map(b => b.driverMobile).filter(Boolean);
         
         if (numbers.length === 0) {
@@ -217,7 +234,12 @@ function FindBikersContent() {
             return;
         }
         
-        const message = `Hi, I'm looking for a bike ride from ${fromLocation} to ${toLocation}. Please let me know if you have a seat available. My name is ${passengerName}.`;
+        let message = `Hi, I'm looking for a bike ride from ${fromLocation} to ${toLocation} for ${name}.`;
+        if (passengerMobile) {
+            message += `\n\nYou can contact them at: ${passengerMobile}`;
+        }
+        message += "\n\nPlease let me know if you have a seat available.";
+
 
         const uniqueNumbers = [...new Set(numbers)];
         
@@ -233,6 +255,29 @@ function FindBikersContent() {
             });
         }, 1500);
     }
+    
+    const handleFindPassenger = () => {
+        if (passengerSearchQuery.length < 10) {
+            toast({ title: 'Invalid mobile number', description: 'Please enter a valid 10-digit mobile number.', variant: 'destructive' });
+            return;
+        }
+        const passenger = allProfiles.find(p => p.mobile === passengerSearchQuery);
+        if (passenger) {
+            setFoundPassenger(passenger);
+        } else {
+            toast({ title: 'Passenger not found', description: 'No user registered with this mobile number.', variant: 'destructive' });
+            setFoundPassenger(null);
+        }
+    };
+    
+    const handleShareForPassenger = () => {
+        if (foundPassenger) {
+            handleAlertBikers(foundPassenger.name, foundPassenger.mobile);
+            setIsShareDialogOpen(false);
+            setFoundPassenger(null);
+            setPassengerSearchQuery('');
+        }
+    };
 
     return (
         <AppLayout>
@@ -312,7 +357,10 @@ function FindBikersContent() {
                                     <CardDescription>Found {bikers.length} bikers on this route.</CardDescription>
                                 </div>
                                 {bikers.length > 0 && (
-                                    <Button onClick={handleAlertBikers}><MessageSquare className="mr-2 h-4 w-4" /> Alert All Bikers</Button>
+                                    <div className="flex gap-2">
+                                        <Button onClick={() => handleAlertBikers()}><MessageSquare className="mr-2 h-4 w-4" /> Alert All Bikers</Button>
+                                        <Button variant="outline" onClick={() => setIsShareDialogOpen(true)}><Share2 className="mr-2 h-4 w-4" /> Share for Other</Button>
+                                    </div>
                                 )}
                             </div>
                         </CardHeader>
@@ -354,6 +402,56 @@ function FindBikersContent() {
                     </Card>
                 )}
             </div>
+            
+            <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Share Ride for a Passenger</DialogTitle>
+                        <DialogDescription>
+                            Find a passenger by their mobile number to send them this ride request.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="flex gap-2">
+                            <div className="relative flex-grow">
+                                <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Enter passenger's 10-digit mobile"
+                                    value={passengerSearchQuery}
+                                    onChange={(e) => setPassengerSearchQuery(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <Button onClick={handleFindPassenger}>Find</Button>
+                        </div>
+                        
+                        {foundPassenger && (
+                            <div className="p-4 border rounded-md bg-muted/50">
+                                <p className="font-semibold text-sm">Passenger Found:</p>
+                                <div className="flex items-center gap-3 mt-2">
+                                    <Avatar className="h-10 w-10">
+                                        <AvatarImage src={foundPassenger.selfieDataUrl} />
+                                        <AvatarFallback>{foundPassenger.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-medium">{foundPassenger.name}</p>
+                                        <p className="text-sm text-muted-foreground">{foundPassenger.mobile}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="ghost">Cancel</Button>
+                        </DialogClose>
+                        <Button onClick={handleShareForPassenger} disabled={!foundPassenger}>
+                            Share with {foundPassenger?.name || 'Passenger'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </AppLayout>
     );
 }
@@ -366,5 +464,3 @@ export default function FindBikersPage() {
         </Suspense>
     )
 }
-
-    
