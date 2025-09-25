@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -277,7 +276,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
     const dataWithVehicleInfo = {
         ...data,
         ownerEmail: ownerEmail,
-        vehicleType: userProfile.vehicleType,
+        // BUG FIX: Use vehicleType from form data, not from profile
+        vehicleType: data.vehicleType, 
         vehicleNumber: userProfile.vehicleNumber,
     };
 
