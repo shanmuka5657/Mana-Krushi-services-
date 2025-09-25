@@ -6,6 +6,9 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  fallbacks: {
+    document: '/offline',
+  }
 })
 
 // Forcing a rebuild to solve chunk loading errors.
