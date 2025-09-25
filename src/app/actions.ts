@@ -254,6 +254,27 @@ export async function reverseGeocode(lat: number, lon: number): Promise<{ addres
     // }
     return { error: "Location service is temporarily unavailable." };
 }
+
+const BroadcastNotificationInput = z.object({
+  title: z.string().min(1, "Title is required."),
+  message: z.string().min(1, "Message is required."),
+});
+
+export async function sendBroadcastNotification(input: { title: string; message: string }): Promise<{ success: boolean; error?: string }> {
+  const validatedInput = BroadcastNotificationInput.safeParse(input);
+  if (!validatedInput.success) {
+    return { success: false, error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+  }
+  
+  console.log("Simulating sending push notification...");
+  console.log("Title:", validatedInput.data.title);
+  console.log("Message:", validatedInput.data.message);
+  
+  // This is where you would integrate with a real push notification service like Firebase Cloud Messaging (FCM).
+  // For this simulation, we'll just return success.
+  
+  return { success: true };
+}
     
 
     
