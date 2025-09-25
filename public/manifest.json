@@ -5,36 +5,65 @@
   "scope": "/",
   "start_url": "/",
   "name": "Mana Krushi Services",
-  "short_name": "MK Services",
+  "short_name": "ManaKrushi",
   "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "orientation": "portrait",
+  "id": "/?utm_source=pwa",
   "lang": "en-US",
   "dir": "ltr",
   "categories": [
     "travel",
-    "business",
-    "lifestyle"
+    "social",
+    "transportation"
   ],
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=72",
+      "sizes": "72x72",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=96",
+      "sizes": "96x96",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=128",
+      "sizes": "128x128",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=144",
+      "sizes": "144x144",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=152",
+      "sizes": "152x152",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=192",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/jpeg",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-256x256.png",
-      "sizes": "256x256",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=384",
       "sizes": "384x384",
-      "type": "image/png"
+      "type": "image/jpeg",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg?width=512",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
@@ -48,17 +77,13 @@
   "shortcuts": [
     {
       "name": "Find a Ride",
-      "short_name": "Search",
-      "description": "Find available rides",
       "url": "/dashboard?role=passenger",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "description": "Search for available rides"
     },
     {
       "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming trips",
       "url": "/bookings",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "description": "View your upcoming and past bookings"
     }
   ],
   "share_target": {
