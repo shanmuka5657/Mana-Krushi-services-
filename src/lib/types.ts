@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 
 export type Booking = {
@@ -70,6 +69,8 @@ export type Profile = {
     status?: 'active' | 'deleted';
     referralCode?: string;
     referredBy?: string;
+    homeLocation?: string;
+    officeLocation?: string;
 }
 
 export type MovieSite = {

@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save, Edit, Bike } from "lucide-react";
+import { User, Phone, Mail, ShieldCheck, Car, Fuel, Camera, CheckCircle, Badge, MessageSquareWarning, Globe, PhoneForwarded, TestTube2, Loader2, Copy, Gift, Video, RefreshCcw, Save, Edit, Bike, Home, Briefcase } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { format, addMonths } from "date-fns";
 import Image from "next/image";
@@ -57,6 +57,8 @@ const profileFormSchema = z.object({
   mobileVerified: z.boolean().default(false),
   additionalMobiles: z.string().optional(),
   referralCode: z.string().optional(),
+  homeLocation: z.string().optional(),
+  officeLocation: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -102,6 +104,8 @@ export default function ProfileForm() {
       mobileVerified: false,
       additionalMobiles: "",
       referralCode: "",
+      homeLocation: "",
+      officeLocation: "",
     },
   });
   
@@ -190,6 +194,8 @@ export default function ProfileForm() {
             mobileVerified: false,
             additionalMobiles: '',
             referralCode: '',
+            homeLocation: '',
+            officeLocation: '',
         };
         
         const combinedValues = { ...defaultValues, ...userProfile };
@@ -659,6 +665,50 @@ export default function ProfileForm() {
                   </FormItem>
                 )}
               />
+
+               {profile?.role === 'passenger' && (
+                <>
+                <CardHeader className="-mx-6 -mb-6">
+                    <CardTitle>My Commute</CardTitle>
+                    <CardDescription>Save your daily commute to get automatic ride suggestions.</CardDescription>
+                </CardHeader>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                        control={form.control}
+                        name="homeLocation"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Home Location</FormLabel>
+                            <FormControl>
+                            <div className="relative">
+                                <Home className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input placeholder="e.g., Kukatpally, Hyderabad" {...field} className="pl-10" />
+                            </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="officeLocation"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Office/Work Location</FormLabel>
+                            <FormControl>
+                            <div className="relative">
+                                <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input placeholder="e.g., Hitech City, Hyderabad" {...field} className="pl-10" />
+                            </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </div>
+                </>
+              )}
+
 
               {profile?.role === 'admin' && (
                  <FormItem>
