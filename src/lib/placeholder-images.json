@@ -12,9 +12,9 @@
     "hint": "advertisement banner"
   },
   "noRoutes": {
-    "url": "https://i.ibb.co/bW0FLc5/undraw-map-1-re-603p.png",
-    "width": 200,
-    "height": 150,
+    "url": "https://picsum.photos/seed/no-routes/400/300",
+    "width": 400,
+    "height": 300,
     "hint": "empty map"
   }
 }
