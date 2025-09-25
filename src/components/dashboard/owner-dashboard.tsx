@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -191,7 +192,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         return;
     }
     
-    const allExistingRoutesToday = await getRoutes(false, { ownerEmail, date: format(data.travelDate, 'yyyy-MM-dd') });
+    const allExistingRoutesToday = await getRoutes(false, { ownerEmail });
     
     const existingRoutesOfSameType = allExistingRoutesToday.filter(
         route => route.vehicleType === data.vehicleType
@@ -681,3 +682,5 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
+
+    
