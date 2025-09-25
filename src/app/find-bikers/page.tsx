@@ -145,6 +145,12 @@ function FindBikersContent() {
                     if (!fromMatch || !toMatch) {
                         return false;
                     }
+                    
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    if (new Date(route.travelDate) < today) {
+                        return false;
+                    }
 
                     if (startTime && endTime) {
                         const routeDeparture = route.departureTime;
