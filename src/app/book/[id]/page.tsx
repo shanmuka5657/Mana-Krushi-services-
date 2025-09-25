@@ -193,7 +193,7 @@ export default function BookRidePage() {
         departureDate: routeDate,
         returnDate: routeDate, 
         amount: route.price * numberOfSeats,
-        status: "Confirmed",
+        status: "Pending",
         travelers: String(numberOfSeats),
         mobile: passengerProfile.mobile,
         driverName: route.driverName,
@@ -211,8 +211,8 @@ export default function BookRidePage() {
     await setDoc(newBookingRef, newBooking);
 
     toast({
-        title: "Booking Confirmed!",
-        description: `Your ride for ${numberOfSeats} seat(s) has been successfully booked.`,
+        title: "Booking Request Sent!",
+        description: `Your ride for ${numberOfSeats} seat(s) has been requested. You will be notified once the driver confirms.`,
     });
     
     setNewlyBooked(newBooking as Booking);
@@ -282,10 +282,14 @@ export default function BookRidePage() {
     const formattedDate = format(bookingDate, 'dd MMM, yyyy');
     const formattedTime = format(bookingDate, 'p');
 
+    const baseUrl = window.location.origin;
+    const acceptUrl = `${baseUrl}/api/booking-response?bookingId=${newlyBooked.id}&action=confirm`;
+    const rejectUrl = `${baseUrl}/api/booking-response?bookingId=${newlyBooked.id}&action=reject`;
+
     const message = `
 Hello ${newlyBooked.driverName},
 
-This is a notification for a new booking.
+You have a new ride request from Mana Krushi Services.
 
 *Booking Details:*
 - *Passenger:* ${newlyBooked.client}
@@ -295,10 +299,16 @@ This is a notification for a new booking.
 - *Seats:* ${newlyBooked.travelers}
 - *Amount:* ₹${newlyBooked.amount.toFixed(2)}
 
-Please confirm you have received this.
+Please respond to the passenger:
+
+*Accept Ride:*
+${acceptUrl}
+
+*Reject Ride:*
+${rejectUrl}
 
 Thank you,
-${newlyBooked.client}
+Mana Krushi Services
     `.trim().replace(/^\s+/gm, '');
     
     const whatsappUrl = `https://wa.me/91${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
@@ -430,52 +440,54 @@ ${newlyBooked.client}
                 )}
             </Button>
         </main>
-    </div>
-    
-      <AlertDialog open={!!existingBooking} onOpenChange={(open) => !open && setExistingBooking(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have a booking for this ride with {existingBooking?.travelers} seat(s).
-              How many more seats would you like to add?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="grid gap-2 py-4">
-              <Label htmlFor="seats-to-add">Additional Seats</Label>
-              <Input
-                id="seats-to-add"
-                type="number"
-                value={seatsToAdd}
-                onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
-                min="1"
-                className="col-span-3"
-              />
-            </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        
+        <AlertDialog open={!!existingBooking} onOpenChange={(open) => !open && setExistingBooking(null)}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
+                <AlertDialogDescription>
+                You have a booking for this ride with {existingBooking?.travelers} seat(s).
+                How many more seats would you like to add?
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="grid gap-2 py-4">
+                <Label htmlFor="seats-to-add">Additional Seats</Label>
+                <Input
+                    id="seats-to-add"
+                    type="number"
+                    value={seatsToAdd}
+                    onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
+                    min="1"
+                    className="col-span-3"
+                />
+                </div>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
 
-       <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Booking Successful!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your ride is confirmed. You can now notify the driver via WhatsApp.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-             <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
-            <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Notify Driver
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Booking Request Sent!</AlertDialogTitle>
+                <AlertDialogDescription>
+                Your request is pending driver confirmation. You can now notify the driver via WhatsApp to get a faster response.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
+                <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Notify Driver
+                </AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    </div>
     </AppLayout>
   );
 }
+
+    
