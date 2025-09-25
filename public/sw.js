@@ -1,19 +1,27 @@
-// This is a basic service worker file.
+// This is the service worker script which executes in the background,
+// separate from the web page, to provide features like push notifications and offline support.
 
 const CACHE_NAME = 'mana-krushi-cache-v1';
+
+// A list of all the files and assets we want to cache.
+// This is updated automatically during the build process.
 const urlsToCache = [
   '/',
   '/offline',
-  '/globals.css',
+  '/favicon.ico',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/styles/globals.css', // Adjust path based on your project structure
+  // Add other critical assets like logo, main scripts etc.
+  'https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png'
 ];
 
-// Install event: Fires when the service worker is first installed.
+// --- EVENT LISTENERS ---
+
+// 1. Install Event:
+// This is fired when the service worker is first installed.
+// We open a cache and add all the core app shell files to it.
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
-  // waitUntil() ensures that the service worker will not install until the code inside has successfully completed.
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -21,53 +29,44 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        // Skip waiting to activate the new service worker immediately.
-        return self.skipWaiting();
+        console.log('Service Worker: Installation complete');
+        return self.skipWaiting(); // Force the waiting service worker to become the active one.
       })
   );
 });
 
-// Activate event: Fires when the service worker is activated.
+// 2. Activate Event:
+// This is fired when the service worker is activated.
+// We clean up any old caches that are no longer needed.
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activating...');
-  // Clean up old caches.
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Clearing old cache', cache);
-            return caches.delete(cache);
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Service Worker: Deleting old cache', cacheName);
+            return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-        // Claim clients to ensure the new service worker takes control of the page immediately.
-        return self.clients.claim();
+        console.log('Service Worker: Activation complete');
+        return self.clients.claim(); // Take control of the page immediately.
     })
   );
 });
 
-// Fetch event: Fires for every network request.
+// 3. Fetch Event:
+// This is fired for every network request made by the page.
+// We try to serve the request from the cache first for offline support.
 self.addEventListener('fetch', (event) => {
-  // We only want to handle GET requests.
+  // We only want to cache GET requests.
   if (event.request.method !== 'GET') {
     return;
   }
-  
-  // For navigation requests, use a network-first strategy.
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          // If the network fails, serve the offline page from the cache.
-          return caches.match('/offline');
-        })
-    );
-    return;
-  }
 
-  // For other requests (CSS, JS, images), use a cache-first strategy.
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -75,61 +74,53 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
-        // Otherwise, fetch from the network.
+
+        // If no match, we fetch it from the network.
         return fetch(event.request)
-          .then((networkResponse) => {
-            // Optional: Cache the new resource for future use.
-            // Be careful with what you cache dynamically.
-            return networkResponse;
+          .then((response) => {
+            // We can also cache the new request here for future offline use.
+            // But for now, we'll keep it simple and just return the network response.
+            return response;
+          })
+          .catch(() => {
+            // If the network fetch fails (e.g., user is offline),
+            // return a fallback offline page.
+            return caches.match('/offline');
           });
       })
   );
 });
 
-
-// --- BACKGROUND SYNC ---
-// This event is fired when the browser regains connectivity.
-// It's used to send data that was queued while the app was offline.
-self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background sync event received', event.tag);
-  if (event.tag === 'sync-offline-submissions') {
-    event.waitUntil(
-      console.log('Placeholder for sending offline form submissions.')
-      // Example: sendOfflineSubmissions();
-    );
-  }
-});
-
-
-// --- PERIODIC BACKGROUND SYNC ---
-// This event is fired periodically by the browser to allow the PWA
-// to fetch fresh content in the background.
+// 4. Periodic Sync Event:
+// Fired at intervals to fetch fresh data in the background.
 self.addEventListener('periodicsync', (event) => {
-  console.log('Service Worker: Periodic sync event received', event.tag);
-  if (event.tag === 'get-latest-data') {
-    event.waitUntil(
-       console.log('Placeholder for fetching latest data, e.g., new routes or bookings.')
-       // Example: fetchAndCacheLatestNews();
-    );
-  }
+    if (event.tag === 'get-latest-data') {
+        console.log('Service Worker: Performing periodic sync...');
+        event.waitUntil(
+            // Replace this with your actual data fetching logic,
+            // e.g., fetching new routes or messages and caching them.
+            fetch('/api/latest-updates')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Service Worker: Periodic sync successful.', data);
+                    // Here you would typically update your cache with the new data.
+                })
+                .catch(err => {
+                    console.error('Service Worker: Periodic sync failed.', err);
+                })
+        );
+    }
 });
 
-// --- PUSH NOTIFICATIONS ---
-self.addEventListener('push', event => {
-  console.log('Push notification received', event);
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Mana Krushi Services';
-  const options = {
-    body: data.body || 'You have a new notification.',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-96x96.png'
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
+// 5. Background Sync Event:
+// Fired when connectivity is restored for tasks tagged with 'sync-data'.
+self.addEventListener('sync', (event) => {
+    if (event.tag === 'sync-form-submission') {
+        console.log('Service Worker: Performing background sync...');
+        event.waitUntil(
+            // Replace this with your logic to send queued data.
+            // Example: read from IndexedDB and send to server.
+            console.log("Would be sending queued data now...")
+        );
+    }
 });
