@@ -127,18 +127,22 @@ function FindBikersContent() {
         const fetchBikers = async () => {
             if (fromLocation && toLocation) {
                 setIsSearching(true);
+                setBikers([]);
+                
                 const allRoutes = await getRoutes(true); // Fetch all routes
                 
                 const lowerFrom = fromLocation.toLowerCase();
                 const lowerTo = toLocation.toLowerCase();
 
                 let filteredRoutes = allRoutes.filter(route => {
+                    if (route.vehicleType !== 'Bike') return false;
+
                     const routeFrom = route.fromLocation.toLowerCase();
                     const routeTo = route.toLocation.toLowerCase();
                     const fromMatch = routeFrom.includes(lowerFrom) || lowerFrom.includes(routeFrom);
                     const toMatch = routeTo.includes(lowerTo) || lowerTo.includes(routeTo);
 
-                    if (route.vehicleType !== 'Bike' || !fromMatch || !toMatch) {
+                    if (!fromMatch || !toMatch) {
                         return false;
                     }
 
