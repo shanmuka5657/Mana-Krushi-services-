@@ -223,7 +223,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/messages?role=passenger`, icon: MessageSquare, label: "Messages" },
-    { href: `/community`, icon: Users, label: "Community" },
+    { href: `/community`, icon: Users, label: "Community Hub" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/history?role=passenger`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
