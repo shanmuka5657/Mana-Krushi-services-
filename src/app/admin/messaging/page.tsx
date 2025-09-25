@@ -146,7 +146,7 @@ function AdminMessagingPage() {
                         <MessageSquare /> Bulk Messaging
                     </CardTitle>
                     <CardDescription>
-                        Compose a message and send it to your users via WhatsApp.
+                        Compose a message and send it to your users via WhatsApp. This will open a WhatsApp chat for each user on your device.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
