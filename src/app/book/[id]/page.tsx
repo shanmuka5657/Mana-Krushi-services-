@@ -193,7 +193,7 @@ export default function BookRidePage() {
         departureDate: routeDate,
         returnDate: routeDate, 
         amount: route.price * numberOfSeats,
-        status: "Pending",
+        status: "Confirmed",
         travelers: String(numberOfSeats),
         mobile: passengerProfile.mobile,
         driverName: route.driverName,
@@ -211,8 +211,8 @@ export default function BookRidePage() {
     await setDoc(newBookingRef, newBooking);
 
     toast({
-        title: "Booking Request Sent!",
-        description: `Your ride for ${numberOfSeats} seat(s) has been requested. You will be notified once the driver confirms.`,
+        title: "Booking Confirmed!",
+        description: `Your ride for ${numberOfSeats} seat(s) has been confirmed. You can contact the driver via WhatsApp.`,
     });
     
     setNewlyBooked(newBooking as Booking);
@@ -255,6 +255,7 @@ export default function BookRidePage() {
       ...existingBooking,
       travelers: String(totalSeats),
       amount: route.price * totalSeats,
+      status: "Confirmed", // Ensure status is confirmed on update
     };
 
     const db = getFirestore(getApp());
@@ -262,11 +263,12 @@ export default function BookRidePage() {
     await updateDoc(bookingRef, {
         travelers: updatedBooking.travelers,
         amount: updatedBooking.amount,
+        status: updatedBooking.status,
     });
 
     toast({
         title: "Booking Updated!",
-        description: `Your booking now has ${totalSeats} seat(s).`,
+        description: `Your booking now has ${totalSeats} seat(s) and is confirmed.`,
     });
     
     setNewlyBooked(updatedBooking);
@@ -282,13 +284,10 @@ export default function BookRidePage() {
     const formattedDate = format(bookingDate, 'dd MMM, yyyy');
     const formattedTime = format(bookingDate, 'p');
 
-    const baseUrl = window.location.origin;
-    const bookingLink = `${baseUrl}/my-routes?role=owner&booking_id=${newlyBooked.id}`;
-
     const message = `
 Hello ${newlyBooked.driverName},
 
-You have a new ride request from Mana Krushi Services.
+You have a new confirmed booking from Mana Krushi Services.
 
 *Booking Details:*
 - *Passenger:* ${newlyBooked.client}
@@ -298,8 +297,7 @@ You have a new ride request from Mana Krushi Services.
 - *Seats:* ${newlyBooked.travelers}
 - *Amount:* ₹${newlyBooked.amount.toFixed(2)}
 
-Please open this link to confirm or reject the booking:
-${bookingLink}
+This booking is now confirmed. You can view it in your 'My Routes' section of the app.
 
 Thank you,
 Mana Krushi Services
@@ -464,9 +462,9 @@ Mana Krushi Services
             <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
                 <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Booking Request Sent!</AlertDialogTitle>
+                    <AlertDialogTitle>Booking Confirmed!</AlertDialogTitle>
                     <AlertDialogDescription>
-                    Your request is pending driver confirmation. You can now notify the driver via WhatsApp to get a faster response.
+                    Your ride is confirmed. You can now notify the driver via WhatsApp to share your details.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
