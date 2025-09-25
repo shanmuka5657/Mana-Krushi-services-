@@ -66,6 +66,11 @@ function FindRideResultsPage() {
             today.setHours(0, 0, 0, 0); // Set to start of today
             
             let routes = allRoutes.filter(route => {
+                 // Only show Car routes on this page
+                if (route.vehicleType !== 'Car') {
+                    return false;
+                }
+
                 const routeDate = new Date(route.travelDate);
                 const searchFromLower = from.trim().toLowerCase();
                 const pickupPointsArray = typeof route.pickupPoints === 'string'
@@ -307,3 +312,5 @@ export default function FindRidePage() {
         </Suspense>
     )
 }
+
+    
