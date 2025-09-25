@@ -3,7 +3,6 @@ import type {NextConfig} from 'next';
 
 const withPWA = require('next-pwa')({
   dest: 'public',
-  sw: 'sw.js', // Point to our custom service worker
   disable: process.env.NODE_ENV === 'development',
   fallbacks: {
     document: '/offline', // Fallback for document requests
