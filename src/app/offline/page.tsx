@@ -1,4 +1,3 @@
-
 "use client";
 
 import { WifiOff } from 'lucide-react';
@@ -14,11 +13,11 @@ export default function OfflinePage() {
             You're Offline
           </h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            It looks like you've lost your internet connection. Some features may be unavailable.
+            It looks like you've lost your internet connection. This page hasn't been cached yet.
           </p>
         </div>
-        <Button onClick={() => window.location.reload()}>
-          Try to reconnect
+        <Button onClick={() => window.location.href = '/'}>
+          Go to Homepage
         </Button>
       </div>
     </main>

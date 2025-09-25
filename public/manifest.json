@@ -1,122 +1,157 @@
 {
-  "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
-  "description": "A ride-sharing and carpooling platform to connect passengers and vehicle owners.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
   "theme_color": "#1f83bd",
-  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "MKS",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
+  "orientation": "any",
   "id": "/?utm_source=pwa",
-  "icons": [
-    {
-      "src": "https://i.ibb.co/6Rrvs6t/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6t/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6t/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6t/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+  "lang": "en-US",
+  "dir": "ltr",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
   ],
-  "screenshots": [
-    {
-      "src": "https://picsum.photos/seed/screenshot1/1080/1920",
-      "sizes": "1080x1920",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Login Screen"
-    },
-    {
-      "src": "https://picsum.photos/seed/screenshot2/1080/1920",
-      "sizes": "1080x1920",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Dashboard View"
-    },
-    {
-      "src": "https://picsum.photos/seed/screenshot3/1280/800",
-      "sizes": "1280x800",
-      "type": "image/jpeg",
-      "form_factor": "wide",
-      "label": "Dashboard on Desktop"
-    }
+  "categories": [
+    "travel"
   ],
-  "share_target": {
-    "action": "/search/",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "scope_extensions": [
+    { "origin": "*.google.com" },
+    { "origin": "*.firebaseapp.com" }
+  ],
   "shortcuts": [
     {
       "name": "Find a Ride",
-      "short_name": "Find",
+      "short_name": "Find Ride",
       "description": "Search for available rides",
       "url": "/dashboard?role=passenger",
-      "icons": [{ "src": "/icons/search.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "My Bookings",
       "short_name": "Bookings",
       "description": "View your upcoming and past bookings",
       "url": "/bookings",
-      "icons": [{ "src": "/icons/bookings.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+mks",
+      "url": "/search?q=%s"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "file_handlers": [
     {
       "action": "/handle-file",
+      "name": "MKS Document",
       "accept": {
-        "text/plain": [".txt", ".csv"]
+        "text/plain": [
+          ".txt",
+          ".md"
+        ]
       }
-    }
-  ],
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.example.app",
-      "id": "com.example.app"
     }
   ],
   "widgets": [
     {
       "name": "Upcoming Ride",
-      "description": "View details about your next ride.",
+      "description": "View your next ride details.",
       "tag": "upcoming-ride",
-      "template": "upcoming_ride_template",
-      "ms_ac_template": "upcoming_ride_template.json"
+      "template": "upcoming-ride-template",
+      "ms_ac_template": "widgets/upcoming_ride.json",
+      "data": "widgets/upcoming_ride_data.json",
+      "screenshots": [
+        {
+          "src": "/images/widget-screenshot-1.png",
+          "sizes": "600x400",
+          "label": "Upcoming Ride Widget"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ],
+      "auth": false,
+      "update": 86400
     }
   ],
-  "edge_side_panel": {
-    "preferred_width": 480
-  },
-  "note_taking": {
-    "new_note_url": "/new-note",
-    "accept": ["text/html", "text/plain"]
-  },
-  "scope_extensions": [
-    { "origin": "*.manakrushi.com" },
-    { "origin": "manakrushi.net" }
+  "screenshots": [
+    {
+      "src": "/images/screenshot1.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/images/screenshot2.png",
+      "type": "image/png",
+      "sizes": "1920x1080",
+      "form_factor": "wide"
+    }
   ],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "categories": ["travel", "navigation", "social"]
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
