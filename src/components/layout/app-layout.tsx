@@ -40,6 +40,7 @@ import {
   History,
   Bike,
   Rss,
+  Database,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -199,7 +200,11 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: Rss, label: "Campaigns" },
-    { href: `/games`, icon: Gamepad2, label: "Games" },
+    { href: `/admin/database`, icon: Database, label: "Database" },
+    { href: `/entertainment`, icon: Film, label: "Entertainment" },
+    { href: `/insurance`, icon: Shield, label: "Insurance" },
+    { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
+    { href: `/loans`, icon: Wallet, label: "Loans" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
