@@ -197,7 +197,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
-    { href: `/admin/messaging`, icon: MessageSquare, label: "Bulk Messaging" },
+    { href: `/admin/messaging`, icon: MessageSquare, label: "Campaigns" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
@@ -220,7 +220,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const passengerNavItems = [
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
-    { href: `/find-bikers`, icon: Bike, label: "Find Bikers" },
+    { href: `/community`, icon: Users, label: "Community" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/history?role=passenger`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
