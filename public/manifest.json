@@ -1,111 +1,127 @@
 {
-    "name": "Mana Krushi Services",
-    "short_name": "MK Services",
-    "description": "A ride-sharing and carpooling platform for Mana Krushi Services.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#1f83bd",
-    "orientation": "portrait",
-    "scope": "/",
-    "lang": "en-US",
-    "dir": "ltr",
-    "categories": [
-        "travel",
-        "social",
-        "transportation"
-    ],
-    "id": "/?source=pwa",
-    "icons": [
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "48x48",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "72x72",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "96x96",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "128x128",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "144x144",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "152x152",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "384x384",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
-    ],
-    "screenshots": [
-        {
-            "src": "https://i.ibb.co/dKCyvB7/Screenshot-2024-07-24-110046.png",
-            "type": "image/png",
-            "sizes": "1080x2340",
-            "form_factor": "narrow"
-        },
-        {
-            "src": "https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png",
-            "type": "image/png",
-            "sizes": "1080x2340",
-            "form_factor": "narrow"
-        }
-    ],
-    "share_target": {
-        "action": "/search",
-        "method": "GET",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
+  "theme_color": "#1f83bd",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "ManaKrushi",
+  "description": "A ride-sharing and carpooling platform.",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "travel",
+    "lifestyle",
+    "social"
+  ],
+  "display_override": [
+    "standalone"
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+manakrushi",
+      "url": "/search?q=%s"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "file_handlers": [],
+  "related_applications": [],
+  "id": "/?utm_source=pwa",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "72x72",
+      "type": "image/png"
     },
-    "shortcuts": [
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png",
+      "type": "image/png",
+      "sizes": "1080x2340",
+      "form_factor": "narrow"
+    }
+  ],
+  "share_target": {
+    "action": "/search",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Find a Ride",
+      "short_name": "Find",
+      "description": "Search for available rides",
+      "url": "/dashboard?role=passenger",
+      "icons": [
         {
-            "name": "Find a Ride",
-            "short_name": "Find",
-            "description": "Search for available rides",
-            "url": "/dashboard?role=passenger",
-            "icons": [{ "src": "/icons/search.png", "sizes": "192x192" }]
-        },
-        {
-            "name": "My Bookings",
-            "short_name": "Bookings",
-            "description": "View your upcoming and past bookings",
-            "url": "/bookings",
-            "icons": [{ "src": "/icons/bookings.png", "sizes": "192x192" }]
+          "src": "/icons/find.png",
+          "sizes": "192x192"
         }
-    ]
+      ]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View your upcoming and past bookings",
+      "url": "/bookings",
+      "icons": [
+        {
+          "src": "/icons/bookings.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }
