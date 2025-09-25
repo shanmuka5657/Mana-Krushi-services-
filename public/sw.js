@@ -1,145 +1,158 @@
 // Define a cache name
 const CACHE_NAME = 'mana-krushi-cache-v1';
-
 // List of files to cache
 const urlsToCache = [
   '/',
   '/offline',
-  '/manifest.json',
-  '/globals.css', // Assuming your CSS is critical
-  // Add other critical assets like a logo if needed
-  'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg' 
+  '/styles/globals.css', // Adjust this path based on your actual file structure
+  '/images/icons/icon-192x192.png',
+  '/images/icons/icon-512x512.png',
+  '/manifest.json'
 ];
 
-// 1. Install Event: Cache essential assets
-self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Install');
+// Install a service worker
+self.addEventListener('install', event => {
+  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching all: app shell and content');
+      .then(cache => {
+        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
-      .catch(error => {
-        console.error('[Service Worker] Failed to cache', error);
-      })
   );
 });
 
-// 2. Fetch Event: Serve from cache or network, with offline fallback
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
+// Cache and return requests
+self.addEventListener('fetch', event => {
+    // We only want to cache GET requests.
+    if (event.request.method !== 'GET') {
+        return;
+    }
 
-        // Not in cache - fetch from network
-        return fetch(event.request)
-          .then((networkResponse) => {
-            // Check if we received a valid response
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
+    event.respondWith(
+        caches.match(event.request)
+        .then(cachedResponse => {
+            // Cache hit - return response from cache
+            if (cachedResponse) {
+                return cachedResponse;
             }
 
-            // IMPORTANT: Clone the response. A response is a stream
-            // and because we want the browser to consume the response
-            // as well as the cache consuming the response, we need
-            // to clone it so we have two streams.
-            const responseToCache = networkResponse.clone();
+            // Not in cache - fetch from network
+            return fetch(event.request).then(
+                networkResponse => {
+                    // Check if we received a valid response
+                    if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                        return networkResponse;
+                    }
 
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
+                    // IMPORTANT: Clone the response. A response is a stream
+                    // and because we want the browser to consume the response
+                    // as well as the cache consuming the response, we need
+                    // to clone it so we have two streams.
+                    const responseToCache = networkResponse.clone();
 
-            return networkResponse;
-          })
-          .catch(() => {
-            // Network request failed, user is offline
-            // If it's a navigation request, show the offline page.
-            if (event.request.mode === 'navigate') {
-              return caches.match('/offline');
-            }
-            // For other requests (images, etc.), you can return a placeholder or nothing
-            return undefined;
-          });
-      })
-  );
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+
+                    return networkResponse;
+                }
+            ).catch(error => {
+                // Network request failed, try to serve offline page for navigations
+                console.log('Fetch failed; returning offline page instead.', error);
+                if (event.request.mode === 'navigate') {
+                    return caches.match('/offline');
+                }
+            });
+        })
+    );
 });
 
-// 3. Activate Event: Clean up old caches
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activate');
+
+// Update a service worker
+self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
+        cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
-  return self.clients.claim();
 });
 
 
 // --- PUSH NOTIFICATIONS ---
 self.addEventListener('push', event => {
-  console.log('[Service Worker] Push Received.');
   const data = event.data.json();
-  console.log('[Service Worker] Push data:', data);
+  console.log('Push received:', data);
 
   const title = data.title || 'Mana Krushi Services';
   const options = {
     body: data.body || 'You have a new notification.',
-    icon: data.icon || 'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg',
-    badge: data.badge || 'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg'
+    icon: data.icon || '/images/icons/icon-192x192.png',
+    badge: data.badge || '/images/icons/badge-72x72.png',
+    data: {
+      url: data.url || self.location.origin
+    }
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', event => {
-  console.log('[Service Worker] Notification click Received.');
+  console.log('On notification click: ', event.notification.tag);
   event.notification.close();
+
+  const urlToOpen = event.notification.data.url;
+
   event.waitUntil(
-    clients.openWindow(event.notification.data?.url || '/')
+    clients.matchAll({
+      type: 'window'
+    }).then(clientList => {
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
   );
 });
 
 // --- BACKGROUND & PERIODIC SYNC ---
 self.addEventListener('sync', (event) => {
-  if (event.tag === 'my-background-sync') {
-    console.log('[Service Worker] Background sync event received');
-    event.waitUntil(
-      // Perform some background task, e.g., fetching data
-      fetch('/api/sync-data').then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok.');
-        }
-        return response.json();
-      }).then(data => {
-        console.log('[Service Worker] Background sync data fetched:', data);
-      }).catch(err => {
-        console.error('[Service Worker] Background sync failed:', err);
-      })
-    );
-  }
+    if (event.tag === 'sync-data') {
+        console.log('Background sync triggered!');
+        // Here you would typically perform data synchronization tasks
+        event.waitUntil(
+            new Promise((resolve, reject) => {
+                // Simulate a network request
+                console.log("Simulating background data sync...");
+                setTimeout(resolve, 2000);
+            })
+        );
+    }
 });
 
 self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'my-periodic-sync') {
-    console.log('[Service Worker] Periodic sync event received');
-    event.waitUntil(
-      // Perform some periodic background task
-      console.log('[Service Worker] Performing a periodic task.')
-    );
-  }
+    if (event.tag === 'fetch-latest-news') {
+        console.log('Periodic sync triggered!');
+        // Here you would fetch latest data periodically
+        event.waitUntil(
+             new Promise((resolve, reject) => {
+                // Simulate a network request
+                console.log("Simulating periodic data fetch...");
+                setTimeout(resolve, 2000);
+            })
+        );
+    }
 });
