@@ -1,143 +1,172 @@
-// A simple, robust service worker for caching and offline support.
+// Define a cache name
+const CACHE_NAME = 'mana-krushi-cache-v1';
 
-const CACHE_NAME = 'mana-krushi-v1';
-const OFFLINE_URL = '/offline';
-
+// List of files to cache
 const urlsToCache = [
   '/',
   '/offline',
   '/manifest.json',
-  '/favicon.ico',
-  '/styles/globals.css', // Adjust path if needed
-  'https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png' // App icon
+  '/styles/globals.css', // Assuming you have a global stylesheet
+  // Add other critical assets like logo, main JS bundles etc.
+  'https://i.ibb.co/6Rrvs6t/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png'
 ];
 
-// --- 1. Install Service Worker & Cache Assets ---
+// 1. Install Event: Cache critical assets
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Install');
+  console.log('Service Worker: Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => {
-        // Force the waiting service worker to become the active service worker.
-        return self.skipWaiting();
-      })
-  );
-});
-
-// --- 2. Activate Service Worker & Clean Up Old Caches ---
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activate');
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      // Tell the active service worker to take control of the page immediately.
-      return self.clients.claim();
-    })
-  );
-});
-
-// --- 3. Fetch Event: Serve from Cache or Network, with Offline Fallback ---
-self.addEventListener('fetch', (event) => {
-  // We only want to handle GET requests.
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response from cache.
-        if (response) {
-          return response;
-        }
-
-        // Not in cache - fetch from network.
-        return fetch(event.request).then(
-          (networkResponse) => {
-            // Optional: Clone and cache the new request for future offline use.
-            // Be careful with what you cache. Don't cache API calls with sensitive data.
-            if (networkResponse && networkResponse.status === 200 && !event.request.url.includes('firestore')) {
-              const responseToCache = networkResponse.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-            }
-            return networkResponse;
-          }
-        ).catch(() => {
-          // Network fetch failed, and not in cache.
-          // For navigation requests (to a new page), serve the offline page.
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
-          // For other requests (images, etc.), just fail.
-          return new Response('Network error', {
-            status: 408,
-            headers: { 'Content-Type': 'text/plain' },
-          });
+        console.log('Service Worker: Caching app shell');
+        return cache.addAll(urlsToCache).catch(err => {
+            console.error('Service Worker: Failed to cache app shell.', err);
         });
       })
   );
 });
 
-// --- 4. Push Notification Event ---
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push Received.');
-  if (!event.data) {
-    console.error('Push event but no data');
-    return;
-  }
+// 2. Fetch Event: Serve from cache or network, with offline fallback
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
 
-  const data = event.data.json();
-  const title = data.title || 'Mana Krushi Services';
+        // Not in cache - fetch from network
+        return fetch(event.request).then(
+          (response) => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response because it's a stream and can only be consumed once
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          }
+        );
+      })
+      .catch(() => {
+        // Network request failed, probably offline
+        // If it's a navigation request, show the offline page
+        if (event.request.mode === 'navigate') {
+          return caches.match('/offline');
+        }
+      })
+  );
+});
+
+
+// 3. Activate Event: Clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activating...');
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Service Worker: Deleting old cache', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+
+// --- Push Notification Handlers ---
+
+self.addEventListener('push', event => {
+  console.log('Service Worker: Push Received.');
+  const { title, body, icon, image } = event.data.json();
+
   const options = {
-    body: data.body || 'You have a new message.',
-    icon: data.icon || 'https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png',
-    badge: 'https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png'
+    body: body,
+    icon: icon || '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png', // Small icon for notification bar
+    image: image,
+    actions: [
+      { action: 'explore', title: 'Explore' },
+      { action: 'close', title: 'Close' },
+    ]
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// --- 5. Notification Click Event ---
-self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification click Received.');
+self.addEventListener('notificationclick', event => {
+  console.log('Service Worker: Notification click Received.');
   event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
+
+  if (event.action === 'explore') {
+    // Open a specific page, e.g., the dashboard
+    event.waitUntil(clients.openWindow('/dashboard'));
+  } else {
+    // Default action: focus the app or open the main page
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(windowClients => {
+            for (var i = 0; i < windowClients.length; i++) {
+                var client = windowClients[i];
+                if (client.url === '/' && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow('/');
+            }
+        })
+    );
+  }
 });
 
-// --- 6. Background Sync Event ---
+
+// --- Background Sync Handlers ---
+
 self.addEventListener('sync', (event) => {
-    console.log('[Service Worker] Background Sync event triggered', event);
-    if (event.tag === 'send-message-sync') {
-        console.log('[Service Worker] Processing background sync for sending messages...');
-        // Here you would add the logic to send any queued messages.
-        // For example, read from IndexedDB and send to the server.
-    }
+  if (event.tag === 'sync-new-booking') {
+    console.log('Service Worker: Sync event for "sync-new-booking" received.');
+    // Here you would typically read data from IndexedDB and send it to the server.
+    // This is a placeholder for that logic.
+    event.waitUntil(
+      new Promise((resolve, reject) => {
+        console.log("Simulating sending synced data...");
+        // Simulate a network request
+        setTimeout(() => {
+          console.log("Synced data sent successfully.");
+          self.registration.showNotification('Booking Synced!', {
+            body: 'Your booking made while offline has been confirmed.'
+          });
+          resolve();
+        }, 2000);
+      })
+    );
+  }
 });
 
-// --- 7. Periodic Background Sync Event ---
 self.addEventListener('periodicsync', (event) => {
-    console.log('[Service Worker] Periodic Sync event triggered', event);
-    if (event.tag === 'get-latest-news') {
-        console.log('[Service Worker] Fetching latest content in the background...');
-        // Here you would add logic to fetch new data and update the cache.
-        event.waitUntil(
-            // fetch('/api/latest-news').then(response => cache.put('/api/latest-news', response))
-        );
-    }
+  if (event.tag === 'get-latest-routes') {
+    console.log('Service Worker: Periodic sync for "get-latest-routes" received.');
+    // Here you would fetch new data from the server and cache it.
+    event.waitUntil(
+       new Promise((resolve, reject) => {
+        console.log("Simulating fetching latest routes...");
+        setTimeout(() => {
+            console.log("Latest routes fetched and cached.");
+            // You could show a notification, but it's often better to be silent.
+            resolve();
+        }, 5000);
+       })
+    );
+  }
 });
