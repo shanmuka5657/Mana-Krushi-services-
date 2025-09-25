@@ -1,129 +1,18 @@
 {
   "name": "Mana Krushi Services",
-  "short_name": "Mana Krushi",
-  "description": "Your partner in shared travel. Find or offer a ride with ease.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
+  "short_name": "ManaKrushi",
+  "description": "A ride-sharing and carpooling platform to make travel easier, more affordable, and community-driven.",
   "theme_color": "#1f83bd",
-  "orientation": "portrait-primary",
-  "id": "/?utm_source=pwa",
-  "dir": "ltr",
-  "lang": "en-US",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
   "scope": "/",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
-  "categories": [
-    "travel",
-    "social",
-    "business"
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "",
-  "launch_handler": {
-    "client_mode": [
-      "navigate-existing",
-      "auto"
-    ]
-  },
-  "scope_extensions": [
-    {
-      "origin": "*.manakrushi.com"
-    }
-  ],
-  "widgets": [
-    {
-      "name": "Quick Ride Search",
-      "description": "Search for your next ride directly from your home screen.",
-      "tag": "search",
-      "template": "search_template",
-      "ms_ac_template": "widgets/search_template.json",
-      "data": "widgets/search_data.json",
-      "screenshots": [
-        {
-          "src": "/screenshots/widget-search.png",
-          "sizes": "600x400",
-          "type": "image/png",
-          "label": "Search Widget"
-        }
-      ],
-      "icons": [
-        {
-          "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-          "sizes": "192x192"
-        }
-      ],
-      "auth": false,
-      "update": 86400
-    }
-  ],
-  "edge_side_panel": {},
-  "note_taking": {},
-  "protocol_handlers": [
-    {
-      "protocol": "web+manakrushi",
-      "url": "/search?q=%s"
-    }
-  ],
-  "file_handlers": [
-    {
-      "action": "/handle-file",
-      "accept": {
-        "text/plain": [
-          ".txt"
-        ]
-      }
-    }
-  ],
+  "start_url": "/",
+  "id": "/?utm_source=pwa",
   "icons": [
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -134,7 +23,13 @@
       "purpose": "any"
     },
     {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "src": "https://i.ibb.co/bJCb5Yg/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://i.ibb.co/bJCb5Yg/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -142,24 +37,23 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screen1.png",
+      "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
+      "sizes": "1280x720",
       "type": "image/png",
-      "sizes": "1080x2340",
-      "label": "Login Screen",
-      "form_factor": "narrow"
+      "platform": "wide",
+      "label": "Homescreen of Awesome App"
     },
     {
-      "src": "https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png",
+      "src": "https://www.pwabuilder.com/assets/screenshots/screen2.png",
+      "sizes": "720x1280",
       "type": "image/png",
-      "sizes": "1080x2340",
-      "label": "Home Screen",
-      "form_factor": "wide"
+      "platform": "narrow",
+      "label": "List of Awesome Resources"
     }
   ],
   "share_target": {
-    "action": "/search",
+    "action": "/search/",
     "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "title": "title",
       "text": "text",
@@ -170,26 +64,29 @@
     {
       "name": "Find a Ride",
       "short_name": "Find Ride",
-      "description": "Quickly search for a ride to your destination.",
+      "description": "Search for available rides",
       "url": "/dashboard?role=passenger",
-      "icons": [
-        {
-          "src": "/icons/shortcut-search.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icons/search.png", "sizes": "192x192" }]
     },
     {
       "name": "My Bookings",
       "short_name": "Bookings",
-      "description": "View your upcoming and past bookings.",
+      "description": "View your upcoming and past bookings",
       "url": "/bookings",
-      "icons": [
-        {
-          "src": "/icons/shortcut-bookings.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/icons/bookings.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "categories": ["travel", "navigation"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "file_handlers": [],
+  "protocol_handlers": [],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "widgets": [],
+  "edge_side_panel": {},
+  "note_taking": {},
+  "scope_extensions": []
 }

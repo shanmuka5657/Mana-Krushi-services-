@@ -5,7 +5,7 @@ import { app } from "./firebase";
 // subsequent calls to getToken will return from cache.
 export const getFCMToken = async () => {
     if (typeof window === 'undefined' || !app || !('serviceWorker' in navigator)) {
-        console.error("Firebase, service workers, or window is not available.");
+        console.error("Firebase, service workers, or window is not available for FCM.");
         return null;
     }
     
@@ -18,6 +18,7 @@ export const getFCMToken = async () => {
         
         if (vapidKey.includes("YOUR_VAPID_KEY")) {
              console.error("VAPID key not set. Please update it in src/lib/firebase-messaging.ts");
+             alert("VAPID key not set. Push notifications will not work until it is configured in src/lib/firebase-messaging.ts");
              return null;
         }
 
@@ -27,13 +28,14 @@ export const getFCMToken = async () => {
             console.log('FCM Token:', currentToken);
             return currentToken;
         } else {
-            console.log('No registration token available. Request permission to generate one.');
+            console.log('No registration token available. Requesting permission...');
             // This part is usually handled by a UI element asking for permission.
-            // The button in the messaging page already handles this flow.
+            // The button in the messaging page already handles this flow by calling this function.
+            // The browser will show the permission prompt.
             return null;
         }
     } catch (err) {
-        console.error('An error occurred while retrieving token. ', err);
+        console.error('An error occurred while retrieving FCM token. ', err);
         return null;
     }
 };
