@@ -34,11 +34,12 @@ function DashboardPage() {
         // Ensure the URL reflects the true role from the profile.
         if (userProfile?.role && (!roleFromUrl || roleFromUrl !== userProfile.role)) {
              router.replace(`/dashboard?role=${userProfile.role}`);
+        } else {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
     determineRoleAndProfile();
-  }, [searchParams, router]);
+  }, []);
 
 
   const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => {
