@@ -1,27 +1,13 @@
 {
-  "name": "Mana Krushi Services",
-  "short_name": "ManaKrushi",
-  "description": "Connect with car owners & passengers for easy, affordable travel. Share rides, save money, and travel smart. Your go-to carpooling and ride-sharing community.",
-  "start_url": "/?source=pwa",
-  "display": "standalone",
-  "background_color": "#ffffff",
   "theme_color": "#1f83bd",
+  "background_color": "#ffffff",
+  "display": "standalone",
   "scope": "/",
-  "lang": "en",
-  "dir": "ltr",
-  "orientation": "portrait",
-  "id": "/?source=pwa",
-  "categories": [
-    "travel",
-    "business",
-    "social"
-  ],
+  "start_url": "/",
+  "name": "Mana Krushi Services",
+  "short_name": "MK Services",
+  "description": "Your partner in shared travel. Find or offer a ride with ease.",
   "icons": [
-    {
-      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "48x48",
-      "type": "image/png"
-    },
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "72x72",
@@ -34,23 +20,40 @@
     },
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
-      "sizes": "168x168",
+      "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20
+-at-13-02-57-9dc142ff.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
+      "sizes": "384x384",
       "type": "image/png"
     },
     {
       "src": "https://i.ibb.co/6Rrvs6tM/Whats-App-Image-2025-09-20-at-13-02-57-9dc142ff.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "https://i.ibb.co/3DXSbQ7/Square44x44-Logo-targetsize-16.png",
@@ -59,88 +62,97 @@
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png",
+      "type": "image/png",
+      "sizes": "1080x2160",
+      "form_factor": "narrow"
+    }
+  ],
+  "orientation": "portrait",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": [
+    "travel",
+    "navigation",
+    "social"
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "id": "/?utm_source=pwa",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+mks",
+      "url": "/search?q=%s"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Find a Ride",
-      "short_name": "Find Ride",
-      "description": "Find a ride to your destination",
       "url": "/dashboard?role=passenger",
-      "icons": [
-        {
-          "src": "/icons/search.png",
-          "sizes": "192x192"
-        }
-      ]
+      "description": "Find available rides near you."
     },
     {
       "name": "My Bookings",
-      "short_name": "Bookings",
-      "description": "View your upcoming and past bookings",
       "url": "/bookings",
-      "icons": [
-        {
-          "src": "/icons/bookings.png",
-          "sizes": "192x192"
-        }
-      ]
+      "description": "View your upcoming and past bookings."
     }
   ],
   "share_target": {
-    "action": "/search/",
+    "action": "/search",
     "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "title": "title",
       "text": "text",
       "url": "url"
     }
   },
-  "screenshots": [
+  "file_handlers": [
     {
-      "src": "https://i.ibb.co/3mhxDmsz/file-00000000c09861fabb32183eb613ae2b.png",
-      "type": "image/png",
-      "sizes": "1080x2340",
-      "form_factor": "narrow"
+      "action": "/handle-file",
+      "accept": {
+        "text/*": [
+          ".txt"
+        ]
+      }
     }
   ],
-  "display_override": [
-    "standalone"
-  ],
-  "protocol_handlers": [
+  "related_applications": [
     {
-      "protocol": "web+manakrushi",
-      "url": "/search?q=%s"
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.example.app",
+      "id": "com.example.app"
     }
   ],
-  "launch_handler": {
-    "client_mode": [
-      "navigate-existing",
-      "auto"
-    ]
-  },
-  "iarc_rating_id": "e5c84b33-2287-43d3-a3f7-9c3f7b2a3b04",
-  "related_applications": [],
   "prefer_related_applications": false,
-  "file_handlers": [],
   "widgets": [
     {
-      "name": "My Rides Widget",
-      "short_name": "My Rides",
-      "description": "View your upcoming rides.",
-      "tag": "rides",
-      "template": "rides_template",
-      "ms_ac_template": "widgets/rides.json",
-      "data": "widgets/rides_data.json",
+      "name": "Next Ride Widget",
+      "description": "See your next upcoming ride.",
+      "tag": "next-ride",
+      "template": "next-ride-template",
+      "ms_ac_template": "next-ride-template.json",
+      "data": "next-ride-data.json",
       "type": "application/json"
     }
   ],
-  "edge_side_panel": {},
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "note_taking": {
+    "new_note_url": "/new-note",
+    "needs_user_activation": true
+  },
   "scope_extensions": [
     {
-      "origin": "*.manakrushi.com"
-    },
-    {
-      "origin": "*.example.org"
+      "origin": "*.example.com"
     }
   ]
 }
