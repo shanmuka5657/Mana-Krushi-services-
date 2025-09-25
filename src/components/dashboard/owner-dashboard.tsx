@@ -209,7 +209,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         setIsLoading(false);
     }
     fetchInitialData();
-  }, [form]);
+  }, []);
 
   useEffect(() => {
       setIsMounted(true);
@@ -255,6 +255,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab }: OwnerDashb
         }
 
         const existingRouteDate = new Date(existingRoute.travelDate);
+        
+        // Only check for conflict if it's the same day
+        if (format(routeDate, 'yyyy-MM-dd') !== format(existingRouteDate, 'yyyy-MM-dd')) {
+            continue;
+        }
+
         const existingStart = parse(existingRoute.departureTime, 'HH:mm', existingRouteDate).getTime();
         const existingEnd = parse(existingRoute.arrivalTime, 'HH:mm', existingRouteDate).getTime();
 
