@@ -39,6 +39,7 @@ import {
   FileText,
   History,
   Bike,
+  Rss,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -197,7 +198,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
     { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
-    { href: `/admin/messaging`, icon: MessageSquare, label: "Campaigns" },
+    { href: `/admin/messaging`, icon: Rss, label: "Campaigns" },
     { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
