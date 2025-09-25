@@ -23,21 +23,16 @@ function DashboardPage() {
   useEffect(() => {
     const determineRole = async () => {
         const userProfile = await getProfile();
-        let actualRole = userProfile?.role || 'passenger';
-
-        // Override role if it's explicitly in the URL, but respect admin role from profile
-        if (roleFromUrl && actualRole !== 'admin') {
-            actualRole = roleFromUrl;
-        }
+        const actualRole = userProfile?.role || 'passenger';
         
         if (actualRole === 'admin') {
             router.replace('/admin/dashboard');
-            // Don't set role or stop loading, to prevent rendering anything on this page
             return;
         }
 
         setRole(actualRole);
-        // Update URL to reflect the correct role if it's not already set
+        
+        // Always ensure the URL reflects the true role from the profile.
         if (!roleFromUrl || roleFromUrl !== actualRole) {
              router.replace(`/dashboard?role=${actualRole}`);
         }
