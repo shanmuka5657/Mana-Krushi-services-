@@ -51,16 +51,28 @@ function FindRideResultsPage() {
     
     const from = searchParams.get('from') || '';
     const to = searchParams.get('to') || '';
-    const date = searchParams.get('date') || '';
 
     useEffect(() => {
         const fetchAndFilterRoutes = async () => {
-            if (!from || !to || !date) {
+            if (!from || !to) {
                 setIsLoaded(true);
                 return;
             };
 
-            const routes = await getRoutes(true, { from, to, date });
+            const allRoutes = await getRoutes(true);
+
+            // Filter routes by from and to, and only include future dates
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to start of today
+            
+            let routes = allRoutes.filter(route => {
+                const routeDate = new Date(route.travelDate);
+                const fromMatch = route.fromLocation.trim().toLowerCase() === from.trim().toLowerCase() ||
+                                  route.pickupPoints?.some(p => p.trim().toLowerCase() === from.trim().toLowerCase());
+                const toMatch = route.toLocation.trim().toLowerCase() === to.trim().toLowerCase();
+
+                return fromMatch && toMatch && routeDate >= today;
+            });
 
             if (routes.length > 0) {
                 // Fetch bookings only for the routes found
@@ -85,14 +97,22 @@ function FindRideResultsPage() {
                 setDriverProfiles(profilesMap);
             }
 
-            // Sort promoted rides to the top
-            routes.sort((a, b) => (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0));
+            // Sort by date, then by promotion
+            routes.sort((a, b) => {
+                const dateA = new Date(a.travelDate).getTime();
+                const dateB = new Date(b.travelDate).getTime();
+                if (dateA !== dateB) {
+                    return dateA - dateB;
+                }
+                // If dates are same, promoted rides go first
+                return (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0);
+            });
 
             setAvailableOwners(routes);
             setIsLoaded(true);
         }
         fetchAndFilterRoutes();
-    }, [from, to, date, toast]);
+    }, [from, to, toast]);
 
     const getBookedSeats = (route: Route) => {
         return allBookings.filter(b => {
@@ -132,7 +152,7 @@ function FindRideResultsPage() {
                             Available Rides: {from} to {to}
                         </CardTitle>
                         <p className="text-muted-foreground">
-                            Showing results for {format(new Date(date), "PPP")}
+                            Showing all upcoming rides for this route.
                         </p>
                     </CardHeader>
                     <CardContent>
@@ -172,6 +192,7 @@ function FindRideResultsPage() {
                                             </div>
                                             <div>
                                                 <div className="font-semibold">{route.fromLocation}</div>
+                                                <div className="text-sm text-muted-foreground">{format(new Date(route.travelDate), "PPP")}</div>
                                                 {route.distance && (
                                                 <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
                                                     <Milestone className="h-3 w-3" />
@@ -256,7 +277,7 @@ function FindRideResultsPage() {
                             />
                             <h3 className="text-xl font-semibold">No Rides Found</h3>
                             <p className="text-muted-foreground mt-2 max-w-md">
-                                There are no rides available for this route on the selected date. Try searching for a different date or route.
+                                There are no upcoming rides available for this route. Try searching for a different route.
                             </p>
                         </CardContent>
                     </Card>

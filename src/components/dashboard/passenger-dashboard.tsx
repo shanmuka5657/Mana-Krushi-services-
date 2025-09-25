@@ -4,8 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Search, Loader2, LocateFixed } from "lucide-react";
+import { MapPin, Search, Loader2, LocateFixed } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -20,13 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
 import {
   AlertDialog,
@@ -44,9 +36,6 @@ import { useToast } from "@/hooks/use-toast";
 const searchFormSchema = z.object({
   fromLocation: z.string().min(2, "Starting location is required."),
   toLocation: z.string().min(2, "Destination is required."),
-  travelDate: z.date({
-    required_error: "A travel date is required.",
-  }),
 });
 
 type SearchFormValues = z.infer<typeof searchFormSchema>;
@@ -142,7 +131,6 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
 
@@ -194,7 +182,6 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
     const params = new URLSearchParams({
         from: data.fromLocation,
         to: data.toLocation,
-        date: format(data.travelDate, 'yyyy-MM-dd')
     });
     router.push(`/find-ride?${params.toString()}`);
   }
@@ -261,49 +248,6 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                     placeholder="Destination"
                                   />
                               </FormControl>
-                              <FormMessage />
-                          </FormItem>
-                          )}
-                      />
-                       <FormField
-                          control={form.control}
-                          name="travelDate"
-                          render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                              <FormLabel>Date</FormLabel>
-                              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                              <PopoverTrigger asChild>
-                                  <FormControl>
-                                  <Button
-                                      variant={"outline"}
-                                      className={cn(
-                                      "w-full pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                      )}
-                                  >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
-                                      {field.value ? (
-                                      format(field.value, "PPP")
-                                      ) : (
-                                      <span>Pick a date</span>
-                                      )}
-                                  </Button>
-                                  </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={(date) => {
-                                      field.onChange(date);
-                                      setIsCalendarOpen(false);
-                                  }}
-                                  disabled={(date) =>
-                                      date < new Date(new Date().setHours(0, 0, 0, 0))
-                                  }
-                                  />
-                              </PopoverContent>
-                              </Popover>
                               <FormMessage />
                           </FormItem>
                           )}
