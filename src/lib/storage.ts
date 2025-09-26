@@ -50,7 +50,10 @@ export const sendChatMessage = async (rideId: string, senderEmail: string, text:
 export const getRideDetailsForChat = async (rideId: string, currentUserEmail: string) => {
     // A ride is now identified by its routeId
     const route = await getRouteFromFirestore(rideId);
-    if (!route) return { ride: null, profiles: [] };
+    if (!route) {
+        console.warn(`Chat access denied: Route with ID ${rideId} not found.`);
+        return { ride: null, profiles: [] };
+    }
     
     // Security check: ensure current user is part of the ride
     const isDriver = route.ownerEmail === currentUserEmail;
@@ -59,9 +62,12 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
        routeId: rideId
     });
     
-    const isAParticipant = isDriver || allBookingsForRide.some(b => b.clientEmail === currentUserEmail && b.status !== 'Cancelled');
+    // Check if the current user is a passenger in one of the confirmed bookings for this route.
+    const isPassenger = allBookingsForRide.some(
+        (b) => b.clientEmail === currentUserEmail && b.status !== 'Cancelled'
+    );
 
-    if (!isAParticipant) {
+    if (!isDriver && !isPassenger) {
         console.warn(`User ${currentUserEmail} denied access to chat for ride ${rideId}. Not a participant.`);
         return { ride: null, profiles: [] };
     }
@@ -424,6 +430,7 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
 
 
 
