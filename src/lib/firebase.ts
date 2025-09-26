@@ -208,7 +208,7 @@ export const getBookingFromFirestore = async (bookingId: string): Promise<Bookin
     }
 };
 
-export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
+export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
     try {
         let q = query(bookingsCollection);
@@ -217,6 +217,10 @@ export const getBookingsFromFirestore = async (searchParams?: { destination?: st
         if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
             const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
             q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
+        }
+
+        if (searchParams?.routeId) {
+            q = query(q, where("routeId", "==", searchParams.routeId));
         }
 
         const snapshot = await getDocs(q);
@@ -307,12 +311,15 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
     if (!bookingsCollection || !routesCollection || !email) return null;
     
     const now = new Date();
+    const startOfToday = new Date(now.setHours(0, 0, 0, 0));
     
     try {
         if (role === 'owner') {
             const q = query(
                 routesCollection,
                 where("ownerEmail", "==", email),
+                where("travelDate", ">=", startOfToday),
+                orderBy("travelDate", "asc"),
             );
             const routeSnapshot = await getDocs(q);
             if (routeSnapshot.empty) return null;
@@ -326,15 +333,15 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
                 } as Route;
             });
 
-            const upcomingRoutes = ownerRoutes
-                .filter(route => {
+            // Additional client-side filtering for time
+            const upcomingRoutes = ownerRoutes.filter(route => {
                     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
                     const departureDateTime = new Date(route.travelDate);
                     departureDateTime.setHours(depHours, depMinutes, 0, 0);
                     return departureDateTime >= now;
                 })
-                .sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
-
+                // The sort is already handled by `orderBy` in the query
+                
             if (upcomingRoutes.length === 0) return null;
             
             const nextRoute = upcomingRoutes[0];
@@ -345,6 +352,7 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
 
             return {
                 id: nextRoute.id,
+                routeId: nextRoute.id, // Important for chat
                 destination: `${nextRoute.fromLocation} to ${nextRoute.toLocation}`,
                 departureDate: departureDateTime,
                 driverName: nextRoute.driverName,
@@ -356,23 +364,26 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             const q = query(
                 bookingsCollection,
                 where("clientEmail", "==", email),
-                where("status", "==", "Confirmed"),
-                where("departureDate", ">", now),
-                orderBy("departureDate", "asc"),
-                limit(1)
+                where("departureDate", ">=", now),
+                orderBy("departureDate", "asc")
             );
             const snapshot = await getDocs(q);
             
             if (snapshot.empty) return null;
-            
-            const doc = snapshot.docs[0];
-            const data = doc.data();
-            return {
-                ...data,
-                id: doc.id,
-                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
-                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
-            } as Booking;
+
+            // Find the first non-cancelled booking
+            for (const doc of snapshot.docs) {
+                if (doc.data().status !== 'Cancelled') {
+                    const data = doc.data();
+                    return {
+                        ...data,
+                        id: doc.id,
+                        departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                        returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+                    } as Booking;
+                }
+            }
+            return null; // No upcoming non-cancelled bookings found
         }
 
     } catch (e) {
@@ -440,7 +451,11 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
             const startOfDay = new Date(searchDate.setHours(0,0,0,0));
             const endOfDay = new Date(searchDate.setHours(23,59,59,999));
             q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
+        } else if (!searchParams?.ownerEmail) {
+            // Only apply date filter for general queries, not when filtering by owner
+             q = query(q, where("travelDate", ">=", new Date(new Date().setHours(0,0,0,0))));
         }
+
 
         const snapshot = await getDocs(q);
         let routes = snapshot.docs.map(doc => {
@@ -465,6 +480,11 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
                     route.pickupPoints?.some(p => p.trim().toLowerCase() === searchFromLower)
                 );
             }
+        }
+        
+        // Sort by date if no specific owner is being queried
+        if (!searchParams?.ownerEmail) {
+            routes.sort((a,b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
         }
 
 
@@ -548,5 +568,6 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
+
 
 

@@ -56,14 +56,13 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
     const isDriver = route.ownerEmail === currentUserEmail;
     
     const allBookingsForRide = await getBookings(true, {
-        destination: `${route.fromLocation} to ${route.toLocation}`,
-        date: new Date(route.travelDate).toISOString().split('T')[0],
-        time: route.departureTime
+       routeId: rideId
     });
     
-    const isAParticipant = isDriver || allBookingsForRide.some(b => b.clientEmail === currentUserEmail);
+    const isAParticipant = isDriver || allBookingsForRide.some(b => b.clientEmail === currentUserEmail && b.status !== 'Cancelled');
 
     if (!isAParticipant) {
+        console.warn(`User ${currentUserEmail} denied access to chat for ride ${rideId}. Not a participant.`);
         return { ride: null, profiles: [] };
     }
 
@@ -71,7 +70,7 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
     const participantEmails = new Set<string>();
     participantEmails.add(route.ownerEmail);
     allBookingsForRide.forEach(b => {
-        if(b.clientEmail) participantEmails.add(b.clientEmail);
+        if(b.clientEmail && b.status !== 'Cancelled') participantEmails.add(b.clientEmail);
     });
 
     const profilePromises = Array.from(participantEmails).map(email => getProfile(email));
@@ -242,7 +241,7 @@ export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => 
 
 
 // --- Bookings ---
-export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
+export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
     if (!isBrowser) return [];
     
     const cacheKey = JSON.stringify(searchParams || {});
@@ -428,5 +427,6 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
 
 
