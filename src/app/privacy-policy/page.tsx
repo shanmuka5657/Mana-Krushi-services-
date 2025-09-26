@@ -22,7 +22,7 @@ function PrivacyPolicyPageContent() {
                 </CardHeader>
                 <CardContent className="prose dark:prose-invert max-w-none text-muted-foreground space-y-4">
                     <p>
-                        Mana Krushi Services ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application.
+                        MK Services ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application.
                     </p>
 
                     <h3 className="font-semibold text-foreground pt-2">1. Information We Collect</h3>
@@ -79,3 +79,5 @@ export default function PrivacyPolicyPage() {
         </Suspense>
     );
 }
+
+    

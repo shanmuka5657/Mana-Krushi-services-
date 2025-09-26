@@ -329,3 +329,5 @@ export default function GamesPage() {
         </Suspense>
     )
 }
+
+    

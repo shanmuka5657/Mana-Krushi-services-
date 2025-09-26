@@ -287,7 +287,7 @@ export default function BookRidePage() {
     const message = `
 Hello ${newlyBooked.driverName},
 
-You have a new confirmed booking from Mana Krushi Services.
+You have a new confirmed booking from MK Services.
 
 *Booking Details:*
 - *Passenger:* ${newlyBooked.client}
@@ -300,7 +300,7 @@ You have a new confirmed booking from Mana Krushi Services.
 This booking is now confirmed. You can view it in your 'My Routes' section of the app.
 
 Thank you,
-Mana Krushi Services
+MK Services
     `.trim().replace(/^\s+/gm, '');
     
     const whatsappUrl = `https://wa.me/91${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
@@ -481,5 +481,7 @@ Mana Krushi Services
     </AppLayout>
   );
 }
+
+    
 
     

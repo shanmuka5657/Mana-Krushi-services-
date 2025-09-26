@@ -17,12 +17,12 @@ function DisclaimerPageContent() {
                         Legal Disclaimer
                     </CardTitle>
                     <CardDescription>
-                        Important information about the use of Mana Krushi Services.
+                        Important information about the use of MK Services.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-muted-foreground">
                     <p>
-                        Mana Krushi Services is a technology platform that connects private car owners with passengers who are seeking to share a ride to a common destination. It is strictly intended for non-commercial carpooling and cost-sharing purposes.
+                        MK Services is a technology platform that connects private car owners with passengers who are seeking to share a ride to a common destination. It is strictly intended for non-commercial carpooling and cost-sharing purposes.
                     </p>
                     <h3 className="font-semibold text-foreground pt-2">For Vehicle Owners (Drivers):</h3>
                     <ul className="list-disc pl-5 space-y-2">
@@ -38,7 +38,7 @@ function DisclaimerPageContent() {
                     </ul>
                      <h3 className="font-semibold text-foreground pt-2">General:</h3>
                     <p>
-                        The use of Mana Krushi Services is at your own risk. The platform is provided "as is" without any warranties. We are not liable for any incidents, accidents, damages, or losses that may occur during a carpool trip arranged through our platform.
+                        The use of MK Services is at your own risk. The platform is provided "as is" without any warranties. We are not liable for any incidents, accidents, damages, or losses that may occur during a carpool trip arranged through our platform.
                     </p>
                     <p>
                         By using this service, you agree to these terms. For any questions, please visit our <Link href="/help" className="text-primary underline">Help page</Link>.
@@ -56,3 +56,5 @@ export default function DisclaimerPage() {
         </Suspense>
     );
 }
+
+    

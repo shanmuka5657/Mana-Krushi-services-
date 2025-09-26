@@ -77,7 +77,7 @@ const ClientVideoPlayer = () => {
         if (navigator.share && videoUrl) {
             try {
                 await navigator.share({
-                    title: 'Mana Krushi Services',
+                    title: 'MK Services',
                     text: 'Check out this video!',
                     url: videoUrl,
                 });
@@ -141,13 +141,13 @@ const ClientVideoPlayer = () => {
             <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 p-2 rounded-lg pointer-events-none">
                  <Image 
                     src={defaultLogo.url}
-                    alt="Mana Krushi Services Logo"
+                    alt="MK Services Logo"
                     width={24}
                     height={24}
                     className="rounded-full"
                     data-ai-hint={defaultLogo.hint}
                 />
-                <span className="text-white font-bold text-lg">Mana Krushi Services</span>
+                <span className="text-white font-bold text-lg">MK Services</span>
             </div>
              <div className="absolute top-2 right-2 flex items-center gap-2 bg-black/50 p-1 rounded-lg">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 hover:text-white" onClick={handleLike}>
@@ -171,3 +171,5 @@ const ClientVideoPlayer = () => {
 };
 
 export default ClientVideoPlayer;
+
+    

@@ -324,7 +324,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
        message = `
 Hello ${booking.client},
 
-This is ${booking.driverName} from Mana Krushi Services, confirming your ride.
+This is ${booking.driverName} from MK Services, confirming your ride.
 
 *Booking Details:*
 - *Route:* ${booking.destination}
@@ -339,12 +339,12 @@ ${booking.driverName}
     `.trim().replace(/^\s+/gm, '');
     } else if (type === 'payment') {
         const upiId = "7569114679@ybl";
-        const upiUrl = `upi://pay?pa=${upiId}&pn=Mana%20Krushi%20Services&am=${booking.amount.toFixed(2)}&tn=RidePayment${booking.id}`;
+        const upiUrl = `upi://pay?pa=${upiId}&pn=MK%20Services&am=${booking.amount.toFixed(2)}&tn=RidePayment${booking.id}`;
         
         message = `
 Hello ${booking.client},
 
-Thank you for travelling with Mana Krushi Services!
+Thank you for travelling with MK Services!
 
 This is a reminder for your payment of *₹${booking.amount.toFixed(2)}*.
 
@@ -818,3 +818,5 @@ ${booking.driverName}
 };
 
 export default MyRoutes;
+
+    

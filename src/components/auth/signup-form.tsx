@@ -122,12 +122,12 @@ export function SignupForm() {
       <div className="flex flex-col items-center text-center mb-6">
         <Image 
             src={defaultLogo.url}
-            alt="Mana Krushi Services Logo"
+            alt="MK Services Logo"
             width={80}
             height={80}
             data-ai-hint={defaultLogo.hint}
         />
-        <h2 className="text-2xl font-bold mt-2">Mana Krushi Services</h2>
+        <h2 className="text-2xl font-bold mt-2">MK Services</h2>
       </div>
       <Card className="w-full max-w-lg">
         <CardHeader>
@@ -273,3 +273,5 @@ export function SignupForm() {
     </>
   );
 }
+
+    

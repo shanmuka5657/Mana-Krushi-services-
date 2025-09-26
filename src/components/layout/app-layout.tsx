@@ -288,7 +288,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
           <div className="flex items-center gap-2">
             <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
             <h1 className="text-xl font-bold">
-              Mana Krushi<span className="text-accent">Services</span>
+              MK<span className="text-accent">Services</span>
             </h1>
           </div>
         </SidebarHeader>
@@ -339,7 +339,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
               <div className="flex items-center gap-2 truncate">
                 <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
                 <h2 className="text-xl md:text-2xl font-semibold truncate">
-                  Mana Krushi Services
+                  MK Services
                 </h2>
               </div>
             </div>
@@ -402,3 +402,5 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     </SidebarProvider>
   );
 }
+
+    
