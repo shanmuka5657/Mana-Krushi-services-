@@ -346,24 +346,26 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             const q = query(
                 bookingsCollection,
                 where("clientEmail", "==", email),
-                where("departureDate", ">", now),
-                orderBy("departureDate", "asc")
             );
             const snapshot = await getDocs(q);
-
-            // Client-side filtering for 'Confirmed' status
-            const confirmedUpcomingBookings = snapshot.docs.filter(doc => doc.data().status === 'Confirmed');
+            
+            // Client side filtering to avoid composite index
+            const confirmedUpcomingBookings = snapshot.docs
+                .map(doc => {
+                    const data = doc.data();
+                    return {
+                        ...data,
+                        id: doc.id,
+                        departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                        returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+                    } as Booking;
+                })
+                .filter(b => b.status === 'Confirmed' && b.departureDate > now)
+                .sort((a,b) => a.departureDate.getTime() - b.departureDate.getTime());
             
             if (confirmedUpcomingBookings.length === 0) return null;
             
-            const doc = confirmedUpcomingBookings[0];
-            const data = doc.data();
-            return {
-                ...data,
-                id: doc.id,
-                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
-                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
-            } as Booking;
+            return confirmedUpcomingBookings[0];
         }
 
     } catch (e) {
