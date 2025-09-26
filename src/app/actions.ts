@@ -6,6 +6,7 @@ import { calculateDistance as calculateDistanceFlow } from "@/ai/flows/distance-
 import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { cropLogo as cropLogoFlow } from "@/ai/flows/crop-logo-flow";
+import { suggestLocations as suggestLocationsFlow } from "@/ai/flows/location-suggester";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
@@ -22,66 +23,63 @@ export async function suggestDestinations(input: {
   preferences: string;
   budget: number;
 }) {
-  // const validatedInput = SuggestDestinationsInput.safeParse(input);
+  const validatedInput = SuggestDestinationsInput.safeParse(input);
 
-  // if (!validatedInput.success) {
-  //   return { error: "Invalid input. " + validatedInput.error.flatten().fieldErrors };
-  // }
+  if (!validatedInput.success) {
+    return { error: "Invalid input. " + validatedInput.error.flatten().fieldErrors };
+  }
 
-  // try {
-  //   const result = await findDestinations(validatedInput.data);
-  //   if (!result || !result.destinations || result.destinations.length === 0) {
-  //     return {
-  //       suggestions: [],
-  //       message: "Could not find any destinations. Try different preferences.",
-  //     };
-  //   }
-  //   return { suggestions: result.destinations };
-  // } catch (e) {
-  //   console.error(e);
-  //   return { error: "An unexpected error occurred. Please try again later." };
-  // }
-  return { error: "AI features are temporarily disabled." };
+  try {
+    const result = await findDestinations(validatedInput.data);
+    if (!result || !result.destinations || result.destinations.length === 0) {
+      return {
+        suggestions: [],
+        message: "Could not find any destinations. Try different preferences.",
+      };
+    }
+    return { suggestions: result.destinations };
+  } catch (e) {
+    console.error(e);
+    return { error: "An unexpected error occurred. Please try again later." };
+  }
 }
 
 export async function calculateDistance(input: { from: string, to: string }) {
-    // const validatedInput = CalculateDistanceInputSchema.safeParse(input);
-    // if(!validatedInput.success) {
-    //     return { error: "Invalid input. " + validatedInput.error.flatten().fieldErrors };
-    // }
+    const validatedInput = CalculateDistanceInputSchema.safeParse(input);
+    if(!validatedInput.success) {
+        return { error: "Invalid input. " + validatedInput.error.flatten().fieldErrors };
+    }
 
-    // try {
-    //     const result = await calculateDistanceFlow(validatedInput.data);
-    //     if(!result || !result.distance) {
-    //          return { error: "Could not calculate distance." };
-    //     }
-    //     return { distance: result.distance };
-    // } catch (e) {
-    //     console.error(e);
-    //     return { error: "An unexpected error occurred while calculating the distance." };
-    // }
-    return { error: "AI features are temporarily disabled." };
+    try {
+        const result = await calculateDistanceFlow(validatedInput.data);
+        if(!result || !result.distance) {
+             return { error: "Could not calculate distance." };
+        }
+        return { distance: result.distance };
+    } catch (e) {
+        console.error(e);
+        return { error: "An unexpected error occurred while calculating the distance." };
+    }
 }
 
 export async function calculateToll(input: { from: string; to: string }) {
-//   const validatedInput = TollCalculatorInputSchema.safeParse(input);
-//   if (!validatedInput.success) {
-//     return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
-//   }
+  const validatedInput = TollCalculatorInputSchema.safeParse(input);
+  if (!validatedInput.success) {
+    return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+  }
 
-//   try {
-//     const result = await calculateTollFlow(validatedInput.data);
-//     if (!result) {
-//       return { error: 'Could not calculate toll.' };
-//     }
-//     return {
-//       estimatedTollCost: result.estimatedTollCost,
-//     };
-//   } catch (e) {
-//     console.error(e);
-//     return { error: 'An unexpected error occurred while calculating the toll.' };
-//   }
-    return { error: "AI features are temporarily disabled." };
+  try {
+    const result = await calculateTollFlow(validatedInput.data);
+    if (!result) {
+      return { error: 'Could not calculate toll.' };
+    }
+    return {
+      estimatedTollCost: result.estimatedTollCost,
+    };
+  } catch (e) {
+    console.error(e);
+    return { error: 'An unexpected error occurred while calculating the toll.' };
+  }
 }
 
 const FindMovieInput = z.object({
@@ -89,19 +87,18 @@ const FindMovieInput = z.object({
 });
 
 export async function findMovie(input: { movieName: string }) {
-//   const validatedInput = FindMovieInput.safeParse(input);
-//   if (!validatedInput.success) {
-//     return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
-//   }
+  const validatedInput = FindMovieInput.safeParse(input);
+  if (!validatedInput.success) {
+    return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+  }
 
-//   try {
-//     const result = await findMovieFlow(validatedInput.data);
-//     return { sites: result.sites };
-//   } catch (e) {
-//     console.error(e);
-//     return { error: 'An unexpected error occurred while searching for the movie.' };
-//   }
-    return { error: "AI features are temporarily disabled." };
+  try {
+    const result = await findMovieFlow(validatedInput.data);
+    return { sites: result.sites };
+  } catch (e) {
+    console.error(e);
+    return { error: 'An unexpected error occurred while searching for the movie.' };
+  }
 }
 
 const CropLogoInput = z.object({
@@ -109,19 +106,18 @@ const CropLogoInput = z.object({
 });
 
 export async function cropLogo(input: { photoDataUri: string }): Promise<{ croppedLogoUrl?: string, error?: string }> {
-    // const validatedInput = CropLogoInput.safeParse(input);
-    // if (!validatedInput.success) {
-    //     return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
-    // }
+    const validatedInput = CropLogoInput.safeParse(input);
+    if (!validatedInput.success) {
+        return { error: 'Invalid input. ' + validatedInput.error.flatten().fieldErrors };
+    }
 
-    // try {
-    //     const result = await cropLogoFlow(validatedInput.data);
-    //     return { croppedLogoUrl: result.croppedPhotoDataUri };
-    // } catch (e) {
-    //     console.error('Error cropping logo:', e);
-    //     return { error: 'An unexpected error occurred while cropping the logo.' };
-    // }
-    return { croppedLogoUrl: input.photoDataUri }; // Return original image
+    try {
+        const result = await cropLogoFlow(validatedInput.data);
+        return { croppedLogoUrl: result.croppedPhotoDataUri };
+    } catch (e) {
+        console.error('Error cropping logo:', e);
+        return { error: 'An unexpected error occurred while cropping the logo.' };
+    }
 }
 
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
@@ -151,7 +147,17 @@ async function getMapmyIndiaToken(): Promise<string | null> {
 
 
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
-    return { error: "Location search is temporarily unavailable." };
+    try {
+        const result = await suggestLocationsFlow({ query });
+        if (result.suggestions) {
+            // The AI returns an object that matches the structure MapMyIndia would, so we can just return it.
+            return { suggestions: result.suggestions };
+        }
+        return { suggestions: [] };
+    } catch (e) {
+        console.error("AI location suggestion failed:", e);
+        return { error: "Failed to get suggestions from AI." };
+    }
 }
 
 export async function reverseGeocode(lat: number, lon: number): Promise<{ address?: string, error?: string }> {

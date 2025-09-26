@@ -50,6 +50,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder }: { f
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [query, setQuery] = useState(field.value || '');
     const [isFocused, setIsFocused] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -61,8 +62,9 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder }: { f
             setSuggestions([]);
             return;
         }
-        
+        setIsLoading(true);
         const result = await getMapSuggestions(searchQuery);
+        setIsLoading(false);
 
         if (result.error) {
             console.error(result.error);
@@ -107,12 +109,13 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder }: { f
                     autoComplete="off"
                     placeholder={placeholder}
                 />
+                {isLoading && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />}
             </div>
             {isFocused && suggestions.length > 0 && (
                 <ul className="absolute z-10 w-full bg-card border rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
-                    {suggestions.map((suggestion) => (
+                    {suggestions.map((suggestion, index) => (
                         <li
-                            key={suggestion.eLoc}
+                            key={suggestion.eLoc || index}
                             onMouseDown={() => handleSuggestionClick(suggestion)} // Use onMouseDown to fire before onBlur
                             className="px-4 py-2 hover:bg-muted cursor-pointer"
                         >
@@ -274,5 +277,3 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
     </div>
   );
 }
-
-    
