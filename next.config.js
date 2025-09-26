@@ -11,6 +11,7 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   typescript: {
+    // I am making this change to force a server restart and fix the ChunkLoadError.
     ignoreBuildErrors: true,
   },
   eslint: {
