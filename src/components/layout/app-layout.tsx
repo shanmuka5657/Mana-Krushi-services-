@@ -24,7 +24,6 @@ import {
   Film,
   ShoppingCart,
   MapPin,
-  Gamepad2,
   Timer,
   AlertCircle,
   PanelLeft,
@@ -212,7 +211,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const ownerNavItems = [
     { href: `/dashboard?role=owner`, icon: Home, label: "Home" },
     { href: `/profile?role=owner`, icon: User, label: "Profile" },
-    { href: `/messages?role=owner`, icon: MessageSquare, label: "Messages" },
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
     { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
     { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
@@ -227,7 +225,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const passengerNavItems = [
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
     { href: `/profile?role=passenger`, icon: User, label: "Profile" },
-    { href: `/messages?role=passenger`, icon: MessageSquare, label: "Messages" },
     { href: `/community`, icon: Users, label: "Community Hub" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/history?role=passenger`, icon: History, label: "History" },
@@ -284,12 +281,12 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     <SidebarProvider>
       <Sidebar collapsible="icon">
         <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
-            <h1 className="text-xl font-bold">
-              Mana<span className="text-accent">Krushi</span>
-            </h1>
-          </div>
+           <div className="flex items-center gap-2">
+                <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
+                <div className="text-xl font-bold">
+                    <span>Mana</span><span className="text-accent">Krushi</span>
+                </div>
+            </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
@@ -401,5 +398,3 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     </SidebarProvider>
   );
 }
-
-    
