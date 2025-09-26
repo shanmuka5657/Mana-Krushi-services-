@@ -234,7 +234,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         <SidebarHeader>
            <div className="flex items-center gap-2">
                 <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
-                <h2 className="text-xl font-bold">Mana Krushi</h2>
+                <h2 className="text-lg font-bold">Mana Krushi</h2>
             </div>
         </SidebarHeader>
         <SidebarContent>
