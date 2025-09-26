@@ -56,8 +56,6 @@ const ownerFormSchema = z.object({
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
-  pickupPoints: z.string().optional(),
-  dropOffPoints: z.string().optional(),
   distance: z.coerce.number().optional(),
   travelDate: z.date({
     required_error: "A travel date is required.",
@@ -115,8 +113,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         driverMobile: (profile.mobile && profile.mobile !== '0000000000') ? profile.mobile : "",
         fromLocation: "",
         toLocation: "",
-        pickupPoints: "",
-        dropOffPoints: "",
         distance: 0,
         departureTime: "09:00",
         arrivalTime: "18:00",
@@ -475,34 +471,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   )}
                   />
               </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <FormField
-                    control={form.control}
-                    name="pickupPoints"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Pickup Points (Optional)</FormLabel>
-                        <FormControl>
-                            <Textarea placeholder="e.g., Kukatpally, Ameerpet" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="dropOffPoints"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Drop Points (Optional)</FormLabel>
-                        <FormControl>
-                            <Textarea placeholder="e.g., Dilsukhnagar, LB Nagar" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+              <div className="grid grid-cols-1 gap-4">
                 <FormField
                     control={form.control}
                     name="distance"
@@ -676,3 +645,4 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
+

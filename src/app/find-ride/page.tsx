@@ -73,13 +73,8 @@ function FindRideResultsPage() {
 
                 const routeDate = new Date(route.travelDate);
                 const searchFromLower = from.trim().toLowerCase();
-                const pickupPointsArray = typeof route.pickupPoints === 'string'
-                    ? route.pickupPoints.split(',').map(p => p.trim().toLowerCase())
-                    : Array.isArray(route.pickupPoints) ? route.pickupPoints.map(p => p.trim().toLowerCase()) : [];
 
-
-                const fromMatch = route.fromLocation.trim().toLowerCase() === searchFromLower ||
-                                  pickupPointsArray.includes(searchFromLower);
+                const fromMatch = route.fromLocation.trim().toLowerCase() === searchFromLower;
 
                 const toMatch = route.toLocation.trim().toLowerCase() === to.trim().toLowerCase();
 
