@@ -390,7 +390,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="hidden md:block space-y-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                     control={form.control}
                     name="ownerName"
@@ -472,7 +472,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
                     name="distance"
