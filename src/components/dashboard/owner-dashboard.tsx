@@ -447,8 +447,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 items-end">
-                  <FormField
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
                   control={form.control}
                   name="fromLocation"
                   render={({ field }) => (
@@ -476,7 +476,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   />
               </div>
 
-              <div className="grid grid-cols-3 gap-4 items-end">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                     control={form.control}
                     name="pickupPoints"
@@ -680,5 +680,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     
 
     
+
 
 
