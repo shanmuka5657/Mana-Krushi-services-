@@ -73,10 +73,15 @@ function FindRideResultsPage() {
 
                 const routeDate = new Date(route.travelDate);
                 const searchFromLower = from.trim().toLowerCase();
+                const searchToLower = to.trim().toLowerCase();
+                const routeFromLower = route.fromLocation.trim().toLowerCase();
+                const routeToLower = route.toLocation.trim().toLowerCase();
 
-                const fromMatch = route.fromLocation.trim().toLowerCase() === searchFromLower;
-
-                const toMatch = route.toLocation.trim().toLowerCase() === to.trim().toLowerCase();
+                // Flexible matching:
+                // - The user's search term contains the route's location (e.g., search "Hyderabad" contains route "Gachibowli")
+                // - The route's location contains the user's search term (e.g., route "Hyderabad" contains search "Gachibowli")
+                const fromMatch = searchFromLower.includes(routeFromLower) || routeFromLower.includes(searchFromLower);
+                const toMatch = searchToLower.includes(routeToLower) || routeToLower.includes(searchToLower);
 
                 return fromMatch && toMatch && routeDate >= today;
             });
