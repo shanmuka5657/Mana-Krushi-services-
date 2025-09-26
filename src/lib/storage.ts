@@ -1,6 +1,5 @@
 
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
-import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { 
     collection, 
     getDocs, 
@@ -362,7 +361,7 @@ const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: strin
                 const searchFromLower = searchParams.from.trim().toLowerCase();
                 routes = routes.filter(route => 
                     route.fromLocation.trim().toLowerCase() === searchFromLower ||
-                    route.pickupPoints?.some(p => p.trim().toLowerCase() === searchFromLower)
+                    (route as any).pickupPoints?.some((p:string) => p.trim().toLowerCase() === searchFromLower)
                 );
             }
         }
@@ -770,13 +769,9 @@ export const getGlobalVideoUrl = async (): Promise<string | null> => {
     return url;
 }
 
-export const onGlobalVideoUrlChange = (callback: (url: string | null) => void) => {
-    if (!isBrowser) return () => {};
-    return onSettingChange('backgroundVideoUrl', callback);
-};
-
 export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
     if (!isBrowser || !db) return () => {};
+    perfTracker.increment({ reads: 1, writes: 0 });
     return onSnapshot(doc(db, "settings", "isGlobalVideoPlayerVisible"), (doc) => {
         const value = doc.data()?.value;
         callback(value === null || value === undefined ? true : value);

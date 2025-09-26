@@ -2,28 +2,8 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
     getFirestore, 
-    collection, 
-    getDocs, 
-    doc, 
-    setDoc, 
-    query, 
-    where, 
-    writeBatch, 
-    documentId, 
-    terminate, 
-    onSnapshot, 
-    deleteDoc, 
-    getDoc, 
-    serverTimestamp, 
-    addDoc, 
-    orderBy,
     initializeFirestore,
-    persistentLocalCache,
-    limit,
-    updateDoc,
-    enableNetwork,
-    disableNetwork,
-    getCountFromServer,
+    persistentLocalCache
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
