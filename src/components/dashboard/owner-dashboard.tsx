@@ -398,7 +398,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   control={form.control}
                   name="ownerName"
                   render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="hidden md:block">
                       <FormLabel>Owner Name</FormLabel>
                       <FormControl>
                           <div className="relative">
@@ -414,7 +414,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   control={form.control}
                   name="driverName"
                   render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="hidden md:block">
                       <FormLabel>Driver Name</FormLabel>
                       <FormControl>
                           <div className="relative">
@@ -432,7 +432,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   control={form.control}
                   name="driverMobile"
                   render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="hidden md:block">
                       <FormLabel>Driver Mobile</FormLabel>
                       <FormControl>
                       <div className="relative">
