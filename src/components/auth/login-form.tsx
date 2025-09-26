@@ -20,10 +20,12 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import React, { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Download, QrCode } from 'lucide-react';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { signInWithEmail } from '@/lib/auth';
 import { getProfile } from '@/lib/storage';
+import QRCode from 'qrcode.react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -35,6 +37,41 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { defaultLogo } = placeholderImages;
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isAppInstallable, setIsAppInstallable] = useState(false);
+  const [loginUrl, setLoginUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        setLoginUrl(window.location.href);
+    }
+    
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setIsAppInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        toast({ title: 'Installation successful!' });
+      } else {
+        toast({ title: 'Installation dismissed.' });
+      }
+      setInstallPrompt(null);
+      setIsAppInstallable(false);
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -128,6 +165,42 @@ export function LoginForm() {
             </Link>
           </div>
         </CardContent>
+         <CardFooter className="flex flex-col gap-4">
+            <div className='relative w-full flex items-center justify-center text-xs uppercase text-muted-foreground'>
+                <div className='absolute inset-0 flex items-center'>
+                    <div className='w-full border-t border-border'></div>
+                </div>
+                <span className='relative bg-card px-2'>OR</span>
+            </div>
+
+            {isAppInstallable && (
+                <Button variant="outline" className="w-full" onClick={handleInstallClick}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Install App
+                </Button>
+            )}
+            
+             <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                        <QrCode className="mr-2 h-4 w-4" />
+                        Scan to Install
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xs">
+                    <DialogHeader>
+                        <DialogTitle>Scan to Install App</DialogTitle>
+                        <DialogDescription>
+                            Open your phone's camera and point it at the QR code to open this page and install the app.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center justify-center p-4 bg-white rounded-lg">
+                       {loginUrl && <QRCode value={loginUrl} size={200} />}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+        </CardFooter>
       </Card>
     </>
   );
