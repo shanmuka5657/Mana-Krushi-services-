@@ -836,5 +836,3 @@ ${booking.driverName}
 };
 
 export default MyRoutes;
-
-    

@@ -518,7 +518,3 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 };
 
 export default RecentBookings;
-
-
-
-
