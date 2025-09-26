@@ -42,7 +42,7 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, 
       pn: PAYEE_NAME,
       am: amount,
       cu: "INR",
-      tn: `Fee for Ride Sharing App - ${title}`
+      tn: `Payment for service - ${title}`
   });
 
   const paymentUrl = `upi://pay?${upiParams.toString()}`;
