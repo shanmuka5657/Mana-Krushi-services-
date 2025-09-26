@@ -6,8 +6,8 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { getBookings, getCurrentUser, getCurrentUserName, getCurrentUserRole, saveBookings, getNextRideForUser, updateBookingLocation } from '@/lib/storage';
-import type { Booking } from '@/lib/types';
+import { getBookings, getCurrentUser, getCurrentUserName, saveBookings, getNextRideForUser, updateBookingLocation, getProfile } from '@/lib/storage';
+import type { Booking, Profile } from '@/lib/types';
 import { Loader2, Gamepad2, Calendar, Clock, User, Play, Phone, Info, Hash, Ghost, Shell, Timer, Share2, MapPin } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -49,19 +49,21 @@ function GamesPageContent() {
     const [passengerCount, setPassengerCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [timeLeft, setTimeLeft] = useState('');
-    const [userRole, setUserRole] = useState<string | null>(null);
+    const [userProfile, setUserProfile] = useState<Profile | null>(null);
     const locationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const fetchLatestBooking = async () => {
-            const role = getCurrentUserRole();
-            setUserRole(role);
             const userEmail = getCurrentUser();
-
             if (!userEmail) {
                 setIsLoading(false);
                 return;
             }
+
+            const profile = await getProfile(userEmail);
+            setUserProfile(profile);
+            const role = profile?.role || 'passenger';
+            
 
             const nextRide = await getNextRideForUser(userEmail, role as 'owner' | 'passenger');
             
@@ -236,9 +238,9 @@ ${latestBooking.client}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {userRole === 'owner' && driverRide ? (
+                        {userProfile?.role === 'owner' && driverRide ? (
                              <DriverRideCard ride={driverRide} passengers={passengerCount} />
-                        ) : userRole === 'passenger' && latestBooking ? (
+                        ) : userProfile?.role === 'passenger' && latestBooking ? (
                             <Card className="bg-muted/50">
                                 <CardHeader>
                                     <CardTitle>Your Next Ride</CardTitle>

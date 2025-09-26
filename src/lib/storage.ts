@@ -397,15 +397,7 @@ export const getCurrentUserName = (): string | null => {
     // This is a workaround to get the name, ideally it should come from the profile
     return user?.displayName || user?.email?.split('@')[0] || null;
 };
-export const getCurrentUserRole = (): string | null => {
-    // This is a bit of a hack, as role is not stored on the auth user.
-    // This will be replaced by a proper claim-based system later.
-     if (!isBrowser) return null;
-     const email = getCurrentUser();
-     if(email === 'mana-krushi-admin@google.com') return 'admin';
-     // In a real app, this would be fetched from the profile
-     return 'passenger'; // Placeholder
-};
+
 export const clearCurrentUser = () => {
     // This is now handled by signOut and cache clearing
     clearCache();
