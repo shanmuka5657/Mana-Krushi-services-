@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle, LocateFixed } from "lucide-react";
 import { format, addDays, parse, isToday } from "date-fns";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -43,7 +43,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { getProfile, saveProfile, getCurrentUser, getRoutes, getBookings, getRouteViews, saveBookings } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile, Route, Booking } from "@/lib/types";
-import { calculateDistance, getMapSuggestions } from "@/app/actions";
+import { calculateDistance, getMapSuggestions, reverseGeocode } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -94,6 +94,99 @@ const getTravelDuration = (departureTime?: string, arrivalTime?: string): string
     }
 }
 
+// --- Location Autocomplete Component ---
+const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUseCurrentLocation }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string, onUseCurrentLocation?: () => void }) => {
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [query, setQuery] = useState(field.value || '');
+    const [isFocused, setIsFocused] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        setQuery(field.value);
+    }, [field.value]);
+
+    const fetchSuggestions = async (searchQuery: string) => {
+        if (searchQuery.length < 2) {
+            setSuggestions([]);
+            return;
+        }
+        setIsLoading(true);
+        const result = await getMapSuggestions(searchQuery);
+        setIsLoading(false);
+
+        if (result.error) {
+            console.error(result.error);
+            setSuggestions([]);
+        } else if (result.suggestions) {
+            setSuggestions(result.suggestions);
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setQuery(value);
+        field.onChange(value);
+
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+        debounceTimeout.current = setTimeout(() => {
+            fetchSuggestions(value);
+        }, 300); // 300ms debounce
+    };
+
+    const handleSuggestionClick = (suggestion: any) => {
+        const locationName = suggestion.placeName;
+        setQuery(locationName);
+        onLocationSelect(locationName);
+        setSuggestions([]);
+        setIsFocused(false);
+    };
+
+    return (
+        <div className="relative">
+             <div className="flex gap-2">
+                <div className="relative flex-grow">
+                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        {...field}
+                        value={query}
+                        onChange={handleInputChange}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay to allow click
+                        className="pl-10"
+                        autoComplete="off"
+                        placeholder={placeholder}
+                    />
+                    {isLoading && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />}
+                </div>
+                {onUseCurrentLocation && (
+                    <Button type="button" variant="outline" size="icon" onClick={onUseCurrentLocation} disabled={isLoading}>
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+                        <span className="sr-only">Use current location</span>
+                    </Button>
+                )}
+            </div>
+            {isFocused && suggestions.length > 0 && (
+                <ul className="absolute z-10 w-full bg-card border rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
+                    {suggestions.map((suggestion, index) => (
+                        <li
+                            key={suggestion.eLoc || index}
+                            onMouseDown={() => handleSuggestionClick(suggestion)} // Use onMouseDown to fire before onBlur
+                            className="px-4 py-2 hover:bg-muted cursor-pointer"
+                        >
+                            <p className="font-semibold text-sm">{suggestion.placeName}</p>
+                            <p className="text-xs text-muted-foreground">{suggestion.placeAddress}</p>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
+
 export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: OwnerDashboardProps) {
   const { toast } = useToast();
   const router = useRouter();
@@ -109,6 +202,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const [selectedRouteForView, setSelectedRouteForView] = useState<Route | null>(null);
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
 
   const form = useForm<OwnerFormValues>({
@@ -202,6 +296,36 @@ useEffect(() => {
         form.setValue('availableSeats', 1);
     }
   }, [vehicleType, form]);
+
+  const handleUseCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({ title: "Geolocation is not supported by your browser.", variant: "destructive" });
+      return;
+    }
+    
+    setIsGettingLocation(true);
+    toast({ title: "Getting your location..." });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const result = await reverseGeocode(latitude, longitude);
+        setIsGettingLocation(false);
+
+        if (result.error) {
+          toast({ title: "Could not get address", description: result.error, variant: "destructive" });
+        } else if (result.address) {
+          form.setValue("fromLocation", result.address, { shouldValidate: true });
+          toast({ title: "Location set!", description: result.address });
+        }
+      },
+      () => {
+        setIsGettingLocation(false);
+        toast({ title: "Unable to retrieve your location.", description: "Please ensure location permissions are enabled.", variant: "destructive" });
+      }
+    );
+  };
+
 
   async function onSubmit(data: OwnerFormValues) {
     const ownerEmail = getCurrentUser();
@@ -534,7 +658,7 @@ useEffect(() => {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                       control={form.control}
                       name="fromLocation"
@@ -542,7 +666,12 @@ useEffect(() => {
                           <FormItem>
                               <FormLabel>From</FormLabel>
                               <FormControl>
-                                  <Input placeholder="Enter starting location" {...field} />
+                                  <LocationAutocompleteInput
+                                        field={field}
+                                        onLocationSelect={(location) => form.setValue('fromLocation', location)}
+                                        placeholder="Starting point"
+                                        onUseCurrentLocation={handleUseCurrentLocation}
+                                    />
                               </FormControl>
                               <FormMessage />
                           </FormItem>
@@ -555,7 +684,11 @@ useEffect(() => {
                           <FormItem>
                               <FormLabel>To</FormLabel>
                               <FormControl>
-                                  <Input placeholder="Enter destination" {...field} />
+                                  <LocationAutocompleteInput
+                                    field={field}
+                                    onLocationSelect={(location) => form.setValue('toLocation', location)}
+                                    placeholder="Destination"
+                                  />
                               </FormControl>
                               <FormMessage />
                           </FormItem>

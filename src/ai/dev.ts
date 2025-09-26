@@ -8,3 +8,4 @@ import '@/ai/flows/toll-calculator.ts';
 import '@/ai/flows/movie-finder.ts';
 import '@/ai/flows/crop-logo-flow.ts';
 import '@/ai/flows/location-suggester.ts';
+import '@/ai/flows/reverse-geocode-flow.ts';

@@ -7,6 +7,7 @@ import { calculateToll as calculateTollFlow } from "@/ai/flows/toll-calculator";
 import { findMovie as findMovieFlow } from "@/ai/flows/movie-finder";
 import { cropLogo as cropLogoFlow } from "@/ai/flows/crop-logo-flow";
 import { suggestLocations as suggestLocationsFlow } from "@/ai/flows/location-suggester";
+import { reverseGeocode as reverseGeocodeFlow } from "@/ai/flows/reverse-geocode-flow";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
@@ -161,7 +162,16 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
 }
 
 export async function reverseGeocode(lat: number, lon: number): Promise<{ address?: string, error?: string }> {
-    return { error: "Location service is temporarily unavailable." };
+    try {
+        const result = await reverseGeocodeFlow({ latitude: lat, longitude: lon });
+        if (result.address) {
+            return { address: result.address };
+        }
+        return { error: "Could not determine address from coordinates." };
+    } catch (e) {
+        console.error("AI reverse geocode failed:", e);
+        return { error: "Failed to get address from AI." };
+    }
 }
 
 const BroadcastNotificationInput = z.object({
