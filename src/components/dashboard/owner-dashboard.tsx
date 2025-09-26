@@ -448,37 +448,37 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                     )}
                 />
               </div>
-
+              
               <div className="grid grid-cols-2 gap-4">
                   <FormField
-                  control={form.control}
-                  name="fromLocation"
-                  render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>From</FormLabel>
-                      <FormControl>
-                          <Input placeholder="Enter starting location" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
+                      control={form.control}
+                      name="fromLocation"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>From</FormLabel>
+                              <FormControl>
+                                  <Input placeholder="Enter starting location" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
                   />
                   <FormField
-                  control={form.control}
-                  name="toLocation"
-                  render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>To</FormLabel>
-                      <FormControl>
-                           <Input placeholder="Enter destination" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
+                      control={form.control}
+                      name="toLocation"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>To</FormLabel>
+                              <FormControl>
+                                  <Input placeholder="Enter destination" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
                   />
               </div>
-
-             <div className="grid grid-cols-2 gap-4 items-end">
+              
+              <div className="grid grid-cols-2 gap-4 items-end">
                 <FormField
                     control={form.control}
                     name="distance"
@@ -538,25 +538,21 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   )}
                   />
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                   <FormField
                       control={form.control}
                       name="departureTime"
                       render={({ field }) => (
                           <FormItem>
-                          <FormLabel>Dep Time</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormLabel>Dep Time</FormLabel>
                               <FormControl>
-                              <SelectTrigger>
-                                  <SelectValue />
-                              </SelectTrigger>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input type="time" className="pl-10" {...field} />
+                                </div>
                               </FormControl>
-                              <SelectContent>
-                                  {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
-                              </SelectContent>
-                          </Select>
-                          <FormMessage />
+                              <FormMessage />
                           </FormItem>
                       )}
                   />
@@ -565,18 +561,14 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                       name="arrivalTime"
                       render={({ field }) => (
                           <FormItem>
-                          <FormLabel>Arrival Time</FormLabel>
-                           <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormLabel>Arrival Time</FormLabel>
                               <FormControl>
-                              <SelectTrigger>
-                                  <SelectValue />
-                              </SelectTrigger>
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input type="time" className="pl-10" {...field} />
+                                </div>
                               </FormControl>
-                              <SelectContent>
-                                  {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
-                              </SelectContent>
-                          </Select>
-                          <FormMessage />
+                              <FormMessage />
                           </FormItem>
                       )}
                   />
