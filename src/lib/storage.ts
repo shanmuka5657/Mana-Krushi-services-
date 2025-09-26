@@ -1,9 +1,10 @@
 
 
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore, getBookingFromFirestore, onChatMessagesFromFirestore, sendChatMessageToFirestore, getRouteFromFirestore, getDoc, doc, setDoc } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore, getBookingFromFirestore, onChatMessagesFromFirestore, sendChatMessageToFirestore, getRouteFromFirestore, getDoc, doc, setDoc, getDocs, collection, writeBatch } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
@@ -55,6 +56,39 @@ export const setLocationCache = async (query: string, suggestions: any[]) => {
     const docRef = doc(db, "location_cache", queryKey);
     perfTracker.increment({ reads: 0, writes: 1 });
     await setDoc(docRef, { suggestions, timestamp: new Date() });
+};
+
+export const getLocationCacheContents = async (): Promise<{id: string, suggestions: any[]}[]> => {
+    if (!isBrowser || !db) return [];
+    try {
+        const cacheCollection = collection(db, "location_cache");
+        perfTracker.increment({ reads: 1, writes: 0 }); // Reading multiple docs
+        const snapshot = await getDocs(cacheCollection);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            suggestions: doc.data().suggestions,
+        }));
+    } catch (e) {
+        console.error("Error fetching location cache contents:", e);
+        return [];
+    }
+};
+
+export const clearLocationCache = async () => {
+    if (!isBrowser || !db) return;
+    try {
+        const cacheCollection = collection(db, "location_cache");
+        perfTracker.increment({ reads: 1, writes: 0 });
+        const snapshot = await getDocs(cacheCollection);
+        const batch = writeBatch(db);
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        perfTracker.increment({ reads: 0, writes: 1 }); // Batch write
+        await batch.commit();
+    } catch (e) {
+        console.error("Error clearing location cache:", e);
+    }
 };
 
 
@@ -454,6 +488,7 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
 
 
 
