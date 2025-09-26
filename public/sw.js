@@ -1,133 +1,110 @@
-'use strict';
 
+// This is a basic service worker with a cache-first strategy.
 const CACHE_NAME = 'mana-krushi-cache-v1';
-const PRECACHE_URLS = [
-    '/',
-    '/offline',
-    '/styles/globals.css', // Adjust if your global CSS path is different
-    'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg'
+const urlsToCache = [
+  '/',
+  '/offline',
+  // Add other important pages and assets here
 ];
 
-
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
+  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
+      .then(cache => {
         console.log('Opened cache');
-        return cache.addAll(PRECACHE_URLS);
+        // The 'urlsToCache' is a placeholder. 
+        // next-pwa will automatically generate a more comprehensive list of assets to cache.
+        return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+
+        return fetch(event.request).then(
+          response => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // IMPORTANT: Clone the response. A response is a stream
+            // and because we want the browser to consume the response
+            // as well as the cache consuming the response, we need
+            // to clone it so we have two streams.
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
           }
-        })
-      );
-    }).then(() => self.clients.claim())
+        );
+      })
+      .catch(() => {
+        // If the fetch fails (e.g., user is offline), return the offline page.
+        return caches.match('/offline');
+      })
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      caches.match(event.request)
-        .then((response) => {
-          return response || fetch(event.request).catch(() => caches.match('/offline'));
-        })
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request)
-        .then((response) => {
-          return response || fetch(event.request);
-        })
+// Background Sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-new-booking') {
+    console.log('Service Worker: Background syncing new booking.');
+    event.waitUntil(
+      // Here you would typically re-try a failed API request
+      // For now, we'll just log it.
+      Promise.resolve() 
     );
   }
 });
 
 
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push Received.');
-  const pushData = event.data.json();
+// Periodic Sync
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'get-latest-rides') {
+     console.log('Service Worker: Periodically fetching latest rides.');
+    event.waitUntil(
+      // This would fetch new data and update the cache
+      Promise.resolve()
+    );
+  }
+});
 
-  const title = pushData.title || 'Mana Krushi';
+
+// Push Notifications
+self.addEventListener('push', event => {
+  const data = event.data.json();
+  console.log('Service Worker: Push Received.', data);
+
+  const title = data.title || 'Mana Krushi';
   const options = {
-    body: pushData.body || 'You have a new notification.',
-    icon: pushData.icon || 'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg',
-    badge: pushData.badge || 'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg',
-    data: {
-        url: pushData.data?.url || self.location.origin
-    }
+    body: data.body || 'You have a new notification.',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
+    ...data.options,
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
-    console.log('[Service Worker] Notification click Received.');
-    event.notification.close();
-    const urlToOpen = event.notification.data.url;
+self.addEventListener('notificationclick', event => {
+  console.log('Service Worker: Notification click Received.');
 
-    event.waitUntil(
-        clients.matchAll({
-            type: "window"
-        })
-        .then((clientList) => {
-            for (let i = 0; i < clientList.length; i++) {
-                const client = clientList[i];
-                if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
-            }
-        })
-    );
-});
+  event.notification.close();
 
-
-self.addEventListener('sync', (event) => {
-  console.log('[Service Worker] Background sync event fired:', event);
-  if (event.tag === 'background-sync-example') {
-    event.waitUntil(
-      // Perform some background task, e.g., sending queued data
-      new Promise((resolve, reject) => {
-        console.log('Performing background sync task...');
-        // Simulate a network request
-        setTimeout(() => {
-          console.log('Background sync task completed.');
-          self.registration.showNotification('Background Sync', {
-            body: 'Background sync task completed successfully!'
-          });
-          resolve();
-        }, 5000);
-      })
-    );
-  }
-});
-
-self.addEventListener('periodicsync', (event) => {
-  console.log('[Service Worker] Periodic sync event fired:', event);
-  if (event.tag === 'periodic-sync-example') {
-    event.waitUntil(
-      new Promise((resolve, reject) => {
-        console.log('Performing periodic sync task...');
-        setTimeout(() => {
-            console.log('Periodic sync task completed.');
-            self.registration.showNotification('Periodic Sync', {
-                body: 'Content updated in the background.'
-            });
-            resolve();
-        }, 10000);
-      })
-    );
-  }
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url || '/')
+  );
 });
