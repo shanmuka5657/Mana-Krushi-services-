@@ -1,9 +1,8 @@
 
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
+import { db, auth } from './firebase';
 import { 
-    db,
-    auth,
     collection, 
     getDocs, 
     doc, 
@@ -17,14 +16,12 @@ import {
     serverTimestamp, 
     addDoc, 
     orderBy,
-    initializeFirestore,
-    persistentLocalCache,
     limit,
     updateDoc,
-    enableNetwork,
-    disableNetwork,
     getCountFromServer,
-} from './firebase';
+    deleteDoc,
+} from 'firebase/firestore';
+
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
@@ -777,8 +774,8 @@ export const onGlobalVideoUrlChange = (callback: (url: string | null) => void) =
 };
 
 export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
-    if (!isBrowser) return () => {};
-    return onSnapshot(doc(db!, "settings", "isGlobalVideoPlayerVisible"), (doc) => {
+    if (!isBrowser || !db) return () => {};
+    return onSnapshot(doc(db, "settings", "isGlobalVideoPlayerVisible"), (doc) => {
         const value = doc.data()?.value;
         callback(value === null || value === undefined ? true : value);
     });
@@ -968,20 +965,9 @@ export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'pa
     sessionStorage.setItem('user_role', role);
 };
 
-
-// Deprecated branding functions, kept for compatibility, will be removed later.
-export const getGlobalLogoUrl = async (): Promise<string | null> => {
-    if (!isBrowser) return null;
-    perfTracker.increment({ reads: 1, writes: 0 });
-    const url = await getSetting('globalLogoUrl');
-    return url;
-};
-
 // New getSetting function to be used by other parts of the app
 export const getSetting = async (key: string): Promise<any> => {
     if (!isBrowser) return null;
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-
-    

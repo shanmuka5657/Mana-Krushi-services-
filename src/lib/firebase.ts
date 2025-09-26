@@ -56,4 +56,4 @@ if (typeof window !== 'undefined') {
     }
 }
 
-export { app, db, auth, storage, collection, getDocs, doc, setDoc, query, where, writeBatch, documentId, terminate, onSnapshot, deleteDoc, getDoc, serverTimestamp, addDoc, orderBy, initializeFirestore, persistentLocalCache, limit, updateDoc, enableNetwork, disableNetwork, getCountFromServer };
+export { app, db, auth, storage };
