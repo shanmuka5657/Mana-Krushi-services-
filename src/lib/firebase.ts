@@ -320,10 +320,15 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             const routeSnapshot = await getDocs(q);
             if (routeSnapshot.empty) return null;
             
-            const nextRoute = routeSnapshot.docs[0].data() as Route;
+            const nextRouteDoc = routeSnapshot.docs[0];
+            const nextRouteData = nextRouteDoc.data();
 
-            // To display the ride card, we need to convert the Route to a Booking-like object.
-            // This is a bit of a workaround because the card expects a Booking.
+            const nextRoute = {
+                ...nextRouteData,
+                id: nextRouteDoc.id,
+                travelDate: nextRouteData.travelDate.toDate()
+            } as Route
+
             const [depHours, depMinutes] = nextRoute.departureTime.split(':').map(Number);
             const departureDateTime = new Date(nextRoute.travelDate);
             departureDateTime.setHours(depHours, depMinutes, 0, 0);
@@ -334,23 +339,24 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
                 departureDate: departureDateTime,
                 driverName: nextRoute.driverName,
                 vehicleNumber: nextRoute.vehicleNumber,
-                status: 'Confirmed', // A route is always 'confirmed' for the driver.
-            } as Booking; // Cast to Booking to satisfy the component's type.
+                status: 'Confirmed', 
+            } as Booking;
 
         } else { // Passenger
             const q = query(
                 bookingsCollection,
                 where("clientEmail", "==", email),
-                where("status", "==", "Confirmed"),
                 where("departureDate", ">", now),
-                orderBy("departureDate", "asc"),
-                limit(1)
+                orderBy("departureDate", "asc")
             );
             const snapshot = await getDocs(q);
 
-            if (snapshot.empty) return null;
+            // Client-side filtering for 'Confirmed' status
+            const confirmedUpcomingBookings = snapshot.docs.filter(doc => doc.data().status === 'Confirmed');
             
-            const doc = snapshot.docs[0];
+            if (confirmedUpcomingBookings.length === 0) return null;
+            
+            const doc = confirmedUpcomingBookings[0];
             const data = doc.data();
             return {
                 ...data,
@@ -518,5 +524,3 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
-
-    
