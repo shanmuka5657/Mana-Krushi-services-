@@ -310,7 +310,6 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
     
     try {
         if (role === 'owner') {
-            // Simplified query to avoid composite index. Filter by owner, sort by date client-side.
             const q = query(
                 routesCollection,
                 where("ownerEmail", "==", email),
@@ -318,7 +317,6 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             const routeSnapshot = await getDocs(q);
             if (routeSnapshot.empty) return null;
             
-            // Client-side filtering and sorting
             const ownerRoutes = routeSnapshot.docs.map(doc => {
                 const data = doc.data();
                 return {
@@ -355,7 +353,6 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             } as Booking;
 
         } else { // Passenger
-            // Simplified query to avoid composite index
             const q = query(
                 bookingsCollection,
                 where("clientEmail", "==", email),
@@ -392,7 +389,28 @@ export const updateBookingInFirestore = async (bookingId: string, data: Partial<
 
 
 // --- Routes ---
-export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string }): Promise<Route[]> => {
+export const getRouteFromFirestore = async (routeId: string): Promise<Route | null> => {
+    if (!routesCollection || !routeId) return null;
+    try {
+        const docRef = doc(db, "routes", routeId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+                ...data,
+                id: docSnap.id,
+                travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
+            } as Route;
+        }
+        return null;
+    } catch (e) {
+        console.error("Error getting route from Firestore", e);
+        return null;
+    }
+};
+
+
+export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
     if (!routesCollection) return [];
     try {
         if (searchParams?.routeId) {
@@ -411,6 +429,10 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
 
         let q = query(routesCollection);
 
+        if (searchParams?.ownerEmail) {
+            q = query(q, where("ownerEmail", "==", searchParams.ownerEmail));
+        }
+        
         if (searchParams?.promoted) {
             q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()), orderBy("travelDate", "asc"), limit(5));
         } else if (searchParams?.date) {
@@ -526,4 +548,5 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
+
 

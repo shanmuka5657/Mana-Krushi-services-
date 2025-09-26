@@ -399,15 +399,11 @@ ${booking.driverName}
   };
 
   const handleGoToChat = () => {
-      if (bookingsForRoute.length > 0) {
-        const rideId = bookingsForRoute[0].id; // Use first booking as identifier for the ride
-        router.push(`/chat/${rideId}`);
+    if (selectedRoute) {
+        router.push(`/chat/${selectedRoute.id}`);
         setIsViewDialogOpen(false);
-    } else if (selectedRoute) {
-        // If there are no bookings yet, the owner still might want to see an empty chat room.
-        // The chat room creation is based on a booking ID, so we can't create one for a route with no bookings.
-        // A better approach would be to create chat based on Route ID. For now, we'll disable it.
-        toast({ title: "No Bookings Yet", description: "A chat room is created once the first passenger books this ride."});
+    } else {
+        toast({ title: "Error", description: "Could not find the selected route to open chat.", variant: "destructive"});
     }
   }
 
@@ -638,8 +634,7 @@ ${booking.driverName}
                   <p>No bookings for this route yet.</p>
                 )}
               </div>
-              {bookingsForRoute.length > 0 && (
-                <DialogFooter className="flex-col sm:flex-row sm:justify-between w-full">
+              <DialogFooter className="flex-col sm:flex-row sm:justify-between w-full">
                      <Button variant="outline" onClick={handleGoToChat}>
                         <MessagesSquare className="mr-2 h-4 w-4" />
                         Group Chat
@@ -649,7 +644,6 @@ ${booking.driverName}
                         Send Summary to Driver
                     </Button>
                 </DialogFooter>
-              )}
             </DialogContent>
         </Dialog>
         
@@ -842,4 +836,5 @@ ${booking.driverName}
 };
 
 export default MyRoutes;
+
 

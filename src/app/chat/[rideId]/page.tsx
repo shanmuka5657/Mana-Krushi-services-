@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { onChatMessages, sendChatMessage, getRideDetailsForChat } from '@/lib/storage';
 import { getCurrentUser, getProfile } from '@/lib/storage';
 import { Loader2, Send, ArrowLeft, Shield } from 'lucide-react';
-import type { ChatMessage, Booking, Profile } from '@/lib/types';
+import type { ChatMessage, Booking, Profile, Route } from '@/lib/types';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +22,7 @@ export default function ChatRoomPage() {
     
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
-    const [rideDetails, setRideDetails] = useState<Booking | null>(null);
+    const [rideDetails, setRideDetails] = useState<Route | null>(null);
     const [participants, setParticipants] = useState<Map<string, Profile>>(new Map());
     const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -101,7 +101,11 @@ export default function ChatRoomPage() {
         );
     }
     
-    const isRideCompleted = rideDetails.status === 'Completed' || rideDetails.status === 'Cancelled';
+    const [depHours, depMinutes] = rideDetails.departureTime.split(':').map(Number);
+    const departureDateTime = new Date(rideDetails.travelDate);
+    departureDateTime.setHours(depHours, depMinutes, 0, 0);
+
+    const isRideCompleted = departureDateTime < new Date();
 
     return (
         <AppLayout>
@@ -113,9 +117,9 @@ export default function ChatRoomPage() {
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                             <div className="flex-grow">
-                                <CardTitle>{rideDetails.destination}</CardTitle>
+                                <CardTitle>{rideDetails.fromLocation} to {rideDetails.toLocation}</CardTitle>
                                 <CardDescription>
-                                    {format(new Date(rideDetails.departureDate), 'PPP, p')}
+                                    {format(departureDateTime, 'PPP, p')}
                                 </CardDescription>
                             </div>
                              <div className="flex -space-x-2 overflow-hidden">
@@ -185,4 +189,3 @@ export default function ChatRoomPage() {
         </AppLayout>
     );
 }
-
