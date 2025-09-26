@@ -5,8 +5,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike } from "lucide-react";
-import { format, addDays, parse } from "date-fns";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode } from "lucide-react";
+import { format, addDays, parse, isToday } from "date-fns";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
@@ -20,8 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Popover,
@@ -41,13 +40,15 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { getProfile, saveProfile, getCurrentUser, getRoutes } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, getRoutes, getBookings, getRouteViews } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
-import type { Profile, Route } from "@/lib/types";
+import type { Profile, Route, Booking } from "@/lib/types";
 import { calculateDistance, getMapSuggestions } from "@/app/actions";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import MyRoutes from "./my-routes";
+
 
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
@@ -101,6 +102,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean, distance?: number }) | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [todaysRoutes, setTodaysRoutes] = useState<Route[]>([]);
+  const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
+  const [routeViewsMap, setRouteViewsMap] = useState<Map<string, number>>(new Map());
+  const [isTodaysRoutesLoading, setIsTodaysRoutesLoading] = useState(true);
+  const [selectedRouteForView, setSelectedRouteForView] = useState<Route | null>(null);
+
   
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
@@ -124,6 +131,59 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const fromLocation = useWatch({ control: form.control, name: 'fromLocation' });
   const toLocation = useWatch({ control: form.control, name: 'toLocation' });
   const vehicleType = useWatch({ control: form.control, name: 'vehicleType' });
+  
+  const fetchTodaysRoutesAndDetails = useCallback(async () => {
+    const ownerEmail = getCurrentUser();
+    if (!ownerEmail) {
+        setIsTodaysRoutesLoading(false);
+        return;
+    }
+    setIsTodaysRoutesLoading(true);
+
+    const allRoutes = await getRoutes(false, { ownerEmail });
+    const todayRoutes = allRoutes.filter(route => isToday(new Date(route.travelDate)));
+
+    setTodaysRoutes(todayRoutes);
+
+    if (todayRoutes.length > 0) {
+        const newBookedSeatsMap = new Map<string, number>();
+        const newRouteViewsMap = new Map<string, number>();
+
+        const bookingPromises = todayRoutes.map(route => {
+            const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
+            return getBookings(true, {
+                destination: `${route.fromLocation} to ${route.toLocation}`,
+                date: routeDate,
+                time: route.departureTime,
+            });
+        });
+
+        const viewPromises = todayRoutes.map(route => getRouteViews(route.id));
+
+        const [bookingsByRoute, viewsByRoute] = await Promise.all([
+            Promise.all(bookingPromises),
+            Promise.all(viewPromises),
+        ]);
+
+        todayRoutes.forEach((route, index) => {
+            const bookingsForThisRoute = bookingsByRoute[index];
+            const bookedSeats = bookingsForThisRoute
+                .filter(b => b.status !== 'Cancelled')
+                .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+            newBookedSeatsMap.set(route.id, bookedSeats);
+            newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
+        });
+
+        setBookedSeatsMap(newBookedSeatsMap);
+        setRouteViewsMap(newRouteViewsMap);
+    }
+    setIsTodaysRoutesLoading(false);
+}, []);
+
+useEffect(() => {
+    fetchTodaysRoutesAndDetails();
+}, [fetchTodaysRoutesAndDetails]);
+
   
   useEffect(() => {
     if (vehicleType === 'Bike') {
@@ -206,14 +266,15 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     }
   };
 
-  const handleRouteSubmission = (data: OwnerFormValues & { isPromoted?: boolean, distance?: number }) => {
-    onRouteAdded(data);
+  const handleRouteSubmission = async (data: OwnerFormValues & { isPromoted?: boolean, distance?: number }) => {
+    await onRouteAdded(data);
     toast({
       title: "Route Added!",
       description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
     });
     
-    router.push('/my-routes?role=owner');
+    // Refresh today's routes list
+    fetchTodaysRoutesAndDetails();
   }
   
   const handlePaymentSuccess = async () => {
@@ -222,11 +283,13 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     }
   }
 
-  const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
-      const hour = Math.floor(i / 2);
-      const minute = (i % 2) * 30;
-      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-  });
+  const handleViewBookings = (route: Route) => {
+    setSelectedRouteForView(route);
+  };
+  
+  if (selectedRouteForView) {
+      return <MyRoutes routes={[]} bookingIdFromUrl={selectedRouteForView.id} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -437,76 +500,76 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
               
               <div className="grid grid-cols-2 gap-4 items-end">
                 <FormField
-                  control={form.control}
-                  name="travelDate"
-                  render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>Travel Date</FormLabel>
-                      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                          <PopoverTrigger asChild>
-                          <FormControl>
-                              <Button
-                              variant={"outline"}
-                              className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                              )}
-                              >
-                              {field.value ? (
-                                  format(field.value, "MMM dd, yyyy")
-                              ) : (
-                                  <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                          </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={(date) => {
-                                  field.onChange(date)
-                                  setIsCalendarOpen(false)
-                              }}
-                              fromDate={new Date()}
-                              toDate={addDays(new Date(), 30)}
-                          />
-                          </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                      </FormItem>
-                  )}
-                  />
-                <FormField
-                  control={form.control}
-                  name="vehicleType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vehicle Type</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                            field.onChange(value);
-                            if (value === 'Bike') {
-                                form.setValue('availableSeats', 1);
-                            }
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select vehicle type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Car">Car</SelectItem>
-                          <SelectItem value="Bike">Bike</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    control={form.control}
+                    name="travelDate"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Travel Date</FormLabel>
+                        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                                >
+                                {field.value ? (
+                                    format(field.value, "MMM dd, yyyy")
+                                ) : (
+                                    <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={(date) => {
+                                    field.onChange(date)
+                                    setIsCalendarOpen(false)
+                                }}
+                                fromDate={new Date()}
+                                toDate={addDays(new Date(), 30)}
+                            />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                 />
+                 <FormField
+                    control={form.control}
+                    name="vehicleType"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Vehicle Type</FormLabel>
+                        <Select
+                            onValueChange={(value) => {
+                                field.onChange(value);
+                                if (value === 'Bike') {
+                                    form.setValue('availableSeats', 1);
+                                }
+                            }}
+                            defaultValue={field.value}
+                        >
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select vehicle type" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            <SelectItem value="Car">Car</SelectItem>
+                            <SelectItem value="Bike">Bike</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -580,6 +643,105 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           </Form>
           </CardContent>
       </Card>
+      
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold tracking-tight mb-4">Today's Routes</h2>
+        {isTodaysRoutesLoading ? (
+            <div className="flex items-center justify-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        ) : todaysRoutes.length > 0 ? (
+            <div className="space-y-4">
+                {todaysRoutes.map((route) => {
+                    const bookedSeats = bookedSeatsMap.get(route.id) || 0;
+                    const availableSeats = route.availableSeats - bookedSeats;
+                    const views = routeViewsMap.get(route.id) || 0;
+                    
+                    return (
+                       <Card key={route.id} className={cn("overflow-hidden transition-all", route.isPromoted && "border-yellow-400 border-2 bg-yellow-50/50 dark:bg-yellow-900/10")}>
+                            <CardContent className="p-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex gap-4">
+                                        <div>
+                                            <div className="font-semibold">{route.departureTime}</div>
+                                            <div className="text-sm text-muted-foreground">{getTravelDuration(route.departureTime, route.arrivalTime)}</div>
+                                            <div className="font-semibold mt-2">{route.arrivalTime}</div>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                            <div className="w-px h-10 bg-border my-1"></div>
+                                            <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold">{route.fromLocation}</div>
+                                            <div className="text-sm text-muted-foreground">{format(new Date(route.travelDate), "PPP")}</div>
+                                            {route.distance && (
+                                                <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
+                                                    <Milestone className="h-3 w-3" />
+                                                    <span>{route.distance.toFixed(0)} km</span>
+                                                </div>
+                                            )}
+                                            <div className="font-semibold mt-2">{route.toLocation}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-lg font-bold">
+                                            ₹{(route.price || 0).toFixed(2)}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                            <Users className="h-4 w-4" />
+                                            <span>{availableSeats > 0 ? `${availableSeats} seat${availableSeats > 1 ? 's' : ''} left` : 'Sold out'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap items-center justify-between mt-3 gap-2">
+                                     <div className="flex flex-wrap gap-2">
+                                        {route.isPromoted && (
+                                            <Badge variant="secondary" className="bg-yellow-200 text-yellow-800 border-yellow-300">
+                                                <Sparkles className="mr-1 h-3 w-3" />
+                                                Promoted
+                                            </Badge>
+                                        )}
+                                    </div>
+                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Eye className="h-4 w-4" />
+                                        <span>{views} views</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                             <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={profile.selfieDataUrl} />
+                                        <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <div className="font-semibold text-sm">{route.driverName}</div>
+                                        <div className="flex items-center gap-1">
+                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                            <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button size="sm" onClick={() => handleViewBookings(route)}>
+                                    View Bookings
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    )
+                })}
+            </div>
+        ) : (
+             <Card>
+                <CardContent className="py-12 flex flex-col items-center justify-center text-center">
+                    <h3 className="text-xl font-semibold">No Routes for Today</h3>
+                    <p className="text-muted-foreground mt-2 max-w-md">
+                        You have not added any routes for today. Add one using the form above.
+                    </p>
+                </CardContent>
+            </Card>
+        )}
+      </div>
     </div>
   );
 }
