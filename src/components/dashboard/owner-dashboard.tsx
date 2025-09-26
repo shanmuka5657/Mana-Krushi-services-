@@ -495,7 +495,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                     name="dropOffPoints"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Drop-off Points (Optional)</FormLabel>
+                        <FormLabel>Drop Points (Optional)</FormLabel>
                         <FormControl>
                             <Textarea placeholder="e.g., Dilsukhnagar, LB Nagar" {...field} />
                         </FormControl>
@@ -676,10 +676,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
-
-    
-
-    
-
-
-
