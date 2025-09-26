@@ -28,7 +28,7 @@ import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Lo
 import { format, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getProfile, onBookingsUpdate } from "@/lib/storage";
+import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUser, getProfile, onBookingsUpdate } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 
 
@@ -69,10 +69,12 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 
 
   useEffect(() => {
-    const role = getCurrentUserRole();
-    setUserRole(role);
+    const fetchUserRole = async () => {
+        const profile = await getProfile();
+        setUserRole(profile?.role || 'passenger');
+    }
+    fetchUserRole();
     const currentUserEmail = getCurrentUser();
-    const isAdmin = role === 'admin';
 
     const handleRealtimeUpdates = (allUserBookings: Booking[]) => {
         let filteredBookings;
@@ -88,7 +90,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
         
         // Sort by earliest date first for 'upcoming', latest first for others
         if (mode === 'upcoming') {
-            filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+            filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(a.departureDate).getTime());
         } else {
              filteredBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
         }
@@ -102,7 +104,8 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 
     // Only subscribe if we are not on the admin page (which passes all bookings)
     if (mode !== 'all') {
-        const searchParams = isAdmin ? undefined : { userEmail: currentUserEmail as string, role: role as 'passenger' | 'owner' };
+        const profileRole = userRole as 'passenger' | 'owner' | 'admin' | null;
+        const searchParams = (!profileRole || profileRole === 'admin') ? undefined : { userEmail: currentUserEmail as string, role: profileRole };
         const unsubscribe = onBookingsUpdate(handleRealtimeUpdates, searchParams);
         return () => unsubscribe();
     } else {
@@ -110,7 +113,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
          setIsLoading(false);
     }
 
-  }, [initialBookings, mode]);
+  }, [initialBookings, mode, userRole]);
 
 
 
@@ -506,3 +509,4 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 };
 
 export default RecentBookings;
+

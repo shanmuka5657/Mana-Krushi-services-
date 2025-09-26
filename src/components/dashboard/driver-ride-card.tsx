@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Badge } from '../ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Label } from '@/components/ui/label';
 
 
 interface DriverRideCardProps {
@@ -74,8 +73,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
                 setTimeLeft("Ride complete.");
                 clearInterval(intervalId);
                 if (locationIntervalRef.current) {
-                    clearInterval(locationIntervalRef.current);
-                    locationIntervalRef.current = null; // Clear ref after stopping
+                    clearInterval(locationIntervalRef.current); // Clear ref after stopping
                 }
                 return;
             }
@@ -223,7 +221,7 @@ ${booking.driverName}
                 </div>
                  {passengersForRide.length > 0 && (
                     <div className="pt-2">
-                        <Label className="text-xs text-muted-foreground">Passengers on this ride:</Label>
+                        
                         <div className="flex items-center space-x-2 mt-1">
                             <div className="flex -space-x-2 overflow-hidden">
                                 {passengersForRide.slice(0, 5).map(passenger => {
@@ -312,3 +310,4 @@ ${booking.driverName}
         </>
     );
 }
+

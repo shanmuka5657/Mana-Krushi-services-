@@ -54,8 +54,7 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
     
     // Security check: ensure current user is part of the ride
     const isDriver = rideBooking.driverEmail === currentUserEmail;
-    const isPassenger = rideBooking.clientEmail === currentUserEmail;
-
+    
     // We need to fetch all bookings for this ride to check if the user is a passenger on any of them
     const allBookingsForRide = await getBookings(true, {
         destination: rideBooking.destination,
@@ -296,7 +295,7 @@ export const updateBookingLocation = async (bookingId: string, location: { passe
 
 
 // --- Routes ---
-export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
+export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string }): Promise<Route[]> => {
     if (!isBrowser) return [];
 
     const cacheKey = JSON.stringify(searchParams || {});
@@ -397,13 +396,22 @@ export const getCurrentUserName = (): string | null => {
     // This is a workaround to get the name, ideally it should come from the profile
     return user?.displayName || user?.email?.split('@')[0] || null;
 };
-
+export const getCurrentUserRole = (): string | null => {
+    if (!isBrowser) return null;
+    return sessionStorage.getItem('user_role');
+}
 export const clearCurrentUser = () => {
-    // This is now handled by signOut and cache clearing
+    if (!isBrowser) return;
+    sessionStorage.removeItem('user_email');
+    sessionStorage.removeItem('user_name');
+    sessionStorage.removeItem('user_role');
     clearCache();
 };
 export const saveCurrentUser = (email: string, name: string, role: 'owner' | 'passenger' | 'admin') => {
-   // This is now handled by signUpWithEmail
+    if (!isBrowser) return;
+    sessionStorage.setItem('user_email', email);
+    sessionStorage.setItem('user_name', name);
+    sessionStorage.setItem('user_role', role);
 };
 
 
@@ -421,3 +429,4 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+

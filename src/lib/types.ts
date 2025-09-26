@@ -140,3 +140,4 @@ export const TollCalculatorOutputSchema = z.object({
     .describe('The estimated number of toll plazas along the route.'),
 });
 export type TollCalculatorOutput = z.infer<typeof TollCalculatorOutputSchema>;
+

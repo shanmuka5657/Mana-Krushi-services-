@@ -31,7 +31,7 @@ import { getAuth } from "firebase/auth";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
-import { format, startOfDay } from "date-fns";
+import { format } from "date-fns";
 
 // Your web app's Firebase configuration
 const firebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_ENV === 'production' 
@@ -310,11 +310,10 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
     
     try {
         if (role === 'owner') {
-            const todayStart = startOfDay(new Date());
-            // Simplified query: get all routes for the owner.
+            // Simplified query to avoid composite index. Filter by owner, sort by date client-side.
             const q = query(
                 routesCollection,
-                where("ownerEmail", "==", email)
+                where("ownerEmail", "==", email),
             );
             const routeSnapshot = await getDocs(q);
             if (routeSnapshot.empty) return null;
@@ -360,26 +359,23 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             const q = query(
                 bookingsCollection,
                 where("clientEmail", "==", email),
+                where("status", "==", "Confirmed"),
+                where("departureDate", ">", now),
+                orderBy("departureDate", "asc"),
+                limit(1)
             );
             const snapshot = await getDocs(q);
             
-            // Client side filtering to find the next confirmed, upcoming booking
-            const confirmedUpcomingBookings = snapshot.docs
-                .map(doc => {
-                    const data = doc.data();
-                    return {
-                        ...data,
-                        id: doc.id,
-                        departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
-                        returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
-                    } as Booking;
-                })
-                .filter(b => b.status === 'Confirmed' && b.departureDate > now)
-                .sort((a,b) => a.departureDate.getTime() - b.departureDate.getTime());
+            if (snapshot.empty) return null;
             
-            if (confirmedUpcomingBookings.length === 0) return null;
-            
-            return confirmedUpcomingBookings[0];
+            const doc = snapshot.docs[0];
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
         }
 
     } catch (e) {
@@ -396,7 +392,7 @@ export const updateBookingInFirestore = async (bookingId: string, data: Partial<
 
 
 // --- Routes ---
-export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
+export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string }): Promise<Route[]> => {
     if (!routesCollection) return [];
     try {
         if (searchParams?.routeId) {
@@ -415,12 +411,7 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
 
         let q = query(routesCollection);
 
-        if (searchParams?.ownerEmail) {
-            q = query(q, where("ownerEmail", "==", searchParams.ownerEmail));
-            // The query requiring an index was a combination of filtering by ownerEmail and ordering by travelDate.
-            // By removing the orderBy clause from the query, we avoid the need for the composite index.
-            // Sorting will now be handled client-side after fetching.
-        } else if (searchParams?.promoted) {
+        if (searchParams?.promoted) {
             q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()), orderBy("travelDate", "asc"), limit(5));
         } else if (searchParams?.date) {
             const searchDate = new Date(searchParams.date);
@@ -439,11 +430,6 @@ export const getRoutesFromFirestore = async (searchParams?: { from?: string, to?
             } as Route;
         });
         
-        // If we filtered by ownerEmail, sort the results now in the code
-        if (searchParams?.ownerEmail) {
-            routes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
-        }
-
         // Client-side filtering for other params (if not a promoted-only query)
         if (!searchParams?.promoted) {
             if (searchParams?.to) {
@@ -540,3 +526,4 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
+
