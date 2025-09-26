@@ -447,7 +447,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
+              <div className="grid grid-cols-2 gap-4 items-end">
                   <FormField
                   control={form.control}
                   name="fromLocation"
@@ -476,7 +476,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
+              <div className="grid grid-cols-3 gap-4 items-end">
                 <FormField
                     control={form.control}
                     name="pickupPoints"
@@ -567,7 +567,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   )}
                   />
               
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-3 gap-4">
                   <FormField
                   control={form.control}
                   name="departureTime"
@@ -631,7 +631,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-4">
                   <FormField
                   control={form.control}
                   name="availableSeats"
@@ -680,4 +680,5 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     
 
     
+
 
