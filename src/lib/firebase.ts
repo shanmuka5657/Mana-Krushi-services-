@@ -304,23 +304,53 @@ export const saveBookingsToFirestore = async (bookings: Booking[]) => {
 };
 
 export const getNextRideForUserFromFirestore = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
-    if (!bookingsCollection || !email) return null;
+    if (!bookingsCollection || !routesCollection || !email) return null;
+    
+    const now = new Date();
+    
     try {
-        const fieldToQuery = role === 'owner' ? 'driverEmail' : 'clientEmail';
+        if (role === 'owner') {
+            const q = query(
+                routesCollection,
+                where("ownerEmail", "==", email),
+                where("travelDate", ">=", now),
+                orderBy("travelDate", "asc"),
+                limit(1)
+            );
+            const routeSnapshot = await getDocs(q);
+            if (routeSnapshot.empty) return null;
+            
+            const nextRoute = routeSnapshot.docs[0].data() as Route;
 
-        // Simplified query to fetch all bookings for the user.
-        const q = query(
-            bookingsCollection,
-            where(fieldToQuery, "==", email)
-        );
+            // To display the ride card, we need to convert the Route to a Booking-like object.
+            // This is a bit of a workaround because the card expects a Booking.
+            const [depHours, depMinutes] = nextRoute.departureTime.split(':').map(Number);
+            const departureDateTime = new Date(nextRoute.travelDate);
+            departureDateTime.setHours(depHours, depMinutes, 0, 0);
 
-        const snapshot = await getDocs(q);
+            return {
+                id: nextRoute.id,
+                destination: `${nextRoute.fromLocation} to ${nextRoute.toLocation}`,
+                departureDate: departureDateTime,
+                driverName: nextRoute.driverName,
+                vehicleNumber: nextRoute.vehicleNumber,
+                status: 'Confirmed', // A route is always 'confirmed' for the driver.
+            } as Booking; // Cast to Booking to satisfy the component's type.
 
-        if (snapshot.empty) {
-            return null;
-        }
+        } else { // Passenger
+            const q = query(
+                bookingsCollection,
+                where("clientEmail", "==", email),
+                where("status", "==", "Confirmed"),
+                where("departureDate", ">", now),
+                orderBy("departureDate", "asc"),
+                limit(1)
+            );
+            const snapshot = await getDocs(q);
 
-        const userBookings = snapshot.docs.map(doc => {
+            if (snapshot.empty) return null;
+            
+            const doc = snapshot.docs[0];
             const data = doc.data();
             return {
                 ...data,
@@ -328,15 +358,7 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
                 departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
                 returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
             } as Booking;
-        });
-
-        // Filter and sort in-memory. This is efficient enough for a single user's bookings.
-        const now = new Date();
-        const upcomingConfirmedRides = userBookings
-            .filter(b => b.status === 'Confirmed' && new Date(b.departureDate) > now)
-            .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-
-        return upcomingConfirmedRides[0] || null;
+        }
 
     } catch (e) {
         console.error("Error getting next ride:", e);
@@ -496,3 +518,5 @@ export const saveProfileToFirestore = async (profile: Profile) => {
 };
 
 export { app, db, auth, storage };
+
+    
