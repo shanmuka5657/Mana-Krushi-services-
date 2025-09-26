@@ -3,7 +3,24 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
     getFirestore, 
     initializeFirestore,
-    persistentLocalCache
+    persistentLocalCache,
+    collection,
+    getDocs,
+    doc,
+    setDoc,
+    query,
+    where,
+    writeBatch,
+    documentId,
+    onSnapshot,
+    getDoc,
+    serverTimestamp,
+    addDoc,
+    orderBy,
+    limit,
+    updateDoc,
+    getCountFromServer,
+    deleteDoc
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
@@ -36,5 +53,26 @@ if (typeof window !== 'undefined') {
     }
 }
 
-export { app, db, auth, storage };
-
+export { 
+    app, 
+    db, 
+    auth, 
+    storage,
+    collection,
+    getDocs,
+    doc,
+    setDoc,
+    query,
+    where,
+    writeBatch,
+    documentId,
+    onSnapshot,
+    getDoc,
+    serverTimestamp,
+    addDoc,
+    orderBy,
+    limit,
+    updateDoc,
+    getCountFromServer,
+    deleteDoc
+};

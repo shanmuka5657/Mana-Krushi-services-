@@ -1,25 +1,26 @@
 
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import { 
-    collection, 
-    getDocs, 
-    doc, 
-    setDoc, 
-    query, 
-    where, 
-    writeBatch, 
-    documentId, 
-    onSnapshot, 
-    getDoc, 
-    serverTimestamp, 
-    addDoc, 
+    db, 
+    auth,
+    collection,
+    getDocs,
+    doc,
+    setDoc,
+    query,
+    where,
+    writeBatch,
+    documentId,
+    onSnapshot,
+    getDoc,
+    serverTimestamp,
+    addDoc,
     orderBy,
     limit,
     updateDoc,
     getCountFromServer,
-    deleteDoc,
-} from 'firebase/firestore';
-import { db, auth } from './firebase';
+    deleteDoc
+} from './firebase';
 
 
 import { getDatabase, ref, set } from "firebase/database";
@@ -468,16 +469,18 @@ const getSettingFromFirestore = async (key: string): Promise<any | null> => {
 }
 
 const onSettingChange = (key: string, callback: (value: any) => void) => {
-    if (!db) return () => {};
+    if (!isBrowser || !db) return () => {};
+    perfTracker.increment({ reads: 1, writes: 0 }); // counts as one subscription
     const docRef = doc(db, "settings", key);
-    const unsubscribe = onSnapshot(docRef, (doc) => {
+    return onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
             callback(doc.data().value);
         } else {
             callback(null);
         }
+    }, (error) => {
+        console.error(`Error listening to setting "${key}":`, error);
     });
-    return unsubscribe;
 };
 
 // --- Chat ---
@@ -769,11 +772,16 @@ export const getGlobalVideoUrl = async (): Promise<string | null> => {
     return url;
 }
 
+export const onGlobalVideoUrlChange = (callback: (url: string | null) => void) => {
+    if (!isBrowser || !db) return () => {};
+    perfTracker.increment({ reads: 1, writes: 0 });
+    return onSettingChange('backgroundVideoUrl', callback);
+};
+
 export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
     if (!isBrowser || !db) return () => {};
     perfTracker.increment({ reads: 1, writes: 0 });
-    return onSnapshot(doc(db, "settings", "isGlobalVideoPlayerVisible"), (doc) => {
-        const value = doc.data()?.value;
+    return onSettingChange('isGlobalVideoPlayerVisible', (value) => {
         callback(value === null || value === undefined ? true : value);
     });
 };
@@ -968,5 +976,3 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-
-    
