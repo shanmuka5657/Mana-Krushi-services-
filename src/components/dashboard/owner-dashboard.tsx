@@ -217,6 +217,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         driverMobile: (profile.mobile && profile.mobile !== '0000000000') ? profile.mobile : "",
         fromLocation: "",
         toLocation: "",
+        travelDate: new Date(),
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -731,7 +732,7 @@ useEffect(() => {
                                 mode="single"
                                 selected={field.value}
                                 onSelect={(date) => {
-                                    field.onChange(date)
+                                    if (date) field.onChange(date);
                                     setIsCalendarOpen(false)
                                 }}
                                 fromDate={new Date()}
