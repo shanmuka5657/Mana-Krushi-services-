@@ -480,22 +480,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
               
               <div className="grid grid-cols-2 gap-4 items-end">
                 <FormField
-                    control={form.control}
-                    name="distance"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Distance (km)</FormLabel>
-                        <div className="relative">
-                            <FormControl>
-                                <Input type="number" placeholder="Distance" {...field} />
-                            </FormControl>
-                            {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
-                        </div>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                 <FormField
                   control={form.control}
                   name="travelDate"
                   render={({ field }) => (
@@ -537,36 +521,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                       </FormItem>
                   )}
                   />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
                   <FormField
-                      control={form.control}
-                      name="departureTime"
-                      render={({ field }) => (
-                          <FormItem>
-                              <FormLabel>Dep Time</FormLabel>
-                              <FormControl>
-                                <Input type="time" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                          </FormItem>
-                      )}
-                  />
-                  <FormField
-                      control={form.control}
-                      name="arrivalTime"
-                      render={({ field }) => (
-                          <FormItem>
-                              <FormLabel>Arrival Time</FormLabel>
-                              <FormControl>
-                                <Input type="time" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                          </FormItem>
-                      )}
-                  />
-                   <FormField
                   control={form.control}
                   name="vehicleType"
                   render={({ field }) => (
@@ -595,6 +550,35 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                     </FormItem>
                   )}
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                      control={form.control}
+                      name="departureTime"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Dep Time</FormLabel>
+                              <FormControl>
+                                <Input type="time" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="arrivalTime"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Arrival Time</FormLabel>
+                              <FormControl>
+                                <Input type="time" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                  />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
