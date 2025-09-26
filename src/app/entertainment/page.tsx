@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { findMovie } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { MovieSite, Profile } from '@/lib/types';
-import { saveGlobalVideoUrl, getGlobalVideoUrl, saveGlobalVideoVisibility, getGlobalVideoVisibility, getProfile } from '@/lib/storage';
+import { getProfile } from '@/lib/storage';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
@@ -48,29 +48,6 @@ function EntertainmentPageContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState<MovieSite[]>([]);
-    const [userRole, setUserRole] = useState<string | null>(null);
-    const [videoUrl, setVideoUrl] = useState('');
-    const [isPlayerVisible, setIsPlayerVisible] = useState(true);
-
-    useEffect(() => {
-        const fetchUserDataAndSettings = async () => {
-            const userProfile = await getProfile();
-            const role = userProfile?.role;
-            setUserRole(role || 'passenger');
-            
-            if (role === 'admin') {
-                const [currentUrl, currentVisibility] = await Promise.all([
-                    getGlobalVideoUrl(),
-                    getGlobalVideoVisibility(),
-                ]);
-                setVideoUrl(currentUrl || '');
-                setIsPlayerVisible(currentVisibility);
-            }
-        };
-
-        fetchUserDataAndSettings();
-        
-    }, []);
     
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -91,80 +68,9 @@ function EntertainmentPageContent() {
         }
     }
 
-    const handleSetVideoUrl = async () => {
-        if (!videoUrl.trim()) {
-            toast({ title: 'Please enter a YouTube URL.', variant: 'destructive' });
-            return;
-        }
-        await saveGlobalVideoUrl(videoUrl);
-        toast({ title: 'Video URL Updated!', description: 'The background video has been updated for all users.' });
-    };
-
-    const handleVisibilityToggle = async () => {
-        const newVisibility = !isPlayerVisible;
-        await saveGlobalVideoVisibility(newVisibility);
-        setIsPlayerVisible(newVisibility);
-        toast({
-            title: `Video Player ${newVisibility ? 'Enabled' : 'Disabled'}`,
-            description: `All users will ${newVisibility ? 'now see' : 'no longer see'} the video player.`
-        });
-    };
-
     return (
         <AppLayout>
             <div className="space-y-6">
-                {userRole === 'admin' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Master Admin Controls</CardTitle>
-                            <CardDescription>Manage global settings for all users.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="flex items-center justify-between p-4 border rounded-md">
-                                <div>
-                                    <Label htmlFor="visibility-toggle" className="font-medium flex items-center gap-2">
-                                        <Youtube />
-                                        Video Player
-                                    </Label>
-                                    <p className="text-sm text-muted-foreground">
-                                        {isPlayerVisible ? "Player is enabled for all users." : "Player is disabled for all users."}
-                                    </p>
-                                </div>
-                                <Button
-                                    id="visibility-toggle"
-                                    size="sm"
-                                    variant={isPlayerVisible ? "destructive" : "outline"}
-                                    onClick={handleVisibilityToggle}
-                                >
-                                    {isPlayerVisible ? (
-                                        <>
-                                            <PowerOff className="mr-2 h-4 w-4" />
-                                            Disable Player
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Power className="mr-2 h-4 w-4" />
-                                            Enable Player
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                             <div className="space-y-2 pt-4 border-t">
-                                 <Label htmlFor="video-url" className="font-medium">Set Background Video URL</Label>
-                                <div className="flex gap-2">
-                                    <Input 
-                                        id="video-url"
-                                        placeholder="Enter YouTube URL"
-                                        value={videoUrl}
-                                        onChange={(e) => setVideoUrl(e.target.value)}
-                                    />
-                                    <Button onClick={handleSetVideoUrl}>Set Video</Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-
                  <Card>
                     <CardHeader>
                         <CardTitle>Find a Movie</CardTitle>
