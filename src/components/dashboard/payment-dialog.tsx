@@ -42,7 +42,7 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, 
       pn: PAYEE_NAME,
       am: amount,
       cu: "INR",
-      tn: `Fee for Mana Krushi - ${title}`
+      tn: `Fee for Ride Sharing App - ${title}`
   });
 
   const paymentUrl = `upi://pay?${upiParams.toString()}`;
@@ -124,5 +124,3 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, 
     </Dialog>
   );
 }
-
-    
