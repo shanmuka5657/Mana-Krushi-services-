@@ -17,9 +17,13 @@ import {
     serverTimestamp, 
     addDoc, 
     orderBy,
+    initializeFirestore,
+    persistentLocalCache,
     limit,
     updateDoc,
-    getCountFromServer
+    enableNetwork,
+    disableNetwork,
+    getCountFromServer,
 } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
@@ -620,6 +624,20 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
 };
 
 
+// --- Settings ---
+export const onSettingChange = (key: string, callback: (value: any) => void) => {
+    if (!db) return () => {};
+    const docRef = doc(db, "settings", key);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            callback(doc.data().value);
+        } else {
+            callback(null);
+        }
+    });
+    return unsubscribe;
+};
+
 // --- Branding ---
 export const saveGlobalLogoUrl = async (url: string) => {
     if (!isBrowser) return;
@@ -753,6 +771,11 @@ export const getGlobalVideoUrl = async (): Promise<string | null> => {
     return url;
 }
 
+export const onGlobalVideoUrlChange = (callback: (url: string | null) => void) => {
+    if (!isBrowser) return () => {};
+    return onSettingChange('backgroundVideoUrl', callback);
+};
+
 export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
     if (!isBrowser) return () => {};
     return onSnapshot(doc(db!, "settings", "isGlobalVideoPlayerVisible"), (doc) => {
@@ -775,18 +798,6 @@ export const getGlobalVideoVisibility = async (): Promise<boolean> => {
     return isVisible === null ? true : isVisible; // Default to true if not set
 };
 
-export const onSettingChange = (key: string, callback: (value: any) => void) => {
-    if (!db) return () => {};
-    const docRef = doc(db, "settings", key);
-    const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-            callback(doc.data().value);
-        } else {
-            callback(null);
-        }
-    });
-    return unsubscribe;
-};
 
 // --- Bookings ---
 export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
@@ -972,3 +983,5 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
+    
