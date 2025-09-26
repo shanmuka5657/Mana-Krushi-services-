@@ -140,7 +140,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         setIsTodaysRoutesLoading(false);
         return;
     }
-    setIsTodaysRoutesLoading(true);
+    // Only show loader on initial load
+    if (isTodaysRoutesLoading) {
+      // no change, keep it as it is
+    } else {
+       setIsTodaysRoutesLoading(false);
+    }
 
     const allRoutes = await getRoutes(false, { ownerEmail });
     const todayRoutes = allRoutes.filter(route => isToday(new Date(route.travelDate)));
@@ -180,10 +185,15 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         setRouteViewsMap(newRouteViewsMap);
     }
     setIsTodaysRoutesLoading(false);
-}, []);
+}, [isTodaysRoutesLoading]);
 
 useEffect(() => {
-    fetchTodaysRoutesAndDetails();
+    fetchTodaysRoutesAndDetails(); // Initial fetch
+    const intervalId = setInterval(() => {
+        fetchTodaysRoutesAndDetails();
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
 }, [fetchTodaysRoutesAndDetails]);
 
   
