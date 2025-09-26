@@ -4,15 +4,44 @@
 
 
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore, getBookingFromFirestore, onChatMessagesFromFirestore, sendChatMessageToFirestore, getRouteFromFirestore, getDoc, doc, setDoc, getDocs } from './firebase';
+import { 
+    getBookingsFromFirestore, 
+    saveBookingsToFirestore, 
+    getRoutesFromFirestore, 
+    saveRoutesToFirestore, 
+    addRouteToFirestore, 
+    getProfileFromFirestore, 
+    saveProfileToFirestore, 
+    getAllProfilesFromFirestore, 
+    saveSetting, 
+    getSetting as getSettingFromFirestore, 
+    onSettingChange, 
+    addVisitToFirestore, 
+    getVisitsFromFirestore, 
+    getNextRideForUserFromFirestore, 
+    updateBookingInFirestore, 
+    onBookingsUpdateFromFirestore, 
+    addRouteViewToFirestore, 
+    getRouteViewsFromFirestore, 
+    getBookingFromFirestore, 
+    onChatMessagesFromFirestore, 
+    sendChatMessageToFirestore, 
+    getRouteFromFirestore,
+    db,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    setDoc,
+    writeBatch
+} from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
 import { perfTracker } from './perf-tracker';
-import { db } from "./firebase";
-import { collection, writeBatch } from "firebase/firestore";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -491,6 +520,7 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
 
 
 
