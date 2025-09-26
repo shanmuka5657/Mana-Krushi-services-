@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 export type Booking = {
   id: string;
+  routeId: string;
   bookingCode?: string;
   client: string;
   clientEmail?: string;
@@ -140,4 +141,5 @@ export const TollCalculatorOutputSchema = z.object({
     .describe('The estimated number of toll plazas along the route.'),
 });
 export type TollCalculatorOutput = z.infer<typeof TollCalculatorOutputSchema>;
+
 

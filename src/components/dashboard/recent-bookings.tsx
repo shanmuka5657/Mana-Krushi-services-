@@ -438,7 +438,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                         <Button variant="outline">Close</Button>
                     </DialogClose>
                      {userRole !== 'admin' && !isRideComplete(selectedBooking) && (
-                        <Button onClick={() => router.push(`/chat/${selectedBooking.id}`)}>
+                        <Button onClick={() => router.push(`/chat/${selectedBooking.routeId}`)}>
                             <MessagesSquare className="mr-2 h-4 w-4" />
                             Go to Chat
                         </Button>
@@ -509,4 +509,5 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 };
 
 export default RecentBookings;
+
 

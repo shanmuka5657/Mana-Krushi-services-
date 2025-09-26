@@ -186,6 +186,7 @@ export default function BookRidePage() {
 
     const bookingData: Booking = {
         id: newBookingRef.id,
+        routeId: route.id,
         bookingCode: newBookingCode,
         client: passengerProfile.name,
         clientEmail: passengerEmail,
@@ -305,7 +306,7 @@ MK Services
     
     const whatsappUrl = `https://wa.me/91${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    router.push('/games');
+    router.push('/dashboard?role=passenger');
   }
 
 
@@ -459,7 +460,7 @@ MK Services
                 </AlertDialogContent>
             </AlertDialog>
 
-            <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/games')}>
+            <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/dashboard?role=passenger')}>
                 <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Booking Confirmed!</AlertDialogTitle>
@@ -468,7 +469,7 @@ MK Services
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => router.push('/games')}>Skip</AlertDialogCancel>
+                    <AlertDialogCancel onClick={() => router.push('/dashboard?role=passenger')}>Skip</AlertDialogCancel>
                     <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
                         <MessageSquare className="mr-2 h-4 w-4" />
                         Notify Driver
