@@ -1,12 +1,14 @@
 
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore, getBookingFromFirestore, onChatMessagesFromFirestore, sendChatMessageToFirestore, getRouteFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore, getBookingFromFirestore, onChatMessagesFromFirestore, sendChatMessageToFirestore, getRouteFromFirestore, getDoc, doc, setDoc } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
 import { perfTracker } from './perf-tracker';
+import { db } from "./firebase";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -33,6 +35,28 @@ const clearCache = (key?: 'profiles' | 'allProfiles' | 'routes' | 'bookings') =>
         cache.bookings.clear();
     }
 }
+
+// --- Location Cache ---
+export const getLocationCache = async (query: string): Promise<any[] | null> => {
+    if (!isBrowser || !db) return null;
+    const queryKey = query.toLowerCase().trim();
+    const docRef = doc(db, "location_cache", queryKey);
+    perfTracker.increment({ reads: 1, writes: 0 });
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return docSnap.data().suggestions;
+    }
+    return null;
+};
+
+export const setLocationCache = async (query: string, suggestions: any[]) => {
+    if (!isBrowser || !db) return;
+    const queryKey = query.toLowerCase().trim();
+    const docRef = doc(db, "location_cache", queryKey);
+    perfTracker.increment({ reads: 0, writes: 1 });
+    await setDoc(docRef, { suggestions, timestamp: new Date() });
+};
+
 
 // --- Chat ---
 export const onChatMessages = (rideId: string, callback: (messages: ChatMessage[]) => void) => {
@@ -430,6 +454,7 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
 
 
 

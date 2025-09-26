@@ -1,5 +1,6 @@
 
 
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
     getFirestore, 
@@ -70,7 +71,7 @@ const chatsCollection = db ? collection(db, "chats") : null;
 
 // --- Chat ---
 export const onChatMessagesFromFirestore = (rideId: string, callback: (messages: ChatMessage[]) => void) => {
-    if (!chatsCollection) return () => {};
+    if (!chatsCollection || !db) return () => {};
     
     const q = query(collection(db, "chats", rideId, "messages"), orderBy("timestamp", "asc"));
     
@@ -92,7 +93,7 @@ export const onChatMessagesFromFirestore = (rideId: string, callback: (messages:
 };
 
 export const sendChatMessageToFirestore = async (rideId: string, senderEmail: string, text: string) => {
-    if (!chatsCollection) return;
+    if (!chatsCollection || !db) return;
     const messagesCol = collection(db, "chats", rideId, "messages");
     await addDoc(messagesCol, {
         senderEmail,
@@ -104,7 +105,7 @@ export const sendChatMessageToFirestore = async (rideId: string, senderEmail: st
 
 // --- Route Views ---
 export const addRouteViewToFirestore = async (routeId: string, sessionId: string) => {
-    if (!routeViewsCollection) return;
+    if (!routeViewsCollection || !db) return;
     // We create a unique ID based on routeId and sessionId to prevent counting the same session multiple times.
     const viewId = `${routeId}_${sessionId}`;
     const docRef = doc(db, "routeViews", viewId);
@@ -567,7 +568,4 @@ export const saveProfileToFirestore = async (profile: Profile) => {
     await setDoc(docRef, profileToSave, { merge: true });
 };
 
-export { app, db, auth, storage };
-
-
-
+export { app, db, auth, storage, doc, setDoc, getDoc };

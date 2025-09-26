@@ -10,7 +10,7 @@ import { suggestLocations as suggestLocationsFlow } from "@/ai/flows/location-su
 import { reverseGeocode as reverseGeocodeFlow } from "@/ai/flows/reverse-geocode-flow";
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
-import { getProfile, saveProfile, getCurrentUser } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, getLocationCache, setLocationCache } from "@/lib/storage";
 
 
 const SuggestDestinationsInput = z.object({
@@ -149,9 +149,17 @@ async function getMapmyIndiaToken(): Promise<string | null> {
 
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
     try {
+        // Check Firestore cache first
+        const cachedSuggestions = await getLocationCache(query);
+        if (cachedSuggestions) {
+            return { suggestions: cachedSuggestions };
+        }
+
+        // If not in cache, call the AI
         const result = await suggestLocationsFlow({ query });
         if (result.suggestions) {
-            // The AI returns an object that matches the structure MapMyIndia would, so we can just return it.
+            // Save to Firestore cache for future use
+            await setLocationCache(query, result.suggestions);
             return { suggestions: result.suggestions };
         }
         return { suggestions: [] };
