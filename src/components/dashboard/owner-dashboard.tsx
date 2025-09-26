@@ -542,7 +542,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   name="departureTime"
                   render={({ field }) => (
                       <FormItem>
-                      <FormLabel>Departure Time</FormLabel>
+                      <FormLabel>Dep Time</FormLabel>
                       <FormControl>
                           <div className="relative">
                           <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -645,3 +645,4 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
+
