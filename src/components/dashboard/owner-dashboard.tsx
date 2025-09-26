@@ -109,7 +109,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
     }, [field.value]);
 
     const fetchSuggestions = async (searchQuery: string) => {
-        const queryKey = searchQuery.toLowerCase();
+        const queryKey = searchQuery.toLowerCase().trim();
         if (queryKey.length < 2) {
             setSuggestions([]);
             return;
