@@ -1,0 +1,150 @@
+{
+  "Andhra Pradesh": [
+    "Visakhapatnam",
+    "Vijayawada",
+    "Guntur",
+    "Tirupati",
+    "Nellore",
+    "Kurnool",
+    "Rajahmundry",
+    "Kakinada",
+    "Anantapur",
+    "Eluru",
+    "Ongole",
+    "Chittoor",
+    "Kadapa"
+  ],
+  "Telangana": [
+    "Hyderabad",
+    "Warangal",
+    "Nizamabad",
+    "Karimnagar",
+    "Khammam",
+    "Ramagundam",
+    "Mahbubnagar",
+    "Nalgonda",
+    "Adilabad",
+    "Siddipet"
+  ],
+  "Visakhapatnam": [
+    "Gajuwaka",
+    "MVP Colony",
+    "Seethammadhara",
+    "Madhurawada",
+    "Dwaraka Nagar",
+    "RTC Complex",
+    "Jagadamba Centre",
+    "Rushikonda",
+    "Pendurthi",
+    "Anakapalle"
+  ],
+  "Vijayawada": [
+    "Benz Circle",
+    "Gannavaram",
+    "Auto Nagar",
+    "One Town",
+    "Besant Road",
+    "Eluru Road",
+    "Governorpet",
+    "Bhavanipuram",
+    "Ibrahimpatnam"
+  ],
+  "Guntur": [
+    "Brodipet",
+    "Arundelpet",
+    "Lakshmipuram",
+    "Pattabhipuram",
+    "Amaravati Road",
+    "Nallapadu",
+    "Vidya Nagar"
+  ],
+  "Tirupati": [
+    "Tirumala",
+    "Alipiri",
+    "RTC Bus Stand",
+    "Tiruchanur",
+    "Renigunta",
+    "Kapila Theertham",
+    "Srikalahasti"
+  ],
+  "Nellore": [
+    "Trunk Road",
+    "Mypadu Gate",
+    "Atmakur Bus Stand",
+    "Mini Bypass Road",
+    "Magunta Layout"
+  ],
+  "Kurnool": [
+    "Bellary Chowrasta",
+    "Nandyal Checkpost",
+    "Raj Vihar",
+    "Kallur",
+    "C Camp",
+    "B Camp",
+    "Panchalingala"
+  ],
+  "Rajahmundry": [
+    "Godavari Bund",
+    "Pushkar Ghat",
+    "Kotipalli Bus Stand",
+    "Lalacheruvu",
+    "Dowleswaram"
+  ],
+  "Kakinada": [
+    "Sarpavaram",
+    "Bhanugudi Junction",
+    "Jagannaickpur",
+    "Valasapakala",
+    "Ramaraopeta"
+  ],
+  "Anantapur": [
+    "Tower Clock",
+    "JNTU",
+    "S.K. University",
+    "Sainagar",
+    "Rudrampeta"
+  ],
+  "Hyderabad": [
+    "Hitech City",
+    "Gachibowli",
+    "Kukatpally",
+    "Banjara Hills",
+    "Jubilee Hills",
+    "Secunderabad",
+    "Ameerpet",
+    "Koti",
+    "Dilsukhnagar",
+    "Miyapur",
+    "LB Nagar",
+    "Mehdipatnam",
+    "Charminar"
+  ],
+  "Warangal": [
+    "Hanamkonda",
+    "Kazipet",
+    "Subedari",
+    "Nakkalagutta",
+    "Bheemaram"
+  ],
+  "Nizamabad": [
+    "Gandhi Chowk",
+    "Vinayak Nagar",
+    "Kanteshwar",
+    "Phulong",
+    "Dichpally"
+  ],
+  "Karimnagar": [
+    "Tower Circle",
+    "Vavilalapally",
+    "Mankammathota",
+    "Ramnagar",
+    "Kothirampur"
+  ],
+  "Khammam": [
+    "Wyra Road",
+    "Sathupalli",
+    "Kallur",
+    "Madhira",
+    "Nelakondapalli"
+  ]
+}
