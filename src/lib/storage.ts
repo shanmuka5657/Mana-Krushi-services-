@@ -470,7 +470,7 @@ const getSettingFromFirestore = async (key: string): Promise<any | null> => {
 
 const onSettingChange = (key: string, callback: (value: any) => void) => {
     if (!isBrowser || !db) return () => {};
-    perfTracker.increment({ reads: 1, writes: 0 }); // counts as one subscription
+    perfTracker.increment({ reads: 1, writes: 0 });
     const docRef = doc(db, "settings", key);
     return onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
