@@ -31,7 +31,7 @@ import { getAuth } from "firebase/auth";
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 
 // Your web app's Firebase configuration
 const firebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_ENV === 'production' 
@@ -310,10 +310,11 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
     
     try {
         if (role === 'owner') {
+            const todayStart = startOfDay(new Date());
             const q = query(
                 routesCollection,
                 where("ownerEmail", "==", email),
-                where("travelDate", ">=", now),
+                where("travelDate", ">=", todayStart),
                 orderBy("travelDate", "asc"),
                 limit(1)
             );
@@ -332,6 +333,9 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             const [depHours, depMinutes] = nextRoute.departureTime.split(':').map(Number);
             const departureDateTime = new Date(nextRoute.travelDate);
             departureDateTime.setHours(depHours, depMinutes, 0, 0);
+
+            // Don't show if the ride has already departed today
+            if (departureDateTime < now) return null;
 
             return {
                 id: nextRoute.id,
