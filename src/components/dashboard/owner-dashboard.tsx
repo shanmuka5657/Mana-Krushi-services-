@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle } from "lucide-react";
 import { format, addDays, parse, isToday } from "date-fns";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -40,7 +40,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { getProfile, saveProfile, getCurrentUser, getRoutes, getBookings, getRouteViews } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, getRoutes, getBookings, getRouteViews, saveBookings } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile, Route, Booking } from "@/lib/types";
 import { calculateDistance, getMapSuggestions } from "@/app/actions";
@@ -107,8 +107,10 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const [routeViewsMap, setRouteViewsMap] = useState<Map<string, number>>(new Map());
   const [isTodaysRoutesLoading, setIsTodaysRoutesLoading] = useState(true);
   const [selectedRouteForView, setSelectedRouteForView] = useState<Route | null>(null);
+  const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
-  
+
   const form = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerFormSchema),
     defaultValues: {
@@ -282,14 +284,67 @@ useEffect(() => {
       handleRouteSubmission(routeDataToSubmit);
     }
   }
-
-  const handleViewBookings = (route: Route) => {
+  
+  const handleViewBookings = async (route: Route) => {
     setSelectedRouteForView(route);
+    setIsViewDialogOpen(true);
+    
+    // Fetch details on demand
+    const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
+    const routeTime = route.departureTime;
+    
+    const routeBookings = await getBookings(true, {
+      destination: `${route.fromLocation} to ${route.toLocation}`,
+      date: routeDate,
+      time: routeTime,
+    });
+    
+    setBookingsForRoute(routeBookings);
   };
   
-  if (selectedRouteForView) {
-      return <MyRoutes routes={[]} bookingIdFromUrl={selectedRouteForView.id} />;
+  const handleGoToChat = () => {
+    if (selectedRouteForView) {
+        router.push(`/chat/${selectedRouteForView.id}`);
+        setIsViewDialogOpen(false);
+    } else {
+        toast({ title: "Error", description: "Could not find the selected route to open chat.", variant: "destructive"});
+    }
   }
+
+  const handleSendSummaryToDriver = () => {
+    if (!selectedRouteForView || !selectedRouteForView.driverMobile) {
+      toast({ title: "Driver mobile not found.", variant: "destructive" });
+      return;
+    }
+    if (bookingsForRoute.length === 0) {
+      toast({ title: "No passengers to report.", variant: "destructive" });
+      return;
+    }
+    
+    const confirmedBookings = bookingsForRoute.filter(b => b.status === 'Confirmed');
+    if (confirmedBookings.length === 0) {
+      toast({ title: "No confirmed bookings to send.", variant: "destructive" });
+      return;
+    }
+
+    const bookingDate = new Date(selectedRouteForView.travelDate);
+    const formattedDate = format(bookingDate, 'dd MMM, yyyy');
+    
+    let summary = `*Passenger Summary for ${selectedRouteForView.fromLocation} to ${selectedRouteForView.toLocation}*\n`;
+    summary += `*Date:* ${formattedDate} at ${selectedRouteForView.departureTime}\n\n`;
+
+    confirmedBookings.forEach((booking, index) => {
+      summary += `*${index + 1}. ${booking.client}*\n`;
+      summary += `   - Seats: ${booking.travelers}\n`;
+      summary += `   - Mobile: ${booking.mobile}\n\n`;
+    });
+    
+    const totalPassengers = confirmedBookings.reduce((sum, b) => sum + (Number(b.travelers) || 1), 0);
+    summary += `*Total Confirmed Passengers:* ${totalPassengers}`;
+    
+    const whatsappUrl = `https://wa.me/91${selectedRouteForView.driverMobile}?text=${encodeURIComponent(summary)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <div className="space-y-6">
@@ -499,7 +554,7 @@ useEffect(() => {
               </div>
               
               <div className="grid grid-cols-2 gap-4 items-end">
-                <FormField
+                 <FormField
                     control={form.control}
                     name="travelDate"
                     render={({ field }) => (
@@ -742,6 +797,51 @@ useEffect(() => {
             </Card>
         )}
       </div>
+      
+        {/* View Bookings Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className="max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Bookings for {selectedRouteForView?.fromLocation} to {selectedRouteForView?.toLocation}</DialogTitle>
+                <DialogDescription>
+                  {selectedRouteForView && format(new Date(selectedRouteForView.travelDate), "PPP")} at {selectedRouteForView?.departureTime}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {bookingsForRoute.length > 0 ? (
+                  bookingsForRoute.map(booking => (
+                    <div key={booking.id} className="border p-3 rounded-md space-y-2">
+                       <div className="flex items-center gap-3">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{booking.client}</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{booking.mobile}</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                           <span>{booking.travelers} Traveler(s)</span>
+                       </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No bookings for this route yet.</p>
+                )}
+              </div>
+              <DialogFooter className="flex-col sm:flex-row sm:justify-between w-full">
+                     <Button variant="outline" onClick={handleGoToChat}>
+                        <MessagesSquare className="mr-2 h-4 w-4" />
+                        Group Chat
+                    </Button>
+                    <Button variant="secondary" onClick={handleSendSummaryToDriver}>
+                        <Car className="mr-2 h-4 w-4" />
+                        Send Summary to Driver
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
     </div>
   );
 }
