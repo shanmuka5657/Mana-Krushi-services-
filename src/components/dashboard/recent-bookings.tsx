@@ -236,6 +236,15 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   
   const shouldShowHeader = mode !== 'all';
 
+  const handleGoToChat = () => {
+    if (selectedBooking) {
+        router.push(`/chat/${selectedBooking.routeId}`);
+        setIsViewOpen(false);
+    } else {
+        toast({ title: "Error", description: "Could not find the selected booking to open chat.", variant: "destructive"});
+    }
+  }
+
 
   return (
     <>
@@ -438,9 +447,9 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                         <Button variant="outline">Close</Button>
                     </DialogClose>
                      {userRole !== 'admin' && !isRideComplete(selectedBooking) && (
-                        <Button onClick={() => router.push(`/chat/${selectedBooking.routeId}`)}>
+                        <Button onClick={handleGoToChat}>
                             <MessagesSquare className="mr-2 h-4 w-4" />
-                            Go to Chat
+                            Group Chat
                         </Button>
                     )}
                 </DialogFooter>
@@ -509,5 +518,6 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 };
 
 export default RecentBookings;
+
 
 
