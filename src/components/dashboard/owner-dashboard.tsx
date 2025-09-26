@@ -393,57 +393,59 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           <CardContent>
           <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                  control={form.control}
-                  name="ownerName"
-                  render={({ field }) => (
-                      <FormItem className="hidden md:block">
-                      <FormLabel>Owner Name</FormLabel>
-                      <FormControl>
-                          <div className="relative">
-                          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
-                          </div>
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
-                  />
-                  <FormField
-                  control={form.control}
-                  name="driverName"
-                  render={({ field }) => (
-                      <FormItem className="hidden md:block">
-                      <FormLabel>Driver Name</FormLabel>
-                      <FormControl>
-                          <div className="relative">
-                          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input placeholder="Enter driver's name" {...field} className="pl-10" />
-                          </div>
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
-                  />
-              </div>
+              <div className="hidden md:block space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                    control={form.control}
+                    name="ownerName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Owner Name</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="driverName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Driver Name</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input placeholder="Enter driver's name" {...field} className="pl-10" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
 
-              <FormField
-                  control={form.control}
-                  name="driverMobile"
-                  render={({ field }) => (
-                  <FormItem className="hidden md:block">
-                      <FormLabel>Driver Mobile</FormLabel>
-                      <FormControl>
-                      <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="tel" placeholder="Enter driver's mobile" {...field} className="pl-10" />
-                      </div>
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
+                <FormField
+                    control={form.control}
+                    name="driverMobile"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Driver Mobile</FormLabel>
+                        <FormControl>
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input type="tel" placeholder="Enter driver's mobile" {...field} className="pl-10" />
+                        </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+              </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
                   <FormField
