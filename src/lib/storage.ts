@@ -394,10 +394,7 @@ export const getCurrentUserName = (): string | null => {
     // This is a workaround to get the name, ideally it should come from the profile
     return user?.displayName || user?.email?.split('@')[0] || null;
 };
-export const getCurrentUserRole = (): string | null => {
-    if (!isBrowser) return null;
-    return sessionStorage.getItem('user_role');
-}
+
 export const clearCurrentUser = () => {
     if (!isBrowser) return;
     sessionStorage.removeItem('user_email');
@@ -427,6 +424,7 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
+
 
 
 
