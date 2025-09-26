@@ -549,7 +549,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                               <SelectTrigger>
-                                  <SelectValue placeholder="Time" />
+                                  <SelectValue />
                               </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -569,7 +569,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                               <SelectTrigger>
-                                  <SelectValue placeholder="Time" />
+                                  <SelectValue />
                               </SelectTrigger>
                               </FormControl>
                               <SelectContent>
