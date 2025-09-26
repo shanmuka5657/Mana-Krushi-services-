@@ -265,6 +265,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     }
   }
 
+  const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
+      const hour = Math.floor(i / 2);
+      const minute = (i % 2) * 30;
+      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  });
+
   return (
     <div className="space-y-6">
       <AlertDialog open={showProfilePrompt}>
@@ -444,7 +450,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField
+                  <FormField
                   control={form.control}
                   name="fromLocation"
                   render={({ field }) => (
@@ -472,21 +478,18 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+             <div className="grid grid-cols-2 gap-4 items-end">
                 <FormField
                     control={form.control}
                     name="distance"
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Distance (km)</FormLabel>
-                        <div className="flex gap-2">
+                        <div className="relative">
                             <FormControl>
-                                <div className="relative flex-grow">
-                                
-                                <Input type="number" placeholder="Distance" {...field} className="pl-10" />
-                                {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
-                                </div>
+                                <Input type="number" placeholder="Distance" {...field} />
                             </FormControl>
+                            {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
                         </div>
                         <FormMessage />
                         </FormItem>
@@ -496,7 +499,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   control={form.control}
                   name="travelDate"
                   render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      <FormItem>
                       <FormLabel>Travel Date</FormLabel>
                       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                           <PopoverTrigger asChild>
@@ -509,7 +512,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                               )}
                               >
                               {field.value ? (
-                                  format(field.value, "PPP")
+                                  format(field.value, "MMM dd, yyyy")
                               ) : (
                                   <span>Pick a date</span>
                               )}
@@ -538,36 +541,44 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
               
               <div className="grid grid-cols-3 gap-4">
                   <FormField
-                  control={form.control}
-                  name="departureTime"
-                  render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>Dep Time</FormLabel>
-                      <FormControl>
-                          <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="time" className="pl-10" {...field} />
-                          </div>
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
+                      control={form.control}
+                      name="departureTime"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Dep Time</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Time" />
+                              </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                  {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                              </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          </FormItem>
+                      )}
                   />
                   <FormField
-                  control={form.control}
-                  name="arrivalTime"
-                  render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>Arrival Time</FormLabel>
-                      <FormControl>
-                          <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input type="time" className="pl-10" {...field} />
-                          </div>
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
+                      control={form.control}
+                      name="arrivalTime"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Arrival Time</FormLabel>
+                           <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                              <SelectTrigger>
+                                  <SelectValue placeholder="Time" />
+                              </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                  {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                              </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          </FormItem>
+                      )}
                   />
                    <FormField
                   control={form.control}
@@ -645,4 +656,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
-
