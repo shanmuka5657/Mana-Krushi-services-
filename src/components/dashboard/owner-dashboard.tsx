@@ -95,7 +95,7 @@ const getTravelDuration = (departureTime?: string, arrivalTime?: string): string
 }
 
 // --- Location Autocomplete Component ---
-const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUseCurrentLocation }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string, onUseCurrentLocation?: () => void }) => {
+const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUseCurrentLocation, isGettingCurrentLocation }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string, onUseCurrentLocation?: () => void, isGettingCurrentLocation?: boolean }) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [query, setQuery] = useState(field.value || '');
     const [isFocused, setIsFocused] = useState(false);
@@ -162,8 +162,8 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
                     {isLoading && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />}
                 </div>
                 {onUseCurrentLocation && (
-                    <Button type="button" variant="outline" size="icon" onClick={onUseCurrentLocation} disabled={isLoading}>
-                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+                    <Button type="button" variant="outline" size="icon" onClick={onUseCurrentLocation} disabled={isGettingCurrentLocation}>
+                        {isGettingCurrentLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
                         <span className="sr-only">Use current location</span>
                     </Button>
                 )}
@@ -671,6 +671,7 @@ useEffect(() => {
                                         onLocationSelect={(location) => form.setValue('fromLocation', location)}
                                         placeholder="Starting point"
                                         onUseCurrentLocation={handleUseCurrentLocation}
+                                        isGettingCurrentLocation={isGettingLocation}
                                     />
                               </FormControl>
                               <FormMessage />

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +47,7 @@ interface PassengerDashboardProps {
 }
 
 // --- Location Autocomplete Component ---
-const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string }) => {
+const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUseCurrentLocation, isGettingCurrentLocation }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string, onUseCurrentLocation?: () => void, isGettingCurrentLocation?: boolean }) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [query, setQuery] = useState(field.value || '');
     const [isFocused, setIsFocused] = useState(false);
