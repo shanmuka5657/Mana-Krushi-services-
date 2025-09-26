@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Badge } from '../ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Label } from '@/components/ui/label';
 
 
 interface DriverRideCardProps {
