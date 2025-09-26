@@ -311,31 +311,40 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
     try {
         if (role === 'owner') {
             const todayStart = startOfDay(new Date());
+            // Simplified query: get all routes for the owner.
             const q = query(
                 routesCollection,
-                where("ownerEmail", "==", email),
-                where("travelDate", ">=", todayStart),
-                orderBy("travelDate", "asc"),
-                limit(1)
+                where("ownerEmail", "==", email)
             );
             const routeSnapshot = await getDocs(q);
             if (routeSnapshot.empty) return null;
             
-            const nextRouteDoc = routeSnapshot.docs[0];
-            const nextRouteData = nextRouteDoc.data();
+            // Client-side filtering and sorting
+            const ownerRoutes = routeSnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    ...data,
+                    id: doc.id,
+                    travelDate: data.travelDate.toDate(),
+                } as Route;
+            });
 
-            const nextRoute = {
-                ...nextRouteData,
-                id: nextRouteDoc.id,
-                travelDate: nextRouteData.travelDate.toDate()
-            } as Route
+            const upcomingRoutes = ownerRoutes
+                .filter(route => {
+                    const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
+                    const departureDateTime = new Date(route.travelDate);
+                    departureDateTime.setHours(depHours, depMinutes, 0, 0);
+                    return departureDateTime >= now;
+                })
+                .sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
 
+            if (upcomingRoutes.length === 0) return null;
+            
+            const nextRoute = upcomingRoutes[0];
+            
             const [depHours, depMinutes] = nextRoute.departureTime.split(':').map(Number);
             const departureDateTime = new Date(nextRoute.travelDate);
             departureDateTime.setHours(depHours, depMinutes, 0, 0);
-
-            // Don't show if the ride has already departed today
-            if (departureDateTime < now) return null;
 
             return {
                 id: nextRoute.id,
@@ -347,13 +356,14 @@ export const getNextRideForUserFromFirestore = async (email: string, role: 'pass
             } as Booking;
 
         } else { // Passenger
+            // Simplified query to avoid composite index
             const q = query(
                 bookingsCollection,
                 where("clientEmail", "==", email),
             );
             const snapshot = await getDocs(q);
             
-            // Client side filtering to avoid composite index
+            // Client side filtering to find the next confirmed, upcoming booking
             const confirmedUpcomingBookings = snapshot.docs
                 .map(doc => {
                     const data = doc.data();
