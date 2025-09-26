@@ -645,4 +645,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
-
