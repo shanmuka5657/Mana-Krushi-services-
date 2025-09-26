@@ -1,47 +1,31 @@
 
-
-
-
-
-
-
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
 import { 
-    getBookingsFromFirestore, 
-    saveBookingsToFirestore, 
-    getRoutesFromFirestore, 
-    saveRoutesToFirestore, 
-    addRouteToFirestore, 
-    getProfileFromFirestore, 
-    saveProfileToFirestore, 
-    getAllProfilesFromFirestore, 
-    saveSetting, 
-    getSetting as getSettingFromFirestore, 
-    onSettingChange, 
-    addVisitToFirestore, 
-    getVisitsFromFirestore, 
-    getNextRideForUserFromFirestore, 
-    updateBookingInFirestore, 
-    onBookingsUpdateFromFirestore, 
-    addRouteViewToFirestore, 
-    getRouteViewsFromFirestore, 
-    getBookingFromFirestore, 
-    onChatMessagesFromFirestore, 
-    sendChatMessageToFirestore, 
-    getRouteFromFirestore,
     db,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    setDoc,
-    writeBatch
+    auth,
+    collection, 
+    getDocs, 
+    doc, 
+    setDoc, 
+    query, 
+    where, 
+    writeBatch, 
+    documentId, 
+    onSnapshot, 
+    getDoc, 
+    serverTimestamp, 
+    addDoc, 
+    orderBy,
+    limit,
+    updateDoc,
+    getCountFromServer
 } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
 import { perfTracker } from './perf-tracker';
+import { format } from "date-fns";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -120,6 +104,466 @@ export const clearLocationCache = async () => {
         await batch.commit();
     } catch (e) {
         console.error("Error clearing location cache:", e);
+    }
+};
+
+const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
+    if (!db) return [];
+    const bookingsCollection = collection(db, "bookings");
+    try {
+        let q = query(bookingsCollection);
+
+        // Server-side filtering by user if possible
+        if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
+            const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
+            q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
+        }
+
+        if (searchParams?.routeId) {
+            q = query(q, where("routeId", "==", searchParams.routeId));
+        }
+
+        const snapshot = await getDocs(q);
+        
+        let bookings = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        });
+        
+        // Client-side filtering for everything else
+        if (searchParams?.date) {
+            bookings = bookings.filter(b => format(new Date(b.departureDate), 'yyyy-MM-dd') === searchParams.date);
+        }
+
+        if (searchParams?.destination) {
+            bookings = bookings.filter(b => b.destination === searchParams.destination);
+        }
+        
+        if (searchParams?.time) {
+            bookings = bookings.filter(booking => {
+                 const bookingTime = new Date(booking.departureDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                 return bookingTime === searchParams.time;
+            });
+        }
+        
+        return bookings;
+
+    } catch(e) {
+        console.error("Error getting bookings from Firestore", e);
+        return [];
+    }
+};
+
+const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) => void, searchParams?: { userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }) => {
+    if (!db) return () => {};
+    const bookingsCollection = collection(db, "bookings");
+
+    let q = query(bookingsCollection);
+    
+    // Apply user-specific filters if provided. This is the simplest query we can make.
+    if (searchParams?.userEmail && searchParams?.role && searchParams.role !== 'admin') {
+        const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
+        q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const bookings = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        });
+        
+        callback(bookings);
+
+    }, (error) => {
+        console.error("Error listening to bookings updates:", error);
+    });
+
+    return unsubscribe;
+};
+
+const saveBookingsToFirestore = async (bookings: Booking[]) => {
+    if (!db) return;
+    const bookingsCollection = collection(db, "bookings");
+    const batch = writeBatch(db);
+    bookings.forEach((booking) => {
+        // A valid Firestore ID is a 20-character string. Anything else is a new doc.
+        const isNew = !booking.id || booking.id.length !== 20;
+        const docRef = isNew ? doc(bookingsCollection) : doc(db, "bookings", booking.id);
+        
+        // Firestore cannot store undefined values.
+        const bookingToSave = Object.fromEntries(Object.entries(booking).filter(([, v]) => v !== undefined));
+
+        batch.set(docRef, bookingToSave, { merge: true });
+    });
+    await batch.commit();
+};
+
+const getNextRideForUserFromFirestore = async (email: string, role: 'passenger' | 'owner'): Promise<Booking | null> => {
+    if (!db || !email) return null;
+    const bookingsCollection = collection(db, "bookings");
+    const routesCollection = collection(db, "routes");
+    
+    const now = new Date();
+    const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+    
+    try {
+        if (role === 'owner') {
+            const q = query(
+                routesCollection,
+                where("ownerEmail", "==", email),
+                where("travelDate", ">=", startOfToday),
+                orderBy("travelDate", "asc"),
+            );
+            const routeSnapshot = await getDocs(q);
+            if (routeSnapshot.empty) return null;
+            
+            const ownerRoutes = routeSnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    ...data,
+                    id: doc.id,
+                    travelDate: data.travelDate.toDate(),
+                } as Route;
+            });
+
+            // Additional client-side filtering for time
+            const upcomingRoutes = ownerRoutes.filter(route => {
+                    const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
+                    const departureDateTime = new Date(route.travelDate);
+                    departureDateTime.setHours(depHours, depMinutes, 0, 0);
+                    return departureDateTime >= now;
+                })
+                // The sort is already handled by `orderBy` in the query
+                
+            if (upcomingRoutes.length === 0) return null;
+            
+            const nextRoute = upcomingRoutes[0];
+            
+            const [depHours, depMinutes] = nextRoute.departureTime.split(':').map(Number);
+            const departureDateTime = new Date(nextRoute.travelDate);
+            departureDateTime.setHours(depHours, depMinutes, 0, 0);
+
+            return {
+                id: nextRoute.id,
+                routeId: nextRoute.id, // Important for chat
+                destination: `${nextRoute.fromLocation} to ${nextRoute.toLocation}`,
+                departureDate: departureDateTime,
+                driverName: nextRoute.driverName,
+                vehicleNumber: nextRoute.vehicleNumber,
+                status: 'Confirmed', 
+            } as Booking;
+
+        } else { // Passenger
+            const q = query(
+                bookingsCollection,
+                where("clientEmail", "==", email),
+                where("departureDate", ">=", now),
+                orderBy("departureDate", "asc")
+            );
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) return null;
+
+            // Find the first non-cancelled booking
+            for (const doc of snapshot.docs) {
+                if (doc.data().status !== 'Cancelled') {
+                    const data = doc.data();
+                    return {
+                        ...data,
+                        id: doc.id,
+                        departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                        returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+                    } as Booking;
+                }
+            }
+            return null; // No upcoming non-cancelled bookings found
+        }
+
+    } catch (e) {
+        console.error("Error getting next ride:", e);
+        return null;
+    }
+};
+
+const updateBookingInFirestore = async (bookingId: string, data: Partial<Booking>) => {
+    if (!db) return;
+    const docRef = doc(db, 'bookings', bookingId);
+    await updateDoc(docRef, data);
+};
+
+const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
+    if (!db) return [];
+    const routesCollection = collection(db, "routes");
+    try {
+        if (searchParams?.routeId) {
+            const docRef = doc(db, "routes", searchParams.routeId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                return [{
+                    ...data,
+                    id: docSnap.id,
+                    travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
+                } as Route];
+            }
+            return [];
+        }
+
+        let q = query(routesCollection);
+
+        if (searchParams?.ownerEmail) {
+            q = query(q, where("ownerEmail", "==", searchParams.ownerEmail));
+        }
+        
+        if (searchParams?.promoted) {
+            q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()), orderBy("travelDate", "asc"), limit(5));
+        } else if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            const startOfDay = new Date(searchDate.setHours(0,0,0,0));
+            const endOfDay = new Date(searchDate.setHours(23,59,59,999));
+            q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
+        } else if (!searchParams?.ownerEmail) {
+            // Only apply date filter for general queries, not when filtering by owner
+             q = query(q, where("travelDate", ">=", new Date(new Date().setHours(0,0,0,0))));
+        }
+
+
+        const snapshot = await getDocs(q);
+        let routes = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
+            } as Route;
+        });
+        
+        // Client-side filtering for other params (if not a promoted-only query)
+        if (!searchParams?.promoted) {
+            if (searchParams?.to) {
+                routes = routes.filter(route => route.toLocation.trim().toLowerCase() === searchParams.to?.trim().toLowerCase());
+            }
+
+            if (searchParams?.from) {
+                const searchFromLower = searchParams.from.trim().toLowerCase();
+                routes = routes.filter(route => 
+                    route.fromLocation.trim().toLowerCase() === searchFromLower ||
+                    route.pickupPoints?.some(p => p.trim().toLowerCase() === searchFromLower)
+                );
+            }
+        }
+        
+        // Sort by date if no specific owner is being queried
+        if (!searchParams?.ownerEmail) {
+            routes.sort((a,b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
+        }
+
+
+        return routes;
+    } catch(e) {
+        console.error("Error getting routes from Firestore", e);
+        return [];
+    }
+};
+
+const saveRoutesToFirestore = async (routes: Route[]) => {
+    if (!db) return;
+    const routesCollection = collection(db, "routes");
+    const batch = writeBatch(db);
+    routes.forEach((route) => {
+        const docRef = doc(db, "routes", route.id);
+        const routeToSave = Object.fromEntries(Object.entries(route).filter(([_, v]) => v !== undefined));
+        batch.set(docRef, routeToSave);
+    });
+    await batch.commit();
+};
+
+const addRouteToFirestore = async (route: Omit<Route, 'id'>): Promise<Route> => {
+    if (!db) throw new Error("Firestore not initialized");
+    const routesCollection = collection(db, "routes");
+    const newDocRef = doc(routesCollection);
+    const routeToSave = Object.fromEntries(Object.entries(route).filter(([_, v]) => v !== undefined));
+    const newRoute = { ...routeToSave, id: newDocRef.id } as Route;
+    await setDoc(newDocRef, newRoute);
+    return newRoute;
+}
+
+const getProfileFromFirestore = async (email: string): Promise<Profile | null> => {
+    if (!db || !email) return null;
+    const profilesCollection = collection(db, "profiles");
+    try {
+        const q = query(profilesCollection, where(documentId(), "==", email));
+        const docSnap = await getDocs(q);
+
+        if (!docSnap.empty) {
+            const doc = docSnap.docs[0];
+            const data = doc.data();
+            return { 
+                ...data, 
+                email: doc.id,
+                planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
+            } as Profile;
+        }
+    } catch(e) {
+        console.error("Error getting profile", e);
+    }
+    return null;
+}
+
+const getAllProfilesFromFirestore = async (): Promise<Profile[]> => {
+    if (!db) return [];
+    const profilesCollection = collection(db, "profiles");
+    try {
+        const snapshot = await getDocs(profilesCollection);
+        return snapshot.docs.map(doc => {
+             const data = doc.data();
+            return {
+                ...data,
+                email: doc.id,
+                planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
+            } as Profile
+        });
+    } catch(e) {
+        console.error("Error getting all profiles from Firestore", e);
+        return [];
+    }
+};
+
+const saveProfileToFirestore = async (profile: Profile) => {
+    if (!db) return;
+    const docRef = doc(db, "profiles", profile.email);
+    // Remove undefined values before saving to Firestore
+    const profileToSave = Object.fromEntries(
+        Object.entries(profile).filter(([, value]) => value !== undefined)
+    );
+    await setDoc(docRef, profileToSave, { merge: true });
+};
+
+const getSettingFromFirestore = async (key: string): Promise<any | null> => {
+    if (!db) return null;
+    try {
+        const docRef = doc(db, "settings", key);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data().value;
+        }
+        return null;
+    } catch(e) {
+        console.error("Error getting setting", e);
+        return null;
+    }
+}
+
+// --- Chat ---
+const onChatMessagesFromFirestore = (rideId: string, callback: (messages: ChatMessage[]) => void) => {
+    if (!db) return () => {};
+    
+    const q = query(collection(db, "chats", rideId, "messages"), orderBy("timestamp", "asc"));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const messages = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(),
+            } as ChatMessage;
+        });
+        callback(messages);
+    }, (error) => {
+        console.error("Error listening to chat messages:", error);
+    });
+
+    return unsubscribe;
+};
+
+const sendChatMessageToFirestore = async (rideId: string, senderEmail: string, text: string) => {
+    if (!db) return;
+    const messagesCol = collection(db, "chats", rideId, "messages");
+    await addDoc(messagesCol, {
+        senderEmail,
+        text,
+        timestamp: serverTimestamp(),
+    });
+};
+
+const addRouteViewToFirestore = async (routeId: string, sessionId: string) => {
+    if (!db) return;
+    // We create a unique ID based on routeId and sessionId to prevent counting the same session multiple times.
+    const viewId = `${routeId}_${sessionId}`;
+    const docRef = doc(db, "routeViews", viewId);
+    await setDoc(docRef, { routeId, sessionId, timestamp: serverTimestamp() }, { merge: true });
+};
+
+const getRouteViewsFromFirestore = async (routeId: string): Promise<number> => {
+    if (!db) return 0;
+    try {
+        const q = query(collection(db, "routeViews"), where("routeId", "==", routeId));
+        const snapshot = await getCountFromServer(q);
+        return snapshot.data().count;
+    } catch(e) {
+        console.error("Error getting route views from Firestore", e);
+        return 0;
+    }
+};
+
+const addVisitToFirestore = async (visit: Omit<Visit, 'id' | 'timestamp'>) => {
+    if (!db) return;
+    await addDoc(collection(db, "visits"), { ...visit, timestamp: serverTimestamp() });
+}
+
+const getVisitsFromFirestore = async (): Promise<Visit[]> => {
+    if (!db) return [];
+    try {
+        const q = query(collection(db, "visits"), orderBy("timestamp", "desc"), limit(200));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(),
+            } as Visit;
+        });
+    } catch(e) {
+        console.error("Error getting visits from Firestore", e);
+        return [];
+    }
+}
+
+const saveSetting = async (key: string, value: any) => {
+    if (!db) return;
+    const docRef = doc(db, "settings", key);
+    await setDoc(docRef, { value });
+};
+
+const getRouteFromFirestore = async (routeId: string): Promise<Route | null> => {
+    if (!db || !routeId) return null;
+    try {
+        const docRef = doc(db, "routes", routeId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+                ...data,
+                id: docSnap.id,
+                travelDate: data.travelDate?.toDate ? data.travelDate.toDate() : new Date(data.travelDate),
+            } as Route;
+        }
+        return null;
+    } catch (e) {
+        console.error("Error getting route from Firestore", e);
+        return null;
     }
 };
 
@@ -309,10 +753,14 @@ export const getGlobalVideoUrl = async (): Promise<string | null> => {
     return url;
 }
 
-export const onGlobalVideoUrlChange = (callback: (url: string) => void) => {
+export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
     if (!isBrowser) return () => {};
-    return onSettingChange('backgroundVideoUrl', callback);
+    return onSnapshot(doc(db!, "settings", "isGlobalVideoPlayerVisible"), (doc) => {
+        const value = doc.data()?.value;
+        callback(value === null || value === undefined ? true : value);
+    });
 };
+
 
 export const saveGlobalVideoVisibility = async (isVisible: boolean) => {
     if (!isBrowser) return;
@@ -327,14 +775,18 @@ export const getGlobalVideoVisibility = async (): Promise<boolean> => {
     return isVisible === null ? true : isVisible; // Default to true if not set
 };
 
-export const onGlobalVideoVisibilityChange = (callback: (isVisible: boolean) => void) => {
-    if (!isBrowser) return () => {};
-    return onSettingChange('isGlobalVideoPlayerVisible', (value) => {
-        // If the value is null (not set in Firestore), default to true
-        callback(value === null ? true : value);
+export const onSettingChange = (key: string, callback: (value: any) => void) => {
+    if (!db) return () => {};
+    const docRef = doc(db, "settings", key);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            callback(doc.data().value);
+        } else {
+            callback(null);
+        }
     });
+    return unsubscribe;
 };
-
 
 // --- Bookings ---
 export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
@@ -389,7 +841,7 @@ export const updateBookingLocation = async (bookingId: string, location: { passe
 
 
 // --- Routes ---
-export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string }): Promise<Route[]> => {
+export const getRoutes = async (isAdminOrSearch: boolean = false, searchParams?: { from?: string, to?: string, date?: string, promoted?: boolean, routeId?: string, ownerEmail?: string }): Promise<Route[]> => {
     if (!isBrowser) return [];
 
     const cacheKey = JSON.stringify(searchParams || {});
@@ -520,13 +972,3 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-
-
-
-
-
-
-
-
-
-
