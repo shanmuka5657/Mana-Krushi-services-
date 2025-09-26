@@ -476,7 +476,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-end">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 items-end">
                 <FormField
                     control={form.control}
                     name="pickupPoints"
@@ -503,28 +503,25 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                         </FormItem>
                     )}
                 />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
-                  <FormField
-                      control={form.control}
-                      name="distance"
-                      render={({ field }) => (
-                          <FormItem>
-                          <FormLabel>Distance (km)</FormLabel>
-                          <div className="flex gap-2">
-                              <FormControl>
-                                  <div className="relative flex-grow">
-                                  
-                                  <Input type="number" placeholder="Distance" {...field} className="pl-10" />
-                                  {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
-                                  </div>
-                              </FormControl>
-                          </div>
-                          <FormMessage />
-                          </FormItem>
-                      )}
-                      />
+                <FormField
+                    control={form.control}
+                    name="distance"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Distance (km)</FormLabel>
+                        <div className="flex gap-2">
+                            <FormControl>
+                                <div className="relative flex-grow">
+                                
+                                <Input type="number" placeholder="Distance" {...field} className="pl-10" />
+                                {isCalculating && <Loader2 className="animate-spin absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />}
+                                </div>
+                            </FormControl>
+                        </div>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
               </div>
 
               <FormField
@@ -570,7 +567,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   )}
                   />
               
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <FormField
                   control={form.control}
                   name="departureTime"
@@ -603,9 +600,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                       </FormItem>
                   )}
                   />
-              </div>
-
-               <FormField
+                   <FormField
                   control={form.control}
                   name="vehicleType"
                   render={({ field }) => (
@@ -634,6 +629,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                     </FormItem>
                   )}
                 />
+              </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
@@ -684,3 +680,4 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     
 
     
+
