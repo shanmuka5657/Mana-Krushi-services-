@@ -1,6 +1,7 @@
 
 
 
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
     getFirestore, 
@@ -568,4 +569,4 @@ export const saveProfileToFirestore = async (profile: Profile) => {
     await setDoc(docRef, profileToSave, { merge: true });
 };
 
-export { app, db, auth, storage, doc, setDoc, getDoc };
+export { app, db, auth, storage, doc, setDoc, getDoc, getDocs, collection, query, where, writeBatch };
