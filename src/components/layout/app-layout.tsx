@@ -78,17 +78,6 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { perfTracker } from "@/lib/perf-tracker";
 
 
-// Define the interface for the event, as it's not standard in all TS lib versions.
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: Array<string>;
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed',
-    platform: string,
-  }>;
-  prompt(): Promise<void>;
-}
-
-
 export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -99,8 +88,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
   const [role, setRole] = React.useState('passenger');
-  const [installPrompt, setInstallPrompt] = React.useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
@@ -127,25 +114,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
       </Button>
     )
   }
-
-
-  React.useEffect(() => {
-    // This will only run on the client
-    if(window.matchMedia('(display-mode: standalone)').matches) {
-        setIsStandalone(true);
-    }
-    
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    };
-  }, []);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -259,22 +227,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
       router.push(href);
     }
   };
-  
-  const handleInstallClick = () => {
-    if (installPrompt) {
-      installPrompt.prompt();
-      installPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          setIsStandalone(true);
-          toast({ title: "Installation Complete!", description: "The app has been successfully installed." });
-        } else {
-           toast({ title: "Installation Cancelled", variant: "destructive" });
-        }
-        setInstallPrompt(null);
-      });
-    }
-  };
-
 
   return (
     <SidebarProvider>
@@ -303,21 +255,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-            {!isStandalone && (
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton 
-                            className="justify-start" 
-                            tooltip="Install App" 
-                            onClick={handleInstallClick}
-                            disabled={!installPrompt}
-                        >
-                           <Download />
-                           <span>Install App</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            )}
         </SidebarFooter>
       </Sidebar>
 

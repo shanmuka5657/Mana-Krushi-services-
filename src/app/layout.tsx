@@ -19,17 +19,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  
-  React.useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((registration) => console.log('Service Worker registered with scope:', registration.scope))
-          .catch((error) => console.error('Service Worker registration failed:', error));
-      });
-    }
-  }, []);
 
   React.useEffect(() => {
     logVisit(pathname);
@@ -38,7 +27,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-          <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#1f83bd" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

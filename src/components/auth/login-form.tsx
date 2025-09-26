@@ -20,9 +20,7 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import React, { useEffect, useState } from 'react';
-import { Download, Loader2, QrCode } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import QRCode from 'qrcode.react';
+import { Loader2 } from 'lucide-react';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { signInWithEmail } from '@/lib/auth';
 import { getProfile } from '@/lib/storage';
@@ -32,60 +30,11 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: Array<string>;
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed',
-    platform: string,
-  }>;
-  prompt(): Promise<void>;
-}
-
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [showQrDialog, setShowQrDialog] = useState(false);
-  const [appUrl, setAppUrl] = useState('');
   const { defaultLogo } = placeholderImages;
-
-
-  useEffect(() => {
-    setAppUrl(window.location.origin);
-    
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsStandalone(true);
-    }
-
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-
-  }, []);
-
-  const handleInstallClick = () => {
-    if (installPrompt) {
-      installPrompt.prompt();
-      installPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          setIsStandalone(true);
-          toast({ title: "Installation Complete!", description: "The app has been successfully installed." });
-        } else {
-           toast({ title: "Installation Cancelled", variant: "destructive" });
-        }
-        setInstallPrompt(null);
-      });
-    }
-  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -179,49 +128,7 @@ export function LoginForm() {
             </Link>
           </div>
         </CardContent>
-        {!isStandalone && installPrompt && (
-            <CardFooter className="flex-col gap-2">
-                <div className="w-full h-px bg-border" />
-                 <p className="text-sm text-muted-foreground pt-2">Get the best experience by installing the app.</p>
-                <div className="w-full grid grid-cols-2 gap-2">
-                    <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        onClick={handleInstallClick}
-                    >
-                        <Download className="mr-2 h-4 w-4" />
-                        Install App
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        onClick={() => setShowQrDialog(true)}
-                    >
-                        <QrCode className="mr-2 h-4 w-4" />
-                        Scan to Install
-                    </Button>
-                </div>
-            </CardFooter>
-        )}
       </Card>
-      <Dialog open={showQrDialog} onOpenChange={setShowQrDialog}>
-        <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-                <DialogTitle>Install on Your Phone</DialogTitle>
-                <DialogDescription>
-                    Scan this QR code with your phone's camera to open the app and install it.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="py-4 flex flex-col items-center gap-4">
-                <div className="p-4 bg-white rounded-lg">
-                  {appUrl ? <QRCode value={appUrl} size={200} level="H" /> : <Loader2 className="h-16 w-16 animate-spin" />}
-                </div>
-                <p className="text-sm text-muted-foreground font-mono text-center break-all px-4">{appUrl}</p>
-            </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
-
-    
