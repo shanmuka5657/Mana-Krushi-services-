@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Form, FormControl, F, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
 import QRCode from "qrcode.react";
@@ -326,7 +326,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
        message = `
 Hello ${booking.client},
 
-This is ${booking.driverName} from MK Services, confirming your ride.
+This is ${booking.driverName} from Mana Krushi, confirming your ride.
 
 *Booking Details:*
 - *Route:* ${booking.destination}
@@ -341,12 +341,12 @@ ${booking.driverName}
     `.trim().replace(/^\s+/gm, '');
     } else if (type === 'payment') {
         const upiId = "7569114679@ybl";
-        const upiUrl = `upi://pay?pa=${upiId}&pn=MK%20Services&am=${booking.amount.toFixed(2)}&tn=RidePayment${booking.id}`;
+        const upiUrl = `upi://pay?pa=${upiId}&pn=Mana%20Krushi&am=${booking.amount.toFixed(2)}&tn=RidePayment${booking.id}`;
         
         message = `
 Hello ${booking.client},
 
-Thank you for travelling with MK Services!
+Thank you for travelling with Mana Krushi!
 
 This is a reminder for your payment of *₹${booking.amount.toFixed(2)}*.
 
@@ -837,4 +837,4 @@ ${booking.driverName}
 
 export default MyRoutes;
 
-
+    

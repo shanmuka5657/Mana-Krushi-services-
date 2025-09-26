@@ -32,7 +32,7 @@ function HelpPageContent() {
         }
     ];
 
-    const appStoreLongDescription = `Welcome to **MK Services**, the ultimate ride-sharing and carpooling platform designed to make your travel easier, more affordable, and community-driven. Whether you're a passenger looking for a ride or a car owner with empty seats, our app seamlessly connects you.
+    const appStoreLongDescription = `Welcome to **Mana Krushi**, the ultimate ride-sharing and carpooling platform designed to make your travel easier, more affordable, and community-driven. Whether you're a passenger looking for a ride or a car owner with empty seats, our app seamlessly connects you.
 
 **For Passengers:**
 *   **Find a Ride with Ease:** Simply enter your starting point, destination, and travel date to find available rides from trusted vehicle owners.
@@ -46,7 +46,7 @@ function HelpPageContent() {
 *   **Seamless Payments:** Get paid for your rides. Our app helps you track payments and manage your earnings.
 *   **Grow Your Client Base:** Connect with a network of passengers who are looking for reliable rides.
 
-Join the MK Services community today and transform the way you travel. Download the app, share the journey, and save together.`;
+Join the Mana Krushi community today and transform the way you travel. Download the app, share the journey, and save together.`;
 
     return (
         <AppLayout>

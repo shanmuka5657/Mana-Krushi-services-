@@ -287,7 +287,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
           <div className="flex items-center gap-2">
             <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
             <h1 className="text-xl font-bold">
-              MK<span className="text-accent">Services</span>
+              Mana<span className="text-accent">Krushi</span>
             </h1>
           </div>
         </SidebarHeader>
@@ -338,7 +338,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
               <div className="flex items-center gap-2 truncate">
                 <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
                 <h2 className="text-xl md:text-2xl font-semibold truncate">
-                  MK Services
+                  Mana Krushi
                 </h2>
               </div>
             </div>

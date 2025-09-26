@@ -46,14 +46,14 @@ export default function WelcomePage() {
       <div className="flex flex-col items-center gap-6">
         <Image 
             src={defaultLogo.url}
-            alt="MK Services Logo"
+            alt="Mana Krushi Logo"
             width={defaultLogo.width}
             height={defaultLogo.height}
             data-ai-hint={defaultLogo.hint}
         />
         <div>
           <h1 className="text-4xl font-bold tracking-tight">
-            Welcome to MK Services
+            Welcome to Mana Krushi
           </h1>
           <p className="mt-2 text-lg text-muted-foreground">
             Your partner in shared travel. Find or offer a ride with ease.

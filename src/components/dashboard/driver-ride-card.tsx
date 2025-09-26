@@ -156,7 +156,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
         const message = `
 Hello ${booking.client},
 
-This is ${booking.driverName} from MK Services, confirming your ride.
+This is ${booking.driverName} from Mana Krushi, confirming your ride.
 
 *Booking Details:*
 - *Route:* ${booking.destination}
@@ -311,3 +311,4 @@ ${booking.driverName}
     );
 }
 
+    

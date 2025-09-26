@@ -26,7 +26,7 @@ interface PaymentDialogProps {
 }
 
 const UPI_ID = "7671926567@ibl";
-const PAYEE_NAME = "MK Services";
+const PAYEE_NAME = "Mana Krushi";
 
 export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, amount, title, description }: PaymentDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -125,7 +125,5 @@ export default function PaymentDialog({ isOpen, onOpenChange, onPaymentSuccess, 
     </Dialog>
   );
 }
-
-    
 
     
