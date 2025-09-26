@@ -102,7 +102,6 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
     const [query, setQuery] = useState(field.value || '');
     const [isFocused, setIsFocused] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         setQuery(field.value);
@@ -110,7 +109,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
 
     const fetchSuggestions = async (searchQuery: string) => {
         const queryKey = searchQuery.toLowerCase().trim();
-        if (queryKey.length < 2) {
+        if (queryKey.length < 1) { // Search from the first letter
             setSuggestions([]);
             return;
         }
@@ -137,13 +136,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
         const value = e.target.value;
         setQuery(value);
         field.onChange(value);
-
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-        debounceTimeout.current = setTimeout(() => {
-            fetchSuggestions(value);
-        }, 300); // 300ms debounce
+        fetchSuggestions(value); // Fetch on every keystroke
     };
 
     const handleSuggestionClick = (suggestion: any) => {
