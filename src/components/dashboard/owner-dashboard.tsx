@@ -471,7 +471,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                   )}
                   />
               </div>
-              <div className="grid grid-cols-1 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
                     name="distance"
@@ -491,9 +492,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                         </FormItem>
                     )}
                     />
-              </div>
-
-              <FormField
+                 <FormField
                   control={form.control}
                   name="travelDate"
                   render={({ field }) => (
@@ -535,6 +534,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                       </FormItem>
                   )}
                   />
+              </div>
               
               <div className="grid grid-cols-3 gap-4">
                   <FormField
