@@ -4,8 +4,7 @@ const urlsToCache = [
   '/',
   '/offline',
   '/manifest.json',
-  '/favicon.ico',
-  // Add other static assets that should be cached
+  'https://i.ibb.co/mrqBwfds/IMG-20250920-WA0025.jpg', // Main App Icon
 ];
 
 self.addEventListener('install', event => {
@@ -22,24 +21,17 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response
         if (response) {
           return response;
         }
 
-        // Clone the request because it's a stream and can only be consumed once
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+        return fetch(event.request).then(
+          (response) => {
+            if(!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // Clone the response because it's a stream and can only be consumed once
             const responseToCache = response.clone();
-
             caches.open(CACHE_NAME)
               .then(cache => {
                 cache.put(event.request, responseToCache);
@@ -47,10 +39,10 @@ self.addEventListener('fetch', event => {
 
             return response;
           }
-        ).catch(() => {
-            // If the fetch fails (e.g., user is offline), return the offline page.
-            return caches.match('/offline');
-        });
+        );
+      })
+      .catch(() => {
+        return caches.match('/offline');
       })
   );
 });
@@ -71,20 +63,19 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Listener for periodic background sync
+
 self.addEventListener('periodicsync', (event) => {
   if (event.tag === 'get-daily-news') {
     event.waitUntil(
-        console.log("Periodic Sync: Mocking fetching daily news.")
+      console.log("Periodic Sync Triggered")
     );
   }
 });
 
-// Listener for background sync
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-new-posts') {
     event.waitUntil(
-        console.log("Background Sync: Mocking syncing new posts.")
+       console.log("Background Sync Triggered")
     );
   }
 });
