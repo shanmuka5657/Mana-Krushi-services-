@@ -46,7 +46,7 @@ const cropLogoFlow = ai.defineFlow(
       model: 'googleai/gemini-2.5-flash-image-preview',
       prompt: [
         {media: {url: input.photoDataUri}},
-        {text: 'Crop this image to tightly fit the circular logo containing the letters "MK". Make the area outside the circle transparent.'},
+        {text: 'Crop this image to tightly fit the circular logo containing the letters "MK". The text "CONSULTING SERVICES" should be removed. Make the area outside the circle transparent.'},
       ],
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
