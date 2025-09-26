@@ -1,8 +1,8 @@
 
 
-import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore } from './firebase';
+import { getBookingsFromFirestore, saveBookingsToFirestore, getRoutesFromFirestore, saveRoutesToFirestore, addRouteToFirestore, getProfileFromFirestore, saveProfileToFirestore, getAllProfilesFromFirestore, saveSetting, getSetting as getSettingFromFirestore, onSettingChange, addVisitToFirestore, getVisitsFromFirestore, getNextRideForUserFromFirestore, updateBookingInFirestore, onBookingsUpdateFromFirestore, addRouteViewToFirestore, getRouteViewsFromFirestore, getBookingFromFirestore, onChatMessagesFromFirestore, sendChatMessageToFirestore } from './firebase';
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
@@ -33,6 +33,54 @@ const clearCache = (key?: 'profiles' | 'allProfiles' | 'routes' | 'bookings') =>
         cache.bookings.clear();
     }
 }
+
+// --- Chat ---
+export const onChatMessages = (rideId: string, callback: (messages: ChatMessage[]) => void) => {
+    if (!isBrowser) return () => {};
+    perfTracker.increment({ reads: 1, writes: 0 }); // counts as one subscription
+    return onChatMessagesFromFirestore(rideId, callback);
+}
+
+export const sendChatMessage = async (rideId: string, senderEmail: string, text: string) => {
+    if (!isBrowser) return;
+    perfTracker.increment({ reads: 0, writes: 1 });
+    return sendChatMessageToFirestore(rideId, senderEmail, text);
+};
+
+export const getRideDetailsForChat = async (rideId: string, currentUserEmail: string) => {
+    // A ride can be identified by a booking ID. All bookings for the same ride share a destination and departure time.
+    const rideBooking = await getBookingFromFirestore(rideId);
+    if (!rideBooking) return { ride: null, profiles: [] };
+    
+    // Security check: ensure current user is part of the ride
+    const isDriver = rideBooking.driverEmail === currentUserEmail;
+    const isPassenger = rideBooking.clientEmail === currentUserEmail;
+
+    // We need to fetch all bookings for this ride to check if the user is a passenger on any of them
+    const allBookingsForRide = await getBookings(true, {
+        destination: rideBooking.destination,
+        date: new Date(rideBooking.departureDate).toISOString().split('T')[0],
+        time: new Date(rideBooking.departureDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    });
+    
+    const isAParticipant = isDriver || allBookingsForRide.some(b => b.clientEmail === currentUserEmail);
+
+    if (!isAParticipant) {
+        return { ride: null, profiles: [] };
+    }
+
+    // Get all participants
+    const participantEmails = new Set<string>();
+    if(rideBooking.driverEmail) participantEmails.add(rideBooking.driverEmail);
+    allBookingsForRide.forEach(b => {
+        if(b.clientEmail) participantEmails.add(b.clientEmail);
+    });
+
+    const profilePromises = Array.from(participantEmails).map(email => getProfile(email));
+    const profiles = await Promise.all(profilePromises);
+
+    return { ride: rideBooking, profiles: profiles.filter((p): p is Profile => !!p) };
+};
 
 
 // --- Branding ---

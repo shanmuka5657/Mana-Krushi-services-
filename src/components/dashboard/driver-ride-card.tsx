@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle, Car, MapPin } from 'lucide-react';
+import { Timer, Share2, Users, Info, Route, Loader2, Calendar, Clock, Phone, MessageSquare, CheckCircle, Car, MapPin, MessagesSquare } from 'lucide-react';
 import type { Booking, Profile } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getBookings, saveBookings, getAllProfiles } from '@/lib/storage';
@@ -246,22 +246,13 @@ ${booking.driverName}
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                 <div className="grid grid-cols-2 gap-2 w-full">
-                     <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
+                     <Button onClick={() => router.push(`/chat/${ride.id}`)} className="w-full">
+                        <MessagesSquare className="mr-2 h-4 w-4" />
+                        Group Chat
+                    </Button>
+                    <Button onClick={() => setIsContactDialogOpen(true)} className="w-full" variant="outline">
                         <Users className="mr-2 h-4 w-4" />
                         Contact Passengers
-                    </Button>
-                    <Button onClick={() => handleShareLocation(true)} className="w-full" variant="outline" disabled={isSharing}>
-                        {isSharing ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Sharing...
-                            </>
-                        ) : (
-                            <>
-                                <Share2 className="mr-2 h-4 w-4" />
-                                Share Location
-                            </>
-                        )}
                     </Button>
                 </div>
                 <Button onClick={handleMoreInfo} className="w-full" variant="secondary">
@@ -320,5 +311,3 @@ ${booking.driverName}
         </>
     );
 }
-
-    

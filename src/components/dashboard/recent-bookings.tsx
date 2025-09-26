@@ -24,11 +24,12 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Loader2, MapPin, Milestone, Shield } from "lucide-react";
+import { User, Phone, Car, Calendar, Clock, AlertCircle, CheckCircle, Trash2, Loader2, MapPin, Milestone, Shield, MessagesSquare } from "lucide-react";
 import { format, startOfDay } from "date-fns";
 import { Textarea } from "../ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { getBookings, saveBookings, getRoutes, getAllProfiles, getCurrentUserRole, getCurrentUser, getProfile, onBookingsUpdate } from "@/lib/storage";
+import { useRouter } from "next/navigation";
 
 
 const getStatusBadgeClass = (status: Booking["status"]) => {
@@ -64,6 +65,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -428,10 +430,16 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                         </div>
                     </div>
                 </div>
-                 <DialogFooter className="mt-auto pt-4 border-t">
-                    <DialogClose asChild>
-                        <Button variant="outline" className="w-full">Close</Button>
+                 <DialogFooter className="mt-auto pt-4 border-t flex-col sm:flex-row sm:justify-between w-full">
+                     <DialogClose asChild>
+                        <Button variant="outline">Close</Button>
                     </DialogClose>
+                     {userRole !== 'admin' && !isRideComplete(selectedBooking) && (
+                        <Button onClick={() => router.push(`/chat/${selectedBooking.id}`)}>
+                            <MessagesSquare className="mr-2 h-4 w-4" />
+                            Go to Chat
+                        </Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
        )}

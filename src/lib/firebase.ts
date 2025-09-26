@@ -28,7 +28,7 @@ import {
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
-import type { Booking, Route, Profile, VideoPlayerState, Visit } from "./types";
+import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import { devFirebaseConfig } from "./firebase-config.dev";
 import { prodFirebaseConfig } from "./firebase-config.prod";
 import { format } from "date-fns";
@@ -66,6 +66,40 @@ const profilesCollection = db ? collection(db, "profiles") : null;
 const settingsCollection = db ? collection(db, "settings") : null;
 const visitsCollection = db ? collection(db, "visits") : null;
 const routeViewsCollection = db ? collection(db, "routeViews") : null;
+const chatsCollection = db ? collection(db, "chats") : null;
+
+// --- Chat ---
+export const onChatMessagesFromFirestore = (rideId: string, callback: (messages: ChatMessage[]) => void) => {
+    if (!chatsCollection) return () => {};
+    
+    const q = query(collection(db, "chats", rideId, "messages"), orderBy("timestamp", "asc"));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const messages = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(),
+            } as ChatMessage;
+        });
+        callback(messages);
+    }, (error) => {
+        console.error("Error listening to chat messages:", error);
+    });
+
+    return unsubscribe;
+};
+
+export const sendChatMessageToFirestore = async (rideId: string, senderEmail: string, text: string) => {
+    if (!chatsCollection) return;
+    const messagesCol = collection(db, "chats", rideId, "messages");
+    await addDoc(messagesCol, {
+        senderEmail,
+        text,
+        timestamp: serverTimestamp(),
+    });
+};
 
 
 // --- Route Views ---
@@ -153,6 +187,27 @@ export const onSettingChange = (key: string, callback: (value: any) => void) => 
 };
 
 // --- Bookings ---
+export const getBookingFromFirestore = async (bookingId: string): Promise<Booking | null> => {
+    if (!bookingsCollection) return null;
+    try {
+        const docRef = doc(db, "bookings", bookingId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            return {
+                ...data,
+                id: docSnap.id,
+                departureDate: data.departureDate?.toDate ? data.departureDate.toDate() : new Date(data.departureDate),
+                returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
+            } as Booking;
+        }
+        return null;
+    } catch(e) {
+        console.error("Error getting booking from Firestore", e);
+        return null;
+    }
+};
+
 export const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!bookingsCollection) return [];
     try {

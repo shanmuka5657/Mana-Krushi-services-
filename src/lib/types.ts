@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export type Booking = {
@@ -101,6 +102,13 @@ export type RouteView = {
     timestamp: Date;
 };
 
+export type ChatMessage = {
+    id: string;
+    senderEmail: string;
+    text: string;
+    timestamp: Date;
+};
+
 
 // Zod Schemas for Distance Calculator AI Flow
 export const CalculateDistanceInputSchema = z.object({
@@ -132,5 +140,3 @@ export const TollCalculatorOutputSchema = z.object({
     .describe('The estimated number of toll plazas along the route.'),
 });
 export type TollCalculatorOutput = z.infer<typeof TollCalculatorOutputSchema>;
-
-    
