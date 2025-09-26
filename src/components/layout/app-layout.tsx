@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import {
@@ -218,7 +219,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit & Loss" },
     { href: `/history?role=owner`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
-    { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
     { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
     { href: `/privacy-policy?role=owner`, icon: FileText, label: "Privacy Policy" },
@@ -232,7 +232,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/history?role=passenger`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
-    { href: `/games`, icon: Gamepad2, label: "Games" },
     { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
     { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
     { href: `/privacy-policy?role=passenger`, icon: FileText, label: "Privacy Policy" },

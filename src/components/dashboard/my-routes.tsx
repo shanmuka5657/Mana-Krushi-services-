@@ -576,8 +576,8 @@ ${booking.driverName}
                               <span className={`font-medium ${statusColor}`}>{booking.status}</span>
                           </div>
                       </div>
-
-                        <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-2">
+                      
+                      <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-2">
                             {booking.status === 'Completed' && booking.paymentStatus !== 'Paid' ? (
                                 <>
                                   <p className="text-sm text-muted-foreground mb-2 sm:mb-0">Payment:</p>
@@ -596,19 +596,24 @@ ${booking.driverName}
                                     <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
                                 </div>
                             ) : null}
-                            
-                            {booking.status !== 'Cancelled' && (
+                      </div>
+
+                        <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+                           {booking.status !== 'Cancelled' && (
                                 <>
-                                {booking.status !== 'Completed' &&
+                                    <a href={`tel:${booking.mobile}`}>
+                                        <Button size="sm" variant="outline">
+                                            <Phone className="mr-2 h-4 w-4" /> Call
+                                        </Button>
+                                    </a>
+                                    <Button size="sm" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking, booking.status === 'Completed' ? 'payment' : 'confirmation')}>
+                                        <MessageSquare className="mr-2 h-4 w-4" />
+                                        WhatsApp
+                                    </Button>
                                     <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
                                         <Share2 className="mr-2 h-4 w-4" />
                                         Share My Location
                                     </Button>
-                                }
-                                 <Button size="sm" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking, booking.status === 'Completed' ? 'payment' : 'confirmation')}>
-                                    <MessageSquare className="mr-2 h-4 w-4" />
-                                    {booking.status === 'Completed' ? 'Send Payment Link' : 'WhatsApp'}
-                                </Button>
                                 </>
                             )}
                         </div>
