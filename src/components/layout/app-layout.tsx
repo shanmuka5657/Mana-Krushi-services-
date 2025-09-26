@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import {
@@ -283,9 +282,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         <SidebarHeader>
            <div className="flex items-center gap-2">
                 <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
-                <div className="text-xl font-bold">
-                    <span>Mana</span><span className="text-accent">Krushi</span>
-                </div>
+                <h2 className="text-xl font-bold">Mana Krushi</h2>
             </div>
         </SidebarHeader>
         <SidebarContent>
