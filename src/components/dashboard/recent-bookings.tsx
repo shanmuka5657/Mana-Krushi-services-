@@ -237,11 +237,11 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   const shouldShowHeader = mode !== 'all';
 
   const handleGoToChat = () => {
-    if (selectedBooking) {
+    if (selectedBooking && selectedBooking.routeId) {
         router.push(`/chat/${selectedBooking.routeId}`);
         setIsViewOpen(false);
     } else {
-        toast({ title: "Error", description: "Could not find the selected booking to open chat.", variant: "destructive"});
+        toast({ title: "Error", description: "Could not find the route ID for this booking to open chat.", variant: "destructive"});
     }
   }
 
@@ -518,6 +518,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
 };
 
 export default RecentBookings;
+
 
 
 

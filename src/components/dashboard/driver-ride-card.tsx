@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -245,7 +246,7 @@ ${booking.driverName}
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
                 <div className="grid grid-cols-2 gap-2 w-full">
-                     <Button onClick={() => router.push(`/chat/${ride.id}`)} className="w-full">
+                     <Button onClick={() => router.push(`/chat/${ride.routeId}`)} className="w-full">
                         <MessagesSquare className="mr-2 h-4 w-4" />
                         Group Chat
                     </Button>
