@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye, Car, X, ShieldAlert } from "lucide-react";
+import { User, Phone, Users, Calendar as CalendarIcon, IndianRupee, Sparkles, CheckCircle, AlertCircle, Edit, Clock, MapPin, Loader2, Share2, MessageSquare, QrCode, Copy, Search, Eye, Car, X, ShieldAlert, MessagesSquare } from "lucide-react";
 import { getBookings, saveBookings, getProfile, getRoutes, saveRoutes, getAllProfiles, getCurrentUser, getRouteViews } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 
 interface MyRoutesProps {
@@ -75,6 +76,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
   const [bookedSeatsMap, setBookedSeatsMap] = useState<Map<string, number>>(new Map());
   const [routeViewsMap, setRouteViewsMap] = useState<Map<string, number>>(new Map());
   const { toast } = useToast();
+  const router = useRouter();
   const [allProfiles, setAllProfiles] = useState<Map<string, Profile>>(new Map());
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -305,7 +307,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
     };
 
     const error = () => {
-        toast({ title: "Unable to retrieve your location.", description: "Please ensure location services are enabled.", variant: 'destructive' });
+        toast({ title: "Unable to retrieve your location.", description: "Please ensure location permissions are enabled.", variant: 'destructive' });
     };
 
     toast({ title: "Getting your location..." });
@@ -332,7 +334,7 @@ This is ${booking.driverName} from MK Services, confirming your ride.
 - *Time:* ${formattedTime}
 - *Amount:* ₹${booking.amount.toFixed(2)}
 
-Looking forward to having you on board.
+Looking forward to have you on board.
 
 Thank you,
 ${booking.driverName}
@@ -395,6 +397,19 @@ ${booking.driverName}
     const whatsappUrl = `https://wa.me/91${selectedRoute.driverMobile}?text=${encodeURIComponent(summary)}`;
     window.open(whatsappUrl, '_blank');
   };
+
+  const handleGoToChat = () => {
+      if (bookingsForRoute.length > 0) {
+        const rideId = bookingsForRoute[0].id; // Use first booking as identifier for the ride
+        router.push(`/chat/${rideId}`);
+        setIsViewDialogOpen(false);
+    } else if (selectedRoute) {
+        // If there are no bookings yet, the owner still might want to see an empty chat room.
+        // The chat room creation is based on a booking ID, so we can't create one for a route with no bookings.
+        // A better approach would be to create chat based on Route ID. For now, we'll disable it.
+        toast({ title: "No Bookings Yet", description: "A chat room is created once the first passenger books this ride."});
+    }
+  }
 
 
   const getStatusInfo = (status: Booking['status']) => {
@@ -624,7 +639,11 @@ ${booking.driverName}
                 )}
               </div>
               {bookingsForRoute.length > 0 && (
-                <DialogFooter>
+                <DialogFooter className="flex-col sm:flex-row sm:justify-between w-full">
+                     <Button variant="outline" onClick={handleGoToChat}>
+                        <MessagesSquare className="mr-2 h-4 w-4" />
+                        Group Chat
+                    </Button>
                     <Button variant="secondary" onClick={handleSendSummaryToDriver}>
                         <Car className="mr-2 h-4 w-4" />
                         Send Summary to Driver
@@ -824,4 +843,3 @@ ${booking.driverName}
 
 export default MyRoutes;
 
-    
