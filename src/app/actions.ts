@@ -149,17 +149,20 @@ async function getMapmyIndiaToken(): Promise<string | null> {
 
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
     try {
+        const queryKey = query.toLowerCase().trim();
+        if (!queryKey) return { suggestions: [] };
+
         // Check Firestore cache first
-        const cachedSuggestions = await getLocationCache(query);
+        const cachedSuggestions = await getLocationCache(queryKey);
         if (cachedSuggestions) {
             return { suggestions: cachedSuggestions };
         }
 
         // If not in cache, call the AI
-        const result = await suggestLocationsFlow({ query });
-        if (result.suggestions) {
+        const result = await suggestLocationsFlow({ query: queryKey });
+        if (result && result.suggestions) {
             // Save to Firestore cache for future use
-            await setLocationCache(query, result.suggestions);
+            await setLocationCache(queryKey, result.suggestions);
             return { suggestions: result.suggestions };
         }
         return { suggestions: [] };
