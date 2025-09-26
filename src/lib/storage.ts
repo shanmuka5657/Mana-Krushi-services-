@@ -1,7 +1,6 @@
 
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import type { ProfileFormValues } from "@/components/dashboard/profile-form";
-import { db, auth } from './firebase';
 import { 
     collection, 
     getDocs, 
@@ -21,6 +20,8 @@ import {
     getCountFromServer,
     deleteDoc,
 } from 'firebase/firestore';
+import { db, auth } from './firebase';
+
 
 import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
@@ -58,6 +59,7 @@ const clearCache = (key?: 'profiles' | 'allProfiles' | 'routes' | 'bookings') =>
 export const getLocationCache = async (query: string): Promise<any[] | null> => {
     if (!isBrowser || !db) return null;
     const queryKey = query.toLowerCase().trim();
+    if (!queryKey) return null; // Do not query for empty strings
     const docRef = doc(db, "location_cache", queryKey);
     perfTracker.increment({ reads: 1, writes: 0 });
     const docSnap = await getDoc(docRef);
@@ -70,6 +72,7 @@ export const getLocationCache = async (query: string): Promise<any[] | null> => 
 export const setLocationCache = async (query: string, suggestions: any[]) => {
     if (!isBrowser || !db) return;
     const queryKey = query.toLowerCase().trim();
+    if (!queryKey) return; // Do not save for empty strings
     const docRef = doc(db, "location_cache", queryKey);
     perfTracker.increment({ reads: 0, writes: 1 });
     await setDoc(docRef, { suggestions, timestamp: new Date() });
@@ -465,6 +468,19 @@ const getSettingFromFirestore = async (key: string): Promise<any | null> => {
     }
 }
 
+const onSettingChange = (key: string, callback: (value: any) => void) => {
+    if (!db) return () => {};
+    const docRef = doc(db, "settings", key);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            callback(doc.data().value);
+        } else {
+            callback(null);
+        }
+    });
+    return unsubscribe;
+};
+
 // --- Chat ---
 const onChatMessagesFromFirestore = (rideId: string, callback: (messages: ChatMessage[]) => void) => {
     if (!db) return () => {};
@@ -620,20 +636,6 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
     return { ride: route, profiles: profiles.filter((p): p is Profile => !!p) };
 };
 
-
-// --- Settings ---
-export const onSettingChange = (key: string, callback: (value: any) => void) => {
-    if (!db) return () => {};
-    const docRef = doc(db, "settings", key);
-    const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-            callback(doc.data().value);
-        } else {
-            callback(null);
-        }
-    });
-    return unsubscribe;
-};
 
 // --- Branding ---
 export const saveGlobalLogoUrl = async (url: string) => {
