@@ -56,7 +56,6 @@ const ownerFormSchema = z.object({
   driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
-  distance: z.coerce.number().optional(),
   travelDate: z.date({
     required_error: "A travel date is required.",
   }),
@@ -72,7 +71,7 @@ const ownerFormSchema = z.object({
 export type OwnerFormValues = z.infer<typeof ownerFormSchema>;
 
 interface OwnerDashboardProps {
-  onRouteAdded: (newRoute: OwnerFormValues & { isPromoted?: boolean }) => void;
+  onRouteAdded: (newRoute: OwnerFormValues & { isPromoted?: boolean, distance?: number }) => void;
   onSwitchTab: (tab: string) => void;
   profile: Profile;
 }
@@ -99,9 +98,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const router = useRouter();
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-  const [isCalculating, setIsCalculating] = useState(false);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean, id?: string }) | null>(null);
+  const [routeDataToSubmit, setRouteDataToSubmit] = useState<(OwnerFormValues & { isPromoted?: boolean, distance?: number }) | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   const form = useForm<OwnerFormValues>({
@@ -113,7 +111,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         driverMobile: (profile.mobile && profile.mobile !== '0000000000') ? profile.mobile : "",
         fromLocation: "",
         toLocation: "",
-        distance: 0,
         departureTime: "09:00",
         arrivalTime: "18:00",
         availableSeats: 1,
@@ -127,49 +124,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const fromLocation = useWatch({ control: form.control, name: 'fromLocation' });
   const toLocation = useWatch({ control: form.control, name: 'toLocation' });
   const vehicleType = useWatch({ control: form.control, name: 'vehicleType' });
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     if (vehicleType === 'Bike') {
         form.setValue('availableSeats', 1);
     }
   }, [vehicleType, form]);
-
-
-  const handleCalculateDistance = async (from: string, to: string) => {
-      if(!from || !to || from.length < 2 || to.length < 2) {
-          return;
-      }
-      
-      setIsCalculating(true);
-      const result = await calculateDistance({from, to});
-      setIsCalculating(false);
-
-      if (result.error) {
-        // AI is disabled, do nothing
-      } else if (result.distance) {
-          form.setValue('distance', result.distance);
-           toast({
-              title: "Distance Calculated",
-              description: `The distance is approximately ${result.distance} km.`,
-          });
-      }
-  }
-
-  useEffect(() => {
-    if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-    }
-    if (fromLocation && toLocation) {
-        debounceTimeout.current = setTimeout(() => {
-            handleCalculateDistance(fromLocation, toLocation);
-        }, 1000); // 1 second debounce
-    }
-    return () => {
-        if(debounceTimeout.current) clearTimeout(debounceTimeout.current);
-    }
-  }, [fromLocation, toLocation]);
-
 
   async function onSubmit(data: OwnerFormValues) {
     const ownerEmail = getCurrentUser();
@@ -197,14 +157,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     const routeDate = data.travelDate;
     const newStart = parse(data.departureTime, 'HH:mm', routeDate).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', routeDate).getTime();
-    
-    const routeIdToEdit = (routeDataToSubmit as Route | null)?.id;
 
     for (const existingRoute of existingRoutesOfSameType) {
-        if (routeIdToEdit && existingRoute.id === routeIdToEdit) {
-            continue;
-        }
-
         const existingRouteDate = new Date(existingRoute.travelDate);
         
         if (format(routeDate, 'yyyy-MM-dd') !== format(existingRouteDate, 'yyyy-MM-dd')) {
@@ -224,8 +178,11 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         }
     }
 
+    const distanceResult = await calculateDistance({from: data.fromLocation, to: data.toLocation});
+
     const dataWithVehicleInfo = {
         ...data,
+        distance: distanceResult.distance,
         ownerEmail: ownerEmail,
         vehicleType: data.vehicleType, 
         vehicleNumber: profile.vehicleNumber,
@@ -249,7 +206,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     }
   };
 
-  const handleRouteSubmission = (data: OwnerFormValues & { isPromoted?: boolean }) => {
+  const handleRouteSubmission = (data: OwnerFormValues & { isPromoted?: boolean, distance?: number }) => {
     onRouteAdded(data);
     toast({
       title: "Route Added!",
@@ -521,7 +478,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                       </FormItem>
                   )}
                   />
-                  <FormField
+                <FormField
                   control={form.control}
                   name="vehicleType"
                   render={({ field }) => (
@@ -626,5 +583,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
-
-    

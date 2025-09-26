@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 function DashboardPage({ profile }: { profile: Profile | null }) {
   const router = useRouter();
 
-  const handleAddRoute = async (newRouteData: OwnerFormValues & { pickupPoints?: string[], dropOffPoints?: string[], isPromoted?: boolean }) => {
+  const handleAddRoute = async (newRouteData: OwnerFormValues & { isPromoted?: boolean, distance?: number }) => {
     const ownerEmail = getCurrentUser();
      if (!ownerEmail) {
         console.error("Owner email not found, cannot add route.");
