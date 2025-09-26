@@ -47,6 +47,8 @@ interface PassengerDashboardProps {
 }
 
 // --- Location Autocomplete Component ---
+const locationCache = new Map<string, any[]>();
+
 const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUseCurrentLocation, isGettingCurrentLocation }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string, onUseCurrentLocation?: () => void, isGettingCurrentLocation?: boolean }) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [query, setQuery] = useState(field.value || '');
@@ -59,10 +61,17 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
     }, [field.value]);
 
     const fetchSuggestions = async (searchQuery: string) => {
-        if (searchQuery.length < 2) {
+        const queryKey = searchQuery.toLowerCase();
+        if (queryKey.length < 2) {
             setSuggestions([]);
             return;
         }
+
+        if (locationCache.has(queryKey)) {
+            setSuggestions(locationCache.get(queryKey)!);
+            return;
+        }
+        
         setIsLoading(true);
         const result = await getMapSuggestions(searchQuery);
         setIsLoading(false);
@@ -71,6 +80,7 @@ const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUse
             console.error(result.error);
             setSuggestions([]);
         } else if (result.suggestions) {
+            locationCache.set(queryKey, result.suggestions);
             setSuggestions(result.suggestions);
         }
     };
