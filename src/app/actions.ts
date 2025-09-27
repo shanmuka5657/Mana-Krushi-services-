@@ -176,6 +176,12 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         return { suggestions: [] };
     }
 
+    // 1. Check cache first
+    const cachedSuggestions = await getLocationCache(query);
+    if (cachedSuggestions) {
+        return { suggestions: cachedSuggestions };
+    }
+
     const token = await getMapmyIndiaToken();
     if (!token) {
         return { error: "Failed to authenticate with map service." };
@@ -201,6 +207,11 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
           placeName: item.placeName,
           placeAddress: item.placeAddress
         })) || [];
+        
+        // 2. Save to cache if we got results
+        if(formattedSuggestions.length > 0) {
+            await setLocationCache(query, formattedSuggestions);
+        }
 
         return { suggestions: formattedSuggestions };
 
