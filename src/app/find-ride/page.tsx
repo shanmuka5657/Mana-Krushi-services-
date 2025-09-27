@@ -11,7 +11,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getRoutes, getBookings, getAllProfiles, getProfile } from '@/lib/storage';
+import { getRoutes, getBookings, getProfile } from '@/lib/storage';
 import type { Route, Booking, Profile } from '@/lib/types';
 import { Car, Star, Users, Milestone, ArrowLeft, Zap, Sparkles, Shield, CheckCircle, Bike } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +60,7 @@ function FindRideResultsPage() {
                 return;
             };
 
-            const allRoutes = await getRoutes(true);
+            const allRoutesData = await getRoutes(true);
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -95,7 +95,7 @@ function FindRideResultsPage() {
             const fromSearchTerms = getSearchTerms(from);
             const toSearchTerms = getSearchTerms(to);
             
-            let routes = allRoutes.filter(route => {
+            const routes = allRoutesData.filter(route => {
                 if (route.vehicleType !== 'Car') {
                     return false;
                 }
@@ -111,13 +111,8 @@ function FindRideResultsPage() {
             });
 
             if (routes.length > 0) {
-                const bookingsPromises = routes.map(route => getBookings(true, {
-                    destination: `${route.fromLocation} to ${route.toLocation}`,
-                    date: format(new Date(route.travelDate), 'yyyy-MM-dd'),
-                    time: route.departureTime,
-                }));
-                const bookingsByRoute = await Promise.all(bookingsPromises);
-                const allRelevantBookings = bookingsByRoute.flat();
+                 // OPTIMIZED: Batch fetch bookings and profiles
+                const allRelevantBookings = await getBookings(true);
                 setAllBookings(allRelevantBookings);
                 
                 const driverEmails = new Set(routes.map(r => r.ownerEmail));
@@ -330,6 +325,7 @@ export default function FindRidePage() {
     
 
     
+
 
 
 
