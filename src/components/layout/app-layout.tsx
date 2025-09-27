@@ -91,7 +91,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [role, setRole] = React.useState('passenger');
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isAuthLoading, setIsAuthLoading] = React.useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
 
 
@@ -99,7 +99,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     setIsMounted(true);
 
     const unsubAuth = onAuthStateChanged(async (user) => {
-        setIsLoading(true);
+        setIsAuthLoading(true);
         setAuthUser(user);
         if (user) {
             const userProfile = await getProfile(user.email!);
@@ -118,13 +118,11 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
                 setUserRole(roleFromProfile === 'owner' ? 'Owner' : 'Passenger');
             }
         } else {
-            // If user is not authenticated, redirect to login page
-            // Allow access to public pages like /disclaimer
             if (!['/disclaimer', '/privacy-policy', '/login', '/signup', '/'].includes(pathname)) {
                  router.push('/login');
             }
         }
-        setIsLoading(false);
+        setIsAuthLoading(false);
     });
     
     perfTracker.subscribe(setPerfCounts);
@@ -151,7 +149,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   }, [router, pathname, isMounted]);
 
 
-  // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
     const { toggleSidebar } = useSidebar()
     return (
@@ -249,7 +246,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {!isMounted || isLoading ? (
+            {!isMounted || isAuthLoading ? (
               <>
                 {Array.from({ length: 9 }).map((_, index) => (
                   <SidebarMenuSkeleton key={index} showIcon />
@@ -337,7 +334,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
             </div>
           </header>
           <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-            {isLoading ? (
+            {isAuthLoading ? (
                 <div className="flex items-center justify-center h-full">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
