@@ -2,52 +2,37 @@
 "use client";
 
 import {
-  BarChart,
   Briefcase,
-  IndianRupee,
   HelpCircle,
   Home,
-  LayoutDashboard,
-  Map,
   Route as RouteIcon,
-  Search,
   Settings,
   Users,
   User,
   LogOut,
   Plane,
-  Download,
   Shield,
   Book,
   Loader2,
-  Film,
-  ShoppingCart,
-  MapPin,
-  Timer,
-  AlertCircle,
-  PanelLeft,
-  Wallet,
-  Eye,
-  Youtube,
-  Signal,
-  MessageSquare,
   Gift,
   Activity,
   ArrowDown,
   ArrowUp,
   FileText,
   History,
-  Bike,
   Rss,
   Database,
+  Eye,
+  IndianRupee,
+  Wallet,
 } from "lucide-react";
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { SidebarProvider, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "@/components/ui/sidebar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { SidebarProvider, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton, Sidebar, SidebarTrigger, SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
 
 import {
   DropdownMenu,
@@ -144,34 +129,28 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: Rss, label: "Campaigns" },
     { href: `/admin/database`, icon: Database, label: "Database" },
-    { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
   const ownerNavItems = [
     { href: `/dashboard?role=owner`, icon: Home, label: "Home" },
-    { href: `/profile?role=owner`, icon: User, label: "Profile" },
     { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
-    { href: `/clients?role=owner`, icon: Users, label: "Passengers" },
-    { href: `/payments?role=owner`, icon: IndianRupee, label: "Payments" },
-    { href: `/profit-loss?role=owner`, icon: Wallet, label: "Profit & Loss" },
     { href: `/history?role=owner`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
-    { href: `/settings?role=owner`, icon: Settings, label: "Settings" },
-    { href: `/help?role=owner`, icon: HelpCircle, label: "Help" },
-    { href: `/privacy-policy?role=owner`, icon: FileText, label: "Privacy Policy" },
   ];
 
   const passengerNavItems = [
     { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
-    { href: `/profile?role=passenger`, icon: User, label: "Profile" },
     { href: `/community`, icon: Users, label: "Community Hub" },
     { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
     { href: `/history?role=passenger`, icon: History, label: "History" },
     { href: `/referral`, icon: Gift, label: "Referral" },
-    { href: `/settings?role=passenger`, icon: Settings, label: "Settings" },
-    { href: `/help?role=passenger`, icon: HelpCircle, label: "Help" },
-    { href: `/privacy-policy?role=passenger`, icon: FileText, label: "Privacy Policy" },
   ];
+  
+  const footerNavItems = [
+     { href: `/settings?role=${role}`, icon: Settings, label: "Settings" },
+     { href: `/help?role=${role}`, icon: HelpCircle, label: "Help" },
+     { href: `/privacy-policy?role=${role}`, icon: FileText, label: "Privacy Policy" },
+  ]
   
   const getNavItems = () => {
     switch (role) {
@@ -201,7 +180,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
     }
   };
 
-  const renderNavMenu = () => (
+  const renderNavMenu = (items: typeof navItems) => (
       <SidebarMenu>
           {isAuthLoading ? (
           <>
@@ -210,7 +189,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
               ))}
           </>
           ) : (
-              navItems.map((item) => (
+              items.map((item) => (
               <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                   onClick={() => handleNavClick(item.href)}
@@ -227,109 +206,121 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
   );
   
   return (
-    <div className="flex min-h-svh w-full flex-col bg-background">
-        <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7"
-                            aria-label="Toggle Menu"
-                        >
-                            <PanelLeft />
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0 flex flex-col">
-                        <SheetHeader className="p-2">
-                             <SheetTitle>
-                                <div className="flex items-center gap-2">
-                                    <div className="relative h-8 w-8">
-                                        <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
+    <SidebarProvider>
+        <div className="flex min-h-svh w-full flex-col bg-background">
+            <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                        <SheetTrigger asChild>
+                           <Button
+                                variant="ghost"
+                                size="icon"
+                                className="md:hidden size-7"
+                                aria-label="Toggle Menu"
+                            >
+                                <RouteIcon />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0 flex flex-col">
+                           <SheetHeader className="p-2 border-b">
+                                <SheetTitle>
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative h-8 w-8">
+                                            <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
+                                        </div>
+                                        <h2 className="text-lg font-bold">Mana Krushi</h2>
                                     </div>
-                                    <h2 className="text-lg font-bold">Mana Krushi</h2>
-                                </div>
-                             </SheetTitle>
-                        </SheetHeader>
-                        <div className="flex-1 overflow-y-auto p-2">
-                            {renderNavMenu()}
-                        </div>
-                    </SheetContent>
-                </Sheet>
-              
-              <div className="flex items-center gap-2 truncate">
-                <div className="relative h-8 w-8">
-                  <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
-                </div>
-                <h2 className="text-xl md:text-2xl font-semibold truncate">
-                  Mana Krushi
-                </h2>
-              </div>
-            </div>
-            <div className="flex flex-shrink-0 items-center justify-end gap-4">
-               <div className="flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
-                  <div className="flex items-center gap-2" title="Database Reads (Session)">
-                      <ArrowDown className="h-4 w-4 text-green-500" />
-                      <span className="font-mono">{perfCounts.reads}</span>
-                  </div>
-                  <div className="h-4 w-px bg-border" />
-                   <div className="flex items-center gap-2" title="Database Writes (Session)">
-                      <ArrowUp className="h-4 w-4 text-orange-500" />
-                      <span className="font-mono">{perfCounts.writes}</span>
-                  </div>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div className="flex items-center gap-3 cursor-pointer">
-                    <Avatar className="h-10 w-10 border">
-                       <AvatarImage src={profile?.selfieDataUrl} alt={userName} />
-                      <AvatarFallback>{userInitial}</AvatarFallback>
-                    </Avatar>
-                    <div className="hidden text-sm md:block">
-                      <div className="font-semibold">{userName}</div>
-                      <div className="text-muted-foreground">{userRole}</div>
+                                </SheetTitle>
+                            </SheetHeader>
+                            <div className="flex-1 overflow-y-auto p-2">
+                                {renderNavMenu(navItems)}
+                            </div>
+                             <div className="p-2 mt-auto border-t">
+                                {renderNavMenu(footerNavItems)}
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                  
+                  <div className="flex items-center gap-2 truncate">
+                    <div className="relative h-8 w-8">
+                        <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
                     </div>
+                    <h2 className="text-xl md:text-2xl font-semibold truncate">
+                      Mana Krushi
+                    </h2>
                   </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                   <DropdownMenuItem onClick={() => router.push(role === 'admin' ? '/admin/profile' : `/profile?role=${role}`)}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </div>
+                <div className="flex flex-shrink-0 items-center justify-end gap-4">
+                   <div className="flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
+                      <div className="flex items-center gap-2" title="Database Reads (Session)">
+                          <ArrowDown className="h-4 w-4 text-green-500" />
+                          <span className="font-mono">{perfCounts.reads}</span>
+                      </div>
+                      <div className="h-4 w-px bg-border" />
+                       <div className="flex items-center gap-2" title="Database Writes (Session)">
+                          <ArrowUp className="h-4 w-4 text-orange-500" />
+                          <span className="font-mono">{perfCounts.writes}</span>
+                      </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="flex items-center gap-3 cursor-pointer">
+                        <Avatar className="h-10 w-10 border">
+                           <AvatarImage src={profile?.selfieDataUrl} alt={userName} />
+                          <AvatarFallback>{userInitial}</AvatarFallback>
+                        </Avatar>
+                        <div className="hidden text-sm md:block">
+                          <div className="font-semibold">{userName}</div>
+                          <div className="text-muted-foreground">{userRole}</div>
+                        </div>
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                       <DropdownMenuItem onClick={() => router.push(role === 'admin' ? '/admin/profile' : `/profile?role=${role}`)}>
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Profile</span>
+                        </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+            </header>
+
+            <div className="flex flex-1">
+                <Sidebar className="hidden md:flex md:flex-col">
+                    <SidebarContent>
+                        {renderNavMenu(navItems)}
+                    </SidebarContent>
+                    <SidebarFooter>
+                        {renderNavMenu(footerNavItems)}
+                    </SidebarFooter>
+                </Sidebar>
+                <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+                {isAuthLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                ) : (
+                    typeof children === 'function' ? children(profile) : children
+                )}
+                </main>
             </div>
-        </header>
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        {isAuthLoading ? (
-            <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        ) : (
-            typeof children === 'function' ? children(profile) : children
-        )}
-        </main>
-    </div>
+        </div>
+    </SidebarProvider>
   );
 }
 
 
 export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
-    return (
-        <SidebarProvider>
-            <AppLayoutContent>{children}</AppLayoutContent>
-        </SidebarProvider>
-    )
+    return <AppLayoutContent>{children}</AppLayoutContent>;
 }
