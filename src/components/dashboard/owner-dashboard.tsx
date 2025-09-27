@@ -135,7 +135,7 @@ const LocationAutocompleteInput = ({
                     ) : (
                         suggestions.map((suggestion, index) => (
                             <div
-                                key={index}
+                                key={`${suggestion.placeName}-${index}`}
                                 className="p-2 hover:bg-muted cursor-pointer"
                                 onMouseDown={() => {
                                     field.onChange(suggestion.placeName);
