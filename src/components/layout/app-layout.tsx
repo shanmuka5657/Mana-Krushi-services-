@@ -46,7 +46,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   SidebarProvider,
   Sidebar,
@@ -251,10 +251,12 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
                     </SheetTrigger>
                     <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0">
                         <SidebarHeader>
-                            <div className="flex items-center gap-2">
-                                <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
-                                <h2 className="text-lg font-bold">Mana Krushi</h2>
-                            </div>
+                            <SheetTitle>
+                                <div className="flex items-center gap-2">
+                                    <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
+                                    <h2 className="text-lg font-bold">Mana Krushi</h2>
+                                </div>
+                            </SheetTitle>
                         </SidebarHeader>
                         <div className="flex-1 overflow-y-auto p-2">
                             {renderNavMenu()}
