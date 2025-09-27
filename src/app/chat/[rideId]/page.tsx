@@ -37,6 +37,18 @@ export default function ChatRoomPage() {
             return;
         }
 
+        // --- OPTIMIZATION START ---
+        // 1. Subscribe to messages immediately.
+        const unsubscribe = onChatMessages(rideId, (newMessages) => {
+            setMessages(newMessages);
+            if(isLoading) {
+                 // First message load often means we're ready.
+                 // This might still be true if chat is empty, fetchInitialData handles the final isLoading=false
+                setIsLoading(false);
+            }
+        });
+
+        // 2. Fetch ride details and profiles in parallel.
         const fetchInitialData = async () => {
             const { ride, profiles } = await getRideDetailsForChat(rideId, userEmail);
 
@@ -53,15 +65,14 @@ export default function ChatRoomPage() {
                 if(p) profilesMap.set(p.email, p);
             });
             setParticipants(profilesMap);
-            setIsLoading(false);
+            setIsLoading(false); // Final loading state change
         };
 
         fetchInitialData();
-
-        const unsubscribe = onChatMessages(rideId, setMessages);
+        // --- OPTIMIZATION END ---
 
         return () => unsubscribe();
-    }, [rideId, router]);
+    }, [rideId, router, isLoading]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +86,7 @@ export default function ChatRoomPage() {
         setNewMessage('');
     };
     
-    if (isLoading) {
+    if (isLoading && messages.length === 0) {
         return (
             <AppLayout>
                 <div className="flex justify-center items-center h-full">
