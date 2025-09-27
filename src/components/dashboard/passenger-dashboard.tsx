@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -109,6 +110,7 @@ const LocationAutocompleteInput = ({
                                 onMouseDown={() => {
                                     field.onChange(suggestion.placeName);
                                     setSuggestions([]);
+                                    setIsFocused(false);
                                 }}
                             >
                                 <p className="font-semibold">{suggestion.placeName}</p>
