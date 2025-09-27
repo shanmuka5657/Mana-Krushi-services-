@@ -62,31 +62,38 @@ function FindRideResultsPage() {
 
             const allRoutes = await getRoutes(true);
 
-            // Filter routes by from and to, and only include future dates
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Set to start of today
+            today.setHours(0, 0, 0, 0);
 
             const locationData = locations as Record<string, string[]>;
 
             const getSearchTerms = (location: string): string[] => {
                 const lowerCaseLocation = location.trim().toLowerCase();
-                const mainTerms = [lowerCaseLocation];
                 
-                // Find a key in locations.json that matches the search term, case-insensitively
-                const matchingCityKey = Object.keys(locationData).find(city => city.toLowerCase() === lowerCaseLocation);
-                
-                if (matchingCityKey && locationData[matchingCityKey]) {
-                    return [...mainTerms, ...locationData[matchingCityKey].map(sub => sub.toLowerCase())];
+                // Case 1: The location is a major city itself (e.g., "Hyderabad")
+                const cityKey = Object.keys(locationData).find(c => c.toLowerCase() === lowerCaseLocation);
+                if (cityKey && locationData[cityKey]) {
+                    return [lowerCaseLocation, ...locationData[cityKey].map(sub => sub.toLowerCase())];
+                }
+
+                // Case 2: The location is a sub-location (e.g., "Gachibowli")
+                for (const city in locationData) {
+                    const subLocations = locationData[city].map(s => s.toLowerCase());
+                    if (subLocations.includes(lowerCaseLocation)) {
+                        // Found parent city, return the city and all its sub-locations
+                        return [city.toLowerCase(), ...subLocations];
+                    }
                 }
                 
-                return mainTerms;
+                // Case 3: The location is not in our JSON file, so just search for it directly
+                return [lowerCaseLocation];
             };
+
 
             const fromSearchTerms = getSearchTerms(from);
             const toSearchTerms = getSearchTerms(to);
             
             let routes = allRoutes.filter(route => {
-                 // Only show Car routes on this page
                 if (route.vehicleType !== 'Car') {
                     return false;
                 }
@@ -102,7 +109,6 @@ function FindRideResultsPage() {
             });
 
             if (routes.length > 0) {
-                // Fetch bookings only for the routes found
                 const bookingsPromises = routes.map(route => getBookings(true, {
                     destination: `${route.fromLocation} to ${route.toLocation}`,
                     date: format(new Date(route.travelDate), 'yyyy-MM-dd'),
@@ -112,7 +118,6 @@ function FindRideResultsPage() {
                 const allRelevantBookings = bookingsByRoute.flat();
                 setAllBookings(allRelevantBookings);
                 
-                // Fetch profiles only for the drivers found
                 const driverEmails = new Set(routes.map(r => r.ownerEmail));
                 const profilePromises = Array.from(driverEmails).map(email => getProfile(email));
                 const profiles = await Promise.all(profilePromises);
@@ -124,14 +129,12 @@ function FindRideResultsPage() {
                 setDriverProfiles(profilesMap);
             }
 
-            // Sort by date, then by promotion
             routes.sort((a, b) => {
                 const dateA = new Date(a.travelDate).getTime();
                 const dateB = new Date(b.travelDate).getTime();
                 if (dateA !== dateB) {
                     return dateA - dateB;
                 }
-                // If dates are same, promoted rides go first
                 return (b.isPromoted ? 1 : 0) - (a.isPromoted ? 1 : 0);
             });
 
@@ -325,4 +328,5 @@ export default function FindRidePage() {
     
 
     
+
 
