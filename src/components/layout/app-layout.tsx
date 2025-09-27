@@ -46,19 +46,12 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarFooter,
-  useSidebar,
+  SidebarHeader,
   SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import {
@@ -92,6 +85,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
   const [isAuthLoading, setIsAuthLoading] = React.useState(true);
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
 
    React.useEffect(() => {
@@ -143,21 +137,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     };
   }, [router, pathname]);
 
-
-  const ToggleSidebarButton = () => {
-    const { toggleSidebar } = useSidebar()
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-7"
-        onClick={() => toggleSidebar()}
-        aria-label="Toggle Sidebar"
-      >
-        <PanelLeft />
-      </Button>
-    )
-  }
 
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
@@ -219,6 +198,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   };
   
   const handleNavClick = (href: string) => {
+    setIsSheetOpen(false);
     if (href.startsWith('http')) {
       window.open(href, '_blank', 'noopener,noreferrer');
     } else {
@@ -227,51 +207,54 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   };
   
   return (
-    <SidebarProvider>
-      <Sidebar collapsible="icon">
-        <SidebarHeader>
-           <div className="flex items-center gap-2">
-                <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
-                <h2 className="text-lg font-bold">Mana Krushi</h2>
-            </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {isAuthLoading ? (
-              <>
-                {Array.from({ length: 9 }).map((_, index) => (
-                  <SidebarMenuSkeleton key={index} showIcon />
-                ))}
-              </>
-            ) : (
-                navItems.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      onClick={() => handleNavClick(item.href)}
-                      isActive={pathname.startsWith(item.href.split('?')[0])}
-                      className="justify-start"
-                      tooltip={item.label}
-                    >
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))
-            )}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-        </SidebarFooter>
-      </Sidebar>
-
-      <SidebarInset>
-        <div className="flex flex-col flex-1 h-full">
-          <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
-             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <SidebarTrigger className="md:hidden" />
-               <div className="hidden md:flex items-center gap-2">
-                <ToggleSidebarButton />
-              </div>
+    <div className="flex min-h-svh w-full flex-col bg-background">
+        <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7"
+                            aria-label="Toggle Menu"
+                        >
+                            <PanelLeft />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0">
+                        <SidebarHeader>
+                            <div className="flex items-center gap-2">
+                                <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
+                                <h2 className="text-lg font-bold">Mana Krushi</h2>
+                            </div>
+                        </SidebarHeader>
+                        <div className="flex-1 overflow-y-auto p-2">
+                            <SidebarMenu>
+                                {isAuthLoading ? (
+                                <>
+                                    {Array.from({ length: 9 }).map((_, index) => (
+                                    <SidebarMenuSkeleton key={index} showIcon />
+                                    ))}
+                                </>
+                                ) : (
+                                    navItems.map((item) => (
+                                    <SidebarMenuItem key={item.label}>
+                                        <SidebarMenuButton
+                                        onClick={() => handleNavClick(item.href)}
+                                        isActive={pathname.startsWith(item.href.split('?')[0])}
+                                        className="justify-start"
+                                        >
+                                        <item.icon />
+                                        <span>{item.label}</span>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                    ))
+                                )}
+                            </SidebarMenu>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+              
               <div className="flex items-center gap-2 truncate">
                 <Image src={logoUrl} alt="App Logo" width={32} height={32} className="rounded-full" />
                 <h2 className="text-xl md:text-2xl font-semibold truncate">
@@ -323,18 +306,18 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </header>
-          <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-            {isAuthLoading ? (
-                <div className="flex items-center justify-center h-full">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-            ) : (
-                typeof children === 'function' ? children(profile) : children
-            )}
-          </main>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </header>
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        {isAuthLoading ? (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        ) : (
+            typeof children === 'function' ? children(profile) : children
+        )}
+        </main>
+    </div>
   );
 }
+
+    
