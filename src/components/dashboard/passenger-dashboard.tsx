@@ -46,93 +46,6 @@ interface PassengerDashboardProps {
   profile: Profile | null;
 }
 
-// --- Location Autocomplete Component ---
-const locationCache = new Map<string, any[]>();
-
-const LocationAutocompleteInput = ({ field, onLocationSelect, placeholder, onUseCurrentLocation, isGettingCurrentLocation }: { field: any, onLocationSelect: (location: string) => void, placeholder?: string, onUseCurrentLocation?: () => void, isGettingCurrentLocation?: boolean }) => {
-    const [suggestions, setSuggestions] = useState<any[]>([]);
-    const [query, setQuery] = useState(field.value || '');
-    const [isFocused, setIsFocused] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        setQuery(field.value);
-    }, [field.value]);
-
-    const fetchSuggestions = async (searchQuery: string) => {
-        const queryKey = searchQuery.toLowerCase().trim();
-        if (queryKey.length < 1) { // Search from the first letter
-            setSuggestions([]);
-            return;
-        }
-
-        if (locationCache.has(queryKey)) {
-            setSuggestions(locationCache.get(queryKey)!);
-            return;
-        }
-        
-        setIsLoading(true);
-        const result = await getMapSuggestions(searchQuery);
-        setIsLoading(false);
-
-        if (result.error) {
-            console.error(result.error);
-            setSuggestions([]);
-        } else if (result.suggestions) {
-            locationCache.set(queryKey, result.suggestions);
-            setSuggestions(result.suggestions);
-        }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setQuery(value);
-        field.onChange(value);
-        fetchSuggestions(value); // Fetch on every keystroke
-    };
-
-    const handleSuggestionClick = (suggestion: any) => {
-        const locationName = suggestion.placeName;
-        setQuery(locationName);
-        onLocationSelect(locationName);
-        setSuggestions([]);
-        setIsFocused(false);
-    };
-
-    return (
-        <div className="relative">
-            <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                    {...field}
-                    value={query}
-                    onChange={handleInputChange}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} // Delay to allow click
-                    className="pl-10"
-                    autoComplete="off"
-                    placeholder={placeholder}
-                />
-                {isLoading && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />}
-            </div>
-            {isFocused && suggestions.length > 0 && (
-                <ul className="absolute z-10 w-full bg-card border rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
-                    {suggestions.map((suggestion, index) => (
-                        <li
-                            key={suggestion.eLoc || index}
-                            onMouseDown={() => handleSuggestionClick(suggestion)} // Use onMouseDown to fire before onBlur
-                            className="px-4 py-2 hover:bg-muted cursor-pointer"
-                        >
-                            <p className="font-semibold text-sm">{suggestion.placeName}</p>
-                            <p className="text-xs text-muted-foreground">{suggestion.placeAddress}</p>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
-};
-
 
 export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
@@ -227,11 +140,10 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                               <FormLabel>From</FormLabel>
                                <div className="flex gap-2">
                                 <FormControl>
-                                    <LocationAutocompleteInput
-                                        field={field}
-                                        onLocationSelect={(location) => form.setValue('fromLocation', location)}
-                                        placeholder="Starting point"
-                                    />
+                                  <div className="relative flex-grow">
+                                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input {...field} placeholder="Starting point" className="pl-10" />
+                                  </div>
                                 </FormControl>
                                 <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
                                     {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
@@ -249,11 +161,10 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                           <FormItem>
                               <FormLabel>To</FormLabel>
                               <FormControl>
-                                  <LocationAutocompleteInput
-                                    field={field}
-                                    onLocationSelect={(location) => form.setValue('toLocation', location)}
-                                    placeholder="Destination"
-                                  />
+                                <div className="relative">
+                                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                  <Input {...field} placeholder="Destination" className="pl-10" />
+                                </div>
                               </FormControl>
                               <FormMessage />
                           </FormItem>
