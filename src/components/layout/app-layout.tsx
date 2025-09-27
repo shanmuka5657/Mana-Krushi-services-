@@ -47,7 +47,7 @@ import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "@/components/ui/sidebar";
 
 import {
   DropdownMenu,
@@ -67,7 +67,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { perfTracker } from "@/lib/perf-tracker";
 
 
-export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
+function AppLayoutContent({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -243,14 +243,14 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
                     </SheetTrigger>
                     <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0 flex flex-col">
                         <SheetHeader className="p-2">
-                            <SheetTitle>
+                             <SheetTitle>
                                 <div className="flex items-center gap-2">
                                     <div className="relative h-8 w-8">
                                         <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
                                     </div>
                                     <h2 className="text-lg font-bold">Mana Krushi</h2>
                                 </div>
-                            </SheetTitle>
+                             </SheetTitle>
                         </SheetHeader>
                         <div className="flex-1 overflow-y-auto p-2">
                             {renderNavMenu()}
@@ -323,4 +323,13 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         </main>
     </div>
   );
+}
+
+
+export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
+    return (
+        <SidebarProvider>
+            <AppLayoutContent>{children}</AppLayoutContent>
+        </SidebarProvider>
+    )
 }
