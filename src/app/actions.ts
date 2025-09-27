@@ -12,6 +12,7 @@ import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser, getLocationCache, setLocationCache } from "@/lib/storage";
 import { MAPMYINDIA_CLIENT_ID, MAPMYINDIA_CLIENT_SECRET } from "@/lib/map-config";
+import locations from '@/lib/locations.json';
 
 
 const SuggestDestinationsInput = z.object({
@@ -178,20 +179,31 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
 
     const queryKey = query.toLowerCase().trim();
 
-    // 1. Check cache first
+    // Check for major city in our locations.json
+    const locationData = locations as Record<string, string[]>;
+    const matchingCity = Object.keys(locationData).find(city => city.toLowerCase() === queryKey);
+
+    if (matchingCity && locationData[matchingCity]) {
+        const subLocations = locationData[matchingCity];
+        const formattedSuggestions = subLocations.map(sub => ({
+            placeName: sub,
+            placeAddress: `${matchingCity}, ${Object.keys(locations).find(state => (locations as Record<string, any>)[state].includes(matchingCity)) || 'India'}`
+        }));
+        return { suggestions: formattedSuggestions };
+    }
+
     const cachedSuggestions = await getLocationCache(queryKey);
     if (cachedSuggestions) {
         return { suggestions: cachedSuggestions };
     }
 
-    // 2. If not in cache, call the API
     const token = await getMapmyIndiaToken();
     if (!token) {
         return { error: "Failed to authenticate with map service." };
     }
 
     try {
-        const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}&location=21.1458,79.0882&hyperlocal=true`;
+        const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}&hyperlocal=true`;
         
         const response = await fetch(url, {
             headers: {
@@ -211,7 +223,6 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
           placeAddress: item.placeAddress
         })) || [];
         
-        // 3. Save to cache if we got results
         if(formattedSuggestions.length > 0) {
             await setLocationCache(queryKey, formattedSuggestions);
         }
