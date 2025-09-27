@@ -7,17 +7,6 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
-    // Ignore API calls and internal Next.js requests
-    {
-      urlPattern: /^https?:\/\/.*/,
-      handler: 'NetworkOnly',
-      options: {
-        precacheFallback: {
-          fallbackURL: '/offline',
-        },
-      },
-      method: 'POST',
-    },
     // Cache pages
     {
       urlPattern: ({ request }) => request.mode === 'navigate',
