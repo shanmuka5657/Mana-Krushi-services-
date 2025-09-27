@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useFormField,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
@@ -80,9 +82,11 @@ interface OwnerDashboardProps {
 const LocationAutocompleteInput = ({
     field,
     placeholder,
+    id
 }: {
     field: any;
     placeholder: string;
+    id: string;
 }) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -126,6 +130,7 @@ const LocationAutocompleteInput = ({
                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                     {...field}
+                    id={id}
                     placeholder={placeholder}
                     className="pl-10"
                     onChange={(e) => onInputChange(e.target.value)}
@@ -621,36 +626,36 @@ useEffect(() => {
               <div className="hidden md:block space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
-                    control={form.control}
-                    name="ownerName"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Owner Name</FormLabel>
-                        <FormControl>
+                      control={form.control}
+                      name="ownerName"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Owner Name</FormLabel>
+                          <FormControl>
                             <div className="relative">
-                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
+                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
                             </div>
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
                     />
                     <FormField
-                    control={form.control}
-                    name="driverName"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Driver Name</FormLabel>
-                        <FormControl>
+                      control={form.control}
+                      name="driverName"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Driver Name</FormLabel>
+                          <FormControl>
                             <div className="relative">
-                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input placeholder="Enter driver's name" {...field} className="pl-10" />
+                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input placeholder="Enter driver's name" {...field} className="pl-10" />
                             </div>
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
                     />
                 </div>
 
@@ -661,10 +666,10 @@ useEffect(() => {
                     <FormItem>
                         <FormLabel>Driver Mobile</FormLabel>
                         <FormControl>
-                        <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input type="tel" placeholder="Enter driver's mobile" {...field} className="pl-10" />
-                        </div>
+                          </div>
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -684,6 +689,7 @@ useEffect(() => {
                                   <LocationAutocompleteInput
                                         field={field}
                                         placeholder="Starting point"
+                                        id={useFormField().id}
                                     />
                                 </FormControl>
                                 <Button type="button" variant="outline" size="icon" onClick={() => handleUseCurrentLocation()} disabled={isGettingLocation}>
@@ -705,6 +711,7 @@ useEffect(() => {
                                 <LocationAutocompleteInput
                                       field={field}
                                       placeholder="Destination"
+                                      id={useFormField().id}
                                   />
                               </FormControl>
                               <FormMessage />
@@ -825,7 +832,7 @@ useEffect(() => {
                       <FormLabel>Available Seats</FormLabel>
                       <FormControl>
                           <div className="relative">
-                          <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input type="number" placeholder="Number of seats" {...field} className="pl-10" disabled={vehicleType === 'Bike'} />
                           </div>
                       </FormControl>
@@ -841,7 +848,7 @@ useEffect(() => {
                       <FormLabel>Price per Seat (₹)</FormLabel>
                       <FormControl>
                           <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input type="number" placeholder="e.g., 500" {...field} className="pl-10" />
                           </div>
                       </FormControl>
@@ -1005,3 +1012,5 @@ useEffect(() => {
     </div>
   );
 }
+
+    
