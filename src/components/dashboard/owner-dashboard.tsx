@@ -77,6 +77,82 @@ interface OwnerDashboardProps {
   profile: Profile;
 }
 
+const LocationAutocompleteInput = ({
+    field,
+    placeholder,
+}: {
+    field: any;
+    placeholder: string;
+}) => {
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const fetchSuggestions = useCallback(async (query: string) => {
+        if (query.length < 2) {
+            setSuggestions([]);
+            return;
+        }
+        setIsLoading(true);
+        const result = await getMapSuggestions(query);
+        setIsLoading(false);
+        if (result.error) {
+             console.error("Error fetching map suggestions:", result.error);
+        } else if(result.suggestions) {
+            setSuggestions(result.suggestions);
+        }
+    }, []);
+
+    const onInputChange = (value: string) => {
+        field.onChange(value);
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
+            fetchSuggestions(value);
+        }, 300);
+    };
+
+    return (
+        <div className="relative">
+            <div className="relative">
+                 <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    {...field}
+                    placeholder={placeholder}
+                    className="pl-10"
+                    onChange={(e) => onInputChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} 
+                    autoComplete="off"
+                />
+            </div>
+            {isFocused && (isLoading || suggestions.length > 0) && (
+                <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg">
+                    {isLoading ? (
+                        <div className="p-2 text-sm text-muted-foreground">Loading...</div>
+                    ) : (
+                        suggestions.map((suggestion, index) => (
+                            <div
+                                key={index}
+                                className="p-2 hover:bg-muted cursor-pointer"
+                                onMouseDown={() => {
+                                    field.onChange(suggestion.placeName);
+                                    setSuggestions([]);
+                                }}
+                            >
+                                <p className="font-semibold">{suggestion.placeName}</p>
+                                <p className="text-xs text-muted-foreground">{suggestion.placeAddress}</p>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const getTravelDuration = (departureTime?: string, arrivalTime?: string): string => {
     if (!departureTime || !arrivalTime) return "";
     try {
@@ -575,10 +651,10 @@ useEffect(() => {
                               <FormLabel>From</FormLabel>
                               <div className="flex gap-2">
                                 <FormControl>
-                                  <div className="relative flex-grow">
-                                      <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                      <Input {...field} placeholder="Starting point" className="pl-10" />
-                                  </div>
+                                  <LocationAutocompleteInput
+                                        field={field}
+                                        placeholder="Starting point"
+                                    />
                                 </FormControl>
                                 <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
                                     {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
@@ -596,10 +672,10 @@ useEffect(() => {
                           <FormItem>
                               <FormLabel>To</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input {...field} placeholder="Destination" className="pl-10" />
-                                </div>
+                                <LocationAutocompleteInput
+                                      field={field}
+                                      placeholder="Destination"
+                                  />
                               </FormControl>
                               <FormMessage />
                           </FormItem>

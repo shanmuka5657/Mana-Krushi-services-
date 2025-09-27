@@ -11,6 +11,7 @@ import { reverseGeocode as reverseGeocodeFlow } from "@/ai/flows/reverse-geocode
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser, getLocationCache, setLocationCache } from "@/lib/storage";
+import { MAPMYINDIA_CLIENT_ID, MAPMYINDIA_CLIENT_SECRET } from "@/lib/map-config";
 
 
 const SuggestDestinationsInput = z.object({
@@ -143,32 +144,69 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
 }
 
 async function getMapmyIndiaToken(): Promise<string | null> {
-    return null;
+    try {
+        const response = await fetch("https://outpost.mapmyindia.com/api/security/oauth/token", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'grant_type': 'client_credentials',
+                'client_id': MAPMYINDIA_CLIENT_ID,
+                'client_secret': MAPMYINDIA_CLIENT_SECRET,
+            }),
+        });
+        
+        if (!response.ok) {
+            console.error("MapmyIndia token error response:", await response.text());
+            return null;
+        }
+
+        const data = await response.json();
+        return data.access_token;
+    } catch (error) {
+        console.error("Failed to fetch MapmyIndia token:", error);
+        return null;
+    }
 }
 
 
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
-    try {
-        const queryKey = query.toLowerCase().trim();
-        if (!queryKey) return { suggestions: [] };
-
-        // Check Firestore cache first
-        const cachedSuggestions = await getLocationCache(queryKey);
-        if (cachedSuggestions) {
-            return { suggestions: cachedSuggestions };
-        }
-
-        // If not in cache, call the AI
-        const result = await suggestLocationsFlow({ query: queryKey });
-        if (result && result.suggestions) {
-            // Save to Firestore cache for future use
-            await setLocationCache(queryKey, result.suggestions);
-            return { suggestions: result.suggestions };
-        }
+    if (!query || query.trim().length < 2) {
         return { suggestions: [] };
+    }
+
+    const token = await getMapmyIndiaToken();
+    if (!token) {
+        return { error: "Failed to authenticate with map service." };
+    }
+
+    try {
+        const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}&location=21.1458,79.0882&hyperlocal=true`;
+        
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            console.error("MapmyIndia suggest error response:", await response.text());
+            return { error: "Failed to fetch map suggestions." };
+        }
+
+        const data = await response.json();
+
+        const formattedSuggestions = data.suggestedLocations?.map((item: any) => ({
+          placeName: item.placeName,
+          placeAddress: item.placeAddress
+        })) || [];
+
+        return { suggestions: formattedSuggestions };
+
     } catch (e) {
-        console.error("AI location suggestion failed:", e);
-        return { error: "Failed to get suggestions from AI." };
+        console.error("MapmyIndia suggestion API failed:", e);
+        return { error: "Failed to get suggestions from map service." };
     }
 }
 
