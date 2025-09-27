@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -125,6 +124,7 @@ export function SignupForm() {
             alt="Mana Krushi Logo"
             width={80}
             height={80}
+            priority
             data-ai-hint={defaultLogo.hint}
         />
         <h2 className="text-2xl font-bold mt-2">Mana Krushi</h2>
@@ -273,5 +273,4 @@ export function SignupForm() {
     </>
   );
 }
-
     
