@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle, LocateFixed } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle, LocateFixed, Hand } from "lucide-react";
 import { format, addDays, parse, isToday } from "date-fns";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -48,6 +48,7 @@ import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import MyRoutes from "./my-routes";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 
 const ownerFormSchema = z.object({
@@ -90,8 +91,8 @@ const LocationAutocompleteInput = ({
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const fetchSuggestions = useCallback(async (query: string) => {
-        setSuggestions([]); // Clear previous suggestions
         if (query.length < 2) {
+            setSuggestions([]);
             return;
         }
         setIsLoading(true);
@@ -189,6 +190,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const [bookingsForRoute, setBookingsForRoute] = useState<Booking[]>([]);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
 
 
   const form = useForm<OwnerFormValues>({
@@ -282,12 +284,21 @@ useEffect(() => {
     if (vehicleType === 'Bike') {
         form.setValue('availableSeats', 1);
     }
+    const locationPromptDismissed = localStorage.getItem('locationPromptDismissed');
+    if (!locationPromptDismissed) {
+        setShowLocationPrompt(true);
+    }
   }, [vehicleType, form]);
 
-  const handleUseCurrentLocation = async () => {
+  const handleUseCurrentLocation = async (isInitialPrompt = false) => {
     if (!navigator.geolocation) {
       toast({ title: "Geolocation is not supported by your browser.", variant: "destructive" });
       return;
+    }
+
+    if (isInitialPrompt) {
+        setShowLocationPrompt(false);
+        localStorage.setItem('locationPromptDismissed', 'true');
     }
     
     setIsGettingLocation(true);
@@ -485,6 +496,23 @@ useEffect(() => {
           </AlertDialogContent>
       </AlertDialog>
 
+      {showLocationPrompt && (
+        <Alert>
+          <Hand className="h-4 w-4" />
+          <AlertTitle>Make Adding Routes Easier!</AlertTitle>
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p>Allow location access to quickly set your starting point.</p>
+            <div className="flex gap-2 flex-shrink-0">
+               <Button onClick={() => handleUseCurrentLocation(true)} size="sm">Allow Access</Button>
+               <Button onClick={() => {
+                   setShowLocationPrompt(false);
+                   localStorage.setItem('locationPromptDismissed', 'true');
+               }} variant="ghost" size="sm">Dismiss</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Dialog open={showPromotionDialog} onOpenChange={setShowPromotionDialog}>
           <DialogContent>
           <DialogHeader>
@@ -659,7 +687,7 @@ useEffect(() => {
                                         placeholder="Starting point"
                                     />
                                 </FormControl>
-                                <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
+                                <Button type="button" variant="outline" size="icon" onClick={() => handleUseCurrentLocation()} disabled={isGettingLocation}>
                                     {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
                                     <span className="sr-only">Use current location</span>
                                 </Button>

@@ -1,11 +1,10 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { MapPin, Search, Loader2, LocateFixed } from "lucide-react";
+import { MapPin, Search, Loader2, LocateFixed, Hand } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
@@ -32,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { getMapSuggestions, reverseGeocode } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 
 const searchFormSchema = z.object({
@@ -62,6 +62,7 @@ const LocationAutocompleteInput = ({
     const fetchSuggestions = useCallback(async (query: string) => {
         setSuggestions([]); // Clear previous suggestions
         if (query.length < 2) {
+            setSuggestions([]);
             return;
         }
         setIsLoading(true);
@@ -133,10 +134,17 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   const router = useRouter();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+
 
   useEffect(() => {
     if (profile === null || !profile.mobile || profile.mobile === '0000000000') {
       setShowProfilePrompt(true);
+    }
+     // Check if we should show the location prompt
+    const locationPromptDismissed = localStorage.getItem('locationPromptDismissed');
+    if (!locationPromptDismissed) {
+      setShowLocationPrompt(true);
     }
   }, [profile]);
   
@@ -148,12 +156,17 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
     },
   });
 
-  const handleUseCurrentLocation = async () => {
+  const handleUseCurrentLocation = async (isInitialPrompt = false) => {
     if (!navigator.geolocation) {
       toast({ title: "Geolocation is not supported by your browser.", variant: "destructive" });
       return;
     }
     
+    if (isInitialPrompt) {
+      setShowLocationPrompt(false);
+      localStorage.setItem('locationPromptDismissed', 'true');
+    }
+
     setIsGettingLocation(true);
     toast({ title: "Getting your location..." });
 
@@ -204,6 +217,23 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
         </AlertDialogContent>
       </AlertDialog>
 
+      {showLocationPrompt && (
+        <Alert>
+          <Hand className="h-4 w-4" />
+          <AlertTitle>Get Better Suggestions!</AlertTitle>
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p>Allow location access to get ride suggestions from your current area.</p>
+            <div className="flex gap-2 flex-shrink-0">
+               <Button onClick={() => handleUseCurrentLocation(true)} size="sm">Allow Access</Button>
+               <Button onClick={() => {
+                   setShowLocationPrompt(false);
+                   localStorage.setItem('locationPromptDismissed', 'true');
+               }} variant="ghost" size="sm">Dismiss</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card className="shadow-sm">
           <CardHeader>
               <CardTitle>Find a Ride</CardTitle>
@@ -225,7 +255,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                       placeholder="Starting point"
                                   />
                                 </FormControl>
-                                <Button type="button" variant="outline" size="icon" onClick={handleUseCurrentLocation} disabled={isGettingLocation}>
+                                <Button type="button" variant="outline" size="icon" onClick={() => handleUseCurrentLocation()} disabled={isGettingLocation}>
                                     {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
                                     <span className="sr-only">Use current location</span>
                                 </Button>
