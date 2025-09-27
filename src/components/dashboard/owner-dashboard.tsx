@@ -5,7 +5,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle, LocateFixed, Hand } from "lucide-react";
+import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle, LocateFixed, Hand, ArrowRight } from "lucide-react";
 import { format, addDays, parse, isToday } from "date-fns";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -871,7 +871,18 @@ useEffect(() => {
       </Card>
       
       <div className="mt-8">
-        <h2 className="text-2xl font-bold tracking-tight mb-4">Today's Routes</h2>
+        <CardHeader className="px-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Today's Routes</CardTitle>
+              <CardDescription>A summary of your routes for today.</CardDescription>
+            </div>
+            <Button variant="outline" onClick={() => router.push('/my-routes')}>
+              View All Routes <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        
         {isTodaysRoutesLoading ? (
             <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
