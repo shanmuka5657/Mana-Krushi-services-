@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,7 +67,7 @@ const LocationAutocompleteInput = ({
         const result = await getMapSuggestions(query);
         setIsLoading(false);
         if (result.error) {
-            console.error("Error: Failed to get suggestions from AI.");
+            console.error("Error fetching map suggestions:", result.error);
         } else if(result.suggestions) {
             setSuggestions(result.suggestions);
         }

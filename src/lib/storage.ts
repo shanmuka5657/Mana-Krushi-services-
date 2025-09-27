@@ -75,7 +75,7 @@ export const setLocationCache = async (query: string, suggestions: any[]) => {
     if (!queryKey) return; // Do not save for empty strings
     const docRef = doc(db, "location_cache", queryKey);
     perfTracker.increment({ reads: 0, writes: 1 });
-    await setDoc(docRef, { suggestions, timestamp: new Date() });
+    await setDoc(docRef, { suggestions, timestamp: serverTimestamp() });
 };
 
 export const getLocationCacheContents = async (): Promise<{id: string, suggestions: any[]}[]> => {
