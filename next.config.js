@@ -95,7 +95,20 @@ const nextConfig = {
       "https://9000-firebase-studio-1757177149716.cluster-va5f6x3wzzh4stde63ddr3qgge.cloudworkstations.dev",
       "https://6000-firebase-studio-1757177149716.cluster-va5f6x3wzzh4stde63ddr3qgge.cloudworkstations.dev"
     ],
-  }
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com;",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = withPWA(nextConfig);
