@@ -60,8 +60,8 @@ const LocationAutocompleteInput = ({
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const fetchSuggestions = useCallback(async (query: string) => {
+        setSuggestions([]); // Clear previous suggestions
         if (query.length < 2) {
-            setSuggestions([]);
             return;
         }
         setIsLoading(true);
@@ -82,6 +82,12 @@ const LocationAutocompleteInput = ({
         timeoutRef.current = setTimeout(() => {
             fetchSuggestions(value);
         }, 300);
+    };
+
+    const handleSuggestionClick = (suggestion: any) => {
+        field.onChange(suggestion.placeName);
+        setSuggestions([]);
+        setIsFocused(false);
     };
 
     return (
@@ -107,11 +113,7 @@ const LocationAutocompleteInput = ({
                             <div
                                 key={`${suggestion.placeName}-${index}`}
                                 className="p-2 hover:bg-muted cursor-pointer"
-                                onMouseDown={() => {
-                                    field.onChange(suggestion.placeName);
-                                    setSuggestions([]);
-                                    setIsFocused(false);
-                                }}
+                                onMouseDown={() => handleSuggestionClick(suggestion)}
                             >
                                 <p className="font-semibold">{suggestion.placeName}</p>
                                 <p className="text-xs text-muted-foreground">{suggestion.placeAddress}</p>
