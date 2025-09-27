@@ -78,10 +78,12 @@ function FindRideResultsPage() {
 
                 // Case 2: The location is a sub-location (e.g., "Gachibowli")
                 for (const city in locationData) {
-                    const subLocations = locationData[city].map(s => s.toLowerCase());
-                    if (subLocations.includes(lowerCaseLocation)) {
-                        // Found parent city, return the city and all its sub-locations
-                        return [city.toLowerCase(), ...subLocations];
+                    if(locationData.hasOwnProperty(city)) {
+                        const subLocations = (locationData as Record<string, any>)[city].map((s: string) => s.toLowerCase());
+                        if (subLocations.includes(lowerCaseLocation)) {
+                            // Found parent city, return the city and all its sub-locations
+                            return [city.toLowerCase(), ...subLocations];
+                        }
                     }
                 }
                 
@@ -328,5 +330,6 @@ export default function FindRidePage() {
     
 
     
+
 
 
