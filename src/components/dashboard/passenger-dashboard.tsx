@@ -257,7 +257,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                   <LocationAutocompleteInput
                                       field={field}
                                       placeholder="Starting point"
-                                      id="fromLocation"
+                                      id={useFormField().id}
                                   />
                                 </FormControl>
                                 <Button type="button" variant="outline" size="icon" onClick={() => handleUseCurrentLocation()} disabled={isGettingLocation}>
@@ -279,7 +279,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                  <LocationAutocompleteInput
                                     field={field}
                                     placeholder="Destination"
-                                    id="toLocation"
+                                    id={useFormField().id}
                                   />
                               </FormControl>
                               <FormMessage />
