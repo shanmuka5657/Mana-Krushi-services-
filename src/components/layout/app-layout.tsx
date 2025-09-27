@@ -59,6 +59,7 @@ import {
   SidebarTrigger,
   SidebarFooter,
   useSidebar,
+  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -131,6 +132,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
 
 
   React.useEffect(() => {
+    setIsMounted(true);
     perfTracker.subscribe(setPerfCounts);
 
     const fetchInitialLogo = async () => {
@@ -249,19 +251,27 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  onClick={() => handleNavClick(item.href)}
-                  isActive={pathname.startsWith(item.href.split('?')[0])}
-                  className="justify-start"
-                  tooltip={item.label}
-                >
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {!isMounted ? (
+              <>
+                {Array.from({ length: 9 }).map((_, index) => (
+                  <SidebarMenuSkeleton key={index} showIcon />
+                ))}
+              </>
+            ) : (
+                navItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      onClick={() => handleNavClick(item.href)}
+                      isActive={pathname.startsWith(item.href.split('?')[0])}
+                      className="justify-start"
+                      tooltip={item.label}
+                    >
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
