@@ -68,7 +68,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { onGlobalLogoUrlChange, getProfile } from "@/lib/storage";
+import { onGlobalLogoUrlChange, getProfile, getGlobalLogoUrlWithCache } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import type { Profile } from "@/lib/types";
@@ -158,6 +158,15 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         if(url) setLogoUrl(url);
     });
 
+    // Also fetch the initial logo url in case the listener doesn't fire immediately
+    const fetchInitialLogo = async () => {
+        const url = await getGlobalLogoUrlWithCache();
+        if (url) {
+            setLogoUrl(url);
+        }
+    };
+    fetchInitialLogo();
+
     return () => {
       unsubLogo();
     }
@@ -234,6 +243,14 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     }
   };
 
+  if (!isMounted) {
+    return (
+        <div className="flex items-center justify-center h-screen">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
@@ -245,7 +262,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {isMounted && navItems.map((item) => (
+            {navItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
                   onClick={() => handleNavClick(item.href)}
