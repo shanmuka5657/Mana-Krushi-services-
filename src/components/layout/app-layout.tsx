@@ -88,7 +88,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [userRole, setUserRole] = React.useState("Passenger");
   const [userInitial, setUserInitial] = React.useState("U");
   const [role, setRole] = React.useState('passenger');
-  const [isMounted, setIsMounted] = React.useState(false);
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
   const [isLoading, setIsLoading] = React.useState(true);
@@ -151,20 +150,18 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   }, [router, pathname]);
 
   React.useEffect(() => {
-    setIsMounted(true);
-    
-    // Subscribe to logo changes only on the client after hydration
+    // This effect runs only on the client, after hydration
     const unsubLogo = onGlobalLogoUrlChange((url) => {
         if(url) setLogoUrl(url);
     });
 
-    // Also fetch the initial logo url in case the listener doesn't fire immediately
     const fetchInitialLogo = async () => {
         const url = await getGlobalLogoUrlWithCache();
         if (url) {
             setLogoUrl(url);
         }
     };
+    
     fetchInitialLogo();
 
     return () => {
@@ -242,14 +239,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
       router.push(href);
     }
   };
-
-  if (!isMounted) {
-    return (
-        <div className="flex items-center justify-center h-screen">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
-    );
-  }
 
   return (
     <SidebarProvider>
