@@ -32,8 +32,8 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { SidebarProvider, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton, Sidebar, SidebarTrigger, SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { SidebarProvider, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton, Sidebar, SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
 
 import {
   DropdownMenu,
@@ -325,3 +325,5 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
 export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
     return <AppLayoutContent>{children}</AppLayoutContent>;
 }
+
+    
