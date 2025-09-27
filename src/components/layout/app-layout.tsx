@@ -91,6 +91,11 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+   React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
 
   React.useEffect(() => {
@@ -150,11 +155,9 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   }, [router, pathname]);
 
   React.useEffect(() => {
-    // This effect runs only on the client, after hydration
-    const unsubLogo = onGlobalLogoUrlChange((url) => {
-        if(url) setLogoUrl(url);
-    });
+    if (!isMounted) return;
 
+    // This effect runs only on the client, after hydration
     const fetchInitialLogo = async () => {
         const url = await getGlobalLogoUrlWithCache();
         if (url) {
@@ -163,11 +166,16 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     };
     
     fetchInitialLogo();
+    
+    const unsubLogo = onGlobalLogoUrlChange((url) => {
+        if(url) setLogoUrl(url);
+    });
+
 
     return () => {
       unsubLogo();
     }
-  }, []);
+  }, [isMounted]);
 
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
