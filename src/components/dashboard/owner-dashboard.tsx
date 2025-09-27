@@ -225,12 +225,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         setIsTodaysRoutesLoading(false);
         return;
     }
-    // Only show loader on initial load
-    if (isTodaysRoutesLoading) {
-      // no change, keep it as it is
-    } else {
-       setIsTodaysRoutesLoading(false);
-    }
+    
+    setIsTodaysRoutesLoading(true);
 
     const allRoutes = await getRoutes(false, { ownerEmail });
     const todayRoutes = allRoutes.filter(route => isToday(new Date(route.travelDate)));
@@ -241,27 +237,28 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         const newBookedSeatsMap = new Map<string, number>();
         const newRouteViewsMap = new Map<string, number>();
 
-        const bookingPromises = todayRoutes.map(route => {
-            const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
-            return getBookings(true, {
-                destination: `${route.fromLocation} to ${route.toLocation}`,
-                date: routeDate,
-                time: route.departureTime,
-            });
+        // Batch fetch bookings for all of today's routes
+        const allBookingsToday = await getBookings(true, { 
+            userEmail: ownerEmail, 
+            role: 'owner',
+            date: format(new Date(), 'yyyy-MM-dd') 
         });
 
+        // Batch fetch views
         const viewPromises = todayRoutes.map(route => getRouteViews(route.id));
-
-        const [bookingsByRoute, viewsByRoute] = await Promise.all([
-            Promise.all(bookingPromises),
-            Promise.all(viewPromises),
-        ]);
+        const viewsByRoute = await Promise.all(viewPromises);
 
         todayRoutes.forEach((route, index) => {
-            const bookingsForThisRoute = bookingsByRoute[index];
+            // Filter bookings client-side
+            const bookingsForThisRoute = allBookingsToday.filter(b => 
+                b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+                format(new Date(b.departureDate), 'HH:mm') === route.departureTime
+            );
+
             const bookedSeats = bookingsForThisRoute
                 .filter(b => b.status !== 'Cancelled')
                 .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+            
             newBookedSeatsMap.set(route.id, bookedSeats);
             newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
         });
@@ -270,15 +267,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         setRouteViewsMap(newRouteViewsMap);
     }
     setIsTodaysRoutesLoading(false);
-}, [isTodaysRoutesLoading]);
+}, []);
 
 useEffect(() => {
-    fetchTodaysRoutesAndDetails(); // Initial fetch
-    const intervalId = setInterval(() => {
-        fetchTodaysRoutesAndDetails();
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(intervalId); // Cleanup on unmount
+    fetchTodaysRoutesAndDetails();
+    const intervalId = setInterval(fetchTodaysRoutesAndDetails, 30000); 
+    return () => clearInterval(intervalId);
 }, [fetchTodaysRoutesAndDetails]);
 
   
@@ -1027,3 +1021,5 @@ useEffect(() => {
     </div>
   );
 }
+
+    
