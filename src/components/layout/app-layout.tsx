@@ -120,7 +120,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         } else {
             // If user is not authenticated, redirect to login page
             // Allow access to public pages like /disclaimer
-            if (!['/disclaimer', '/privacy-policy', '/login', '/signup'].includes(pathname)) {
+            if (!['/disclaimer', '/privacy-policy', '/login', '/signup', '/'].includes(pathname)) {
                  router.push('/login');
             }
         }
@@ -135,17 +135,20 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
             setLogoUrl(url);
         }
     };
-    fetchInitialLogo();
+    
+    if (isMounted) {
+      fetchInitialLogo();
+    }
     
     const unsubLogo = onGlobalLogoUrlChange((url) => {
-        if(url) setLogoUrl(url);
+        if(url && isMounted) setLogoUrl(url);
     });
 
     return () => { 
         unsubAuth();
         unsubLogo();
     };
-  }, [router, pathname]);
+  }, [router, pathname, isMounted]);
 
 
   // We need to wrap the trigger in a component to use the useSidebar hook.
@@ -234,7 +237,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
       router.push(href);
     }
   };
-
+  
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
@@ -347,5 +350,3 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     </SidebarProvider>
   );
 }
-
-    
