@@ -41,6 +41,7 @@ const withPWA = require('next-pwa')({
   },
 });
 
+const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
   typescript: {
@@ -92,7 +93,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com;",
+            value: `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://www.youtube.com https://s.ytimg.com;`.replace(/\s{2,}/g, ' ').trim(),
           },
         ],
       },
