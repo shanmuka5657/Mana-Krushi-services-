@@ -92,12 +92,9 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
   const [isAuthLoading, setIsAuthLoading] = React.useState(true);
-  const [isMounted, setIsMounted] = React.useState(false);
 
 
    React.useEffect(() => {
-    setIsMounted(true);
-
     const unsubAuth = onAuthStateChanged(async (user) => {
         setIsAuthLoading(true);
         setAuthUser(user);
@@ -134,19 +131,17 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         }
     };
     
-    if (isMounted) {
-      fetchInitialLogo();
-    }
+    fetchInitialLogo();
     
     const unsubLogo = onGlobalLogoUrlChange((url) => {
-        if(url && isMounted) setLogoUrl(url);
+        if(url) setLogoUrl(url);
     });
 
     return () => { 
         unsubAuth();
         unsubLogo();
     };
-  }, [router, pathname, isMounted]);
+  }, [router, pathname]);
 
 
   const ToggleSidebarButton = () => {
@@ -175,10 +170,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
     { href: `/admin/messaging`, icon: Rss, label: "Campaigns" },
     { href: `/admin/database`, icon: Database, label: "Database" },
-    { href: `/entertainment`, icon: Film, label: "Entertainment" },
-    { href: `/insurance`, icon: Shield, label: "Insurance" },
-    { href: `/ecommerce`, icon: ShoppingCart, label: "E-commerce" },
-    { href: `/loans`, icon: Wallet, label: "Loans" },
     { href: `/settings?role=admin`, icon: Settings, label: "Settings" },
   ];
 
@@ -246,7 +237,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {!isMounted || isAuthLoading ? (
+            {isAuthLoading ? (
               <>
                 {Array.from({ length: 9 }).map((_, index) => (
                   <SidebarMenuSkeleton key={index} showIcon />
