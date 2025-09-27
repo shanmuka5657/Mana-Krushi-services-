@@ -21,7 +21,7 @@ const prompt = ai.definePrompt({
     name: 'calculateDistancePrompt',
     input: { schema: CalculateDistanceInputSchema },
     output: { schema: CalculateDistanceOutputSchema },
-    prompt: `Calculate the approximate driving distance in kilometers between the following two locations. Return only the number of kilometers.
+    prompt: `You are an expert in using Google Maps. Calculate the approximate driving distance in kilometers between the following two locations. Return only the numeric distance in kilometers.
 
 From: {{{from}}}
 To: {{{to}}}

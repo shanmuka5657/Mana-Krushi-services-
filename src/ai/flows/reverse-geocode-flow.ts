@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -32,7 +33,7 @@ const prompt = ai.definePrompt({
   name: 'reverseGeocodePrompt',
   input: {schema: ReverseGeocodeInputSchema},
   output: {schema: ReverseGeocodeOutputSchema},
-  prompt: `You are a reverse geocoding expert. Given the following latitude and longitude, provide the corresponding full street address.
+  prompt: `You are an expert in using the Google Maps Geocoding API. Given the following latitude and longitude, provide the corresponding full street address.
 
   Latitude: {{{latitude}}}
   Longitude: {{{longitude}}}

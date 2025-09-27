@@ -11,7 +11,6 @@ import { reverseGeocode as reverseGeocodeFlow } from "@/ai/flows/reverse-geocode
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser, getLocationCache, setLocationCache } from "@/lib/storage";
-import { MAPMYINDIA_CLIENT_ID, MAPMYINDIA_CLIENT_SECRET } from "@/lib/map-config";
 import locations from '@/lib/locations.json';
 
 
@@ -144,42 +143,20 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
   }
 }
 
-async function getMapmyIndiaToken(): Promise<string | null> {
-    try {
-        const response = await fetch("https://outpost.mapmyindia.com/api/security/oauth/token", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                'grant_type': 'client_credentials',
-                'client_id': MAPMYINDIA_CLIENT_ID,
-                'client_secret': MAPMYINDIA_CLIENT_SECRET,
-            }),
-        });
-        
-        if (!response.ok) {
-            console.error("MapmyIndia token error response:", await response.text());
-            return null;
-        }
-
-        const data = await response.json();
-        return data.access_token;
-    } catch (error) {
-        console.error("Failed to fetch MapmyIndia token:", error);
-        return null;
-    }
-}
-
-
 export async function getMapSuggestions(query: string): Promise<{ suggestions?: any[], error?: string }> {
     if (!query || query.trim().length < 2) {
         return { suggestions: [] };
     }
 
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+        console.error("Google Maps API Key is not configured.");
+        return { error: "Map service is not configured." };
+    }
+    
     const queryKey = query.toLowerCase().trim();
 
-    // Check for major city in our locations.json
+    // Check our local `locations.json` first for major cities
     const locationData = locations as Record<string, string[]>;
     const matchingCity = Object.keys(locationData).find(city => city.toLowerCase() === queryKey);
 
@@ -187,7 +164,7 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         const subLocations = locationData[matchingCity];
         const formattedSuggestions = subLocations.map(sub => ({
             placeName: sub,
-            placeAddress: `${matchingCity}, ${Object.keys(locations).find(state => (locations as Record<string, any>)[state].includes(matchingCity)) || 'India'}`
+            placeAddress: `${matchingCity}, India`, // Simplified address
         }));
         return { suggestions: formattedSuggestions };
     }
@@ -197,35 +174,47 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         return { suggestions: cachedSuggestions };
     }
 
-    const token = await getMapmyIndiaToken();
-    if (!token) {
-        return { error: "Failed to authenticate with map service." };
-    }
-
     try {
-        const url = `https://atlas.mapmyindia.com/api/places/search/json?query=${encodeURIComponent(query)}&hyperlocal=true`;
-        
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
+        // Using a proxy is recommended for production to hide the API key,
+        // but for simplicity in this context, we call it directly.
+        const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${apiKey}&components=country:IN`;
 
+        const response = await fetch(url);
+        
         if (!response.ok) {
-            console.error("MapmyIndia suggest error response:", await response.text());
+            console.error("Google Maps suggest error response:", await response.text());
             return { error: "Failed to fetch map suggestions." };
         }
 
         const data = await response.json();
+        
+        if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+             console.error("Google Maps API error:", data.error_message || data.status);
+             return { error: `Map service error: ${data.status}` };
+        }
 
-        const formattedSuggestions = data.suggestedLocations?.map((item: any) => ({
-          placeName: item.placeName,
-          placeAddress: item.placeAddress,
-          lat: item.latitude,
-          lng: item.longitude,
-          eLoc: item.eLoc,
-          type: item.type,
-        })) || [];
+        // We need another call to get lat/lng for each prediction
+        const detailsPromises = data.predictions.map(async (prediction: any) => {
+            const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&key=${apiKey}&fields=name,formatted_address,geometry,types`;
+            const detailsResponse = await fetch(detailsUrl);
+            if (!detailsResponse.ok) return null;
+            const detailsData = await detailsResponse.json();
+            if (detailsData.status !== 'OK') return null;
+            return detailsData.result;
+        });
+
+        const detailedResults = await Promise.all(detailsPromises);
+
+        const formattedSuggestions = detailedResults
+            .filter(item => item) // Filter out any null results from failed calls
+            .map((item: any) => ({
+              placeName: item.name,
+              placeAddress: item.formatted_address,
+              lat: item.geometry.location.lat,
+              lng: item.geometry.location.lng,
+              eLoc: item.place_id, // Using Google's place_id as eLoc
+              type: item.types?.[0] || 'point_of_interest', // Use the first type as the category
+            }));
         
         if(formattedSuggestions.length > 0) {
             await setLocationCache(queryKey, formattedSuggestions);
@@ -234,10 +223,11 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
         return { suggestions: formattedSuggestions };
 
     } catch (e) {
-        console.error("MapmyIndia suggestion API failed:", e);
+        console.error("Google Maps suggestion API failed:", e);
         return { error: "Failed to get suggestions from map service." };
     }
 }
+
 
 export async function reverseGeocode(lat: number, lon: number): Promise<{ address?: string, error?: string }> {
     try {
