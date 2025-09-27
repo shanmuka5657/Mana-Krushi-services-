@@ -33,7 +33,6 @@ import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SidebarProvider, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton, Sidebar, SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
 
 import {
   DropdownMenu,
@@ -119,130 +118,16 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
   }, [router, pathname]);
 
 
-  const adminNavItems = [
-    { href: `/admin/dashboard`, icon: Home, label: "Home" },
-    { href: `/admin/profile`, icon: User, label: "Profile" },
-    { href: `/admin/users`, icon: Users, label: "Users" },
-    { href: `/admin/visitors`, icon: Eye, label: "Visitors" },
-    { href: `/admin/routes`, icon: RouteIcon, label: "All Routes" },
-    { href: `/admin/bookings`, icon: Book, label: "All Bookings" },
-    { href: `/admin/payments`, icon: IndianRupee, label: "All Payments" },
-    { href: `/admin/reports`, icon: AlertCircle, label: "All Reports" },
-    { href: `/admin/messaging`, icon: Rss, label: "Campaigns" },
-    { href: `/admin/database`, icon: Database, label: "Database" },
-  ];
-
-  const ownerNavItems = [
-    { href: `/dashboard?role=owner`, icon: Home, label: "Home" },
-    { href: `/my-routes?role=owner`, icon: RouteIcon, label: "My Routes" },
-    { href: `/history?role=owner`, icon: History, label: "History" },
-    { href: `/referral`, icon: Gift, label: "Referral" },
-  ];
-
-  const passengerNavItems = [
-    { href: `/dashboard?role=passenger`, icon: Home, label: "Home" },
-    { href: `/community`, icon: Users, label: "Community Hub" },
-    { href: `/bookings?role=passenger`, icon: Plane, label: "Bookings" },
-    { href: `/history?role=passenger`, icon: History, label: "History" },
-    { href: `/referral`, icon: Gift, label: "Referral" },
-  ];
-  
-  const footerNavItems = [
-     { href: `/settings?role=${role}`, icon: Settings, label: "Settings" },
-     { href: `/help?role=${role}`, icon: HelpCircle, label: "Help" },
-     { href: `/privacy-policy?role=${role}`, icon: FileText, label: "Privacy Policy" },
-  ]
-  
-  const getNavItems = () => {
-    switch (role) {
-      case 'admin':
-        return adminNavItems;
-      case 'owner':
-        return ownerNavItems;
-      default:
-        return passengerNavItems;
-    }
-  };
-
-  const navItems = getNavItems();
-
-
   const handleLogout = async () => {
     await signOut();
     router.push('/login');
   };
   
-  const handleNavClick = (href: string) => {
-    setIsSheetOpen(false);
-    if (href.startsWith('http')) {
-      window.open(href, '_blank', 'noopener,noreferrer');
-    } else {
-      router.push(href);
-    }
-  };
-
-  const renderNavMenu = (items: typeof navItems) => (
-      <SidebarMenu>
-          {isAuthLoading ? (
-          <>
-              {Array.from({ length: 9 }).map((_, index) => (
-              <SidebarMenuSkeleton key={index} showIcon />
-              ))}
-          </>
-          ) : (
-              items.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton
-                  onClick={() => handleNavClick(item.href)}
-                  isActive={pathname.startsWith(item.href.split('?')[0])}
-                  className="justify-start"
-                  >
-                  <item.icon />
-                  <span>{item.label}</span>
-                  </SidebarMenuButton>
-              </SidebarMenuItem>
-              ))
-          )}
-      </SidebarMenu>
-  );
-  
   return (
-    <SidebarProvider>
         <div className="flex min-h-svh w-full flex-col bg-background">
             <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                        <SheetTrigger asChild>
-                           <Button
-                                variant="ghost"
-                                size="icon"
-                                className="md:hidden size-7"
-                                aria-label="Toggle Menu"
-                            >
-                                <RouteIcon />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0 flex flex-col">
-                           <SheetHeader className="p-2 border-b">
-                                <SheetTitle>
-                                    <div className="flex items-center gap-2">
-                                        <div className="relative h-8 w-8">
-                                            <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
-                                        </div>
-                                        <h2 className="text-lg font-bold">Mana Krushi</h2>
-                                    </div>
-                                </SheetTitle>
-                            </SheetHeader>
-                            <div className="flex-1 overflow-y-auto p-2">
-                                {renderNavMenu(navItems)}
-                            </div>
-                             <div className="p-2 mt-auto border-t">
-                                {renderNavMenu(footerNavItems)}
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                  
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2 truncate" onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer' }}>
                     <div className="relative h-8 w-8">
                         <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
                     </div>
@@ -252,7 +137,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
                   </div>
                 </div>
                 <div className="flex flex-shrink-0 items-center justify-end gap-4">
-                   <div className="flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
+                   <div className="hidden sm:flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
                       <div className="flex items-center gap-2" title="Database Reads (Session)">
                           <ArrowDown className="h-4 w-4 text-green-500" />
                           <span className="font-mono">{perfCounts.reads}</span>
@@ -298,14 +183,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
             </header>
 
             <div className="flex flex-1">
-                <Sidebar className="hidden md:flex md:flex-col">
-                    <SidebarContent>
-                        {renderNavMenu(navItems)}
-                    </SidebarContent>
-                    <SidebarFooter>
-                        {renderNavMenu(footerNavItems)}
-                    </SidebarFooter>
-                </Sidebar>
                 <main className="flex-1 p-4 md:p-8 overflow-y-auto">
                 {isAuthLoading ? (
                     <div className="flex items-center justify-center h-full">
@@ -317,7 +194,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
                 </main>
             </div>
         </div>
-    </SidebarProvider>
   );
 }
 
@@ -325,5 +201,3 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
 export function AppLayout({ children }: { children: React.ReactNode | ((profile: Profile | null) => React.ReactNode) }) {
     return <AppLayoutContent>{children}</AppLayoutContent>;
 }
-
-    

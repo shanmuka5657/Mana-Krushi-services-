@@ -4,9 +4,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { MapPin, Search, Loader2, LocateFixed, Hand } from "lucide-react";
+import { MapPin, Search, Loader2, LocateFixed, Hand, Plane, Users, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,20 @@ interface PassengerDashboardProps {
   onSwitchTab: (tab: string) => void;
   profile: Profile | null;
 }
+
+const NavLink = ({ href, icon: Icon, title, description }: { href: string, icon: React.ElementType, title: string, description: string }) => (
+    <Link href={href} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+        <div className="flex items-center gap-4">
+            <Icon className="h-6 w-6 text-muted-foreground" />
+            <div>
+                <h4 className="font-medium">{title}</h4>
+                <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
+        </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+    </Link>
+);
+
 
 const LocationAutocompleteInput = ({
     field,
@@ -304,6 +319,21 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
               </Form>
           </CardContent>
       </Card>
+      
+      <div className="space-y-4">
+            <NavLink 
+                href="/bookings?role=passenger"
+                icon={Plane}
+                title="My Bookings"
+                description="View and manage your upcoming rides."
+            />
+            <NavLink 
+                href="/community"
+                icon={Users}
+                title="Community Hub"
+                description="Find rides with bikers in your community."
+            />
+        </div>
 
     </div>
   );

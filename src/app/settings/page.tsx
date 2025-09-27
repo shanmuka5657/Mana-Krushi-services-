@@ -19,8 +19,23 @@ import {
 import { deleteAccount } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, History, Gift, HelpCircle, FileText, ChevronRight } from 'lucide-react';
 import { clearCurrentUser } from '@/lib/storage';
+import Link from 'next/link';
+
+const NavLink = ({ href, icon: Icon, title, description }: { href: string, icon: React.ElementType, title: string, description: string }) => (
+    <Link href={href} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+        <div className="flex items-center gap-4">
+            <Icon className="h-5 w-5 text-muted-foreground" />
+            <div>
+                <h4 className="font-medium">{title}</h4>
+                <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
+        </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+    </Link>
+);
+
 
 function SettingsPageContent() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -52,35 +67,69 @@ function SettingsPageContent() {
 
     return (
         <AppLayout>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Settings</CardTitle>
-                    <CardDescription>Manage your account and application settings.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                            <h4 className="font-medium">Notifications</h4>
-                            <p className="text-sm text-muted-foreground">Manage how you receive notifications.</p>
+            <div className="max-w-2xl mx-auto space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Settings</CardTitle>
+                        <CardDescription>Manage your account, preferences, and more.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <NavLink 
+                            href="/history"
+                            icon={History}
+                            title="Booking History"
+                            description="View your past and cancelled rides."
+                        />
+                         <NavLink 
+                            href="/referral"
+                            icon={Gift}
+                            title="Refer & Earn"
+                            description="Share your code and get rewards."
+                        />
+                         <NavLink 
+                            href="/help"
+                            icon={HelpCircle}
+                            title="Help & Support"
+                            description="Find answers to your questions."
+                        />
+                         <NavLink 
+                            href="/privacy-policy"
+                            icon={FileText}
+                            title="Privacy Policy"
+                            description="Read our data and privacy policy."
+                        />
+                    </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Account Management</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                                <h4 className="font-medium">Notifications</h4>
+                                <p className="text-sm text-muted-foreground">Manage how you receive notifications.</p>
+                            </div>
+                            <Button variant="outline">Configure</Button>
                         </div>
-                        <Button variant="outline">Configure</Button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                            <h4 className="font-medium">Appearance</h4>
-                            <p className="text-sm text-muted-foreground">Customize the look and feel of the app.</p>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                                <h4 className="font-medium">Appearance</h4>
+                                <p className="text-sm text-muted-foreground">Customize the look and feel of the app.</p>
+                            </div>
+                            <Button variant="outline">Customize</Button>
                         </div>
-                         <Button variant="outline">Customize</Button>
-                    </div>
-                     <div className="flex items-center justify-between p-4 border rounded-lg border-destructive/50">
-                        <div>
-                            <h4 className="font-medium text-destructive">Delete Account</h4>
-                            <p className="text-sm text-muted-foreground">Permanently delete your account and all associated data.</p>
+                        <div className="flex items-center justify-between p-4 border rounded-lg border-destructive/50">
+                            <div>
+                                <h4 className="font-medium text-destructive">Delete Account</h4>
+                                <p className="text-sm text-muted-foreground">Permanently delete your account and all associated data.</p>
+                            </div>
+                            <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>Delete</Button>
                         </div>
-                         <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>Delete</Button>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
 
             <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
                 <AlertDialogContent>
