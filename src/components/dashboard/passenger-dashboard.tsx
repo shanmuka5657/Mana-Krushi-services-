@@ -16,6 +16,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useFormField,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,9 +50,11 @@ interface PassengerDashboardProps {
 const LocationAutocompleteInput = ({
     field,
     placeholder,
+    id,
 }: {
     field: any;
     placeholder: string;
+    id: string;
 }) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -97,6 +100,7 @@ const LocationAutocompleteInput = ({
                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                     {...field}
+                    id={id}
                     placeholder={placeholder}
                     className="pl-10"
                     onChange={(e) => onInputChange(e.target.value)}
@@ -253,6 +257,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                   <LocationAutocompleteInput
                                       field={field}
                                       placeholder="Starting point"
+                                      id="fromLocation"
                                   />
                                 </FormControl>
                                 <Button type="button" variant="outline" size="icon" onClick={() => handleUseCurrentLocation()} disabled={isGettingLocation}>
@@ -274,6 +279,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                  <LocationAutocompleteInput
                                     field={field}
                                     placeholder="Destination"
+                                    id="toLocation"
                                   />
                               </FormControl>
                               <FormMessage />
