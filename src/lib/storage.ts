@@ -1,4 +1,5 @@
 
+
 import type { Booking, Route, Profile, VideoPlayerState, Visit, ChatMessage } from "./types";
 import { 
     db, 
@@ -601,35 +602,44 @@ export const sendChatMessage = async (rideId: string, senderEmail: string, text:
 };
 
 export const getRideDetailsForChat = async (rideId: string, currentUserEmail: string) => {
-    // A ride is now identified by its routeId
+    if (!db) return { ride: null, profiles: [] };
+    
     const route = await getRouteFromFirestore(rideId);
     if (!route) {
         console.warn(`Chat access denied: Route with ID ${rideId} not found.`);
         return { ride: null, profiles: [] };
     }
-    
-    // Security check: ensure current user is part of the ride
-    const isDriver = route.ownerEmail === currentUserEmail;
-    
-    const allBookingsForRide = await getBookings(true, {
-       routeId: rideId
-    });
-    
-    // Check if the current user is a passenger in one of the confirmed bookings for this route.
-    const isPassenger = allBookingsForRide.some(
-        (b) => b.clientEmail === currentUserEmail && b.status !== 'Cancelled'
-    );
 
-    if (!isDriver && !isPassenger) {
+    // Security check: Ensure current user is part of the ride
+    let isParticipant = false;
+    if (route.ownerEmail === currentUserEmail) {
+        isParticipant = true;
+    } else {
+        const bookingsQuery = query(
+            collection(db, "bookings"),
+            where("routeId", "==", rideId),
+            where("clientEmail", "==", currentUserEmail),
+            where("status", "!=", "Cancelled")
+        );
+        const bookingSnapshot = await getDocs(bookingsQuery);
+        if (!bookingSnapshot.empty) {
+            isParticipant = true;
+        }
+    }
+
+    if (!isParticipant) {
         console.warn(`User ${currentUserEmail} denied access to chat for ride ${rideId}. Not a participant.`);
         return { ride: null, profiles: [] };
     }
 
-    // Get all participants
+    // Get all participants' details
+    const allBookingsForRide = await getBookings(true, { routeId: rideId });
     const participantEmails = new Set<string>();
     participantEmails.add(route.ownerEmail);
     allBookingsForRide.forEach(b => {
-        if(b.clientEmail && b.status !== 'Cancelled') participantEmails.add(b.clientEmail);
+        if (b.clientEmail && b.status !== 'Cancelled') {
+            participantEmails.add(b.clientEmail);
+        }
     });
 
     const profilePromises = Array.from(participantEmails).map(email => getProfile(email));
