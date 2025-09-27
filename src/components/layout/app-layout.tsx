@@ -96,6 +96,8 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
 
 
    React.useEffect(() => {
+    setIsMounted(true);
+
     const unsubAuth = onAuthStateChanged(async (user) => {
         setIsLoading(true);
         setAuthUser(user);
@@ -118,40 +120,33 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         } else {
             // If user is not authenticated, redirect to login page
             // Allow access to public pages like /disclaimer
-            if (!['/disclaimer', '/privacy-policy'].includes(pathname)) {
+            if (!['/disclaimer', '/privacy-policy', '/login', '/signup'].includes(pathname)) {
                  router.push('/login');
             }
         }
         setIsLoading(false);
     });
-
-    return () => { 
-        unsubAuth();
-    };
-  }, [router, pathname]);
-
-
-  React.useEffect(() => {
-    setIsMounted(true);
+    
     perfTracker.subscribe(setPerfCounts);
-
+    
     const fetchInitialLogo = async () => {
         const url = await getGlobalLogoUrlWithCache();
         if (url) {
             setLogoUrl(url);
         }
     };
-    
     fetchInitialLogo();
     
     const unsubLogo = onGlobalLogoUrlChange((url) => {
         if(url) setLogoUrl(url);
     });
 
-    return () => {
-      unsubLogo();
-    }
-  }, []);
+    return () => { 
+        unsubAuth();
+        unsubLogo();
+    };
+  }, [router, pathname]);
+
 
   // We need to wrap the trigger in a component to use the useSidebar hook.
   const ToggleSidebarButton = () => {
@@ -251,7 +246,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {!isMounted ? (
+            {!isMounted || isLoading ? (
               <>
                 {Array.from({ length: 9 }).map((_, index) => (
                   <SidebarMenuSkeleton key={index} showIcon />
@@ -352,3 +347,5 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     </SidebarProvider>
   );
 }
+
+    
