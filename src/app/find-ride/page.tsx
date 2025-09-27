@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { calculateDistance } from '../actions';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
+import locations from '@/lib/locations.json';
 
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
@@ -64,6 +65,25 @@ function FindRideResultsPage() {
             // Filter routes by from and to, and only include future dates
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Set to start of today
+
+            const locationData = locations as Record<string, string[]>;
+
+            const getSearchTerms = (location: string): string[] => {
+                const lowerCaseLocation = location.trim().toLowerCase();
+                const mainTerms = [lowerCaseLocation];
+                
+                // Find a key in locations.json that matches the search term, case-insensitively
+                const matchingCityKey = Object.keys(locationData).find(city => city.toLowerCase() === lowerCaseLocation);
+                
+                if (matchingCityKey && locationData[matchingCityKey]) {
+                    return [...mainTerms, ...locationData[matchingCityKey].map(sub => sub.toLowerCase())];
+                }
+                
+                return mainTerms;
+            };
+
+            const fromSearchTerms = getSearchTerms(from);
+            const toSearchTerms = getSearchTerms(to);
             
             let routes = allRoutes.filter(route => {
                  // Only show Car routes on this page
@@ -72,17 +92,12 @@ function FindRideResultsPage() {
                 }
 
                 const routeDate = new Date(route.travelDate);
-                const searchFromLower = from.trim().toLowerCase();
-                const searchToLower = to.trim().toLowerCase();
                 const routeFromLower = route.fromLocation.trim().toLowerCase();
                 const routeToLower = route.toLocation.trim().toLowerCase();
 
-                // Flexible matching:
-                // - The user's search term contains the route's location (e.g., search "Hyderabad" contains route "Gachibowli")
-                // - The route's location contains the user's search term (e.g., route "Hyderabad" contains search "Gachibowli")
-                const fromMatch = searchFromLower.includes(routeFromLower) || routeFromLower.includes(searchFromLower);
-                const toMatch = searchToLower.includes(routeToLower) || routeToLower.includes(searchToLower);
-
+                const fromMatch = fromSearchTerms.some(term => routeFromLower.includes(term));
+                const toMatch = toSearchTerms.some(term => routeToLower.includes(term));
+                
                 return fromMatch && toMatch && routeDate >= today;
             });
 
@@ -310,3 +325,4 @@ export default function FindRidePage() {
     
 
     
+
