@@ -126,19 +126,17 @@ const LocationAutocompleteInput = ({
 
     return (
         <div className="relative">
-            <div className="relative">
-                 <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                    {...field}
-                    id={id}
-                    placeholder={placeholder}
-                    className="pl-10"
-                    onChange={(e) => onInputChange(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setTimeout(() => setIsFocused(false), 150)} 
-                    autoComplete="off"
-                />
-            </div>
+             <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+                {...field}
+                id={id}
+                placeholder={placeholder}
+                className="pl-10"
+                onChange={(e) => onInputChange(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 150)} 
+                autoComplete="off"
+            />
             {isFocused && (isLoading || suggestions.length > 0) && (
                 <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg">
                     {isLoading ? (
@@ -684,7 +682,7 @@ useEffect(() => {
                       render={({ field }) => (
                           <FormItem>
                               <FormLabel>From</FormLabel>
-                              <div className="flex gap-2">
+                               <div className="flex gap-2">
                                 <FormControl>
                                   <LocationAutocompleteInput
                                         field={field}
@@ -708,10 +706,10 @@ useEffect(() => {
                           <FormItem>
                               <FormLabel>To</FormLabel>
                               <FormControl>
-                                <LocationAutocompleteInput
-                                      field={field}
-                                      placeholder="Destination"
-                                      id={useFormField().id}
+                                 <LocationAutocompleteInput
+                                    field={field}
+                                    placeholder="Destination"
+                                    id={useFormField().id}
                                   />
                               </FormControl>
                               <FormMessage />
@@ -725,7 +723,7 @@ useEffect(() => {
                     control={form.control}
                     name="travelDate"
                     render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                         <FormLabel>Travel Date</FormLabel>
                         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                             <PopoverTrigger asChild>
@@ -802,7 +800,10 @@ useEffect(() => {
                           <FormItem>
                               <FormLabel>Dep Time</FormLabel>
                               <FormControl>
-                                <Input type="time" {...field} />
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input type="time" {...field} className="pl-10" />
+                                </div>
                               </FormControl>
                               <FormMessage />
                           </FormItem>
@@ -815,7 +816,10 @@ useEffect(() => {
                           <FormItem>
                               <FormLabel>Arrival Time</FormLabel>
                               <FormControl>
-                                <Input type="time" {...field} />
+                                <div className="relative">
+                                    <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input type="time" {...field} className="pl-10" />
+                                </div>
                               </FormControl>
                               <FormMessage />
                           </FormItem>
@@ -1012,5 +1016,3 @@ useEffect(() => {
     </div>
   );
 }
-
-    
