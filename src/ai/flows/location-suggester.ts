@@ -58,7 +58,6 @@ const suggestLocationsFlow = ai.defineFlow(
     name: 'suggestLocationsFlow',
     inputSchema: SuggestLocationsInputSchema,
     outputSchema: SuggestLocationsOutputSchema,
-    model: 'googleai/gemini-2.5-flash',
   },
   async input => {
     const {output} = await prompt(input);
