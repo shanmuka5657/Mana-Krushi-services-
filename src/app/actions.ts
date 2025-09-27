@@ -220,7 +220,11 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
 
         const formattedSuggestions = data.suggestedLocations?.map((item: any) => ({
           placeName: item.placeName,
-          placeAddress: item.placeAddress
+          placeAddress: item.placeAddress,
+          lat: item.latitude,
+          lng: item.longitude,
+          eLoc: item.eLoc,
+          type: item.type,
         })) || [];
         
         if(formattedSuggestions.length > 0) {
