@@ -93,33 +93,8 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   const [isLoading, setIsLoading] = React.useState(true);
   const [isMounted, setIsMounted] = React.useState(false);
 
+
    React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-
-  React.useEffect(() => {
-    const unsubscribe = perfTracker.subscribe(setPerfCounts);
-    return () => unsubscribe();
-  }, []);
-  
-  // We need to wrap the trigger in a component to use the useSidebar hook.
-  const ToggleSidebarButton = () => {
-    const { toggleSidebar } = useSidebar()
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-7"
-        onClick={() => toggleSidebar()}
-        aria-label="Toggle Sidebar"
-      >
-        <PanelLeft />
-      </Button>
-    )
-  }
-
-  React.useEffect(() => {
     const unsubAuth = onAuthStateChanged(async (user) => {
         setIsLoading(true);
         setAuthUser(user);
@@ -154,10 +129,10 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
     };
   }, [router, pathname]);
 
-  React.useEffect(() => {
-    if (!isMounted) return;
 
-    // This effect runs only on the client, after hydration
+  React.useEffect(() => {
+    perfTracker.subscribe(setPerfCounts);
+
     const fetchInitialLogo = async () => {
         const url = await getGlobalLogoUrlWithCache();
         if (url) {
@@ -171,11 +146,26 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         if(url) setLogoUrl(url);
     });
 
-
     return () => {
       unsubLogo();
     }
-  }, [isMounted]);
+  }, []);
+
+  // We need to wrap the trigger in a component to use the useSidebar hook.
+  const ToggleSidebarButton = () => {
+    const { toggleSidebar } = useSidebar()
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="size-7"
+        onClick={() => toggleSidebar()}
+        aria-label="Toggle Sidebar"
+      >
+        <PanelLeft />
+      </Button>
+    )
+  }
 
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
