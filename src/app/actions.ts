@@ -11,7 +11,6 @@ import { reverseGeocode as reverseGeocodeFlow } from "@/ai/flows/reverse-geocode
 import { z } from "zod";
 import { CalculateDistanceInputSchema, TollCalculatorInputSchema } from "@/lib/types";
 import { getProfile, saveProfile, getCurrentUser, getLocationCache, setLocationCache } from "@/lib/storage";
-import locations from '@/lib/locations.json';
 
 
 const SuggestDestinationsInput = z.object({
@@ -147,27 +146,8 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
     if (!query || query.trim().length < 2) {
         return { suggestions: [] };
     }
-
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-        console.error("Google Maps API Key is not configured.");
-        return { error: "Map service is not configured." };
-    }
     
     const queryKey = query.toLowerCase().trim();
-
-    // Check our local `locations.json` first for major cities
-    const locationData = locations as Record<string, string[]>;
-    const matchingCity = Object.keys(locationData).find(city => city.toLowerCase() === queryKey);
-
-    if (matchingCity && locationData[matchingCity]) {
-        const subLocations = locationData[matchingCity];
-        const formattedSuggestions = subLocations.map(sub => ({
-            placeName: sub,
-            placeAddress: `${matchingCity}, India`, // Simplified address
-        }));
-        return { suggestions: formattedSuggestions };
-    }
 
     const cachedSuggestions = await getLocationCache(queryKey);
     if (cachedSuggestions) {
@@ -175,56 +155,17 @@ export async function getMapSuggestions(query: string): Promise<{ suggestions?: 
     }
 
     try {
-        // Using a proxy is recommended for production to hide the API key,
-        // but for simplicity in this context, we call it directly.
-        const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${apiKey}&components=country:IN`;
-
-        const response = await fetch(url);
+        const result = await suggestLocationsFlow({ query });
         
-        if (!response.ok) {
-            console.error("Google Maps suggest error response:", await response.text());
-            return { error: "Failed to fetch map suggestions." };
+        if (result.suggestions && result.suggestions.length > 0) {
+            await setLocationCache(queryKey, result.suggestions);
         }
 
-        const data = await response.json();
-        
-        if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-             console.error("Google Maps API error:", data.error_message || data.status);
-             return { error: `Map service error: ${data.status}` };
-        }
-
-        // We need another call to get lat/lng for each prediction
-        const detailsPromises = data.predictions.map(async (prediction: any) => {
-            const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&key=${apiKey}&fields=name,formatted_address,geometry,types`;
-            const detailsResponse = await fetch(detailsUrl);
-            if (!detailsResponse.ok) return null;
-            const detailsData = await detailsResponse.json();
-            if (detailsData.status !== 'OK') return null;
-            return detailsData.result;
-        });
-
-        const detailedResults = await Promise.all(detailsPromises);
-
-        const formattedSuggestions = detailedResults
-            .filter(item => item) // Filter out any null results from failed calls
-            .map((item: any) => ({
-              placeName: item.name,
-              placeAddress: item.formatted_address,
-              lat: item.geometry.location.lat,
-              lng: item.geometry.location.lng,
-              eLoc: item.place_id, // Using Google's place_id as eLoc
-              type: item.types?.[0] || 'point_of_interest', // Use the first type as the category
-            }));
-        
-        if(formattedSuggestions.length > 0) {
-            await setLocationCache(queryKey, formattedSuggestions);
-        }
-
-        return { suggestions: formattedSuggestions };
+        return { suggestions: result.suggestions };
 
     } catch (e) {
-        console.error("Google Maps suggestion API failed:", e);
-        return { error: "Failed to get suggestions from map service." };
+        console.error("AI location suggestion failed:", e);
+        return { error: "Failed to get suggestions from AI." };
     }
 }
 
