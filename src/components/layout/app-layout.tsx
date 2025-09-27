@@ -47,7 +47,7 @@ import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { SidebarProvider, Sidebar, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "@/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton } from "@/components/ui/sidebar";
 
 import {
   DropdownMenu,
@@ -227,7 +227,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   );
   
   return (
-    <SidebarProvider>
     <div className="flex min-h-svh w-full flex-col bg-background">
         <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -242,19 +241,17 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
                             <PanelLeft />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0">
-                        <SidebarHeader>
-                            <SheetHeader>
-                                <SheetTitle>
-                                    <div className="flex items-center gap-2">
-                                        <div className="relative h-8 w-8">
-                                            <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
-                                        </div>
-                                        <h2 className="text-lg font-bold">Mana Krushi</h2>
+                    <SheetContent side="left" className="w-[18rem] bg-sidebar text-sidebar-foreground p-0 flex flex-col">
+                        <SheetHeader className="p-2">
+                            <SheetTitle>
+                                <div className="flex items-center gap-2">
+                                    <div className="relative h-8 w-8">
+                                        <Image src={logoUrl} alt="App Logo" fill className="rounded-full object-cover" />
                                     </div>
-                                </SheetTitle>
-                            </SheetHeader>
-                        </SidebarHeader>
+                                    <h2 className="text-lg font-bold">Mana Krushi</h2>
+                                </div>
+                            </SheetTitle>
+                        </SheetHeader>
                         <div className="flex-1 overflow-y-auto p-2">
                             {renderNavMenu()}
                         </div>
@@ -325,6 +322,5 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         )}
         </main>
     </div>
-    </SidebarProvider>
   );
 }
