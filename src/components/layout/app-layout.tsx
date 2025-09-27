@@ -72,6 +72,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
     const unsubAuth = onAuthStateChanged(async (user) => {
         setIsAuthLoading(true);
         setAuthUser(user);
+        
+        const publicPages = ['/disclaimer', '/privacy-policy', '/login', '/signup', '/'];
+        const isPublicPage = publicPages.includes(pathname);
+
         if (user) {
             const userProfile = await getProfile(user.email!);
             setProfile(userProfile);
@@ -89,7 +93,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
                 setUserRole(roleFromProfile === 'owner' ? 'Owner' : 'Passenger');
             }
         } else {
-            if (!['/disclaimer', '/privacy-policy', '/login', '/signup', '/'].includes(pathname)) {
+            if (!isPublicPage) {
                  router.push('/login');
             }
         }
