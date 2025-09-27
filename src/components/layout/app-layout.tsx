@@ -116,8 +116,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
   }
 
   React.useEffect(() => {
-    setIsMounted(true);
-
     const unsubAuth = onAuthStateChanged(async (user) => {
         setIsLoading(true);
         setAuthUser(user);
@@ -147,15 +145,23 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         setIsLoading(false);
     });
 
+    return () => { 
+        unsubAuth();
+    };
+  }, [router, pathname]);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+    
+    // Subscribe to logo changes only on the client after hydration
     const unsubLogo = onGlobalLogoUrlChange((url) => {
         if(url) setLogoUrl(url);
     });
 
-    return () => { 
-        unsubAuth();
-        unsubLogo();
-    };
-  }, [router, pathname]);
+    return () => {
+      unsubLogo();
+    }
+  }, []);
 
   const adminNavItems = [
     { href: `/admin/dashboard`, icon: Home, label: "Home" },
