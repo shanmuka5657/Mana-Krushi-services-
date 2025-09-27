@@ -7,15 +7,43 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
+    // Ignore API calls and internal Next.js requests
     {
-      urlPattern: /^https?.*/,
+      urlPattern: /^https?:\/\/.*/,
+      handler: 'NetworkOnly',
+      options: {
+        precacheFallback: {
+          fallbackURL: '/offline',
+        },
+      },
+      method: 'POST',
+    },
+    // Cache pages
+    {
+      urlPattern: ({ request }) => request.mode === 'navigate',
       handler: 'NetworkFirst',
       options: {
-        cacheName: 'offlineCache',
+        cacheName: 'pages',
         expiration: {
-          maxEntries: 200,
+          maxEntries: 50,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
         },
-        networkTimeoutSeconds: 10,
+      },
+    },
+    // Cache static assets
+    {
+      urlPattern: ({ request }) =>
+        request.destination === 'style' ||
+        request.destination === 'script' ||
+        request.destination === 'worker' ||
+        request.destination === 'image',
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 Days
+        },
       },
     },
   ],
