@@ -48,6 +48,8 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
+  SidebarProvider,
+  Sidebar,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -205,8 +207,34 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
       router.push(href);
     }
   };
+
+  const renderNavMenu = () => (
+      <SidebarMenu>
+          {isAuthLoading ? (
+          <>
+              {Array.from({ length: 9 }).map((_, index) => (
+              <SidebarMenuSkeleton key={index} showIcon />
+              ))}
+          </>
+          ) : (
+              navItems.map((item) => (
+              <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton
+                  onClick={() => handleNavClick(item.href)}
+                  isActive={pathname.startsWith(item.href.split('?')[0])}
+                  className="justify-start"
+                  >
+                  <item.icon />
+                  <span>{item.label}</span>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+              ))
+          )}
+      </SidebarMenu>
+  );
   
   return (
+    <SidebarProvider>
     <div className="flex min-h-svh w-full flex-col bg-background">
         <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-8 sticky top-0 z-30 flex-shrink-0">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -229,28 +257,7 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
                             </div>
                         </SidebarHeader>
                         <div className="flex-1 overflow-y-auto p-2">
-                            <SidebarMenu>
-                                {isAuthLoading ? (
-                                <>
-                                    {Array.from({ length: 9 }).map((_, index) => (
-                                    <SidebarMenuSkeleton key={index} showIcon />
-                                    ))}
-                                </>
-                                ) : (
-                                    navItems.map((item) => (
-                                    <SidebarMenuItem key={item.label}>
-                                        <SidebarMenuButton
-                                        onClick={() => handleNavClick(item.href)}
-                                        isActive={pathname.startsWith(item.href.split('?')[0])}
-                                        className="justify-start"
-                                        >
-                                        <item.icon />
-                                        <span>{item.label}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                    ))
-                                )}
-                            </SidebarMenu>
+                            {renderNavMenu()}
                         </div>
                     </SheetContent>
                 </Sheet>
@@ -317,7 +324,6 @@ export function AppLayout({ children }: { children: React.ReactNode | ((profile:
         )}
         </main>
     </div>
+    </SidebarProvider>
   );
 }
-
-    
