@@ -57,7 +57,7 @@ const clearCache = (key?: 'profiles' | 'allProfiles' | 'routes' | 'bookings') =>
 
 // --- Location Cache ---
 export const getLocationCache = async (query: string): Promise<any[] | null> => {
-    if (!isBrowser || !db) return null;
+    if (!db) return null;
     const queryKey = query.toLowerCase().trim();
     if (!queryKey) return null; // Do not query for empty strings
     const docRef = doc(db, "location_cache", queryKey);
@@ -70,7 +70,7 @@ export const getLocationCache = async (query: string): Promise<any[] | null> => 
 };
 
 export const setLocationCache = async (query: string, suggestions: any[]) => {
-    if (!isBrowser || !db) return;
+    if (!db) return;
     const queryKey = query.toLowerCase().trim();
     if (!queryKey) return; // Do not save for empty strings
     const docRef = doc(db, "location_cache", queryKey);
@@ -79,7 +79,7 @@ export const setLocationCache = async (query: string, suggestions: any[]) => {
 };
 
 export const getLocationCacheContents = async (): Promise<{id: string, suggestions: any[]}[]> => {
-    if (!isBrowser || !db) return [];
+    if (!db) return [];
     try {
         const cacheCollection = collection(db, "location_cache");
         perfTracker.increment({ reads: 1, writes: 0 }); // Reading multiple docs
@@ -95,7 +95,7 @@ export const getLocationCacheContents = async (): Promise<{id: string, suggestio
 };
 
 export const clearLocationCache = async () => {
-    if (!isBrowser || !db) return;
+    if (!db) return;
     try {
         const cacheCollection = collection(db, "location_cache");
         perfTracker.increment({ reads: 1, writes: 0 });
@@ -469,7 +469,7 @@ const getSettingFromFirestore = async (key: string): Promise<any | null> => {
 }
 
 const onSettingChange = (key: string, callback: (value: any) => void) => {
-    if (!isBrowser || !db) return () => {};
+    if (!db) return () => {};
     perfTracker.increment({ reads: 1, writes: 0 });
     const docRef = doc(db, "settings", key);
     return onSnapshot(docRef, (doc) => {
@@ -656,7 +656,7 @@ export const getGlobalLogoUrlWithCache = async (): Promise<string | null> => {
 };
 
 export const onGlobalLogoUrlChange = (callback: (url: string | null) => void) => {
-    if (!isBrowser) return () => {};
+    if (!isBrowser || !db) return () => {};
 
     const handleLogoUpdate = async () => {
         perfTracker.increment({ reads: 2, writes: 0 });
