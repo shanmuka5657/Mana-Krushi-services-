@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from 'react';
@@ -74,12 +75,6 @@ function SettingsPageContent() {
                         <CardDescription>Manage your account, preferences, and more.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <NavLink 
-                            href="/history"
-                            icon={History}
-                            title="Booking History"
-                            description="View your past and cancelled rides."
-                        />
                          <NavLink 
                             href="/referral"
                             icon={Gift}

@@ -156,10 +156,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
                             <User className="mr-2 h-4 w-4" />
                             <span>Profile</span>
                             </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/history?role=${profile.role}`)}>
-                            <History className="mr-2 h-4 w-4" />
-                            <span>Booking History</span>
-                            </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => router.push(`/settings?role=${profile.role}`)}>
                             <Settings className="mr-2 h-4 w-4" />
                             <span>Settings</span>
