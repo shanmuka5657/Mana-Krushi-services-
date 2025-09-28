@@ -519,27 +519,30 @@ ${booking.ownerName}
                   bookingsForRoute.map(booking => {
                     const passengerProfile = getProfileForUser(booking.clientEmail);
                     return (
-                    <div key={booking.id} className="border p-4 rounded-md space-y-3">
-                       <div className="flex items-start gap-4">
-                          <User className="h-5 w-5 text-muted-foreground mt-1" />
-                          <div className="flex-grow">
-                              <span className="font-medium">{booking.client}</span>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Users className="h-4 w-4" />
-                                <span>{booking.travelers} Traveler(s)</span>
-                              </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <a href={`tel:${booking.mobile}`}>
-                                <Button size="icon" variant="outline" className="h-8 w-8">
-                                  <Phone className="h-4 w-4" />
+                    <div key={booking.id} className="border p-3 rounded-md space-y-2">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <User className="h-5 w-5 text-muted-foreground" />
+                                <div className="flex flex-col">
+                                    <span className="font-medium">{booking.client}</span>
+                                    <span className="text-sm text-muted-foreground">{booking.mobile}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <a href={`tel:${booking.mobile}`}>
+                                    <Button size="icon" variant="outline" className="h-8 w-8">
+                                    <Phone className="h-4 w-4" />
+                                    </Button>
+                                </a>
+                                <Button size="icon" variant="outline" className="h-8 w-8 bg-green-50 text-green-700 border-green-200 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking)}>
+                                    <MessageSquare className="h-4 w-4" />
                                 </Button>
-                            </a>
-                            <Button size="icon" variant="outline" className="h-8 w-8 bg-green-50 text-green-700 border-green-200 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking)}>
-                                <MessageSquare className="h-4 w-4" />
-                            </Button>
-                          </div>
-                      </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <Users className="h-4 w-4" />
+                            <span>{booking.travelers} Traveler(s)</span>
+                        </div>
                     </div>
                   )})
                 ) : (
