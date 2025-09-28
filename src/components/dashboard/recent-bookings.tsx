@@ -62,7 +62,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
 
@@ -75,41 +75,41 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
     fetchUserRole();
     const currentUserEmail = getCurrentUser();
 
-    const handleRealtimeUpdates = (allUserBookings: Booking[]) => {
-        let filteredBookings;
-        const today = startOfDay(new Date());
-        
-        if (mode === 'upcoming') {
-            filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) >= today && b.status !== 'Cancelled');
-        } else if (mode === 'past') {
-            filteredBookings = allUserBookings.filter(b => new Date(b.departureDate) < today || b.status === 'Cancelled');
-        } else { // 'all'
-            filteredBookings = allUserBookings;
-        }
-        
-        // Sort by earliest date first for 'upcoming', latest first for others
-        if (mode === 'upcoming') {
-            filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(a.departureDate).getTime());
-        } else {
-             filteredBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
-        }
-        
-        setBookings(filteredBookings);
-        setIsLoading(false);
-    }
-    
-    // Set initial state and then subscribe for updates
-    handleRealtimeUpdates(initialBookings);
+    // The initial list is now passed as a prop, which is much faster.
+    // This effect will only set up the real-time listener for updates.
+    setIsLoading(false);
 
-    // Only subscribe if we are not on the admin page (which passes all bookings)
-    if (mode !== 'all') {
+    // Only subscribe for real-time updates if we are not on the admin page
+    if (mode !== 'all' && currentUserEmail) {
         const profileRole = userRole as 'passenger' | 'owner' | 'admin' | null;
-        const searchParams = (!profileRole || profileRole === 'admin') ? undefined : { userEmail: currentUserEmail as string, role: profileRole };
-        const unsubscribe = onBookingsUpdate(handleRealtimeUpdates, searchParams);
+        if (!profileRole || profileRole === 'admin') return;
+
+        const unsubscribe = onBookingsUpdate((updatedBookings) => {
+            let filteredBookings;
+            const today = startOfDay(new Date());
+            
+            if (mode === 'upcoming') {
+                filteredBookings = updatedBookings.filter(b => new Date(b.departureDate) >= today && b.status !== 'Cancelled');
+            } else if (mode === 'past') {
+                filteredBookings = updatedBookings.filter(b => new Date(b.departureDate) < today || b.status === 'Cancelled');
+            } else {
+                filteredBookings = updatedBookings;
+            }
+            
+            if (mode === 'upcoming') {
+                filteredBookings.sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+            } else {
+                filteredBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
+            }
+            
+            setBookings(filteredBookings);
+
+        }, { userEmail: currentUserEmail, role: profileRole });
+
         return () => unsubscribe();
     } else {
-        // For admin page, we just use the initial list
-         setIsLoading(false);
+        // For admin or non-logged-in views, just display the initial static list
+        setBookings(initialBookings);
     }
 
   }, [initialBookings, mode, userRole]);

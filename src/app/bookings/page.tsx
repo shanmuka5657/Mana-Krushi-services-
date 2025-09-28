@@ -13,14 +13,15 @@ import { Loader2 } from 'lucide-react';
 
 function BookingsPageContent() {
     const [bookings, setBookings] = useState<Booking[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(true);
     const searchParams = useSearchParams();
 
     useEffect(() => {
         const fetchInitialBookings = async () => {
+            setIsLoaded(true);
             const userEmail = getCurrentUser();
             if (!userEmail) {
-                setIsLoaded(true);
+                setIsLoaded(false);
                 return;
             }
             
@@ -36,12 +37,12 @@ function BookingsPageContent() {
             });
             
             setBookings(userBookings);
-            setIsLoaded(true);
+            setIsLoaded(false);
         };
         fetchInitialBookings();
     }, []);
     
-    if (!isLoaded) {
+    if (isLoaded) {
         return (
             <AppLayout>
                 <div className="flex items-center justify-center h-64">
