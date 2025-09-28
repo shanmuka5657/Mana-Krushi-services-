@@ -89,7 +89,7 @@ export default function BookRidePage() {
             }
 
             // Calculate available seats - This is the optimized part
-            const bookingsForThisRoute = await getBookings(false, { routeId: foundRoute.id });
+            const bookingsForThisRoute = await getBookings(true, { routeId: foundRoute.id });
 
             const bookedSeats = bookingsForThisRoute
               .filter(b => b.status !== "Cancelled")
@@ -157,7 +157,7 @@ export default function BookRidePage() {
     routeDate.setHours(depHours, depMinutes, 0, 0);
 
     // Check for existing booking
-    const allBookings = await getBookings(false, { 
+    const allBookings = await getBookings(true, { 
         clientEmail: passengerEmail,
         routeId: route.id
     });
@@ -222,7 +222,7 @@ export default function BookRidePage() {
     const totalSeats = (Number(existingBooking.travelers) || 0) + seatsToAdd;
     
     // Recalculate available seats to be sure.
-    const allBookings = await getBookings(false, { routeId: route.id });
+    const allBookings = await getBookings(true, { routeId: route.id });
 
     const otherBookedSeats = allBookings
       .filter(b => b.id !== existingBooking.id && b.status !== "Cancelled")
@@ -474,3 +474,4 @@ Mana Krushi
 }
 
     
+
