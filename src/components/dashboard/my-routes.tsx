@@ -118,7 +118,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
                 const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
                 const routeTime = route.departureTime;
                 return getBookings(false, {
-                    destination: `${route.fromLocation} to ${route.toLocation}`,
+                    destination: `${'route.fromLocation'} to ${'route.toLocation'}`,
                     date: routeDate,
                     time: routeTime,
                 });
