@@ -9,7 +9,7 @@ const withPWA = require('next-pwa')({
   runtimeCaching: [
     // Cache pages
     {
-      urlPattern: ({ request }) => request.mode === 'navigate',
+      urlPattern: ({ request }) => request.mode === 'navigate' && request.method === 'GET',
       handler: 'NetworkFirst',
       options: {
         cacheName: 'pages',
