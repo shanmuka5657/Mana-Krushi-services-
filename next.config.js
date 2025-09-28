@@ -93,7 +93,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://www.youtube.com https://s.ytimg.com;`.replace(/\s{2,}/g, ' ').trim(),
+            value: `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''};`.replace(/\s{2,}/g, ' ').trim(),
           },
         ],
       },
