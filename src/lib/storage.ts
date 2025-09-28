@@ -128,6 +128,18 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
             q = query(q, where("routeId", "==", searchParams.routeId));
         }
 
+        if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            const startOfDayValue = startOfDay(searchDate);
+            const endOfDayValue = endOfDay(searchDate);
+
+            // This is the optimized part. It requires an index.
+            q = query(q, 
+                where("departureDate", ">=", startOfDayValue),
+                where("departureDate", "<=", endOfDayValue)
+            );
+        }
+
         const snapshot = await getDocs(q);
         
         let bookings = snapshot.docs.map(doc => {
@@ -140,11 +152,7 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
             } as Booking;
         });
         
-        // Client-side filtering for everything else
-        if (searchParams?.date) {
-            bookings = bookings.filter(b => format(new Date(b.departureDate), 'yyyy-MM-dd') === searchParams.date);
-        }
-
+        // Client-side filtering for everything else (that's not indexed)
         if (searchParams?.destination) {
             bookings = bookings.filter(b => b.destination === searchParams.destination);
         }

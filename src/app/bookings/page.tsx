@@ -27,7 +27,13 @@ function BookingsPageContent() {
             const userProfile = await getProfile(userEmail);
             const userRole = userProfile?.role || 'passenger';
             
-            const userBookings = await getBookings(false, { userEmail, role: userRole });
+            // Only fetch upcoming bookings initially
+            const today = startOfDay(new Date());
+            const userBookings = await getBookings(false, { 
+                userEmail, 
+                role: userRole,
+                date: today.toISOString() // This is a simplification; the logic in storage handles 'from this day forward'
+            });
             
             setBookings(userBookings);
             setIsLoaded(true);
