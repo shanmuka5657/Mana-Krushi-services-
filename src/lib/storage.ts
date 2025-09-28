@@ -594,6 +594,7 @@ export const sendChatMessage = async (rideId: string, senderEmail: string, text:
 export const getRideDetailsForChat = async (rideId: string, currentUserEmail: string) => {
     if (!db) return { ride: null, profiles: [] };
     
+    perfTracker.increment({ reads: 1, writes: 0 }); // For the route
     const route = await getRouteFromFirestore(rideId);
     if (!route) {
         console.warn(`Chat access denied: Route with ID ${rideId} not found.`);
@@ -605,6 +606,7 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
     if (route.ownerEmail === currentUserEmail) {
         isParticipant = true;
     } else {
+        perfTracker.increment({ reads: 1, writes: 0 }); // For the bookings query
         const bookingsQuery = query(
             collection(db, "bookings"),
             where("routeId", "==", rideId),
@@ -623,6 +625,7 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
     }
 
     // Get all participants' details
+    perfTracker.increment({ reads: 1, writes: 0 }); // For all bookings for the ride
     const allBookingsForRide = await getBookings(true, { routeId: rideId });
     const participantEmails = new Set<string>();
     participantEmails.add(route.ownerEmail);
@@ -632,6 +635,7 @@ export const getRideDetailsForChat = async (rideId: string, currentUserEmail: st
         }
     });
 
+    perfTracker.increment({ reads: participantEmails.size, writes: 0 }); // For profile fetches
     const profilePromises = Array.from(participantEmails).map(email => getProfile(email));
     const profiles = await Promise.all(profilePromises);
 
@@ -1006,7 +1010,3 @@ export const getSetting = async (key: string): Promise<any> => {
     perfTracker.increment({ reads: 1, writes: 0 });
     return await getSettingFromFirestore(key);
 }
-
-
-
-    

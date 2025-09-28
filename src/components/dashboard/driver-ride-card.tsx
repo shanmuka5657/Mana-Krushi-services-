@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -38,10 +37,8 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
             const rideTime = format(new Date(ride.departureDate), 'HH:mm');
 
             // OPTIMIZED: Fetch only bookings relevant to this ride
-            const relatedPassengers = await getBookings(false, {
-                destination: ride.destination,
-                date: rideDate,
-                time: rideTime
+            const relatedPassengers = await getBookings(true, {
+                routeId: ride.routeId
             });
 
             const confirmedPassengers = relatedPassengers.filter(b => b.status === 'Confirmed');
@@ -107,8 +104,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
 
            // Update location for all bookings on this specific ride
             const updatedBookings = allBookings.map(b => {
-                const isSameRide = b.destination === ride.destination &&
-                                new Date(b.departureDate).getTime() === new Date(ride.departureDate).getTime();
+                const isSameRide = b.routeId === ride.routeId;
                 
                 return isSameRide ? { ...b, driverLatitude: latitude, driverLongitude: longitude } : b;
             });
@@ -157,7 +153,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
         const message = `
 Hello ${booking.client},
 
-This is ${booking.driverName} from Mana Krushi, confirming your ride.
+This is ${booking.ownerName} from Mana Krushi, confirming your ride.
 
 *Booking Details:*
 - *Route:* ${booking.destination}
@@ -168,7 +164,7 @@ This is ${booking.driverName} from Mana Krushi, confirming your ride.
 Looking forward to having you on board.
 
 Thank you,
-${booking.driverName}
+${booking.ownerName}
         `.trim();
         
         const whatsappUrl = `https://wa.me/91${booking.mobile}?text=${encodeURIComponent(message)}`;
@@ -311,5 +307,3 @@ ${booking.driverName}
         </>
     );
 }
-
-    
