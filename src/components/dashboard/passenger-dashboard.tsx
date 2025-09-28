@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -328,7 +329,8 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
           </AlertDescription>
         </Alert>
       )}
-
+      
+      {todaysBookings.length === 0 && (
       <Card className="shadow-sm">
           <CardHeader>
               <CardTitle>Find a Ride</CardTitle>
@@ -395,6 +397,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
               </Form>
           </CardContent>
       </Card>
+      )}
 
       <div className="mt-8">
         <CardHeader className="px-0">

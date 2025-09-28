@@ -602,6 +602,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           description="This one-time fee of ₹100 will feature your ride at the top of search results."
       />
       
+      {todaysRoutes.length === 0 && (
       <Card className="shadow-sm">
           <CardHeader>
           <CardTitle>Add a New Route</CardTitle>
@@ -804,6 +805,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           </Form>
           </CardContent>
       </Card>
+      )}
       
       <div className="mt-8">
         <CardHeader className="px-0">
@@ -970,3 +972,4 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     
 
     
+
