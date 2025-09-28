@@ -185,6 +185,16 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<{route: Route | undefined, ownerProfile: Profile | undefined}>({ route: undefined, ownerProfile: undefined });
 
+  const handleTodaysDataUpdate = useCallback((allUserBookings: Booking[]) => {
+    const today = new Date();
+    const filtered = allUserBookings.filter(b => 
+        isToday(new Date(b.departureDate)) && 
+        b.status !== 'Cancelled'
+    );
+    filtered.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+    setTodaysBookings(filtered);
+    if(isTodaysBookingsLoading) setIsTodaysBookingsLoading(false);
+  }, [isTodaysBookingsLoading]);
 
   useEffect(() => {
     if (profile === null || !profile.mobile || profile.mobile === '0000000000') {
@@ -200,23 +210,12 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
         setIsTodaysBookingsLoading(false);
         return;
     }
-
-    const handleDataUpdate = (allUserBookings: Booking[]) => {
-        const today = new Date();
-        const filtered = allUserBookings.filter(b => 
-            isToday(new Date(b.departureDate)) && 
-            b.status !== 'Cancelled'
-        );
-        filtered.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
-        setTodaysBookings(filtered);
-        setIsTodaysBookingsLoading(false);
-    };
-
-    const unsubscribe = onBookingsUpdate(handleDataUpdate, { userEmail, role: 'passenger' });
+    
+    const unsubscribe = onBookingsUpdate(handleTodaysDataUpdate, { userEmail, role: 'passenger' });
 
     return () => unsubscribe();
 
-  }, [profile]);
+  }, [profile, handleTodaysDataUpdate]);
   
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
