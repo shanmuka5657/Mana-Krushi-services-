@@ -47,7 +47,6 @@ export default function BookRidePage() {
   const [message, setMessage] = useState("");
   const [isBooking, setIsBooking] = useState(false);
   const [numberOfSeats, setNumberOfSeats] = useState(1);
-  const [seatsToAdd, setSeatsToAdd] = useState(1);
   const [availableSeats, setAvailableSeats] = useState(0);
   const [isPast, setIsPast] = useState(false);
   const [existingBooking, setExistingBooking] = useState<Booking | null>(null);
@@ -88,7 +87,14 @@ export default function BookRidePage() {
                 setIsPast(true);
             }
 
-            // Calculate available seats - This is the optimized part
+            // Check if THIS user already has a booking
+            const allMyBookings = await getBookings(false, { userEmail: passengerEmail, role: 'passenger' });
+            const userBookingForThisRoute = allMyBookings.find(b => b.routeId === routeId && b.status !== 'Cancelled');
+            if (userBookingForThisRoute) {
+                setExistingBooking(userBookingForThisRoute);
+            }
+
+            // Calculate available seats
             const bookingsForThisRoute = await getBookings(true, { routeId: foundRoute.id });
 
             const bookedSeats = bookingsForThisRoute
@@ -112,13 +118,12 @@ export default function BookRidePage() {
   }
 
   const handleBooking = async () => {
-    if (!route || isBooking || isPast || !ownerProfile) return;
+    if (!route || isBooking || isPast || !ownerProfile || existingBooking) return;
     setIsBooking(true);
 
     const passengerEmail = getCurrentUser();
     
     if (!passengerEmail) {
-        // This check is now mostly redundant due to useEffect, but good for safety
         toast({
             title: "Please Login",
             description: "You need to be logged in to book a ride.",
@@ -155,22 +160,6 @@ export default function BookRidePage() {
     const routeDate = new Date(route.travelDate);
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
     routeDate.setHours(depHours, depMinutes, 0, 0);
-
-    // Check for existing booking
-    const allBookings = await getBookings(true, { 
-        clientEmail: passengerEmail,
-        routeId: route.id
-    });
-
-    const foundExistingBooking = allBookings.find(b => b.status !== "Cancelled");
-
-    if (foundExistingBooking) {
-        setSeatsToAdd(1);
-        setExistingBooking(foundExistingBooking);
-        setIsBooking(false);
-        return;
-    }
-
 
     const db = getFirestore(getApp());
     const newBookingRef = doc(collection(db, 'bookings'));
@@ -213,59 +202,6 @@ export default function BookRidePage() {
     setNewlyBooked(newBooking as Booking);
 
     setIsBooking(false);
-  };
-  
-  const handleUpdateBooking = async () => {
-    if (!existingBooking || !route) return;
-    
-    setIsBooking(true);
-    const totalSeats = (Number(existingBooking.travelers) || 0) + seatsToAdd;
-    
-    // Recalculate available seats to be sure.
-    const allBookings = await getBookings(true, { routeId: route.id });
-
-    const otherBookedSeats = allBookings
-      .filter(b => b.id !== existingBooking.id && b.status !== "Cancelled")
-      .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-    
-    const remainingSeats = route.availableSeats - otherBookedSeats;
-
-
-    if (seatsToAdd > remainingSeats) {
-         toast({
-            title: "Not enough seats",
-            description: `Cannot add ${seatsToAdd} more seats. Only ${remainingSeats} seats available in total.`,
-            variant: "destructive",
-        });
-        setIsBooking(false);
-        setExistingBooking(null);
-        return;
-    }
-
-    const updatedBooking: Booking = {
-      ...existingBooking,
-      travelers: String(totalSeats),
-      amount: route.price * totalSeats,
-      status: "Confirmed", // Ensure status is confirmed on update
-    };
-
-    const db = getFirestore(getApp());
-    const bookingRef = doc(db, 'bookings', existingBooking.id);
-    await updateDoc(bookingRef, {
-        travelers: updatedBooking.travelers,
-        amount: updatedBooking.amount,
-        status: updatedBooking.status,
-    });
-
-    toast({
-        title: "Booking Updated!",
-        description: `Your booking now has ${totalSeats} seat(s) and is confirmed.`,
-    });
-    
-    setNewlyBooked(updatedBooking);
-
-    setIsBooking(false);
-    setExistingBooking(null);
   };
   
   const handleNotifyOwner = () => {
@@ -322,6 +258,16 @@ Mana Krushi
                     <AlertTitle>Ride in Past</AlertTitle>
                     <AlertDescription>
                         This ride has already departed and can no longer be booked.
+                    </AlertDescription>
+                </Alert>
+            )}
+            {existingBooking && (
+                 <Alert variant="default" className="bg-blue-50 border-blue-200">
+                    <CheckCircle className="h-4 w-4 text-blue-600" />
+                    <AlertTitle>Already Booked!</AlertTitle>
+                    <AlertDescription>
+                        You already have a booking for this ride with {existingBooking.travelers} seat(s).
+                        <Button variant="link" className="p-0 h-auto ml-1" onClick={() => router.push('/bookings')}>View My Bookings</Button>
                     </AlertDescription>
                 </Alert>
             )}
@@ -404,12 +350,12 @@ Mana Krushi
                         placeholder="Introduce yourself..."
                         rows={4}
                         className="bg-muted/50"
-                        disabled={isPast}
+                        disabled={isPast || !!existingBooking}
                     />
                 </CardContent>
             </Card>
 
-            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking || availableSeats === 0 || isPast}>
+            <Button size="lg" className="w-full" onClick={handleBooking} disabled={isBooking || availableSeats === 0 || isPast || !!existingBooking}>
                 {isBooking ? (
                     <>
                         <Zap className="mr-2 h-4 w-4 animate-spin" />
@@ -418,37 +364,10 @@ Mana Krushi
                 ) : (
                     <>
                         <Zap className="mr-2 h-4 w-4" />
-                        {isPast ? 'Ride has departed' : (availableSeats > 0 ? `Book for ${numberOfSeats} seat(s)` : 'Sold Out')}
+                        {isPast ? 'Ride has departed' : (existingBooking ? 'Already Booked' : (availableSeats > 0 ? `Book for ${numberOfSeats} seat(s)` : 'Sold Out'))}
                     </>
                 )}
             </Button>
-            
-            <AlertDialog open={!!existingBooking} onOpenChange={(open) => !open && setExistingBooking(null)}>
-                <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>You already have a booking!</AlertDialogTitle>
-                    <AlertDialogDescription>
-                    You have a booking for this ride with {existingBooking?.travelers} seat(s).
-                    How many more seats would you like to add?
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="grid gap-2 py-4">
-                    <Label htmlFor="seats-to-add">Additional Seats</Label>
-                    <Input
-                        id="seats-to-add"
-                        type="number"
-                        value={seatsToAdd}
-                        onChange={(e) => setSeatsToAdd(Math.max(1, parseInt(e.target.value) || 1))}
-                        min="1"
-                        className="col-span-3"
-                    />
-                    </div>
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => setExistingBooking(null)}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleUpdateBooking}>Add Seats</AlertDialogAction>
-                </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
 
             <AlertDialog open={!!newlyBooked} onOpenChange={(open) => !open && router.push('/dashboard?role=passenger')}>
                 <AlertDialogContent>
@@ -472,6 +391,3 @@ Mana Krushi
     </AppLayout>
   );
 }
-
-    
-
