@@ -299,7 +299,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
     navigator.geolocation.getCurrentPosition(success, error);
   };
   
-  const handleWhatsAppToPassenger = (booking: Booking, type: 'confirmation' | 'payment') => {
+  const handleWhatsAppToPassenger = (booking: Booking) => {
     if (!booking.mobile) return;
 
     let message = '';
@@ -307,42 +307,22 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
     const formattedDate = format(bookingDate, 'dd MMM, yyyy');
     const formattedTime = format(bookingDate, 'p');
 
-    if (type === 'confirmation') {
-       message = `
+    
+    message = `
 Hello ${booking.client},
 
-This is ${booking.ownerName} from Mana Krushi, confirming your ride.
+This is ${booking.ownerName} from Mana Krushi, regarding your ride.
 
 *Booking Details:*
 - *Route:* ${booking.destination}
 - *Date:* ${formattedDate}
 - *Time:* ${formattedTime}
-- *Amount:* ₹${booking.amount.toFixed(2)}
 
-Looking forward to have you on board.
+Please let me know if you have any questions.
 
 Thank you,
 ${booking.ownerName}
     `.trim().replace(/^\s+/gm, '');
-    } else if (type === 'payment') {
-        const upiId = "7569114679@ybl";
-        const upiUrl = `upi://pay?pa=${upiId}&pn=Mana%20Krushi&am=${booking.amount.toFixed(2)}&tn=RidePayment${booking.id}`;
-        
-        message = `
-Hello ${booking.client},
-
-Thank you for travelling with Mana Krushi!
-
-This is a reminder for your payment of *₹${booking.amount.toFixed(2)}*.
-
-You can pay via UPI using this link: ${upiUrl}
-
-Alternatively, you can pay in cash. Let me know what you prefer.
-
-Thanks,
-${booking.ownerName}
-    `.trim().replace(/^\s+/gm, '');
-    }
     
     const whatsappUrl = `https://wa.me/91${booking.mobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -537,88 +517,29 @@ ${booking.ownerName}
               <div className="space-y-4 py-4">
                 {bookingsForRoute.length > 0 ? (
                   bookingsForRoute.map(booking => {
-                    const StatusIcon = getStatusInfo(booking.status).icon;
-                    const statusColor = getStatusInfo(booking.status).color;
                     const passengerProfile = getProfileForUser(booking.clientEmail);
                     return (
-                    <div key={booking.id} className="border p-4 rounded-md space-y-4">
-                       <p className="font-mono text-xs text-muted-foreground">ID: {booking.bookingCode || booking.id}</p>
+                    <div key={booking.id} className="border p-4 rounded-md space-y-3">
                        <div className="flex items-start gap-4">
                           <User className="h-5 w-5 text-muted-foreground mt-1" />
-                          <div className="flex flex-col">
-                              <span className="text-sm text-muted-foreground">Passenger Name</span>
+                          <div className="flex-grow">
                               <span className="font-medium">{booking.client}</span>
-                          </div>
-                      </div>
-                       <div className="flex items-start gap-4">
-                          <Phone className="h-5 w-5 text-muted-foreground mt-1" />
-                           <div className="flex flex-col">
-                              <span className="text-sm text-muted-foreground">Mobile Number</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{booking.mobile}</span>
-                                {passengerProfile?.mobileVerified && (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                        <CheckCircle className="h-3 w-3 mr-1" /> Verified
-                                    </Badge>
-                                )}
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>{booking.travelers} Traveler(s)</span>
                               </div>
                           </div>
-                      </div>
-                       <div className="flex items-start gap-4">
-                          <Users className="h-5 w-5 text-muted-foreground mt-1" />
-                          <div className="flex flex-col">
-                              <span className="text-sm text-muted-foreground">Travelers</span>
-                              <span className="font-medium">{booking.travelers}</span>
+                          <div className="flex gap-2">
+                            <a href={`tel:${booking.mobile}`}>
+                                <Button size="icon" variant="outline" className="h-8 w-8">
+                                  <Phone className="h-4 w-4" />
+                                </Button>
+                            </a>
+                            <Button size="icon" variant="outline" className="h-8 w-8 bg-green-50 text-green-700 border-green-200 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking)}>
+                                <MessageSquare className="h-4 w-4" />
+                            </Button>
                           </div>
                       </div>
-                       <div className="flex items-start gap-4">
-                          <StatusIcon className={`h-5 w-5 ${statusColor} mt-1`} />
-                          <div className="flex flex-col">
-                              <span className="text-sm text-muted-foreground">Status</span>
-                              <span className={`font-medium ${statusColor}`}>{booking.status}</span>
-                          </div>
-                      </div>
-                      
-                      <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-2">
-                            {booking.status === 'Completed' && booking.paymentStatus !== 'Paid' ? (
-                                <>
-                                  <p className="text-sm text-muted-foreground mb-2 sm:mb-0">Payment:</p>
-                                  <div className="flex gap-2">
-                                      <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'Cash')}>
-                                          <IndianRupee className="mr-2 h-4 w-4" /> Cash
-                                      </Button>
-                                      <Button size="sm" variant="outline" onClick={() => handlePayment(booking.id, 'UPI')}>
-                                         <Sparkles className="mr-2 h-4 w-4" /> UPI
-                                      </Button>
-                                  </div>
-                                </>
-                            ) : booking.paymentStatus === 'Paid' ? (
-                                <div className="flex items-center gap-2">
-                                    <IndianRupee className="h-5 w-5 text-green-500" />
-                                    <span className="font-medium text-green-500">Paid via {booking.paymentMethod}</span>
-                                </div>
-                            ) : null}
-                      </div>
-
-                        <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
-                           {booking.status !== 'Cancelled' && (
-                                <>
-                                    <a href={`tel:${booking.mobile}`}>
-                                        <Button size="sm" variant="outline">
-                                            <Phone className="mr-2 h-4 w-4" /> Call
-                                        </Button>
-                                    </a>
-                                    <Button size="sm" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100" onClick={() => handleWhatsAppToPassenger(booking, booking.status === 'Completed' ? 'payment' : 'confirmation')}>
-                                        <MessageSquare className="mr-2 h-4 w-4" />
-                                        WhatsApp
-                                    </Button>
-                                    <Button size="sm" variant="outline" onClick={() => handleShareLocation(booking.id)}>
-                                        <Share2 className="mr-2 h-4 w-4" />
-                                        Share My Location
-                                    </Button>
-                                </>
-                            )}
-                        </div>
                     </div>
                   )})
                 ) : (
