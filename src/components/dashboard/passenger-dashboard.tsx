@@ -5,10 +5,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { MapPin, Search, Loader2, LocateFixed, Hand, Plane, Users, ChevronRight } from "lucide-react";
+import { MapPin, Search, Loader2, LocateFixed, Hand, Plane, Users, ChevronRight, Car, Star, Milestone, ArrowRight, Bike } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { format, isToday } from "date-fns";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +23,8 @@ import {
   useFormField,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Profile } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import type { Profile, Booking } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +37,9 @@ import {
 import { getMapSuggestions, reverseGeocode } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { getCurrentUser, onBookingsUpdate } from "@/lib/storage";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
 
 const searchFormSchema = z.object({
@@ -147,6 +152,23 @@ const LocationAutocompleteInput = ({
     );
 };
 
+const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
+    try {
+        const departure = new Date(`1970-01-01T${departureTime}:00`);
+        const arrival = new Date(`1970-01-01T${arrivalTime}:00`);
+        const diffMinutes = (arrival.getTime() - departure.getTime()) / (1000 * 60);
+        if (diffMinutes < 0) return "";
+
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        
+        return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+
+    } catch (e) {
+        return "";
+    }
+}
+
 
 export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDashboardProps) {
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
@@ -155,17 +177,40 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [todaysBookings, setTodaysBookings] = useState<Booking[]>([]);
+  const [isTodaysBookingsLoading, setIsTodaysBookingsLoading] = useState(true);
 
 
   useEffect(() => {
     if (profile === null || !profile.mobile || profile.mobile === '0000000000') {
       setShowProfilePrompt(true);
     }
-     // Check if we should show the location prompt
     const locationPromptDismissed = localStorage.getItem('locationPromptDismissed');
     if (!locationPromptDismissed) {
       setShowLocationPrompt(true);
     }
+
+    const userEmail = getCurrentUser();
+    if (!userEmail) {
+        setIsTodaysBookingsLoading(false);
+        return;
+    }
+
+    const handleDataUpdate = (allUserBookings: Booking[]) => {
+        const today = new Date();
+        const filtered = allUserBookings.filter(b => 
+            isToday(new Date(b.departureDate)) && 
+            b.status !== 'Cancelled'
+        );
+        filtered.sort((a,b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+        setTodaysBookings(filtered);
+        setIsTodaysBookingsLoading(false);
+    };
+
+    const unsubscribe = onBookingsUpdate(handleDataUpdate, { userEmail, role: 'passenger' });
+
+    return () => unsubscribe();
+
   }, [profile]);
   
   const form = useForm<SearchFormValues>({
@@ -320,15 +365,93 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
               </Form>
           </CardContent>
       </Card>
-      
-      <div className="space-y-4">
-            <NavLink 
-                href="/bookings?role=passenger"
-                icon={Plane}
-                title="My Bookings"
-                description="View and manage your upcoming rides."
-            />
-        </div>
+
+      <div className="mt-8">
+        <CardHeader className="px-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Today's Bookings</CardTitle>
+              <CardDescription>Your upcoming rides for today.</CardDescription>
+            </div>
+             <Link href="/bookings">
+                <Button variant="outline">
+                    View All Bookings <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        
+        {isTodaysBookingsLoading ? (
+            <div className="flex items-center justify-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        ) : todaysBookings.length > 0 ? (
+            <div className="space-y-4">
+                {todaysBookings.map((booking) => {
+                    const [from, to] = booking.destination.split(' to ');
+                    const departureTime = format(new Date(booking.departureDate), 'HH:mm');
+
+                    return (
+                       <Card key={booking.id} className="overflow-hidden transition-all hover:bg-muted/50" onClick={() => router.push('/bookings')}>
+                            <CardContent className="p-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex gap-4">
+                                        <div>
+                                            <div className="font-semibold">{departureTime}</div>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-3 h-3 rounded-full border-2 border-primary"></div>
+                                            <div className="w-px h-10 bg-border my-1"></div>
+                                            <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary"></div>
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold">{from}</div>
+                                            <div className="text-sm text-muted-foreground">{format(new Date(booking.departureDate), "PPP")}</div>
+                                            {booking.distance && (
+                                                <div className="text-xs text-muted-foreground flex items-center gap-1 my-1">
+                                                    <Milestone className="h-3 w-3" />
+                                                    <span>{booking.distance.toFixed(0)} km</span>
+                                                </div>
+                                            )}
+                                            <div className="font-semibold mt-2">{to}</div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-lg font-bold">
+                                            ₹{(booking.amount || 0).toFixed(2)}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                                            <Users className="h-4 w-4" />
+                                            <span>{booking.travelers} seat(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                             <CardFooter className="bg-muted/50 p-3 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                   {booking.vehicleType === 'Bike' ? (
+                                        <Bike className="text-muted-foreground h-5 w-5" />
+                                    ) : (
+                                        <Car className="text-muted-foreground h-5 w-5" />
+                                    )}
+                                    <p className="text-sm font-medium">{booking.ownerName}</p>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    )
+                })}
+            </div>
+        ) : (
+             <Card>
+                <CardContent className="py-12 flex flex-col items-center justify-center text-center">
+                    <h3 className="text-xl font-semibold">No Rides Today</h3>
+                    <p className="text-muted-foreground mt-2 max-w-md">
+                        You have no rides scheduled for today. Use the form above to find one!
+                    </p>
+                </CardContent>
+            </Card>
+        )}
+      </div>
 
     </div>
   );

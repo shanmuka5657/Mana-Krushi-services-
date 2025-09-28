@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import {
@@ -171,6 +172,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
                        <DropdownMenuItem onClick={() => router.push(role === 'admin' ? '/admin/profile' : `/profile?role=${role}`)}>
                           <User className="mr-2 h-4 w-4" />
                           <span>Profile</span>
+                        </DropdownMenuItem>
+                       <DropdownMenuItem onClick={() => router.push(`/bookings?role=${role}`)}>
+                          <Plane className="mr-2 h-4 w-4" />
+                          <span>My Bookings</span>
                         </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
                         <Settings className="mr-2 h-4 w-4" />
