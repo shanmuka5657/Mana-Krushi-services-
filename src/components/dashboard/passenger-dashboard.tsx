@@ -1,11 +1,10 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { MapPin, Search, Loader2, LocateFixed, Hand, Plane, Users, ChevronRight, Car, Star, Milestone, ArrowRight, Bike } from "lucide-react";
+import { MapPin, Search, Loader2, LocateFixed, Hand, Plane, Users, ChevronRight, Car, Star, Milestone, ArrowRight, Bike, User, Phone, Shield, MessagesSquare } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import type { Profile, Booking } from "@/lib/types";
+import type { Profile, Booking, Route } from "@/lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,9 +36,12 @@ import {
 import { getMapSuggestions, reverseGeocode } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { getCurrentUser, onBookingsUpdate } from "@/lib/storage";
+import { getCurrentUser, onBookingsUpdate, getRoutes, getProfile } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Badge } from "../ui/badge";
+import { CheckCircle } from "lucide-react";
 
 
 const searchFormSchema = z.object({
@@ -179,6 +181,9 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [todaysBookings, setTodaysBookings] = useState<Booking[]>([]);
   const [isTodaysBookingsLoading, setIsTodaysBookingsLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedBookingDetails, setSelectedBookingDetails] = useState<{route: Route | undefined, ownerProfile: Profile | undefined}>({ route: undefined, ownerProfile: undefined });
 
 
   useEffect(() => {
@@ -262,6 +267,31 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
         to: data.toLocation,
     });
     router.push(`/find-ride?${params.toString()}`);
+  }
+
+  const handleViewClick = async (booking: Booking) => {
+    setSelectedBooking(booking);
+    
+    const bookingDateStr = format(new Date(booking.departureDate), 'yyyy-MM-dd');
+    const [routeData, ownerProfileData] = await Promise.all([
+        getRoutes(true, { date: bookingDateStr, from: booking.destination.split(' to ')[0], to: booking.destination.split(' to ')[1] }),
+        getProfile(booking.ownerEmail),
+    ]);
+    
+    const bookingTime = format(new Date(booking.departureDate), 'HH:mm');
+    const route = routeData.find(r => r.departureTime === bookingTime);
+
+    setSelectedBookingDetails({ route, ownerProfile: ownerProfileData });
+    setIsViewOpen(true);
+  };
+
+  const handleGoToChat = () => {
+    if (selectedBooking && selectedBooking.routeId) {
+        router.push(`/chat/${selectedBooking.routeId}`);
+        setIsViewOpen(false);
+    } else {
+        toast({ title: "Error", description: "Could not find the route ID for this booking to open chat.", variant: "destructive"});
+    }
   }
 
   return (
@@ -392,7 +422,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                     const departureTime = format(new Date(booking.departureDate), 'HH:mm');
 
                     return (
-                       <Card key={booking.id} className="overflow-hidden transition-all hover:bg-muted/50" onClick={() => router.push('/bookings')}>
+                       <Card key={booking.id} className="overflow-hidden transition-all">
                             <CardContent className="p-4">
                                 <div className="flex justify-between items-start">
                                     <div className="flex gap-4">
@@ -436,6 +466,7 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                                     )}
                                     <p className="text-sm font-medium">{booking.ownerName}</p>
                                 </div>
+                                <Button size="sm" variant="outline" onClick={() => handleViewClick(booking)}>View Details</Button>
                             </CardFooter>
                         </Card>
                     )
@@ -453,6 +484,78 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
         )}
       </div>
 
+        {/* View Dialog */}
+        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+        {selectedBooking && (
+                <DialogContent className="max-h-[90vh] flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle>Details for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
+                        <DialogDescription>
+                        Owner and vehicle information for your trip.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4 overflow-y-auto pr-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="flex items-start gap-3">
+                                <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Owner</p>
+                                    <p className="font-medium">{selectedBooking.ownerName || 'N/A'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Owner Mobile</p>
+                                     <div className="flex items-center gap-1 flex-wrap">
+                                        <p className="font-medium">{selectedBooking.ownerMobile}</p>
+                                        {selectedBookingDetails.ownerProfile?.mobileVerified && (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                                <CheckCircle className="h-3 w-3 mr-1" /> Verified
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                             <div className="flex items-start gap-3">
+                                <Car className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Vehicle Type</p>
+                                    <p className="font-medium">{selectedBooking.vehicleType || 'N/A'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Vehicle Number</p>
+                                    <p className="font-medium">{selectedBooking.vehicleNumber || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter className="mt-auto pt-4 border-t flex flex-wrap justify-end gap-2">
+                        <DialogClose asChild>
+                            <Button variant="outline">Close</Button>
+                        </DialogClose>
+                        {selectedBooking.ownerMobile && (
+                            <a href={`tel:${selectedBooking.ownerMobile}`}>
+                                <Button variant="outline">
+                                    <Phone className="mr-2 h-4 w-4" />
+                                    Call Owner
+                                </Button>
+                            </a>
+                        )}
+                        <Button onClick={handleGoToChat}>
+                            <MessagesSquare className="mr-2 h-4 w-4" />
+                            Group Chat
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+        )}
+        </Dialog>
+
     </div>
   );
 }
+
+    
