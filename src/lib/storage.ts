@@ -28,7 +28,7 @@ import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
 import { perfTracker } from './perf-tracker';
-import { format, isToday, startOfDay, endOfDay } from "date-fns";
+import { format, isToday, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -118,7 +118,6 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
     try {
         let q = query(bookingsCollection);
 
-        // Server-side filtering by user if possible
         if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
             const fieldToQuery = searchParams.role === 'owner' ? 'ownerEmail' : 'clientEmail';
             q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
@@ -126,18 +125,6 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
 
         if (searchParams?.routeId) {
             q = query(q, where("routeId", "==", searchParams.routeId));
-        }
-
-        if (searchParams?.date) {
-            const searchDate = new Date(searchParams.date);
-            const startOfDayValue = startOfDay(searchDate);
-            const endOfDayValue = endOfDay(searchDate);
-
-            // This is the optimized part. It requires an index.
-            q = query(q, 
-                where("departureDate", ">=", startOfDayValue),
-                where("departureDate", "<=", endOfDayValue)
-            );
         }
 
         const snapshot = await getDocs(q);
@@ -152,7 +139,12 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
             } as Booking;
         });
         
-        // Client-side filtering for everything else (that's not indexed)
+        // Client-side filtering for other parameters
+        if (searchParams?.date) {
+            const searchDate = new Date(searchParams.date);
+            bookings = bookings.filter(b => isWithinInterval(new Date(b.departureDate), { start: startOfDay(searchDate), end: endOfDay(searchDate) }));
+        }
+
         if (searchParams?.destination) {
             bookings = bookings.filter(b => b.destination === searchParams.destination);
         }
