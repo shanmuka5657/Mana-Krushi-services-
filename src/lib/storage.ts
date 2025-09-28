@@ -375,7 +375,17 @@ const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: strin
 
 
         return routes;
-    } catch(e) {
+    } catch(e: any) {
+        if (e.code === 'failed-precondition') {
+            console.warn(
+                `A Firestore index is required for this query. The app will function but may be slow. 
+                Please deploy the indexes defined in firestore.indexes.json.
+                You can do this by running 'firebase deploy --only firestore:indexes'.
+                Original error:`, e
+            );
+            // Return empty array to avoid crash and allow user to see the message.
+            return [];
+        }
         console.error("Error getting routes from Firestore", e);
         return [];
     }
