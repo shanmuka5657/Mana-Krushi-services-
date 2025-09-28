@@ -19,7 +19,6 @@ import { cn } from '@/lib/utils';
 import { calculateDistance } from '../actions';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
-import locations from '@/lib/locations.json';
 
 
 const getTravelDuration = (departureTime: string, arrivalTime: string): string => {
@@ -64,46 +63,24 @@ function FindRideResultsPage() {
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
-            const locationData = locations as Record<string, string[]>;
-
-            const getSearchTerms = (location: string): string[] => {
-                const lowerCaseLocation = location.trim().toLowerCase();
-                
-                // Case 1: The location is a major city itself (e.g., "Hyderabad")
-                const cityKey = Object.keys(locationData).find(c => c.toLowerCase() === lowerCaseLocation);
-                if (cityKey && locationData[cityKey]) {
-                    return [lowerCaseLocation, ...locationData[cityKey].map(sub => sub.toLowerCase())];
-                }
-
-                // Case 2: The location is a sub-location (e.g., "Gachibowli")
-                for (const city in locationData) {
-                    if(locationData.hasOwnProperty(city)) {
-                        const subLocations = (locationData as Record<string, any>)[city].map((s: string) => s.toLowerCase());
-                        if (subLocations.includes(lowerCaseLocation)) {
-                            // Found parent city, return the city and all its sub-locations
-                            return [city.toLowerCase(), ...subLocations];
-                        }
-                    }
-                }
-                
-                // Case 3: The location is not in our JSON file, so just search for it directly
-                return [lowerCaseLocation];
-            };
-
-
-            const fromSearchTerms = getSearchTerms(from);
-            const toSearchTerms = getSearchTerms(to);
             
+            const fromLower = from.trim().toLowerCase();
+            const toLower = to.trim().toLowerCase();
+
             const routes = allRoutesData.filter(route => {
                 const routeDate = new Date(route.travelDate);
+                if (routeDate < today) {
+                    return false;
+                }
+
                 const routeFromLower = route.fromLocation.trim().toLowerCase();
                 const routeToLower = route.toLocation.trim().toLowerCase();
 
-                const fromMatch = fromSearchTerms.some(term => routeFromLower.includes(term));
-                const toMatch = toSearchTerms.some(term => routeToLower.includes(term));
+                // Flexible matching: check if search terms are substrings of the route locations
+                const fromMatch = routeFromLower.includes(fromLower) || fromLower.includes(routeFromLower);
+                const toMatch = routeToLower.includes(toLower) || toLower.includes(routeToLower);
                 
-                return fromMatch && toMatch && routeDate >= today;
+                return fromMatch && toMatch;
             });
 
             if (routes.length > 0) {
