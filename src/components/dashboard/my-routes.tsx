@@ -118,9 +118,10 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
                 const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
                 const routeTime = route.departureTime;
                 return getBookings(false, {
-                    destination: `${'route.fromLocation'} to ${'route.toLocation'}`,
+                    destination: `${route.fromLocation} to ${route.toLocation}`,
                     date: routeDate,
                     time: routeTime,
+                    ownerEmail: route.ownerEmail,
                 });
             });
 
@@ -187,6 +188,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
       destination: `${route.fromLocation} to ${route.toLocation}`,
       date: routeDate,
       time: routeTime,
+      ownerEmail: route.ownerEmail,
     });
     
     routeBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
@@ -326,7 +328,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
        message = `
 Hello ${booking.client},
 
-This is ${booking.driverName} from Mana Krushi, confirming your ride.
+This is ${booking.ownerName} from Mana Krushi, confirming your ride.
 
 *Booking Details:*
 - *Route:* ${booking.destination}
@@ -337,7 +339,7 @@ This is ${booking.driverName} from Mana Krushi, confirming your ride.
 Looking forward to have you on board.
 
 Thank you,
-${booking.driverName}
+${booking.ownerName}
     `.trim().replace(/^\s+/gm, '');
     } else if (type === 'payment') {
         const upiId = "7569114679@ybl";
@@ -355,7 +357,7 @@ You can pay via UPI using this link: ${upiUrl}
 Alternatively, you can pay in cash. Let me know what you prefer.
 
 Thanks,
-${booking.driverName}
+${booking.ownerName}
     `.trim().replace(/^\s+/gm, '');
     }
     

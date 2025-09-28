@@ -239,7 +239,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           routes.forEach((route, index) => {
               const bookingsForThisRoute = allBookingsToday.filter(b => 
                   b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-                  format(new Date(b.departureDate), 'HH:mm') === route.departureTime
+                  format(new Date(b.departureDate), 'HH:mm') === route.departureTime &&
+                  b.ownerEmail === ownerEmail
               );
               const bookedSeats = bookingsForThisRoute
                   .filter(b => b.status !== 'Cancelled')
@@ -417,6 +418,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
       destination: `${route.fromLocation} to ${route.toLocation}`,
       date: routeDate,
       time: routeTime,
+      ownerEmail: route.ownerEmail,
     });
     
     setBookingsForRoute(routeBookings);
