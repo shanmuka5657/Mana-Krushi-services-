@@ -15,9 +15,9 @@ export type Booking = {
   status: "Confirmed" | "Pending" | "Cancelled" | "Completed";
   travelers: string;
   mobile: string;
-  driverName?: string;
-  driverEmail?: string;
-  driverMobile?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  ownerMobile?: string;
   vehicleType?: string;
   vehicleNumber?: string;
   paymentMethod?: "Cash" | "UPI" | "Pending";
@@ -137,6 +137,7 @@ export const TollCalculatorOutputSchema = z.object({
     .describe('The estimated number of toll plazas along the route.'),
 });
 export type TollCalculatorOutput = z.infer<typeof TollCalculatorOutputSchema>;
+
 
 
 

@@ -63,7 +63,7 @@ function ProfitLossPageContent() {
 
             const ownerBookings = allBookings.filter(b => {
                 const bookingInDateRange = dateInterval ? isWithinInterval(new Date(b.departureDate), dateInterval) : true;
-                return b.driverEmail === userEmail && (b.status === 'Completed' || b.paymentStatus === 'Paid') && bookingInDateRange;
+                return b.ownerEmail === userEmail && (b.status === 'Completed' || b.paymentStatus === 'Paid') && bookingInDateRange;
             });
             
             const ownerRoutesInDateRange = allRoutes.filter(r => {
