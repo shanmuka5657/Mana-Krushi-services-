@@ -20,9 +20,7 @@ import {
     limit,
     updateDoc,
     getCountFromServer,
-    deleteDoc,
-    endOfDay,
-    startOfDay,
+    deleteDoc
 } from './firebase';
 
 
@@ -30,7 +28,7 @@ import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
 import { perfTracker } from './perf-tracker';
-import { format, isToday } from "date-fns";
+import { format, isToday, startOfDay, endOfDay } from "date-fns";
 
 const isBrowser = typeof window !== "undefined";
 
