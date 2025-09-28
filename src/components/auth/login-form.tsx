@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -83,9 +84,9 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await signInWithEmail(values.email, values.password);
+      const user = await signInWithEmail(values.email, values.password);
       
-      const userProfile = await getProfile(values.email);
+      const userProfile = await getProfile(user.email!);
       const role = userProfile?.role || 'passenger';
       
       const redirectUrl = searchParams.get('redirect');

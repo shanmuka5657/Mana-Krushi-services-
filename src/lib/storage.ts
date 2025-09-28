@@ -423,17 +423,15 @@ const addRouteToFirestore = async (route: Omit<Route, 'id'>): Promise<Route> => 
 
 const getProfileFromFirestore = async (email: string): Promise<Profile | null> => {
     if (!db || !email) return null;
-    const profilesCollection = collection(db, "profiles");
     try {
-        const q = query(profilesCollection, where(documentId(), "==", email));
-        const docSnap = await getDocs(q);
+        const docRef = doc(db, "profiles", email);
+        const docSnap = await getDoc(docRef);
 
-        if (!docSnap.empty) {
-            const doc = docSnap.docs[0];
-            const data = doc.data();
+        if (docSnap.exists()) {
+            const data = docSnap.data();
             return { 
                 ...data, 
-                email: doc.id,
+                email: docSnap.id,
                 planExpiryDate: data.planExpiryDate?.toDate ? data.planExpiryDate.toDate() : undefined
             } as Profile;
         }
