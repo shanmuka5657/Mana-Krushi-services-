@@ -20,7 +20,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "driverEmail",
+          "fieldPath": "ownerEmail",
           "order": "ASCENDING"
         },
         {
