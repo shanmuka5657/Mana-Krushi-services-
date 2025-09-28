@@ -114,17 +114,8 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
             const newBookedSeatsMap = new Map<string, number>();
             const newRouteViewsMap = new Map<string, number>();
 
-            const bookingPromises = fetchedRoutes.map(route => {
-                const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
-                const routeTime = route.departureTime;
-                return getBookings(false, {
-                    destination: `${route.fromLocation} to ${route.toLocation}`,
-                    date: routeDate,
-                    time: routeTime,
-                    ownerEmail: route.ownerEmail,
-                });
-            });
-
+            // Use routeId for precise booking fetching
+            const bookingPromises = fetchedRoutes.map(route => getBookings(true, { routeId: route.id }));
             const viewPromises = fetchedRoutes.map(route => getRouteViews(route.id));
             
             const [bookingsByRoute, viewsByRoute] = await Promise.all([
@@ -180,16 +171,8 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
     setSelectedRoute(route);
     setIsViewDialogOpen(true);
 
-    // Fetch details on demand
-    const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
-    const routeTime = route.departureTime;
-    
-    const routeBookings = await getBookings(true, {
-      destination: `${route.fromLocation} to ${route.toLocation}`,
-      date: routeDate,
-      time: routeTime,
-      ownerEmail: route.ownerEmail,
-    });
+    // Fetch details on demand using the precise routeId
+    const routeBookings = await getBookings(true, { routeId: route.id });
     
     routeBookings.sort((a, b) => new Date(b.departureDate).getTime() - new Date(a.departureDate).getTime());
     setBookingsForRoute(routeBookings);

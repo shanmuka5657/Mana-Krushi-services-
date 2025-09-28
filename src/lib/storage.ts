@@ -112,24 +112,23 @@ export const clearLocationCache = async () => {
     }
 };
 
-const getBookingsFromFirestore = async (searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
+const getBookingsFromFirestore = async (searchParams?: { routeId?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!db) return [];
     const bookingsCollection = collection(db, "bookings");
     try {
         let q = query(bookingsCollection);
 
-        if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
+        // The most specific query is by routeId, which should be preferred.
+        if (searchParams?.routeId) {
+            q = query(q, where("routeId", "==", searchParams.routeId));
+        } else if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
             const fieldToQuery = searchParams.role === 'owner' ? 'ownerEmail' : 'clientEmail';
             q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
         }
 
-        if (searchParams?.routeId) {
-            q = query(q, where("routeId", "==", searchParams.routeId));
-        }
-
         const snapshot = await getDocs(q);
         
-        let bookings = snapshot.docs.map(doc => {
+        const bookings = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 ...data,
@@ -138,23 +137,6 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
                 returnDate: data.returnDate?.toDate ? data.returnDate.toDate() : new Date(data.returnDate),
             } as Booking;
         });
-        
-        // Client-side filtering for other parameters
-        if (searchParams?.date) {
-            const searchDate = new Date(searchParams.date);
-            bookings = bookings.filter(b => isWithinInterval(new Date(b.departureDate), { start: startOfDay(searchDate), end: endOfDay(searchDate) }));
-        }
-
-        if (searchParams?.destination) {
-            bookings = bookings.filter(b => b.destination === searchParams.destination);
-        }
-        
-        if (searchParams?.time) {
-            bookings = bookings.filter(booking => {
-                 const bookingTime = new Date(booking.departureDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                 return bookingTime === searchParams.time;
-            });
-        }
         
         return bookings;
 
@@ -820,7 +802,7 @@ export const getGlobalVideoVisibility = async (): Promise<boolean> => {
 
 
 // --- Bookings ---
-export const getBookings = async (isAdmin = false, searchParams?: { destination?: string, date?: string, time?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin', routeId?: string }): Promise<Booking[]> => {
+export const getBookings = async (isAdmin = false, searchParams?: { routeId?: string, userEmail?: string, role?: 'passenger' | 'owner' | 'admin' }): Promise<Booking[]> => {
     if (!isBrowser) return [];
     
     const cacheKey = JSON.stringify(searchParams || {});

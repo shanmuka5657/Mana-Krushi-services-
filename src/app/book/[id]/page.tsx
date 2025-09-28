@@ -89,11 +89,7 @@ export default function BookRidePage() {
             }
 
             // Calculate available seats - This is the optimized part
-            const bookingsForThisRoute = await getBookings(false, {
-                destination: `${foundRoute.fromLocation} to ${foundRoute.toLocation}`,
-                date: format(new Date(foundRoute.travelDate), 'yyyy-MM-dd'),
-                time: foundRoute.departureTime
-            });
+            const bookingsForThisRoute = await getBookings(false, { routeId: foundRoute.id });
 
             const bookedSeats = bookingsForThisRoute
               .filter(b => b.status !== "Cancelled")
@@ -163,9 +159,7 @@ export default function BookRidePage() {
     // Check for existing booking
     const allBookings = await getBookings(false, { 
         clientEmail: passengerEmail,
-        destination: `${route.fromLocation} to ${route.toLocation}`,
-        date: format(routeDate, 'yyyy-MM-dd'),
-        time: route.departureTime
+        routeId: route.id
     });
 
     const foundExistingBooking = allBookings.find(b => b.status !== "Cancelled");
@@ -228,11 +222,7 @@ export default function BookRidePage() {
     const totalSeats = (Number(existingBooking.travelers) || 0) + seatsToAdd;
     
     // Recalculate available seats to be sure.
-    const allBookings = await getBookings(false, { 
-        destination: `${route.fromLocation} to ${route.toLocation}`,
-        date: format(new Date(route.travelDate), 'yyyy-MM-dd'),
-        time: route.departureTime
-    });
+    const allBookings = await getBookings(false, { routeId: route.id });
 
     const otherBookedSeats = allBookings
       .filter(b => b.id !== existingBooking.id && b.status !== "Cancelled")
