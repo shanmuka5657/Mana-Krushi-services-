@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
   useFormField,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
@@ -201,8 +202,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     defaultValues: {
         ownerName: profile.name || "",
         ownerEmail: profile.email || "",
-        driverName: profile.name || "",
-        driverMobile: (profile.mobile && profile.mobile !== '0000000000') ? profile.mobile : "",
+        driverName: "",
+        driverMobile: "",
         fromLocation: "",
         toLocation: "",
         travelDate: new Date(),
@@ -639,6 +640,9 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                               <Input placeholder="Enter driver's name" {...field} className="pl-10" />
                             </div>
                           </FormControl>
+                          <FormDescription>
+                            Enter the driver's name if it's different from the owner.
+                          </FormDescription>
                           <FormMessage />
                           </FormItem>
                       )}
@@ -1017,6 +1021,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     </div>
   );
 }
+
+    
 
     
 
