@@ -20,7 +20,9 @@ import {
     limit,
     updateDoc,
     getCountFromServer,
-    deleteDoc
+    deleteDoc,
+    endOfDay,
+    startOfDay,
 } from './firebase';
 
 
@@ -28,7 +30,7 @@ import { getDatabase, ref, set } from "firebase/database";
 import { getApp } from "firebase/app";
 import { getCurrentFirebaseUser } from './auth';
 import { perfTracker } from './perf-tracker';
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -219,14 +221,14 @@ const getNextRideForUserFromFirestore = async (email: string, role: 'passenger' 
     const routesCollection = collection(db, "routes");
     
     const now = new Date();
-    const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+    const startOfTodayValue = startOfDay(new Date());
     
     try {
         if (role === 'owner') {
             const q = query(
                 routesCollection,
                 where("ownerEmail", "==", email),
-                where("travelDate", ">=", startOfToday),
+                where("travelDate", ">=", startOfTodayValue),
                 orderBy("travelDate", "asc"),
             );
             const routeSnapshot = await getDocs(q);
@@ -334,12 +336,12 @@ const getRoutesFromFirestore = async (searchParams?: { from?: string, to?: strin
             q = query(q, where("isPromoted", "==", true), where("travelDate", ">=", new Date()), orderBy("travelDate", "asc"), limit(5));
         } else if (searchParams?.date) {
             const searchDate = new Date(searchParams.date);
-            const startOfDay = new Date(searchDate.setHours(0,0,0,0));
-            const endOfDay = new Date(searchDate.setHours(23,59,59,999));
-            q = query(q, where("travelDate", ">=", startOfDay), where("travelDate", "<=", endOfDay));
+            const startOfDayValue = startOfDay(searchDate);
+            const endOfDayValue = endOfDay(searchDate);
+            q = query(q, where("travelDate", ">=", startOfDayValue), where("travelDate", "<=", endOfDayValue));
         } else if (!searchParams?.ownerEmail) {
             // Only apply date filter for general queries, not when filtering by owner
-             q = query(q, where("travelDate", ">=", new Date(new Date().setHours(0,0,0,0))));
+             q = query(q, where("travelDate", ">=", startOfDay(new Date())));
         }
 
 
@@ -900,6 +902,36 @@ export const addRoute = async (route: Omit<Route, 'id'>): Promise<Route> => {
     return newRoute;
 }
 
+export const onTodaysRoutesUpdate = (ownerEmail: string, callback: (routes: Route[]) => void) => {
+    if (!db || !isBrowser) return () => {};
+
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
+    const q = query(
+        collection(db, "routes"),
+        where("ownerEmail", "==", ownerEmail),
+        where("travelDate", ">=", todayStart),
+        where("travelDate", "<=", todayEnd)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const routes = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                travelDate: data.travelDate.toDate(),
+            } as Route;
+        });
+        callback(routes);
+    }, (error) => {
+        console.error("Error listening to today's routes:", error);
+    });
+
+    return unsubscribe;
+};
+
 
 // --- Profile ---
 export const saveProfile = async (profile: Profile) => {
@@ -987,3 +1019,6 @@ export const getSetting = async (key: string): Promise<any> => {
     return await getSettingFromFirestore(key);
 }
 
+
+
+    

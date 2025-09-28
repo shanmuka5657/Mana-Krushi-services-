@@ -6,9 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { Clock, User, Phone, Car, MapPin, Users, Calendar as CalendarIcon, DollarSign, Wand2, Loader2, Shield, Sparkles, Star, X, Bike, Milestone, Eye, Edit, QrCode, MessagesSquare, MessageSquare, CheckCircle, LocateFixed, Hand, ArrowRight } from "lucide-react";
-import { format, addDays, parse, isToday } from "date-fns";
+import { format, addDays, parse, isToday, startOfDay, endOfDay } from "date-fns";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +42,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { getProfile, saveProfile, getCurrentUser, getRoutes, getBookings, getRouteViews, saveBookings } from "@/lib/storage";
+import { getProfile, saveProfile, getCurrentUser, getRoutes, getBookings, getRouteViews, saveBookings, onTodaysRoutesUpdate } from "@/lib/storage";
 import PaymentDialog from "./payment-dialog";
 import type { Profile, Route, Booking } from "@/lib/types";
 import { calculateDistance, getMapSuggestions, reverseGeocode } from "@/app/actions";
@@ -219,61 +220,55 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   const toLocation = useWatch({ control: form.control, name: 'toLocation' });
   const vehicleType = useWatch({ control: form.control, name: 'vehicleType' });
   
-  const fetchTodaysRoutesAndDetails = useCallback(async () => {
-    const ownerEmail = getCurrentUser();
-    if (!ownerEmail) {
-        setIsTodaysRoutesLoading(false);
-        return;
-    }
-    
-    setIsTodaysRoutesLoading(true);
+  const handleTodaysDataUpdate = useCallback(async (routes: Route[]) => {
+      setTodaysRoutes(routes);
 
-    const allRoutes = await getRoutes(false, { ownerEmail });
-    const todayRoutes = allRoutes.filter(route => isToday(new Date(route.travelDate)));
+      if (routes.length > 0) {
+          const ownerEmail = getCurrentUser();
+          if (!ownerEmail) return;
 
-    setTodaysRoutes(todayRoutes);
+          const newBookedSeatsMap = new Map<string, number>();
+          const newRouteViewsMap = new Map<string, number>();
 
-    if (todayRoutes.length > 0) {
-        const newBookedSeatsMap = new Map<string, number>();
-        const newRouteViewsMap = new Map<string, number>();
+          const allBookingsToday = await getBookings(true, { 
+              userEmail: ownerEmail, 
+              role: 'owner',
+              date: format(new Date(), 'yyyy-MM-dd') 
+          });
 
-        // Batch fetch bookings for all of today's routes
-        const allBookingsToday = await getBookings(true, { 
-            userEmail: ownerEmail, 
-            role: 'owner',
-            date: format(new Date(), 'yyyy-MM-dd') 
-        });
+          const viewPromises = routes.map(route => getRouteViews(route.id));
+          const viewsByRoute = await Promise.all(viewPromises);
 
-        // Batch fetch views
-        const viewPromises = todayRoutes.map(route => getRouteViews(route.id));
-        const viewsByRoute = await Promise.all(viewPromises);
+          routes.forEach((route, index) => {
+              const bookingsForThisRoute = allBookingsToday.filter(b => 
+                  b.destination === `${route.fromLocation} to ${route.toLocation}` &&
+                  format(new Date(b.departureDate), 'HH:mm') === route.departureTime
+              );
+              const bookedSeats = bookingsForThisRoute
+                  .filter(b => b.status !== 'Cancelled')
+                  .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+              
+              newBookedSeatsMap.set(route.id, bookedSeats);
+              newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
+          });
 
-        todayRoutes.forEach((route, index) => {
-            // Filter bookings client-side
-            const bookingsForThisRoute = allBookingsToday.filter(b => 
-                b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-                format(new Date(b.departureDate), 'HH:mm') === route.departureTime
-            );
+          setBookedSeatsMap(newBookedSeatsMap);
+          setRouteViewsMap(newRouteViewsMap);
+      }
+      setIsTodaysRoutesLoading(false);
+  }, []);
 
-            const bookedSeats = bookingsForThisRoute
-                .filter(b => b.status !== 'Cancelled')
-                .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-            
-            newBookedSeatsMap.set(route.id, bookedSeats);
-            newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
-        });
+  useEffect(() => {
+      const ownerEmail = getCurrentUser();
+      if (!ownerEmail) {
+          setIsTodaysRoutesLoading(false);
+          return;
+      }
+      
+      const unsubscribe = onTodaysRoutesUpdate(ownerEmail, handleTodaysDataUpdate);
 
-        setBookedSeatsMap(newBookedSeatsMap);
-        setRouteViewsMap(newRouteViewsMap);
-    }
-    setIsTodaysRoutesLoading(false);
-}, []);
-
-useEffect(() => {
-    fetchTodaysRoutesAndDetails();
-    const intervalId = setInterval(fetchTodaysRoutesAndDetails, 30000); 
-    return () => clearInterval(intervalId);
-}, [fetchTodaysRoutesAndDetails]);
+      return () => unsubscribe();
+  }, [handleTodaysDataUpdate]);
 
   
   useEffect(() => {
@@ -403,8 +398,7 @@ useEffect(() => {
       description: `Your route from ${data.fromLocation} to ${data.toLocation} has been added.`,
     });
     
-    // Refresh today's routes list
-    fetchTodaysRoutesAndDetails();
+    // The real-time listener will handle the update, no need to manually fetch.
   }
   
   const handlePaymentSuccess = async () => {
@@ -871,9 +865,11 @@ useEffect(() => {
               <CardTitle>Today's Routes</CardTitle>
               <CardDescription>A summary of your routes for today.</CardDescription>
             </div>
-            <Button variant="outline" onClick={() => router.push('/my-routes')}>
-              View All Routes <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+             <Link href="/my-routes">
+                <Button variant="outline">
+                    View All Routes <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </Link>
           </div>
         </CardHeader>
         
@@ -1021,5 +1017,7 @@ useEffect(() => {
     </div>
   );
 }
+
+    
 
     
