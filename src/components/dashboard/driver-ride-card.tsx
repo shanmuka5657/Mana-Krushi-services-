@@ -33,9 +33,7 @@ export default function DriverRideCard({ ride, passengers }: DriverRideCardProps
 
     useEffect(() => {
         const fetchRideDetails = async () => {
-            const rideDate = format(new Date(ride.departureDate), 'yyyy-MM-dd');
-            const rideTime = format(new Date(ride.departureDate), 'HH:mm');
-
+            if (!ride.routeId) return;
             // OPTIMIZED: Fetch only bookings relevant to this ride
             const relatedPassengers = await getBookings(true, {
                 routeId: ride.routeId

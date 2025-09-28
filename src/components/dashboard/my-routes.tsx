@@ -291,7 +291,7 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
     };
 
     const error = () => {
-        toast({ title: "Unable to retrieve your location.", description: "Please ensure location permissions are enabled.", variant: 'destructive' });
+        toast({ title: "Unable to retrieve your location.", description: "Please ensure location permissions are enabled.", variant: "destructive" });
     };
 
     toast({ title: "Getting your location..." });
