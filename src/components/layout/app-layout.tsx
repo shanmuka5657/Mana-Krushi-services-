@@ -58,42 +58,21 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
   const pathname = usePathname();
   const { toast } = useToast();
   const [profile, setProfile] = React.useState<Profile | null>(null);
-  const [authUser, setAuthUser] = React.useState<FirebaseUser | null>(null);
-  const [userName, setUserName] = React.useState("User");
-  const [userRole, setUserRole] = React.useState("Passenger");
-  const [userInitial, setUserInitial] = React.useState("U");
-  const [role, setRole] = React.useState('passenger');
+  const [isAuthLoading, setIsAuthLoading] = React.useState(true);
   const [logoUrl, setLogoUrl] = React.useState(placeholderImages.defaultLogo.url);
   const [perfCounts, setPerfCounts] = React.useState({ reads: 0, writes: 0 });
-  const [isAuthLoading, setIsAuthLoading] = React.useState(true);
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
-
-   React.useEffect(() => {
+  React.useEffect(() => {
     const unsubAuth = onAuthStateChanged(async (user) => {
         setIsAuthLoading(true);
-        setAuthUser(user);
-        
         const publicPages = ['/disclaimer', '/privacy-policy', '/login', '/signup', '/'];
         const isPublicPage = publicPages.includes(pathname);
 
         if (user) {
             const userProfile = await getProfile(user.email!);
             setProfile(userProfile);
-            const roleFromProfile = userProfile?.role || 'passenger';
-            setRole(roleFromProfile);
-
-            if (roleFromProfile === 'admin') {
-                setUserName('Admin');
-                setUserInitial('A');
-                setUserRole('Administrator');
-            } else {
-                const name = userProfile?.name || user.displayName || user.email?.split('@')[0] || 'User';
-                setUserName(name);
-                setUserInitial(name.charAt(0).toUpperCase());
-                setUserRole(roleFromProfile === 'owner' ? 'Owner' : 'Passenger');
-            }
         } else {
+            setProfile(null);
             if (!isPublicPage) {
                  router.push('/login');
             }
@@ -105,9 +84,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
     
     const fetchInitialLogo = async () => {
         const url = await getGlobalLogoUrlWithCache();
-        if (url) {
-            setLogoUrl(url);
-        }
+        if (url) setLogoUrl(url);
     };
     
     fetchInitialLogo();
@@ -127,6 +104,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
     await signOut();
     router.push('/login');
   };
+
+  const userName = profile?.name || 'User';
+  const userRole = profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Guest';
+  const userInitial = userName.charAt(0).toUpperCase();
+
   
   return (
         <div className="flex min-h-svh w-full flex-col bg-background">
@@ -141,54 +123,56 @@ function AppLayoutContent({ children }: { children: React.ReactNode | ((profile:
                     </h2>
                   </div>
                 </div>
-                <div className="flex flex-shrink-0 items-center justify-end gap-4">
-                   <div className="hidden sm:flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
-                      <div className="flex items-center gap-2" title="Database Reads (Session)">
-                          <ArrowDown className="h-4 w-4 text-green-500" />
-                          <span className="font-mono">{perfCounts.reads}</span>
-                      </div>
-                      <div className="h-4 w-px bg-border" />
-                       <div className="flex items-center gap-2" title="Database Writes (Session)">
-                          <ArrowUp className="h-4 w-4 text-orange-500" />
-                          <span className="font-mono">{perfCounts.writes}</span>
-                      </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <div className="flex items-center gap-3 cursor-pointer">
-                        <Avatar className="h-10 w-10 border">
-                           <AvatarImage src={profile?.selfieDataUrl} alt={userName} />
-                          <AvatarFallback>{userInitial}</AvatarFallback>
-                        </Avatar>
-                        <div className="hidden text-sm md:block">
-                          <div className="font-semibold">{userName}</div>
-                          <div className="text-muted-foreground">{userRole}</div>
+                {profile && (
+                    <div className="flex flex-shrink-0 items-center justify-end gap-4">
+                    <div className="hidden sm:flex items-center gap-4 border rounded-full px-3 py-1.5 bg-muted/50 text-sm">
+                        <div className="flex items-center gap-2" title="Database Reads (Session)">
+                            <ArrowDown className="h-4 w-4 text-green-500" />
+                            <span className="font-mono">{perfCounts.reads}</span>
                         </div>
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                       <DropdownMenuItem onClick={() => router.push(role === 'admin' ? '/admin/profile' : `/profile?role=${role}`)}>
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
+                        <div className="h-4 w-px bg-border" />
+                        <div className="flex items-center gap-2" title="Database Writes (Session)">
+                            <ArrowUp className="h-4 w-4 text-orange-500" />
+                            <span className="font-mono">{perfCounts.writes}</span>
+                        </div>
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <div className="flex items-center gap-3 cursor-pointer">
+                            <Avatar className="h-10 w-10 border">
+                            <AvatarImage src={profile?.selfieDataUrl} alt={userName} />
+                            <AvatarFallback>{userInitial}</AvatarFallback>
+                            </Avatar>
+                            <div className="hidden text-sm md:block">
+                            <div className="font-semibold">{userName}</div>
+                            <div className="text-muted-foreground">{userRole}</div>
+                            </div>
+                        </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => router.push(profile.role === 'admin' ? '/admin/profile' : `/profile?role=${profile.role}`)}>
+                            <User className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                            </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/bookings?role=${profile.role}`)}>
+                            <Plane className="mr-2 h-4 w-4" />
+                            <span>My Bookings</span>
+                            </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/settings?role=${profile.role}`)}>
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Settings</span>
                         </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => router.push(`/bookings?role=${role}`)}>
-                          <Plane className="mr-2 h-4 w-4" />
-                          <span>My Bookings</span>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
                         </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push(`/settings?role=${role}`)}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    </div>
+                )}
             </header>
 
             <div className="flex flex-1">

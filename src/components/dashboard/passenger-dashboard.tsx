@@ -206,11 +206,12 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
     }
 
     const userEmail = getCurrentUser();
-    if (!userEmail) {
+    if (!userEmail || !profile) {
         setIsTodaysBookingsLoading(false);
         return;
     }
     
+    // This now only runs once on mount because handleTodaysDataUpdate is stable
     const unsubscribe = onBookingsUpdate(handleTodaysDataUpdate, { userEmail, role: 'passenger' });
 
     return () => unsubscribe();

@@ -7,13 +7,28 @@ import OwnerDashboard from "@/components/dashboard/owner-dashboard";
 import PassengerDashboard from "@/components/dashboard/passenger-dashboard";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { OwnerFormValues } from "@/components/dashboard/owner-dashboard";
-import { addRoute, getCurrentUser } from "@/lib/storage";
+import { addRoute, getCurrentUser, getProfile } from "@/lib/storage";
 import type { Profile } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 
 
 function DashboardPage({ profile }: { profile: Profile | null }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // If profile is still loading, show a loader. AppLayout will pass it down when ready.
+  if (!profile) {
+      return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+      );
+  }
+
+  // Determine role from profile, but allow URL override for switching views
+  const roleFromUrl = searchParams.get('role');
+  const role = roleFromUrl || profile.role || 'passenger';
+
 
   const handleAddRoute = async (newRouteData: OwnerFormValues & { isPromoted?: boolean, distance?: number }) => {
     const ownerEmail = getCurrentUser();
@@ -37,17 +52,9 @@ function DashboardPage({ profile }: { profile: Profile | null }) {
     }
   };
 
-  if (!profile) {
-      return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-      );
-  }
-
   return (
       <>
-      {profile.role === 'owner' ? (
+      {role === 'owner' ? (
         <OwnerDashboard onRouteAdded={handleAddRoute} onSwitchTab={handleSwitchTab} profile={profile} />
       ) : (
         <PassengerDashboard onSwitchTab={handleSwitchTab} profile={profile} />
