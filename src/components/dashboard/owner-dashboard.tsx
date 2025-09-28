@@ -57,8 +57,6 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 const ownerFormSchema = z.object({
   ownerName: z.string().min(2, "Owner name is required."),
   ownerEmail: z.string().email(),
-  driverName: z.string().min(2, "Driver name is required."),
-  driverMobile: z.string().regex(/^\d{10}$/, "Enter a valid 10-digit mobile number."),
   fromLocation: z.string().min(2, "Starting location is required.").transform(val => val.trim()),
   toLocation: z.string().min(2, "Destination is required.").transform(val => val.trim()),
   travelDate: z.date({
@@ -202,8 +200,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     defaultValues: {
         ownerName: profile.name || "",
         ownerEmail: profile.email || "",
-        driverName: "",
-        driverMobile: "",
         fromLocation: "",
         toLocation: "",
         travelDate: new Date(),
@@ -370,11 +366,12 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         ...data,
         distance: distanceResult.distance,
         ownerEmail: ownerEmail,
+        ownerName: profile.name || "",
         vehicleType: data.vehicleType, 
         vehicleNumber: profile.vehicleNumber,
     };
 
-    setRouteDataToSubmit(dataWithVehicleInfo);
+    setRouteDataToSubmit(dataWithVehicleInfo as any);
     setShowPromotionDialog(true);
   }
 
@@ -435,8 +432,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
   }
 
   const handleSendSummaryToDriver = () => {
-    if (!selectedRouteForView || !selectedRouteForView.driverMobile) {
-      toast({ title: "Driver mobile not found.", variant: "destructive" });
+    if (!selectedRouteForView || !profile.mobile) {
+      toast({ title: "Owner mobile not found.", variant: "destructive" });
       return;
     }
     if (bookingsForRoute.length === 0) {
@@ -465,7 +462,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     const totalPassengers = confirmedBookings.reduce((sum, b) => sum + (Number(b.travelers) || 1), 0);
     summary += `*Total Confirmed Passengers:* ${totalPassengers}`;
     
-    const whatsappUrl = `https://wa.me/91${selectedRouteForView.driverMobile}?text=${encodeURIComponent(summary)}`;
+    const whatsappUrl = `https://wa.me/91${profile.mobile}?text=${encodeURIComponent(summary)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -561,7 +558,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                                   <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <div>
-                                  <div className="font-semibold text-sm">{routeDataToSubmit?.driverName}</div>
+                                  <div className="font-semibold text-sm">{routeDataToSubmit?.ownerName}</div>
                                   <div className="flex items-center gap-1">
                                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                       <span className="text-xs text-muted-foreground">{routeDataToSubmit?.rating.toFixed(1)}</span>
@@ -610,62 +607,6 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           <CardContent>
           <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="hidden md:block space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="ownerName"
-                      render={({ field }) => (
-                          <FormItem>
-                          <FormLabel>Owner Name</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="Enter owner's name" {...field} className="pl-10" disabled />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                          </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="driverName"
-                      render={({ field }) => (
-                          <FormItem>
-                          <FormLabel>Driver Name</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="Enter driver's name" {...field} className="pl-10" />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Enter the driver's name if it's different from the owner.
-                          </FormDescription>
-                          <FormMessage />
-                          </FormItem>
-                      )}
-                    />
-                </div>
-
-                <FormField
-                    control={form.control}
-                    name="driverMobile"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Driver Mobile</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input type="tel" placeholder="Enter driver's mobile" {...field} className="pl-10" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -947,7 +888,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                                         <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <div className="font-semibold text-sm">{route.driverName}</div>
+                                        <div className="font-semibold text-sm">{route.ownerName}</div>
                                         <div className="flex items-center gap-1">
                                             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                             <span className="text-xs text-muted-foreground">{(route.rating || 0).toFixed(1)}</span>
@@ -1012,7 +953,7 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
                     </Button>
                     <Button variant="secondary" onClick={handleSendSummaryToDriver}>
                         <Car className="mr-2 h-4 w-4" />
-                        Send Summary to Driver
+                        Send Summary to Owner
                     </Button>
                 </DialogFooter>
             </DialogContent>

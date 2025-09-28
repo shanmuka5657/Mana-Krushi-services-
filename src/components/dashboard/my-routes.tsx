@@ -220,15 +220,15 @@ const MyRoutes = ({ routes: initialRoutes, bookingIdFromUrl }: MyRoutesProps) =>
     setBookingUrl(url);
 
     // Fetch profile only if needed
-    let driverProfile = getProfileForUser(route.ownerEmail);
-    if (!driverProfile) {
-        driverProfile = await getProfile(route.ownerEmail);
-        if (driverProfile) {
-            setAllProfiles(prev => new Map(prev).set(driverProfile!.email, driverProfile!));
+    let ownerProfile = getProfileForUser(route.ownerEmail);
+    if (!ownerProfile) {
+        ownerProfile = await getProfile(route.ownerEmail);
+        if (ownerProfile) {
+            setAllProfiles(prev => new Map(prev).set(ownerProfile!.email, ownerProfile!));
         }
     }
     
-    setShareImageUrl(driverProfile?.selfieDataUrl);
+    setShareImageUrl(ownerProfile?.selfieDataUrl);
     setSelectedRoute(route);
     setIsShareDialogOpen(true);
   };
@@ -363,9 +363,9 @@ ${booking.driverName}
     window.open(whatsappUrl, '_blank');
   };
   
-  const handleSendSummaryToDriver = () => {
-    if (!selectedRoute || !selectedRoute.driverMobile) {
-      toast({ title: "Driver mobile not found.", variant: "destructive" });
+  const handleSendSummaryToOwner = () => {
+    if (!selectedRoute || !selectedRoute.ownerEmail) {
+      toast({ title: "Owner mobile not found.", variant: "destructive" });
       return;
     }
     if (bookingsForRoute.length === 0) {
@@ -394,8 +394,14 @@ ${booking.driverName}
     const totalPassengers = confirmedBookings.reduce((sum, b) => sum + (Number(b.travelers) || 1), 0);
     summary += `*Total Confirmed Passengers:* ${totalPassengers}`;
     
-    const whatsappUrl = `https://wa.me/91${selectedRoute.driverMobile}?text=${encodeURIComponent(summary)}`;
-    window.open(whatsappUrl, '_blank');
+    const ownerProfile = getProfileForUser(selectedRoute.ownerEmail);
+
+    if (ownerProfile?.mobile) {
+        const whatsappUrl = `https://wa.me/91${ownerProfile.mobile}?text=${encodeURIComponent(summary)}`;
+        window.open(whatsappUrl, '_blank');
+    } else {
+        toast({ title: "Owner mobile not found in profile.", variant: "destructive"});
+    }
   };
 
   const handleGoToChat = () => {
@@ -639,9 +645,9 @@ ${booking.driverName}
                         <MessagesSquare className="mr-2 h-4 w-4" />
                         Group Chat
                     </Button>
-                    <Button variant="secondary" onClick={handleSendSummaryToDriver}>
+                    <Button variant="secondary" onClick={handleSendSummaryToOwner}>
                         <Car className="mr-2 h-4 w-4" />
-                        Send Summary to Driver
+                        Send Summary to Owner
                     </Button>
                 </DialogFooter>
             </DialogContent>

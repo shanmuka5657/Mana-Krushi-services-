@@ -93,7 +93,7 @@ function GlobalSearchResultsPage() {
        }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
      
-    const getDriverProfile = (ownerEmail?: string): Profile | undefined => {
+    const getOwnerProfile = (ownerEmail?: string): Profile | undefined => {
         if (!ownerEmail) return undefined;
         return allProfiles.find(p => p.email === ownerEmail);
     }
@@ -101,7 +101,7 @@ function GlobalSearchResultsPage() {
     const filteredRoutes = allRoutes.filter(route => {
         const searchTerm = query.toLowerCase();
         return (
-            route.driverName.toLowerCase().includes(searchTerm) ||
+            route.ownerName.toLowerCase().includes(searchTerm) ||
             (route.vehicleNumber && route.vehicleNumber.toLowerCase().includes(searchTerm)) ||
             route.fromLocation.toLowerCase().includes(searchTerm) ||
             route.toLocation.toLowerCase().includes(searchTerm)
@@ -133,7 +133,7 @@ function GlobalSearchResultsPage() {
                         {filteredRoutes.map((route) => {
                             const bookedSeats = getBookedSeats(route);
                             const availableSeats = route.availableSeats - bookedSeats;
-                            const driverProfile = getDriverProfile(route.ownerEmail);
+                            const ownerProfile = getOwnerProfile(route.ownerEmail);
                             
                             const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
                             const departureDateTime = new Date(route.travelDate);
@@ -182,13 +182,13 @@ function GlobalSearchResultsPage() {
                                     <div className="flex items-center gap-3">
                                         <Car className="text-muted-foreground" />
                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                            <AvatarImage src={ownerProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.ownerName.replace(' ', '+')}&background=random`} />
+                                            <AvatarFallback>{route.ownerName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>
                                             <div className="font-semibold text-sm flex items-center gap-2">
-                                                {route.driverName}
-                                                 {driverProfile?.mobileVerified && (
+                                                {route.ownerName}
+                                                 {ownerProfile?.mobileVerified && (
                                                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 p-1 h-4">
                                                         <CheckCircle className="h-3 w-3" />
                                                     </Badge>

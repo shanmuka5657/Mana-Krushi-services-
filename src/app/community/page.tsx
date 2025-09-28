@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
@@ -40,7 +41,7 @@ function BikerRidesPage() {
     
     const [allRoutes, setAllRoutes] = useState<Route[]>([]);
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
-    const [driverProfiles, setDriverProfiles] = useState<Map<string, Profile>>(new Map());
+    const [ownerProfiles, setOwnerProfiles] = useState<Map<string, Profile>>(new Map());
     const [isLoaded, setIsLoaded] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     
@@ -68,16 +69,16 @@ function BikerRidesPage() {
                 const allRelevantBookings = bookingsByRoute.flat();
                 setAllBookings(allRelevantBookings);
                 
-                // Fetch profiles only for the drivers found
-                const driverEmails = new Set(bikerRoutes.map(r => r.ownerEmail));
-                const profilePromises = Array.from(driverEmails).map(email => getProfile(email));
+                // Fetch profiles only for the owners found
+                const ownerEmails = new Set(bikerRoutes.map(r => r.ownerEmail));
+                const profilePromises = Array.from(ownerEmails).map(email => getProfile(email));
                 const profiles = await Promise.all(profilePromises);
 
                 const profilesMap = new Map<string, Profile>();
                 profiles.forEach(p => {
                     if (p) profilesMap.set(p.email, p);
                 });
-                setDriverProfiles(profilesMap);
+                setOwnerProfiles(profilesMap);
             }
             
             bikerRoutes.sort((a, b) => new Date(a.travelDate).getTime() - new Date(b.travelDate).getTime());
@@ -106,9 +107,9 @@ function BikerRidesPage() {
        }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
      
-    const getDriverProfile = (ownerEmail?: string): Profile | undefined => {
+    const getOwnerProfile = (ownerEmail?: string): Profile | undefined => {
         if (!ownerEmail) return undefined;
-        return driverProfiles.get(ownerEmail);
+        return ownerProfiles.get(ownerEmail);
     }
     
     const availableBikerRoutes = allRoutes.filter(route => {
@@ -119,7 +120,7 @@ function BikerRidesPage() {
         const matchesSearch = searchTerm === '' ||
             route.fromLocation.toLowerCase().includes(searchTerm) ||
             route.toLocation.toLowerCase().includes(searchTerm) ||
-            route.driverName.toLowerCase().includes(searchTerm);
+            route.ownerName.toLowerCase().includes(searchTerm);
 
         return availableSeats > 0 && matchesSearch;
     });
@@ -161,7 +162,7 @@ function BikerRidesPage() {
                         {availableBikerRoutes.map((route) => {
                             const bookedSeats = getBookedSeats(route);
                             const availableSeats = route.availableSeats - bookedSeats;
-                            const driverProfile = getDriverProfile(route.ownerEmail);
+                            const ownerProfile = getOwnerProfile(route.ownerEmail);
                             
                             const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
                             const departureDateTime = new Date(route.travelDate);
@@ -210,13 +211,13 @@ function BikerRidesPage() {
                                     <div className="flex items-center gap-3">
                                         <Bike className="text-muted-foreground h-5 w-5" />
                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                            <AvatarImage src={ownerProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.ownerName.replace(' ', '+')}&background=random`} />
+                                            <AvatarFallback>{route.ownerName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>
                                             <div className="font-semibold text-sm flex items-center gap-2">
-                                                {route.driverName}
-                                                {driverProfile?.mobileVerified && (
+                                                {route.ownerName}
+                                                {ownerProfile?.mobileVerified && (
                                                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 p-1 h-4">
                                                         <CheckCircle className="h-3 w-3" />
                                                     </Badge>

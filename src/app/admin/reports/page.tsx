@@ -59,7 +59,7 @@ function AdminReportsPage() {
                                     <User className="h-3 w-3" />
                                     <span>{report.client}</span>
                                 </div>
-                                 <div className="flex items-center gap-2" title="Driver">
+                                 <div className="flex items-center gap-2" title="Owner">
                                     <Car className="h-3 w-3" />
                                     <span>{report.driverName}</span>
                                 </div>

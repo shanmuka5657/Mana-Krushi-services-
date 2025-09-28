@@ -42,7 +42,7 @@ export default function BookRidePage() {
   const params = useParams();
   const { toast } = useToast();
   const [route, setRoute] = useState<Route | null>(null);
-  const [driverProfile, setDriverProfile] = useState<Profile | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<Profile | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [isBooking, setIsBooking] = useState(false);
@@ -77,7 +77,7 @@ export default function BookRidePage() {
         if (foundRoute) {
             setRoute(foundRoute);
             const profile = await getProfile(foundRoute.ownerEmail);
-            if(profile) setDriverProfile(profile);
+            if(profile) setOwnerProfile(profile);
 
             setMessage(`Hello, I've just booked your ride! I'd be glad to travel with you. Can I get more information?`);
             
@@ -116,7 +116,7 @@ export default function BookRidePage() {
   }
 
   const handleBooking = async () => {
-    if (!route || isBooking || isPast) return;
+    if (!route || isBooking || isPast || !ownerProfile) return;
     setIsBooking(true);
 
     const passengerEmail = getCurrentUser();
@@ -197,9 +197,9 @@ export default function BookRidePage() {
         status: "Confirmed",
         travelers: String(numberOfSeats),
         mobile: passengerProfile.mobile,
-        driverName: route.driverName,
+        driverName: route.ownerName,
         driverEmail: route.ownerEmail,
-        driverMobile: route.driverMobile,
+        driverMobile: ownerProfile.mobile,
         vehicleType: route.vehicleType,
         vehicleNumber: route.vehicleNumber,
         distance: route.distance,
@@ -213,7 +213,7 @@ export default function BookRidePage() {
 
     toast({
         title: "Booking Confirmed!",
-        description: `Your ride for ${numberOfSeats} seat(s) has been confirmed. You can contact the driver via WhatsApp.`,
+        description: `Your ride for ${numberOfSeats} seat(s) has been confirmed. You can contact the owner via WhatsApp.`,
     });
     
     setNewlyBooked(newBooking as Booking);
@@ -278,7 +278,7 @@ export default function BookRidePage() {
     setExistingBooking(null);
   };
   
-  const handleNotifyDriver = () => {
+  const handleNotifyOwner = () => {
     if (!newlyBooked || !newlyBooked.driverMobile) return;
         
     const bookingDate = new Date(newlyBooked.departureDate);
@@ -339,9 +339,9 @@ Mana Krushi
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle>{format(new Date(route.travelDate), 'EEE dd MMM')}</CardTitle>
-                         {driverProfile?.mobileVerified && (
+                         {ownerProfile?.mobileVerified && (
                             <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                <CheckCircle className="h-3 w-3 mr-1" /> Verified Driver
+                                <CheckCircle className="h-3 w-3 mr-1" /> Verified Owner
                             </Badge>
                         )}
                     </div>
@@ -405,7 +405,7 @@ Mana Krushi
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Send a message to {route.driverName}</CardTitle>
+                    <CardTitle>Send a message to {route.ownerName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Textarea 
@@ -465,14 +465,14 @@ Mana Krushi
                 <AlertDialogHeader>
                     <AlertDialogTitle>Booking Confirmed!</AlertDialogTitle>
                     <AlertDialogDescription>
-                    Your ride is confirmed. You can now notify the driver via WhatsApp to share your details.
+                    Your ride is confirmed. You can now notify the owner via WhatsApp to share your details.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={() => router.push('/dashboard?role=passenger')}>Skip</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleNotifyDriver} className="bg-green-500 hover:bg-green-600">
+                    <AlertDialogAction onClick={handleNotifyOwner} className="bg-green-500 hover:bg-green-600">
                         <MessageSquare className="mr-2 h-4 w-4" />
-                        Notify Driver
+                        Notify Owner
                     </AlertDialogAction>
                 </AlertDialogFooter>
                 </AlertDialogContent>

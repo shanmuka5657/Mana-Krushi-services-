@@ -131,7 +131,7 @@ function GamesPageContent() {
         return () => clearInterval(intervalId);
     }, [latestBooking, driverRide]);
 
-    const handleCallDriver = () => {
+    const handleCallOwner = () => {
         if (latestBooking?.driverMobile) {
             window.location.href = `tel:${latestBooking.driverMobile}`;
         }
@@ -148,7 +148,7 @@ function GamesPageContent() {
             // OPTIMIZED: Update only the specific booking
             await updateBookingLocation(latestBooking.id, { passengerLatitude: latitude, passengerLongitude: longitude });
 
-            if(isFirstShare) toast({ title: "Location Sharing Active!", description: "Your location will now be shared with the driver periodically." });
+            if(isFirstShare) toast({ title: "Location Sharing Active!", description: "Your location will now be shared with the owner periodically." });
         };
 
         const error = () => {
@@ -272,10 +272,10 @@ ${latestBooking.client}
                                     </div>
                                 </CardContent>
                                 <CardFooter className="grid grid-cols-5 gap-2">
-                                    <Button onClick={handleCallDriver} className="w-full" size="icon" aria-label="Call Driver">
+                                    <Button onClick={handleCallOwner} className="w-full" size="icon" aria-label="Call Owner">
                                         <Phone className="h-4 w-4" />
                                     </Button>
-                                    <Button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600" size="icon" aria-label="WhatsApp Driver">
+                                    <Button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600" size="icon" aria-label="WhatsApp Owner">
                                         <MessageSquare className="h-4 w-4" />
                                     </Button>
                                     <Button onClick={() => handleShareLocation(true)} className="w-full" variant="outline" size="icon" aria-label="Share Location">

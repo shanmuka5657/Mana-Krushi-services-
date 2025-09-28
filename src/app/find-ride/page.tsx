@@ -47,7 +47,7 @@ function FindRideResultsPage() {
     
     const [availableOwners, setAvailableOwners] = useState<Route[]>([]);
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
-    const [driverProfiles, setDriverProfiles] = useState<Map<string, Profile>>(new Map());
+    const [ownerProfiles, setOwnerProfiles] = useState<Map<string, Profile>>(new Map());
     const [isLoaded, setIsLoaded] = useState(false);
     
     const from = searchParams.get('from') || '';
@@ -115,15 +115,15 @@ function FindRideResultsPage() {
                 const allRelevantBookings = await getBookings(true);
                 setAllBookings(allRelevantBookings);
                 
-                const driverEmails = new Set(routes.map(r => r.ownerEmail));
-                const profilePromises = Array.from(driverEmails).map(email => getProfile(email));
+                const ownerEmails = new Set(routes.map(r => r.ownerEmail));
+                const profilePromises = Array.from(ownerEmails).map(email => getProfile(email));
                 const profiles = await Promise.all(profilePromises);
 
                 const profilesMap = new Map<string, Profile>();
                 profiles.forEach(p => {
                     if (p) profilesMap.set(p.email, p);
                 });
-                setDriverProfiles(profilesMap);
+                setOwnerProfiles(profilesMap);
             }
 
             routes.sort((a, b) => {
@@ -159,9 +159,9 @@ function FindRideResultsPage() {
        }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
      
-    const getDriverProfile = (ownerEmail?: string): Profile | undefined => {
+    const getOwnerProfile = (ownerEmail?: string): Profile | undefined => {
         if (!ownerEmail) return undefined;
-        return driverProfiles.get(ownerEmail);
+        return ownerProfiles.get(ownerEmail);
     }
     
     const finalAvailableOwners = availableOwners.filter(route => {
@@ -200,7 +200,7 @@ function FindRideResultsPage() {
                         {finalAvailableOwners.map((route) => {
                             const bookedSeats = getBookedSeats(route);
                             const availableSeats = route.availableSeats - bookedSeats;
-                            const driverProfile = getDriverProfile(route.ownerEmail);
+                            const ownerProfile = getOwnerProfile(route.ownerEmail);
                             
                             const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
                             const departureDateTime = new Date(route.travelDate);
@@ -262,13 +262,13 @@ function FindRideResultsPage() {
                                             <Car className="text-muted-foreground h-5 w-5" />
                                         )}
                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src={driverProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.driverName.replace(' ', '+')}&background=random`} />
-                                            <AvatarFallback>{route.driverName.charAt(0)}</AvatarFallback>
+                                            <AvatarImage src={ownerProfile?.selfieDataUrl || `https://ui-avatars.com/api/?name=${route.ownerName.replace(' ', '+')}&background=random`} />
+                                            <AvatarFallback>{route.ownerName.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>
                                             <div className="font-semibold text-sm flex items-center gap-2">
-                                                {route.driverName}
-                                                {driverProfile?.mobileVerified && (
+                                                {route.ownerName}
+                                                {ownerProfile?.mobileVerified && (
                                                     <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 p-1 h-4">
                                                         <CheckCircle className="h-3 w-3" />
                                                     </Badge>
@@ -325,6 +325,7 @@ export default function FindRidePage() {
     
 
     
+
 
 
 

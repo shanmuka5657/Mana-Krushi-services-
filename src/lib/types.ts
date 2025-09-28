@@ -36,8 +36,6 @@ export type Route = {
   id: string;
   ownerName: string;
   ownerEmail: string;
-  driverName: string;
-  driverMobile: string;
   fromLocation: string;
   toLocation: string;
   distance?: number;
@@ -139,6 +137,7 @@ export const TollCalculatorOutputSchema = z.object({
     .describe('The estimated number of toll plazas along the route.'),
 });
 export type TollCalculatorOutput = z.infer<typeof TollCalculatorOutputSchema>;
+
 
 
 
