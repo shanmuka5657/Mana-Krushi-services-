@@ -120,7 +120,7 @@ const getBookingsFromFirestore = async (searchParams?: { destination?: string, d
 
         // Server-side filtering by user if possible
         if (searchParams?.userEmail && searchParams.role && searchParams.role !== 'admin') {
-            const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
+            const fieldToQuery = searchParams.role === 'owner' ? 'ownerEmail' : 'clientEmail';
             q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
         }
 
@@ -180,7 +180,7 @@ const onBookingsUpdateFromFirestore = (callback: (bookings: Booking[]) => void, 
     
     // Apply user-specific filters if provided. This is the simplest query we can make.
     if (searchParams?.userEmail && searchParams?.role && searchParams.role !== 'admin') {
-        const fieldToQuery = searchParams.role === 'owner' ? 'driverEmail' : 'clientEmail';
+        const fieldToQuery = searchParams.role === 'owner' ? 'ownerEmail' : 'clientEmail';
         q = query(q, where(fieldToQuery, "==", searchParams.userEmail));
     }
 
@@ -271,7 +271,7 @@ const getNextRideForUserFromFirestore = async (email: string, role: 'passenger' 
                 routeId: nextRoute.id, // Important for chat
                 destination: `${nextRoute.fromLocation} to ${nextRoute.toLocation}`,
                 departureDate: departureDateTime,
-                driverName: nextRoute.driverName,
+                ownerName: nextRoute.ownerName,
                 vehicleNumber: nextRoute.vehicleNumber,
                 status: 'Confirmed', 
             } as Booking;

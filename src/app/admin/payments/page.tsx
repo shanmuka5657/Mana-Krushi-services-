@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -35,7 +36,7 @@ function AdminPaymentsPage() {
         const dataToExport = payments.map(p => ({
             'Booking ID': p.bookingCode || p.id,
             'Client': p.client,
-            'Owner': p.driverName,
+            'Owner': p.ownerName,
             'Date': format(new Date(p.departureDate), 'PPP'),
             'Amount': p.amount.toFixed(2),
             'Method': p.paymentMethod,
@@ -77,7 +78,7 @@ function AdminPaymentsPage() {
                                 <TableRow key={payment.id}>
                                     <TableCell className="font-mono">{payment.bookingCode || payment.id}</TableCell>
                                     <TableCell className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" />{payment.client}</TableCell>
-                                    <TableCell><Car className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.driverName}</TableCell>
+                                    <TableCell><Car className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.ownerName}</TableCell>
                                     <TableCell>{format(new Date(payment.departureDate), 'PPP')}</TableCell>
                                     <TableCell><IndianRupee className="h-4 w-4 mr-2 inline text-muted-foreground" />{payment.amount.toFixed(2)}</TableCell>
                                     <TableCell>

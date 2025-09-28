@@ -132,8 +132,8 @@ function GamesPageContent() {
     }, [latestBooking, driverRide]);
 
     const handleCallOwner = () => {
-        if (latestBooking?.driverMobile) {
-            window.location.href = `tel:${latestBooking.driverMobile}`;
+        if (latestBooking?.ownerMobile) {
+            window.location.href = `tel:${latestBooking.ownerMobile}`;
         }
     };
     
@@ -175,14 +175,14 @@ function GamesPageContent() {
 
 
     const handleWhatsApp = () => {
-        if (!latestBooking || !latestBooking.driverMobile) return;
+        if (!latestBooking || !latestBooking.ownerMobile) return;
         
         const bookingDate = new Date(latestBooking.departureDate);
         const formattedDate = format(bookingDate, 'dd MMM, yyyy');
         const formattedTime = format(bookingDate, 'p');
 
         const message = `
-Hello ${latestBooking.driverName},
+Hello ${latestBooking.ownerName},
 
 This message is regarding my upcoming ride booking.
 
@@ -199,7 +199,7 @@ Thank you,
 ${latestBooking.client}
         `.trim().replace(/^\s+/gm, '');
         
-        const whatsappUrl = `https://wa.me/${latestBooking.driverMobile}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/${latestBooking.ownerMobile}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     }
     
@@ -264,10 +264,10 @@ ${latestBooking.client}
                                         </div>
                                          <div className="flex items-center gap-2 col-span-2">
                                             <User className="h-4 w-4" />
-                                            <span>{latestBooking.driverName}</span>
+                                            <span>{latestBooking.ownerName}</span>
                                             <span className="text-gray-400">•</span>
                                             <Phone className="h-4 w-4" />
-                                            <span>{latestBooking.driverMobile}</span>
+                                            <span>{latestBooking.ownerMobile}</span>
                                         </div>
                                     </div>
                                 </CardContent>

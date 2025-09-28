@@ -56,7 +56,7 @@ interface RecentBookingsProps {
 const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookingProp }: RecentBookingsProps) => {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [selectedBookingDetails, setSelectedBookingDetails] = useState<{route: Route | undefined, clientProfile: Profile | undefined, driverProfile: Profile | undefined}>({ route: undefined, clientProfile: undefined, driverProfile: undefined });
+  const [selectedBookingDetails, setSelectedBookingDetails] = useState<{route: Route | undefined, clientProfile: Profile | undefined, ownerProfile: Profile | undefined}>({ route: undefined, clientProfile: undefined, ownerProfile: undefined });
   const [reportText, setReportText] = useState("");
   const [cancellationReason, setCancellationReason] = useState("");
   const { toast } = useToast();
@@ -141,17 +141,17 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
     
     // Fetch details on demand
     const bookingDateStr = format(new Date(booking.departureDate), 'yyyy-MM-dd');
-    const [routeData, clientProfile, driverProfile] = await Promise.all([
+    const [routeData, clientProfile, ownerProfile] = await Promise.all([
         getRoutes(true, { date: bookingDateStr, from: booking.destination.split(' to ')[0], to: booking.destination.split(' to ')[1] }),
         getProfile(booking.clientEmail),
-        getProfile(booking.driverEmail),
+        getProfile(booking.ownerEmail),
     ]);
     
     // Find the specific route that matches the booking's departure time
     const bookingTime = format(new Date(booking.departureDate), 'HH:mm');
     const route = routeData.find(r => r.departureTime === bookingTime);
 
-    setSelectedBookingDetails({ route, clientProfile, driverProfile });
+    setSelectedBookingDetails({ route, clientProfile, ownerProfile });
     setIsViewOpen(true);
   };
   
@@ -195,8 +195,8 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
     });
     
     toast({
-        title: "Driver Notified (Simulated)",
-        description: `The driver has been notified of your cancellation.`
+        title: "Owner Notified (Simulated)",
+        description: `The owner has been notified of your cancellation.`
     })
     
     setIsCancelOpen(false);
@@ -339,7 +339,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                  <DialogHeader>
                     <DialogTitle>Details for booking {selectedBooking.bookingCode || selectedBooking.id}</DialogTitle>
                     <DialogDescription>
-                    Passenger, driver and vehicle information for your trip.
+                    Passenger, owner and vehicle information for your trip.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4 overflow-y-auto pr-2">
@@ -388,20 +388,20 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                         <div className="flex items-start gap-3">
                             <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                             <div>
-                                <p className="text-sm text-muted-foreground">Driver</p>
-                                <p className="font-medium">{selectedBooking.driverName || 'N/A'}</p>
+                                <p className="text-sm text-muted-foreground">Owner</p>
+                                <p className="font-medium">{selectedBooking.ownerName || 'N/A'}</p>
                             </div>
                         </div>
                          <div className="flex items-center justify-between">
                             <div className="flex items-start gap-3">
                                 <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Driver Mobile</p>
-                                    <p className="font-medium">{maskPhoneNumber(selectedBooking.driverMobile)}</p>
+                                    <p className="text-sm text-muted-foreground">Owner Mobile</p>
+                                    <p className="font-medium">{maskPhoneNumber(selectedBooking.ownerMobile)}</p>
                                 </div>
                             </div>
-                            {selectedBooking.driverMobile && userRole === 'admin' && (
-                                <a href={`tel:${selectedBooking.driverMobile}`}>
+                            {selectedBooking.ownerMobile && userRole === 'admin' && (
+                                <a href={`tel:${selectedBooking.ownerMobile}`}>
                                     <Button variant="outline">
                                         <Phone className="mr-2 h-4 w-4" />
                                         Call
@@ -469,7 +469,7 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                 </DialogHeader>
                 <div className="py-4">
                     <Textarea 
-                        placeholder="Describe the issue... (e.g., driver behavior, vehicle condition, late arrival)"
+                        placeholder="Describe the issue... (e.g., owner behavior, vehicle condition, late arrival)"
                         value={reportText}
                         onChange={(e) => setReportText(e.target.value)}
                         rows={5}

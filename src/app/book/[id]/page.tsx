@@ -197,9 +197,9 @@ export default function BookRidePage() {
         status: "Confirmed",
         travelers: String(numberOfSeats),
         mobile: passengerProfile.mobile,
-        driverName: route.ownerName,
-        driverEmail: route.ownerEmail,
-        driverMobile: ownerProfile.mobile,
+        ownerName: route.ownerName,
+        ownerEmail: route.ownerEmail,
+        ownerMobile: ownerProfile.mobile,
         vehicleType: route.vehicleType,
         vehicleNumber: route.vehicleNumber,
         distance: route.distance,
@@ -279,14 +279,14 @@ export default function BookRidePage() {
   };
   
   const handleNotifyOwner = () => {
-    if (!newlyBooked || !newlyBooked.driverMobile) return;
+    if (!newlyBooked || !newlyBooked.ownerMobile) return;
         
     const bookingDate = new Date(newlyBooked.departureDate);
     const formattedDate = format(bookingDate, 'dd MMM, yyyy');
     const formattedTime = format(bookingDate, 'p');
 
     const message = `
-Hello ${newlyBooked.driverName},
+Hello ${newlyBooked.ownerName},
 
 You have a new confirmed booking from Mana Krushi.
 
@@ -304,7 +304,7 @@ Thank you,
 Mana Krushi
     `.trim().replace(/^\s+/gm, '');
     
-    const whatsappUrl = `https://wa.me/91${newlyBooked.driverMobile}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/91${newlyBooked.ownerMobile}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     router.push('/dashboard?role=passenger');
   }
