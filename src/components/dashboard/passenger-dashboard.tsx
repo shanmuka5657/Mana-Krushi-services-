@@ -328,12 +328,6 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
                 title="My Bookings"
                 description="View and manage your upcoming rides."
             />
-            <NavLink 
-                href="/community"
-                icon={Users}
-                title="Community Hub"
-                description="Find rides with bikers in your community."
-            />
         </div>
 
     </div>

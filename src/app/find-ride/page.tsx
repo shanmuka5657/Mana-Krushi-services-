@@ -96,10 +96,6 @@ function FindRideResultsPage() {
             const toSearchTerms = getSearchTerms(to);
             
             const routes = allRoutesData.filter(route => {
-                if (route.vehicleType !== 'Car') {
-                    return false;
-                }
-
                 const routeDate = new Date(route.travelDate);
                 const routeFromLower = route.fromLocation.trim().toLowerCase();
                 const routeToLower = route.toLocation.trim().toLowerCase();
@@ -321,13 +317,3 @@ export default function FindRidePage() {
         </Suspense>
     )
 }
-
-    
-
-    
-
-
-
-
-
-
