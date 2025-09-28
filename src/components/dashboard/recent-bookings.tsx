@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -400,11 +399,10 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                                     <p className="font-medium">{maskPhoneNumber(selectedBooking.ownerMobile)}</p>
                                 </div>
                             </div>
-                            {selectedBooking.ownerMobile && userRole === 'admin' && (
+                            {userRole === 'admin' && selectedBooking.ownerMobile && (
                                 <a href={`tel:${selectedBooking.ownerMobile}`}>
-                                    <Button variant="outline">
-                                        <Phone className="mr-2 h-4 w-4" />
-                                        Call
+                                    <Button variant="outline" size="icon" className="h-8 w-8">
+                                        <Phone className="h-4 w-4" />
                                     </Button>
                                 </a>
                             )}
@@ -442,10 +440,18 @@ const RecentBookings = ({ initialBookings, mode, onUpdateBooking: onUpdateBookin
                         </div>
                     </div>
                 </div>
-                 <DialogFooter className="mt-auto pt-4 border-t flex-col sm:flex-row sm:justify-between w-full">
-                     <DialogClose asChild>
+                 <DialogFooter className="mt-auto pt-4 border-t flex flex-wrap justify-end gap-2">
+                    <DialogClose asChild>
                         <Button variant="outline">Close</Button>
                     </DialogClose>
+                     {userRole !== 'admin' && !isRideComplete(selectedBooking) && selectedBooking.ownerMobile && (
+                         <a href={`tel:${selectedBooking.ownerMobile}`}>
+                            <Button variant="outline">
+                                <Phone className="mr-2 h-4 w-4" />
+                                Call Owner
+                            </Button>
+                        </a>
+                    )}
                      {userRole !== 'admin' && !isRideComplete(selectedBooking) && (
                         <Button onClick={handleGoToChat}>
                             <MessagesSquare className="mr-2 h-4 w-4" />
