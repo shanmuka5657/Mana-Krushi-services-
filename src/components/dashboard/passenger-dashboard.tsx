@@ -556,5 +556,3 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
     </div>
   );
 }
-
-    
