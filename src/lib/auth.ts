@@ -1,5 +1,4 @@
 
-
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
@@ -68,6 +67,27 @@ export const getCurrentFirebaseUser = () => {
 }
 
 // --- Phone Auth ---
+
+export const getRecaptchaVerifier = async (): Promise<RecaptchaVerifier> => {
+    if (!auth) throw new Error("Auth not initialized");
+
+    if ((window as any).recaptchaVerifier) {
+        return (window as any).recaptchaVerifier;
+    }
+
+    const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+    });
+
+    // Render and wait for it to be ready
+    await verifier.render();
+    
+    (window as any).recaptchaVerifier = verifier;
+    
+    return verifier;
+};
+
+
 export const sendOtp = async (phoneNumber: string, appVerifier: RecaptchaVerifier): Promise<ConfirmationResult> => {
     if (!auth) throw new Error("Auth not initialized");
     return await signInWithPhoneNumber(auth, phoneNumber, appVerifier);

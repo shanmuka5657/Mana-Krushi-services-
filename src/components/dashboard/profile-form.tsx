@@ -42,9 +42,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { sendOtp, confirmOtp } from "@/lib/auth";
-import type { RecaptchaVerifier, ConfirmationResult } from 'firebase/auth';
-import { auth } from "@/lib/firebase";
+import { sendOtp, confirmOtp, getRecaptchaVerifier } from "@/lib/auth";
+import type { ConfirmationResult } from 'firebase/auth';
 
 
 const profileFormSchema = z.object({
@@ -282,14 +281,9 @@ export default function ProfileForm() {
       return;
     }
     
-    const verifier = (window as any).recaptchaVerifier;
-    if (!verifier) {
-        toast({ title: "reCAPTCHA Error", description: "Verifier not initialized. Please refresh.", variant: "destructive" });
-        return;
-    }
-
     setIsVerifying(true);
     try {
+        const verifier = await getRecaptchaVerifier();
         const confirmation = await sendOtp(`+91${mobile}`, verifier);
         confirmationResultRef.current = confirmation;
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
@@ -399,19 +393,6 @@ export default function ProfileForm() {
         form.setValue('mobileVerified', false);
     }
   }, [mobileNumber, profile?.mobile, form]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && auth) {
-      if (!(window as any).recaptchaVerifier) {
-        const { RecaptchaVerifier } = require('firebase/auth');
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible'
-        });
-        (window as any).recaptchaVerifier = verifier;
-        verifier.render();
-      }
-    }
-  }, []);
 
   if (isLoading) {
       return (

@@ -37,13 +37,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signUpWithEmail, sendOtp, confirmOtp } from '@/lib/auth';
+import { signUpWithEmail, sendOtp, confirmOtp, getRecaptchaVerifier } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { Loader2, MessageSquareWarning, CheckCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import type { ConfirmationResult } from 'firebase/auth';
 
 
 const formSchema = z.object({
@@ -94,19 +93,6 @@ export function SignupForm() {
       form.setValue('referralCode', refCodeFromUrl);
     }
   }, [searchParams, form]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && auth) {
-        if (!(window as any).recaptchaVerifier) {
-            const { RecaptchaVerifier } = require('firebase/auth');
-            const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible'
-            });
-            (window as any).recaptchaVerifier = verifier;
-            verifier.render(); 
-        }
-    }
-  }, []);
   
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
     if (!isMobileVerified) {
@@ -138,15 +124,10 @@ export function SignupForm() {
         return;
       }
       
-      const verifier = (window as any).recaptchaVerifier;
-      if (!verifier) {
-          toast({ title: "reCAPTCHA Error", description: "Verifier not ready. Please refresh the page and try again.", variant: "destructive"});
-          return;
-      }
-
       setIsVerifying(true);
       
       try {
+        const verifier = await getRecaptchaVerifier();
         const confirmation = await sendOtp(`+91${mobileNumber}`, verifier);
         confirmationResultRef.current = confirmation;
         setIsOtpSent(true);
