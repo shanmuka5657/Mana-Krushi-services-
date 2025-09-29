@@ -131,7 +131,7 @@ export function SignupForm() {
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
       } catch (error) {
         console.error("Error sending OTP:", error);
-        toast({ title: "Failed to Send OTP", description: "Please check the number and try again.", variant: "destructive" });
+        toast({ title: "Failed to Send OTP", description: "Please check the number and try again. Make sure you're not using a test phone number.", variant: "destructive" });
       } finally {
         setIsVerifying(false);
       }
@@ -401,4 +401,5 @@ export function SignupForm() {
   );
 }
     
+
 
