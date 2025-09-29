@@ -25,5 +25,5 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    - name: Build
+    - name: Build Next.js App
       run: npm run build
