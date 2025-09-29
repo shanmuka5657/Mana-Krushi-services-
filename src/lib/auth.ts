@@ -68,6 +68,13 @@ export const getCurrentFirebaseUser = () => {
 }
 
 // --- Phone Auth ---
+export const getRecaptchaVerifier = (containerId: string): RecaptchaVerifier | null => {
+    if (typeof window === 'undefined' || !auth) return null;
+    return new RecaptchaVerifier(auth, containerId, {
+      'size': 'invisible'
+    });
+};
+
 export const sendOtp = async (phoneNumber: string, appVerifier: RecaptchaVerifier): Promise<ConfirmationResult> => {
     if (!auth) throw new Error("Auth not initialized");
     return await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
