@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -227,6 +226,17 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
     },
   });
 
+  useEffect(() => {
+    const lastFrom = localStorage.getItem('lastSearchFrom');
+    const lastTo = localStorage.getItem('lastSearchTo');
+    if (lastFrom) {
+        form.setValue('fromLocation', lastFrom);
+    }
+    if (lastTo) {
+        form.setValue('toLocation', lastTo);
+    }
+  }, [form]);
+
   const handleUseCurrentLocation = async (isInitialPrompt = false) => {
     if (!navigator.geolocation) {
       toast({ title: "Geolocation is not supported by your browser.", variant: "destructive" });
@@ -263,6 +273,10 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   
   function onSubmit(data: SearchFormValues) {
     setIsSearching(true);
+    // Save the search to localStorage
+    localStorage.setItem('lastSearchFrom', data.fromLocation);
+    localStorage.setItem('lastSearchTo', data.toLocation);
+    
     const params = new URLSearchParams({
         from: data.fromLocation,
         to: data.toLocation,
