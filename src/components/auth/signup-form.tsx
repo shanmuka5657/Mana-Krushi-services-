@@ -28,7 +28,6 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -37,12 +36,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signUpWithEmail, sendOtp, confirmOtp, getRecaptchaVerifier } from '@/lib/auth';
+import { signUpWithEmail, sendOtp, confirmOtp } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { Loader2, MessageSquareWarning, CheckCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 
 const formSchema = z.object({
@@ -73,6 +73,7 @@ export function SignupForm() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,6 +94,22 @@ export function SignupForm() {
       form.setValue('referralCode', refCodeFromUrl);
     }
   }, [searchParams, form]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
+        const { RecaptchaVerifier } = require('firebase/auth');
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible'
+        });
+        recaptchaVerifierRef.current = verifier;
+    }
+
+    return () => {
+        if (recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current.clear();
+        }
+    }
+  }, []);
   
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
     if (!isMobileVerified) {
@@ -124,15 +141,14 @@ export function SignupForm() {
         return;
       }
       
-      setIsVerifying(true);
-      
-      const verifier = getRecaptchaVerifier('recaptcha-container');
+      const verifier = recaptchaVerifierRef.current;
       if (!verifier) {
-          toast({ title: "reCAPTCHA Error", description: "Could not initialize reCAPTCHA.", variant: "destructive"});
-          setIsVerifying(false);
+          toast({ title: "reCAPTCHA Error", description: "Verifier not ready. Please refresh the page and try again.", variant: "destructive"});
           return;
       }
 
+      setIsVerifying(true);
+      
       try {
         const confirmation = await sendOtp(`+91${mobileNumber}`, verifier);
         confirmationResultRef.current = confirmation;
@@ -140,9 +156,12 @@ export function SignupForm() {
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
       } catch (error: any) {
         console.error("Error sending OTP:", error);
-        toast({ title: "Failed to Send OTP", description: "Please check the number and try again. Make sure you're not using a test phone number.", variant: "destructive" });
-        // In case of error, re-render the verifier
-        verifier.render().catch(console.error);
+        // Reset verifier on error
+        recaptchaVerifierRef.current?.clear();
+        const { RecaptchaVerifier } = require('firebase/auth');
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
+
+        toast({ title: "Failed to Send OTP", description: "Please check the number and try again. A page refresh might be needed.", variant: "destructive" });
       } finally {
         setIsVerifying(false);
       }
@@ -411,4 +430,3 @@ export function SignupForm() {
     </>
   );
 }
-    
