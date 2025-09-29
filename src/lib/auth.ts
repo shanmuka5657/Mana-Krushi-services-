@@ -11,7 +11,7 @@ import { auth } from './firebase';
 import { saveProfile, getProfile } from './storage';
 import type { Profile } from './types';
 
-export const signUpWithEmail = async (name: string, email: string, password: string, role: 'owner' | 'passenger', referralCode?: string, referredBy?: string) => {
+export const signUpWithEmail = async (name: string, email: string, password: string, role: 'owner' | 'passenger', referralCode?: string) => {
     if (!auth) throw new Error("Auth not initialized");
 
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -20,6 +20,15 @@ export const signUpWithEmail = async (name: string, email: string, password: str
     const newReferralCode = `${name.split(' ')[0].toLowerCase()}${Math.random().toString(36).substr(2, 4)}`;
 
     const finalRole = email === 'mana-krushi-admin@google.com' ? 'admin' : role;
+    
+    // Check if there was a referrer
+    let referredByProfile: Profile | null = null;
+    if (referralCode) {
+        // This is a simplification. In a real app, you would query profiles by referralCode.
+        // For this app, we'll assume a direct email lookup might work if the code is the user's email prefix.
+        // A more robust solution would be a backend function or a Firestore query.
+    }
+
 
     const newProfile: Profile = {
         name,
@@ -27,7 +36,7 @@ export const signUpWithEmail = async (name: string, email: string, password: str
         mobile: '0000000000',
         role: finalRole,
         referralCode: newReferralCode,
-        referredBy: referredBy,
+        referredBy: referralCode, // Save the code that was used.
     };
     await saveProfile(newProfile);
 

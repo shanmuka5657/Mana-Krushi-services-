@@ -19,10 +19,16 @@ export default function WelcomePage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(async (user) => {
       if (user) {
-        // User is signed in, redirect to dashboard
+        // User is signed in, redirect to the correct dashboard
         const profile = await getProfile(user.email!);
         const role = profile?.role || 'passenger';
-        router.replace(`/dashboard?role=${role}`);
+        
+        if (role === 'admin') {
+            router.replace('/admin/dashboard');
+        } else {
+            router.replace(`/dashboard?role=${role}`);
+        }
+
       } else {
         // User is signed out, show the welcome page
         setIsLoading(false);

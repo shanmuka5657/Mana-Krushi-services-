@@ -90,7 +90,15 @@ export function LoginForm() {
       const role = userProfile?.role || 'passenger';
       
       const redirectUrl = searchParams.get('redirect');
-      router.push(redirectUrl || `/dashboard?role=${role}`);
+
+      if (role === 'admin') {
+          router.push('/admin/dashboard');
+      } else if (redirectUrl) {
+          router.push(redirectUrl);
+      } else {
+          router.push(`/dashboard?role=${role}`);
+      }
+
 
     } catch (error: any) {
         let errorMessage = "An unexpected error occurred. Please try again.";
