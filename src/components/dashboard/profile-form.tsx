@@ -42,6 +42,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { sendOtp, confirmOtp } from "@/lib/auth";
+import type { RecaptchaVerifier, ConfirmationResult } from 'firebase/auth';
+import { auth } from "@/lib/firebase";
 
 
 const profileFormSchema = z.object({
@@ -88,6 +91,12 @@ export default function ProfileForm() {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  
+  // OTP State
+  const [isVerifying, setIsVerifying] = useState(false);
+  const confirmationResultRef = useRef<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -108,6 +117,16 @@ export default function ProfileForm() {
       officeLocation: "",
     },
   });
+
+  useEffect(() => {
+    // Initialize reCAPTCHA verifier
+    if (typeof window !== 'undefined' && auth) {
+        const { RecaptchaVerifier } = require('firebase/auth');
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible'
+        });
+    }
+  }, [auth]);
   
    useEffect(() => {
     if (isCameraOn) {
@@ -267,21 +286,50 @@ export default function ProfileForm() {
     setIsPaymentDialogOpen(true);
   }
   
-  const handleVerifyClick = () => {
+  const handleVerifyClick = async () => {
     const mobile = form.getValues('mobile');
     if (!/^\d{10}$/.test(mobile)) {
       form.setError('mobile', { message: 'Please enter a valid 10-digit mobile number to verify.' });
       return;
     }
-    toast({
-      title: 'OTP Sent (Simulated)',
-      description: 'An OTP has been sent to your mobile. Please enter 123456 to verify.',
-    });
-    setIsOtpDialogOpen(true);
+    
+    const verifier = recaptchaVerifierRef.current;
+    if (!verifier) {
+        toast({ title: "reCAPTCHA Error", description: "Verifier not initialized. Please refresh.", variant: "destructive" });
+        return;
+    }
+
+    setIsVerifying(true);
+    try {
+        const confirmation = await sendOtp(`+91${mobile}`, verifier);
+        confirmationResultRef.current = confirmation;
+        toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
+        setIsOtpDialogOpen(true);
+    } catch (error: any) {
+        console.error("Error sending OTP:", error);
+        toast({ title: "Failed to Send OTP", description: "Please check the number and try again.", variant: "destructive" });
+        // In case of error, re-render the verifier
+        if (recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current.render().catch(console.error);
+        }
+    } finally {
+        setIsVerifying(false);
+    }
   };
 
   const handleOtpSubmit = async () => {
-    if (otpValue === '123456') {
+    if (!otpValue || otpValue.length !== 6) {
+        toast({ title: "Invalid OTP", description: "Please enter the 6-digit code.", variant: "destructive" });
+        return;
+    }
+    if (!confirmationResultRef.current) {
+        toast({ title: "Verification Error", description: "Please request a new OTP.", variant: "destructive" });
+        return;
+    }
+
+    setIsVerifying(true);
+    try {
+      await confirmOtp(confirmationResultRef.current, otpValue);
       form.setValue('mobileVerified', true, { shouldDirty: true });
       const updatedProfile: Profile = { ...profile!, mobileVerified: true, mobile: form.getValues('mobile') };
       await saveProfile(updatedProfile);
@@ -294,12 +342,11 @@ export default function ProfileForm() {
       });
       setIsOtpDialogOpen(false);
       setOtpValue('');
-    } else {
-      toast({
-        title: 'Invalid OTP',
-        description: 'The OTP you entered is incorrect. Please try again.',
-        variant: 'destructive',
-      });
+    } catch (error) {
+      console.error("Error confirming OTP:", error);
+      toast({ title: "Invalid OTP", description: "The code you entered is incorrect. Please try again.", variant: "destructive" });
+    } finally {
+        setIsVerifying(false);
     }
   };
 
@@ -377,6 +424,7 @@ export default function ProfileForm() {
 
   return (
     <div className="space-y-6">
+      <div id="recaptcha-container"></div>
       <AlertDialog open={showPlanPrompt} onOpenChange={setShowPlanPrompt}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -412,7 +460,10 @@ export default function ProfileForm() {
             <DialogClose asChild>
                 <Button type="button" variant="ghost">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleOtpSubmit}>Verify Code</Button>
+            <Button onClick={handleOtpSubmit} disabled={isVerifying}>
+                {isVerifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Verify Code
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -578,6 +629,7 @@ export default function ProfileForm() {
                               placeholder="Enter your primary mobile"
                               {...field}
                               className="pl-10"
+                              disabled={form.getValues('mobileVerified')}
                             />
                           </div>
                         </FormControl>
@@ -585,18 +637,20 @@ export default function ProfileForm() {
                            <Button
                             type="button"
                             variant="outline"
-                            onClick={() => form.setValue('mobileVerified', false)}
+                            className="text-green-600 border-green-300"
+                            disabled
                           >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Change
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Verified
                           </Button>
                         ) : (
                           <Button
                             type="button"
                             variant="outline"
                             onClick={handleVerifyClick}
+                            disabled={isVerifying}
                           >
-                            <MessageSquareWarning className="mr-2 h-4 w-4" />
+                            {isVerifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <MessageSquareWarning className="mr-2 h-4 w-4" />}
                             Verify
                           </Button>
                         )}
