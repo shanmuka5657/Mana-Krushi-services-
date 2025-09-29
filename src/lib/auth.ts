@@ -67,22 +67,23 @@ export const getCurrentFirebaseUser = () => {
 }
 
 // --- Phone Auth ---
-const getRecaptchaVerifier = () => {
-    if (typeof window !== 'undefined' && !(window as any).recaptchaVerifier) {
-        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response: any) => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
-        });
+export const getRecaptchaVerifier = (containerId: string) => {
+    if (!auth) throw new Error("Auth not initialized");
+    // Ensure this is only called on the client side
+    if (typeof window !== 'undefined') {
+        if (!(window as any).recaptchaVerifier) {
+            (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+                'size': 'invisible'
+            });
+        }
+        return (window as any).recaptchaVerifier;
     }
-    return (window as any).recaptchaVerifier;
+    return null;
 }
 
 
-export const sendOtp = async (phoneNumber: string): Promise<ConfirmationResult> => {
+export const sendOtp = async (phoneNumber: string, appVerifier: RecaptchaVerifier): Promise<ConfirmationResult> => {
     if (!auth) throw new Error("Auth not initialized");
-    const appVerifier = getRecaptchaVerifier();
     return await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
 }
 

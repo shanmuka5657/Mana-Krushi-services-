@@ -37,12 +37,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signUpWithEmail, sendOtp, confirmOtp } from '@/lib/auth';
+import { signUpWithEmail, sendOtp, confirmOtp, getRecaptchaVerifier } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
 import { Loader2, MessageSquareWarning, CheckCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { ConfirmationResult } from 'firebase/auth';
+import type { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 
 
 const formSchema = z.object({
@@ -73,6 +73,8 @@ export function SignupForm() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,8 +88,13 @@ export function SignupForm() {
       terms: false,
     },
   });
-  
+
   useEffect(() => {
+    // Initialize reCAPTCHA verifier when the component mounts
+    if (typeof window !== 'undefined' && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = getRecaptchaVerifier('recaptcha-container');
+    }
+
     const refCodeFromUrl = searchParams.get('ref');
     if (refCodeFromUrl) {
       form.setValue('referralCode', refCodeFromUrl);
@@ -123,13 +130,18 @@ export function SignupForm() {
         toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
         return;
       }
+      if (!recaptchaVerifierRef.current) {
+        toast({ title: "reCAPTCHA Error", description: "reCAPTCHA is not initialized. Please refresh.", variant: "destructive"});
+        return;
+      }
+
       setIsVerifying(true);
       try {
-        const confirmation = await sendOtp(`+91${mobileNumber}`);
+        const confirmation = await sendOtp(`+91${mobileNumber}`, recaptchaVerifierRef.current);
         confirmationResultRef.current = confirmation;
         setIsOtpSent(true);
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error sending OTP:", error);
         toast({ title: "Failed to Send OTP", description: "Please check the number and try again. Make sure you're not using a test phone number.", variant: "destructive" });
       } finally {
@@ -401,5 +413,6 @@ export function SignupForm() {
   );
 }
     
+
 
 
