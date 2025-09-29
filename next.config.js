@@ -11,7 +11,7 @@ const withPWA = require('next-pwa')({
     // Cache pages
     {
       urlPattern: ({ request }) => request.mode === 'navigate' && request.method === 'GET',
-      handler: 'NetworkFirst',
+      handler: 'NetworkOnly',
       options: {
         cacheName: 'pages',
         expiration: {
@@ -115,5 +115,6 @@ const nextConfig = {
 };
 
 module.exports = withPWA(nextConfig);
+
 
 
