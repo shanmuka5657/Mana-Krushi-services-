@@ -119,16 +119,6 @@ export default function ProfileForm() {
   });
 
   useEffect(() => {
-    // Initialize reCAPTCHA verifier
-    if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
-        const { RecaptchaVerifier } = require('firebase/auth');
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible'
-        });
-    }
-  }, []);
-  
-   useEffect(() => {
     if (isCameraOn) {
         const getCameraPermission = async () => {
             try {
@@ -301,6 +291,7 @@ export default function ProfileForm() {
 
     setIsVerifying(true);
     try {
+        await verifier.render();
         const confirmation = await sendOtp(`+91${mobile}`, verifier);
         confirmationResultRef.current = confirmation;
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
@@ -308,10 +299,6 @@ export default function ProfileForm() {
     } catch (error: any) {
         console.error("Error sending OTP:", error);
         toast({ title: "Failed to Send OTP", description: "Please check the number and try again.", variant: "destructive" });
-        // In case of error, re-render the verifier
-        if (recaptchaVerifierRef.current) {
-            recaptchaVerifierRef.current.render().catch(console.error);
-        }
     } finally {
         setIsVerifying(false);
     }
@@ -408,11 +395,22 @@ export default function ProfileForm() {
   };
 
   const mobileNumber = form.watch('mobile');
+  
   useEffect(() => {
     if (profile?.mobile && mobileNumber !== profile.mobile) {
         form.setValue('mobileVerified', false);
     }
   }, [mobileNumber, profile?.mobile, form]);
+
+  useEffect(() => {
+    // Initialize reCAPTCHA verifier
+    if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
+        const { RecaptchaVerifier } = require('firebase/auth');
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible'
+        });
+    }
+  }, []);
 
   if (isLoading) {
       return (
@@ -863,5 +861,3 @@ export default function ProfileForm() {
     </div>
   );
 }
-
-    
