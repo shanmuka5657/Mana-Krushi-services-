@@ -3,7 +3,6 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import MyRoutes from '@/components/dashboard/my-routes';
-import { getRoutes, getCurrentUser } from '@/lib/storage';
 import type { Route } from '@/lib/types';
 import { Suspense, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -18,7 +17,9 @@ function MyRoutesPageContent() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // This logic is now safe because the component only runs on the client.
         const fetchInitialData = async () => {
+            const { getRoutes, getCurrentUser } = await import('@/lib/storage');
             const userEmail = getCurrentUser();
             let routes: Route[] = [];
             if (userEmail) {
