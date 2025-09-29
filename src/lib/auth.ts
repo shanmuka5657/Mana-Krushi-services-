@@ -69,14 +69,14 @@ export const getCurrentFirebaseUser = () => {
 // --- Phone Auth ---
 export const getRecaptchaVerifier = (containerId: string) => {
     if (!auth) throw new Error("Auth not initialized");
-    // Ensure this is only called on the client side
     if (typeof window !== 'undefined') {
-        if (!(window as any).recaptchaVerifier) {
-            (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-                'size': 'invisible'
-            });
+        // To avoid re-rendering issues, clear any previous verifier
+        if ((window as any).recaptchaVerifier) {
+            (window as any).recaptchaVerifier.clear();
         }
-        return (window as any).recaptchaVerifier;
+        return new RecaptchaVerifier(auth, containerId, {
+            'size': 'invisible'
+        });
     }
     return null;
 }

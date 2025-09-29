@@ -73,8 +73,6 @@ export function SignupForm() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,11 +88,6 @@ export function SignupForm() {
   });
 
   useEffect(() => {
-    // Initialize reCAPTCHA verifier when the component mounts
-    if (typeof window !== 'undefined' && !recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = getRecaptchaVerifier('recaptcha-container');
-    }
-
     const refCodeFromUrl = searchParams.get('ref');
     if (refCodeFromUrl) {
       form.setValue('referralCode', refCodeFromUrl);
@@ -130,20 +123,26 @@ export function SignupForm() {
         toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
         return;
       }
-      if (!recaptchaVerifierRef.current) {
-        toast({ title: "reCAPTCHA Error", description: "reCAPTCHA is not initialized. Please refresh.", variant: "destructive"});
-        return;
+      
+      setIsVerifying(true);
+      
+      const verifier = getRecaptchaVerifier('recaptcha-container');
+      if (!verifier) {
+          toast({ title: "reCAPTCHA Error", description: "Could not initialize reCAPTCHA.", variant: "destructive"});
+          setIsVerifying(false);
+          return;
       }
 
-      setIsVerifying(true);
       try {
-        const confirmation = await sendOtp(`+91${mobileNumber}`, recaptchaVerifierRef.current);
+        const confirmation = await sendOtp(`+91${mobileNumber}`, verifier);
         confirmationResultRef.current = confirmation;
         setIsOtpSent(true);
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
       } catch (error: any) {
         console.error("Error sending OTP:", error);
         toast({ title: "Failed to Send OTP", description: "Please check the number and try again. Make sure you're not using a test phone number.", variant: "destructive" });
+        // In case of error, re-render the verifier
+        verifier.render().catch(console.error);
       } finally {
         setIsVerifying(false);
       }
@@ -413,6 +412,3 @@ export function SignupForm() {
   );
 }
     
-
-
-
