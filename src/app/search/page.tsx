@@ -75,22 +75,9 @@ function GlobalSearchResultsPage() {
         fetchAllData();
     }, [query]);
 
-    const getBookedSeats = (route: Route) => {
-        return allBookings.filter(b => {
-           const routeDate = new Date(route.travelDate);
-           const bookingDate = new Date(b.departureDate);
-           const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                             routeDate.getMonth() === bookingDate.getMonth() &&
-                             routeDate.getDate() === bookingDate.getDate();
-           const bookingTime = format(bookingDate, 'HH:mm');
-   
-           return (
-               b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-               isSameDay &&
-               bookingTime === route.departureTime &&
-               b.status !== "Cancelled"
-           );
-       }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+    const getBookedSeats = (routeId: string) => {
+        return allBookings.filter(b => b.routeId === routeId && b.status !== "Cancelled")
+       .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
      }
      
     const getOwnerProfile = (ownerEmail?: string): Profile | undefined => {
@@ -131,7 +118,7 @@ function GlobalSearchResultsPage() {
                 {filteredRoutes.length > 0 ? (
                     <div className="space-y-4">
                         {filteredRoutes.map((route) => {
-                            const bookedSeats = getBookedSeats(route);
+                            const bookedSeats = getBookedSeats(route.id);
                             const availableSeats = route.availableSeats - bookedSeats;
                             const ownerProfile = getOwnerProfile(route.ownerEmail);
                             

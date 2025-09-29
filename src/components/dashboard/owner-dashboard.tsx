@@ -227,25 +227,20 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
           const newBookedSeatsMap = new Map<string, number>();
           const newRouteViewsMap = new Map<string, number>();
 
-          const allBookingsToday = await getBookings(true, { 
-              userEmail: ownerEmail, 
-              role: 'owner',
-              date: format(new Date(), 'yyyy-MM-dd') 
-          });
-
+          // Use routeId for precise booking fetching
+          const bookingPromises = routes.map(route => getBookings(true, { routeId: route.id }));
           const viewPromises = routes.map(route => getRouteViews(route.id));
-          const viewsByRoute = await Promise.all(viewPromises);
+          
+          const [bookingsByRoute, viewsByRoute] = await Promise.all([
+              Promise.all(bookingPromises),
+              Promise.all(viewPromises)
+          ]);
 
           routes.forEach((route, index) => {
-              const bookingsForThisRoute = allBookingsToday.filter(b => 
-                  b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-                  format(new Date(b.departureDate), 'HH:mm') === route.departureTime &&
-                  b.ownerEmail === ownerEmail
-              );
+              const bookingsForThisRoute = bookingsByRoute[index];
               const bookedSeats = bookingsForThisRoute
                   .filter(b => b.status !== 'Cancelled')
                   .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-              
               newBookedSeatsMap.set(route.id, bookedSeats);
               newRouteViewsMap.set(route.id, viewsByRoute[index] || 0);
           });
@@ -427,16 +422,8 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     setSelectedRouteForView(route);
     setIsViewDialogOpen(true);
     
-    // Fetch details on demand
-    const routeDate = format(new Date(route.travelDate), 'yyyy-MM-dd');
-    const routeTime = route.departureTime;
-    
-    const routeBookings = await getBookings(true, {
-      destination: `${route.fromLocation} to ${route.toLocation}`,
-      date: routeDate,
-      time: routeTime,
-      ownerEmail: route.ownerEmail,
-    });
+    // Fetch details on demand using the precise routeId
+    const routeBookings = await getBookings(true, { routeId: route.id });
     
     setBookingsForRoute(routeBookings);
   };

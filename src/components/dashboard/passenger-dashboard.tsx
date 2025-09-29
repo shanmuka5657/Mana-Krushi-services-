@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -287,16 +288,12 @@ export default function PassengerDashboard({ onSwitchTab, profile }: PassengerDa
   const handleViewClick = async (booking: Booking) => {
     setSelectedBooking(booking);
     
-    const bookingDateStr = format(new Date(booking.departureDate), 'yyyy-MM-dd');
     const [routeData, ownerProfileData] = await Promise.all([
-        getRoutes(true, { date: bookingDateStr, from: booking.destination.split(' to ')[0], to: booking.destination.split(' to ')[1] }),
+        getRoutes(true, { routeId: booking.routeId }),
         getProfile(booking.ownerEmail),
     ]);
     
-    const bookingTime = format(new Date(booking.departureDate), 'HH:mm');
-    const route = routeData.find(r => r.departureTime === bookingTime);
-
-    setSelectedBookingDetails({ route, ownerProfile: ownerProfileData });
+    setSelectedBookingDetails({ route: routeData[0], ownerProfile: ownerProfileData });
     setIsViewOpen(true);
   };
 

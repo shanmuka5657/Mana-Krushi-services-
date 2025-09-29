@@ -114,9 +114,9 @@ function FindRideResultsPage() {
         fetchAndFilterRoutes();
     }, [from, to, toast]);
 
-    const getBookedSeats = (route: Route) => {
+    const getBookedSeats = (routeId: string) => {
         return allBookings
-            .filter(b => b.routeId === route.id && b.status !== "Cancelled")
+            .filter(b => b.routeId === routeId && b.status !== "Cancelled")
             .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
     };
      
@@ -126,7 +126,7 @@ function FindRideResultsPage() {
     }
     
     const finalAvailableOwners = availableOwners.filter(route => {
-        const bookedSeats = getBookedSeats(route);
+        const bookedSeats = getBookedSeats(route.id);
         const availableSeats = route.availableSeats - bookedSeats;
         return availableSeats > 0;
     });
@@ -159,7 +159,7 @@ function FindRideResultsPage() {
                 {finalAvailableOwners.length > 0 ? (
                     <div className="space-y-4">
                         {finalAvailableOwners.map((route) => {
-                            const bookedSeats = getBookedSeats(route);
+                            const bookedSeats = getBookedSeats(route.id);
                             const availableSeats = route.availableSeats - bookedSeats;
                             const ownerProfile = getOwnerProfile(route.ownerEmail);
                             
