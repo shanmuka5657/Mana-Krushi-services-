@@ -28,12 +28,12 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -74,7 +74,6 @@ export function SignupForm() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -97,15 +96,15 @@ export function SignupForm() {
   }, [searchParams, form]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
-        const { RecaptchaVerifier } = require('firebase/auth');
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible'
-        });
-    }
-
-    return () => {
-        recaptchaVerifierRef.current?.clear();
+    if (typeof window !== 'undefined' && auth) {
+        if (!(window as any).recaptchaVerifier) {
+            const { RecaptchaVerifier } = require('firebase/auth');
+            const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible'
+            });
+            (window as any).recaptchaVerifier = verifier;
+            verifier.render(); 
+        }
     }
   }, []);
   
@@ -139,7 +138,7 @@ export function SignupForm() {
         return;
       }
       
-      const verifier = recaptchaVerifierRef.current;
+      const verifier = (window as any).recaptchaVerifier;
       if (!verifier) {
           toast({ title: "reCAPTCHA Error", description: "Verifier not ready. Please refresh the page and try again.", variant: "destructive"});
           return;
@@ -148,7 +147,6 @@ export function SignupForm() {
       setIsVerifying(true);
       
       try {
-        await verifier.render();
         const confirmation = await sendOtp(`+91${mobileNumber}`, verifier);
         confirmationResultRef.current = confirmation;
         setIsOtpSent(true);

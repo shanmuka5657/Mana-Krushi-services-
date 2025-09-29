@@ -95,7 +95,6 @@ export default function ProfileForm() {
   // OTP State
   const [isVerifying, setIsVerifying] = useState(false);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
 
   const form = useForm<ProfileFormValues>({
@@ -283,7 +282,7 @@ export default function ProfileForm() {
       return;
     }
     
-    const verifier = recaptchaVerifierRef.current;
+    const verifier = (window as any).recaptchaVerifier;
     if (!verifier) {
         toast({ title: "reCAPTCHA Error", description: "Verifier not initialized. Please refresh.", variant: "destructive" });
         return;
@@ -291,7 +290,6 @@ export default function ProfileForm() {
 
     setIsVerifying(true);
     try {
-        await verifier.render();
         const confirmation = await sendOtp(`+91${mobile}`, verifier);
         confirmationResultRef.current = confirmation;
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
@@ -403,12 +401,15 @@ export default function ProfileForm() {
   }, [mobileNumber, profile?.mobile, form]);
 
   useEffect(() => {
-    // Initialize reCAPTCHA verifier
-    if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
+    if (typeof window !== 'undefined' && auth) {
+      if (!(window as any).recaptchaVerifier) {
         const { RecaptchaVerifier } = require('firebase/auth');
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible'
         });
+        (window as any).recaptchaVerifier = verifier;
+        verifier.render();
+      }
     }
   }, []);
 
