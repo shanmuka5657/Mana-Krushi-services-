@@ -35,13 +35,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signUpWithEmail } from '@/lib/auth';
+import { signUpWithEmail, sendOtp, confirmOtp } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import placeholderImages from '@/lib/placeholder-images.json';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MessageSquareWarning, CheckCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import type { ConfirmationResult } from 'firebase/auth';
 
 
 const formSchema = z.object({
@@ -65,6 +66,13 @@ export function SignupForm() {
   const { defaultLogo } = placeholderImages;
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // OTP State
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
+  const confirmationResultRef = useRef<ConfirmationResult | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,9 +95,72 @@ export function SignupForm() {
   }, [searchParams, form]);
   
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
+    if (!isMobileVerified) {
+        toast({
+            title: "Mobile Not Verified",
+            description: "Please verify your mobile number before creating an account.",
+            variant: "destructive",
+        });
+        return;
+    }
     setFormData(values);
     setShowConfirmation(true);
   }
+  
+  const mobileNumber = form.watch('mobile');
+  const isMobileNumberValid = /^\d{10}$/.test(mobileNumber);
+
+  useEffect(() => {
+    // Reset verification status if mobile number changes
+    setIsMobileVerified(false);
+    setIsOtpSent(false);
+    setOtpValue('');
+  }, [mobileNumber]);
+
+
+  async function handleSendOtp() {
+      if (!isMobileNumberValid) {
+        toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+        return;
+      }
+      setIsVerifying(true);
+      try {
+        const confirmation = await sendOtp(`+91${mobileNumber}`);
+        confirmationResultRef.current = confirmation;
+        setIsOtpSent(true);
+        toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        toast({ title: "Failed to Send OTP", description: "Please check the number and try again.", variant: "destructive" });
+      } finally {
+        setIsVerifying(false);
+      }
+  }
+  
+  async function handleConfirmOtp() {
+      if (!otpValue || otpValue.length !== 6) {
+          toast({ title: "Invalid OTP", description: "Please enter the 6-digit code.", variant: "destructive" });
+          return;
+      }
+      if (!confirmationResultRef.current) {
+           toast({ title: "Verification Error", description: "Please try sending the OTP again.", variant: "destructive" });
+          return;
+      }
+
+      setIsVerifying(true);
+      try {
+        await confirmOtp(confirmationResultRef.current, otpValue);
+        setIsMobileVerified(true);
+        setIsOtpSent(false);
+        toast({ title: "Success!", description: "Your mobile number has been verified." });
+      } catch (error) {
+        console.error("Error confirming OTP:", error);
+        toast({ title: "Invalid OTP", description: "The code you entered is incorrect. Please try again.", variant: "destructive" });
+      } finally {
+        setIsVerifying(false);
+      }
+  }
+
 
   async function handleConfirmation() {
     if (!formData) return;
@@ -97,7 +168,7 @@ export function SignupForm() {
     setShowConfirmation(false);
 
     try {
-        await signUpWithEmail(formData.name, formData.email, formData.password, formData.mobile, formData.role, formData.referralCode);
+        await signUpWithEmail(formData.name, formData.email, formData.password, formData.mobile, formData.role, formData.referralCode, true);
         toast({
             title: "Account Created!",
             description: "You have been successfully signed up.",
@@ -120,6 +191,7 @@ export function SignupForm() {
 
   return (
     <>
+      <div id="recaptcha-container"></div>
       <div className="flex flex-col items-center text-center mb-6">
         <Image 
             src={defaultLogo.url}
@@ -172,13 +244,53 @@ export function SignupForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Mobile Number</FormLabel>
-                      <FormControl>
-                        <Input type="tel" placeholder="10-digit mobile number" {...field} />
-                      </FormControl>
+                       <div className="flex items-start gap-2">
+                        <FormControl>
+                            <Input 
+                                type="tel" 
+                                placeholder="10-digit mobile number" 
+                                {...field} 
+                                disabled={isOtpSent || isMobileVerified}
+                            />
+                        </FormControl>
+                         {isMobileVerified ? (
+                            <Button type="button" variant="outline" className="text-green-600 border-green-300" disabled>
+                                <CheckCircle className="mr-2 h-4 w-4"/> Verified
+                            </Button>
+                         ) : (
+                            <Button type="button" variant="outline" onClick={handleSendOtp} disabled={!isMobileNumberValid || isVerifying || isOtpSent}>
+                                {isVerifying ? <Loader2 className="animate-spin" /> : <MessageSquareWarning className="mr-2 h-4 w-4"/>}
+                                Verify
+                            </Button>
+                         )}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                 {isOtpSent && !isMobileVerified && (
+                     <FormItem>
+                      <FormLabel>Enter OTP</FormLabel>
+                      <div className="flex items-start gap-2">
+                        <FormControl>
+                            <Input 
+                                type="text"
+                                placeholder="6-digit code"
+                                value={otpValue}
+                                onChange={(e) => setOtpValue(e.target.value)}
+                                maxLength={6}
+                            />
+                        </FormControl>
+                         <Button type="button" variant="default" onClick={handleConfirmOtp} disabled={isVerifying || otpValue.length !== 6}>
+                            {isVerifying ? <Loader2 className="animate-spin" /> : "Confirm"}
+                         </Button>
+                      </div>
+                      <FormDescription>
+                          Didn't receive the code? <Button variant="link" size="sm" className="p-0 h-auto" onClick={handleSendOtp} disabled={isVerifying}>Resend OTP</Button>
+                      </FormDescription>
+                    </FormItem>
+                )}
+
               </div>
               <FormField
                 control={form.control}
@@ -258,7 +370,7 @@ export function SignupForm() {
               />
 
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting || !isMobileVerified}>
                  {isSubmitting ? <Loader2 className="animate-spin" /> : 'Create Account'}
               </Button>
             </form>
@@ -289,3 +401,4 @@ export function SignupForm() {
   );
 }
     
+
