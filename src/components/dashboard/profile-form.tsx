@@ -120,13 +120,13 @@ export default function ProfileForm() {
 
   useEffect(() => {
     // Initialize reCAPTCHA verifier
-    if (typeof window !== 'undefined' && auth) {
+    if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
         const { RecaptchaVerifier } = require('firebase/auth');
         recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible'
         });
     }
-  }, [auth]);
+  }, []);
   
    useEffect(() => {
     if (isCameraOn) {
