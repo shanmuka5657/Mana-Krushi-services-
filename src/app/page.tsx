@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -53,8 +54,8 @@ export default function WelcomePage() {
         <Image 
             src={defaultLogo.url}
             alt="Mana Krushi Logo"
-            width={defaultLogo.width}
-            height={defaultLogo.height}
+            width={80}
+            height={80}
             data-ai-hint={defaultLogo.hint}
         />
         <div>
