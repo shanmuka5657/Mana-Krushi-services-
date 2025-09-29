@@ -99,16 +99,13 @@ export function SignupForm() {
   useEffect(() => {
     if (typeof window !== 'undefined' && auth && !recaptchaVerifierRef.current) {
         const { RecaptchaVerifier } = require('firebase/auth');
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible'
         });
-        recaptchaVerifierRef.current = verifier;
     }
 
     return () => {
-        if (recaptchaVerifierRef.current) {
-            recaptchaVerifierRef.current.clear();
-        }
+        recaptchaVerifierRef.current?.clear();
     }
   }, []);
   
@@ -151,17 +148,13 @@ export function SignupForm() {
       setIsVerifying(true);
       
       try {
+        await verifier.render();
         const confirmation = await sendOtp(`+91${mobileNumber}`, verifier);
         confirmationResultRef.current = confirmation;
         setIsOtpSent(true);
         toast({ title: "OTP Sent!", description: "An OTP has been sent to your mobile number." });
       } catch (error: any) {
         console.error("Error sending OTP:", error);
-        // Reset verifier on error
-        recaptchaVerifierRef.current?.clear();
-        const { RecaptchaVerifier } = require('firebase/auth');
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
-
         toast({ title: "Failed to Send OTP", description: "Please check the number and try again. A page refresh might be needed.", variant: "destructive" });
       } finally {
         setIsVerifying(false);
