@@ -331,13 +331,30 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
         return;
     }
     
+    // Check for past time on the same day
+    const now = new Date();
+    const routeDate = data.travelDate;
+    if (isToday(routeDate)) {
+        const [hours, minutes] = data.departureTime.split(':').map(Number);
+        const departureDateTime = new Date(routeDate);
+        departureDateTime.setHours(hours, minutes, 0, 0);
+
+        if (departureDateTime < now) {
+            toast({
+                title: "Invalid Time",
+                description: "Cannot add a route for a time that has already passed today.",
+                variant: "destructive"
+            });
+            return;
+        }
+    }
+    
     const allExistingRoutesToday = await getRoutes(false, { ownerEmail });
     
     const existingRoutesOfSameType = allExistingRoutesToday.filter(
         route => route.vehicleType === data.vehicleType
     );
 
-    const routeDate = data.travelDate;
     const newStart = parse(data.departureTime, 'HH:mm', routeDate).getTime();
     const newEnd = parse(data.arrivalTime, 'HH:mm', routeDate).getTime();
 
@@ -972,4 +989,3 @@ export default function OwnerDashboard({ onRouteAdded, onSwitchTab, profile }: O
     
 
     
-
