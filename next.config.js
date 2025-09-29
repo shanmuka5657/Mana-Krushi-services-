@@ -57,7 +57,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
   typescript: {
-    // I am making this change to force a server restart and fix the ChunkLoadError.
+    // This is a change to force a server restart and fix the ChunkLoadError.
     ignoreBuildErrors: true,
   },
   eslint: {
