@@ -106,7 +106,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `script-src 'self' 'unsafe-inline' https://www.google.com ${isDev ? "'unsafe-eval'" : ''};`.replace(/\s{2,}/g, ' ').trim(),
+            value: `script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com ${isDev ? "'unsafe-eval'" : ''};`.replace(/\s{2,}/g, ' ').trim(),
           },
         ],
       },
