@@ -115,22 +115,10 @@ function FindRideResultsPage() {
     }, [from, to, toast]);
 
     const getBookedSeats = (route: Route) => {
-        return allBookings.filter(b => {
-           const routeDate = new Date(route.travelDate);
-           const bookingDate = new Date(b.departureDate);
-           const isSameDay = routeDate.getFullYear() === bookingDate.getFullYear() &&
-                             routeDate.getMonth() === bookingDate.getMonth() &&
-                             routeDate.getDate() === bookingDate.getDate();
-           const bookingTime = format(bookingDate, 'HH:mm');
-   
-           return (
-               b.destination === `${route.fromLocation} to ${route.toLocation}` &&
-               isSameDay &&
-               bookingTime === route.departureTime &&
-               b.status !== "Cancelled"
-           );
-       }).reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
-     }
+        return allBookings
+            .filter(b => b.routeId === route.id && b.status !== "Cancelled")
+            .reduce((acc, b) => acc + (Number(b.travelers) || 1), 0);
+    };
      
     const getOwnerProfile = (ownerEmail?: string): Profile | undefined => {
         if (!ownerEmail) return undefined;

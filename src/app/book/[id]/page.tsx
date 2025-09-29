@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { AppLayout } from "@/components/layout/app-layout";
+import { db } from "@/lib/firebase";
 
 const generateBookingCode = (bookingCount: number): string => {
     const nextId = (bookingCount + 1).toString().padStart(4, '0');
@@ -161,7 +162,6 @@ export default function BookRidePage() {
     const [depHours, depMinutes] = route.departureTime.split(':').map(Number);
     routeDate.setHours(depHours, depMinutes, 0, 0);
 
-    const db = getFirestore(getApp());
     const newBookingRef = doc(collection(db, 'bookings'));
     
     const allBookingsForCount = await getBookings(true);
