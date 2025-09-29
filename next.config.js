@@ -40,18 +40,6 @@ const withPWA = require('next-pwa')({
   fallbacks: {
     document: '/offline',
   },
-  manifest: {
-    share_target: {
-      action: '/search',
-      method: 'GET',
-      enctype: 'application/x-www-form-urlencoded',
-      params: {
-        title: 'title',
-        text: 'text',
-        url: 'url'
-      }
-    }
-  }
 });
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -112,9 +100,22 @@ const nextConfig = {
       },
     ];
   },
+  manifest: {
+    share_target: {
+      action: '/search',
+      method: 'GET',
+      enctype: 'application/x-www-form-urlencoded',
+      params: {
+        title: 'title',
+        text: 'text',
+        url: 'url'
+      }
+    }
+  }
 };
 
 module.exports = withPWA(nextConfig);
+
 
 
 
