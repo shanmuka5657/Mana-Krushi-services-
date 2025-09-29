@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { AppLayout } from '@/components/layout/app-layout';
@@ -9,9 +8,10 @@ import type { Route } from '@/lib/types';
 import { Suspense, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
 
-export default function MyRoutesPage() {
+function MyRoutesPageContent() {
     const searchParams = useSearchParams();
     const bookingIdFromUrl = searchParams.get('booking_id');
     const [initialRoutes, setInitialRoutes] = useState<Route[]>([]);
@@ -29,8 +29,25 @@ export default function MyRoutesPage() {
         };
         fetchInitialData();
     }, []);
-    
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+    
+    return <MyRoutes routes={initialRoutes} bookingIdFromUrl={bookingIdFromUrl} />;
+}
+
+const DynamicMyRoutesPage = dynamic(() => Promise.resolve(MyRoutesPageContent), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+});
+
+
+export default function MyRoutesPage() {
     return (
         <AppLayout>
            <Suspense fallback={
@@ -38,13 +55,7 @@ export default function MyRoutesPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             }>
-                {isLoading ? (
-                     <div className="flex items-center justify-center h-64">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                ) : (
-                    <MyRoutes routes={initialRoutes} bookingIdFromUrl={bookingIdFromUrl} />
-                )}
+                <DynamicMyRoutesPage />
            </Suspense>
         </AppLayout>
     );
