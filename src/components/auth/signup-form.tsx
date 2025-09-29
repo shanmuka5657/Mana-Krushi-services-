@@ -47,6 +47,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Invalid email address.' }),
+  mobile: z.string().regex(/^\d{10}$/, { message: "Enter a valid 10-digit mobile number." }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
   role: z.enum(['owner', 'passenger'], { required_error: 'Please select a role.' }),
   referralCode: z.string().optional(),
@@ -70,6 +71,7 @@ export function SignupForm() {
     defaultValues: {
       name: '',
       email: '',
+      mobile: '',
       password: '',
       role: 'passenger',
       referralCode: '',
@@ -95,7 +97,7 @@ export function SignupForm() {
     setShowConfirmation(false);
 
     try {
-        await signUpWithEmail(formData.name, formData.email, formData.password, formData.role, formData.referralCode);
+        await signUpWithEmail(formData.name, formData.email, formData.password, formData.mobile, formData.role, formData.referralCode);
         toast({
             title: "Account Created!",
             description: "You have been successfully signed up.",
@@ -159,6 +161,19 @@ export function SignupForm() {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input placeholder="you@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile Number</FormLabel>
+                      <FormControl>
+                        <Input type="tel" placeholder="10-digit mobile number" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

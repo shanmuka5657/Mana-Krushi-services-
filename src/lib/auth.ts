@@ -11,7 +11,7 @@ import { auth } from './firebase';
 import { saveProfile, getProfile } from './storage';
 import type { Profile } from './types';
 
-export const signUpWithEmail = async (name: string, email: string, password: string, role: 'owner' | 'passenger', referralCode?: string) => {
+export const signUpWithEmail = async (name: string, email: string, password: string, mobile: string, role: 'owner' | 'passenger', referralCode?: string) => {
     if (!auth) throw new Error("Auth not initialized");
 
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -33,7 +33,7 @@ export const signUpWithEmail = async (name: string, email: string, password: str
     const newProfile: Profile = {
         name,
         email: user.email!,
-        mobile: '0000000000',
+        mobile: mobile,
         role: finalRole,
         referralCode: newReferralCode,
         referredBy: referralCode, // Save the code that was used.
