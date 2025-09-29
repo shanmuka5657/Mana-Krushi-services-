@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -297,36 +296,38 @@ export default function ProfileForm() {
   };
 
   const handleOtpSubmit = async () => {
-    if (!otpValue || otpValue.length !== 6) {
-        toast({ title: "Invalid OTP", description: "Please enter the 6-digit code.", variant: "destructive" });
-        return;
-    }
-    if (!confirmationResultRef.current) {
-        toast({ title: "Verification Error", description: "Please request a new OTP.", variant: "destructive" });
-        return;
-    }
+    setTimeout(async () => {
+      if (!otpValue || otpValue.length !== 6) {
+          toast({ title: "Invalid OTP", description: "Please enter the 6-digit code.", variant: "destructive" });
+          return;
+      }
+      if (!confirmationResultRef.current) {
+          toast({ title: "Verification Error", description: "Please request a new OTP.", variant: "destructive" });
+          return;
+      }
 
-    setIsVerifying(true);
-    try {
-      await confirmOtp(confirmationResultRef.current, otpValue);
-      form.setValue('mobileVerified', true, { shouldDirty: true });
-      const updatedProfile: Profile = { ...profile!, mobileVerified: true, mobile: form.getValues('mobile') };
-      await saveProfile(updatedProfile);
-      setProfile(updatedProfile);
+      setIsVerifying(true);
+      try {
+        await confirmOtp(confirmationResultRef.current, otpValue);
+        form.setValue('mobileVerified', true, { shouldDirty: true });
+        const updatedProfile: Profile = { ...profile!, mobileVerified: true, mobile: form.getValues('mobile') };
+        await saveProfile(updatedProfile);
+        setProfile(updatedProfile);
 
-      toast({
-        title: 'Mobile Verified!',
-        description: 'Your mobile number has been successfully verified.',
-        action: <CheckCircle className="text-green-500" />,
-      });
-      setIsOtpDialogOpen(false);
-      setOtpValue('');
-    } catch (error) {
-      console.error("Error confirming OTP:", error);
-      toast({ title: "Invalid OTP", description: "The code you entered is incorrect. Please try again.", variant: "destructive" });
-    } finally {
-        setIsVerifying(false);
-    }
+        toast({
+          title: 'Mobile Verified!',
+          description: 'Your mobile number has been successfully verified.',
+          action: <CheckCircle className="text-green-500" />,
+        });
+        setIsOtpDialogOpen(false);
+        setOtpValue('');
+      } catch (error) {
+        console.error("Error confirming OTP:", error);
+        toast({ title: "Invalid OTP", description: "The code you entered is incorrect. Please try again.", variant: "destructive" });
+      } finally {
+          setIsVerifying(false);
+      }
+    }, 50);
   };
 
   const handlePaymentSuccess = async () => {

@@ -141,6 +141,7 @@ export function SignupForm() {
   }
   
   async function handleConfirmOtp() {
+    setTimeout(async () => {
       if (!otpValue || otpValue.length !== 6) {
           toast({ title: "Invalid OTP", description: "Please enter the 6-digit code.", variant: "destructive" });
           return;
@@ -162,6 +163,7 @@ export function SignupForm() {
       } finally {
         setIsVerifying(false);
       }
+    }, 50);
   }
 
 
