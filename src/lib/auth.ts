@@ -76,7 +76,10 @@ export const getRecaptchaVerifier = async (): Promise<RecaptchaVerifier> => {
     }
 
     const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
+        'size': 'invisible',
+        'parameters': {
+           'enterprise': true,
+        },
     });
 
     // Render and wait for it to be ready
